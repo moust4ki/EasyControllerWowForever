@@ -1267,7 +1267,16 @@ function C:Init()
         local chord = s.shortcut
         if not (s.features.configShortcut and chord and IsKeyDown) then
             wasDown = false
+            CK.Mapping:Resume()
             return
+        end
+        -- Its first button held: our action on the second one waits (the
+        -- press opens the panel only), back once it is released
+        local M = CK.Mapping
+        if IsKeyDown(chord.hold) then
+            if not M.suspended and M:IsOurs(chord.press) and not InCombatLockdown() then M:Suspend(chord.press) end
+        elseif M.suspended then
+            M:Resume()
         end
         -- While the panel is open, and after it closes until the buttons
         -- are released, the combination does nothing

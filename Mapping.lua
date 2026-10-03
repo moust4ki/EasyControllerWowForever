@@ -998,9 +998,60 @@ function M:Apply()
             if input.paddle and self:InputEnabled(input) then self:ApplyPaddle(input) end
         end
         self:ApplyReplaced()
+        self:BlockFallbacks()
     end
+    -- The panel's shortcut held: its second button left to the game
+    if self.suspended then self:Suspend(self.suspended) end
     self:UpdateMarks()
     self.applying = false
+end
+
+-- A key with a trigger modifier and no binding of its own falls back to the
+-- key without it: our action on L3 alone ran on LT + L3 too, a wheel opened
+-- in every layer. The layers of our keys left free get a binding that does
+-- nothing (the game's own bindings, of its gamepad UI too, stay).
+local NOOP = "CONTROLLERKEYBOARD_NOOP"
+function M:BlockFallbacks()
+    for _, input in ipairs(M.INPUTS) do
+        local key = not input.layer and self:InputKey(input)
+        if key and (self.bound[key] or self.taken[key]) and self.bound[key] ~= NOOP then
+            for _, layer in ipairs(M.LAYERS) do
+                local prefix = input.paddle and self:ArrivalPrefix(layer) or self:LayerPrefix(layer)
+                local combo = prefix and prefix ~= "" and prefix .. key
+                if combo and not (self.bound[combo] or self.taken[combo]) and not self:NativeBinding(combo) then
+                    SetOverrideBinding(owner, false, combo, NOOP)
+                    self.bound[combo] = NOOP
+                end
+            end
+        end
+    end
+end
+
+-- The panel's shortcut (RB + D-pad down): while its first button is held,
+-- out of combat, what we put on the second one is taken off, so the press
+-- only opens the panel (a wheel on D-pad down opened with it). Back on
+-- release.
+function M:Suspend(key)
+    if InCombatLockdown() or not (owner and key) then return end
+    self.suspended = key
+    if self.bound[key] then
+        SetOverrideBinding(owner, false, key, nil)
+        self.bound[key] = nil
+    end
+    if self.taken[key] then
+        SetOverrideBinding(takeOwner, true, key, nil)
+        self.taken[key] = nil
+    end
+end
+
+function M:Resume()
+    if not self.suspended then return end
+    self.suspended = nil
+    self:Apply()
+end
+
+function M:IsOurs(key)
+    return key and (self.bound[key] or self.taken[key]) and self.bound[key] ~= NOOP and true or false
 end
 
 -- The game's buttons the player replaced, and the other layers of each

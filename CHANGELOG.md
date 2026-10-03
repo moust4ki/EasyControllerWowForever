@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.1
+
+- **Trigger layers kept apart**: a function on a button in one layer only (a wheel on L3, a spell on
+  a paddle...) no longer runs in its other layers too. The game ran a key with LT / RT held that had
+  nothing of its own as the key without them; those layers now do nothing, unless the game has its own
+  function there.
+- **The panel's shortcut alone**: with something of yours on D-pad down (a wheel...), RB + D-pad down
+  opened it together with the configuration panel. While RB is held, out of combat, D-pad down is
+  left to the game, and comes back on release.
+
 ## 1.8.0
 
 - **Extra buttons** (Home › Gamepad): up to 8 more buttons, 4 a side, for both controllers with
