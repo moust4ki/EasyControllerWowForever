@@ -11,12 +11,14 @@ Every feature you don't need can be turned off to save even more resources.
 - **Profiles** (new tab): each character has its own buttons and paddles, wheels and supplies, or uses the shared ones. Copy another character's or start from scratch. Every character starts from your current setup, so with one character nothing changes.
 - **LT + RB and RT + LB** can now be set from the Gamepad tab (they showed "Unavailable" in 1.8.2).
 
-## What's new in 1.8.2
+## Also since 1.8 (1.8.1 and 1.8.2)
 - **Triggers: press to switch** (option): press LT alone and the left bar stays on, press it again to come back; same for RT, LT then RT for the bottom bar. Holding still works as before. Made for the game's compact action bar.
 - **Back paddles on Steam Deck / Steam Controller**: each trigger layer now works, even when Steam Input sends the paddles as plain keys.
+- **Trigger layers kept apart**: an action set on one layer of a button no longer runs on its other layers.
 - **Spells like Ghost Wolf** now cast from paddles, buttons and wheels (cast by name, with the rank you chose).
 - **LT + RB and RT + LB** can take a spell, an item, a macro or a wheel.
 - **Aggro lost vibration** for tanks.
+- **RB + D-pad down** opens the configuration panel only, not what you put on D-pad down too.
 
 ## What's new in 1.8
 - **Extra buttons**: up to 8 more buttons, for controllers with more buttons (Vader Pro…) or touchpads set as buttons (Steam Deck, Steam Controller), working like the back paddles.
