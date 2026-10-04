@@ -329,6 +329,10 @@ kind can be left out (Wheels › Consumables).
   stick stays the game's (for its own spell wheels). The mouse works too. While it is open it takes
   the sticks, like the game's own wheels: the camera and the character stay still. The aimed item's
   name shows in the game's banner under the wheel.
+- **Hold to show** (Wheels › Opening, off by default, every wheel): hold the wheel's button, aim
+  with the left stick, let go to use what it aims at; let go with the stick in the middle closes it
+  without using anything. A still uses while you hold it. With Triggers: press to switch on and a
+  bar switched on, the wheel opens on a press as without the option.
 - No game setting is changed. `/ec wheel` lists what the wheel holds, and why an item is not in it.
 
 ### Your own wheels

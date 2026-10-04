@@ -873,7 +873,19 @@ end
 -- state lists its buttons from 1, the index the game gives from 0. A layer
 -- with nothing does nothing.
 local ROUTE = [[
-    if not down then return false end
+    -- The release: to a wheel of the layer pressed (its hold option), as a
+    -- "ckup" click on this release
+    if not down then
+        local pressed = self:GetAttribute("ck-pressed")
+        self:SetAttribute("ck-pressed", nil)
+        if pressed and self:GetAttribute("ck-up-" .. pressed) then
+            self:SetAttribute("useOnKeyDown", false)
+            return "ckup" .. pressed
+        end
+        return false
+    end
+    self:SetAttribute("useOnKeyDown", true)
+    self:SetAttribute("ck-pressed", nil)
     -- The trigger toggle on (Toggle.lua): its layer, held or toggled; a
     -- trigger held was used
     local toggle = self:GetFrameRef("toggle")
@@ -882,6 +894,7 @@ local ROUTE = [[
         if toggle:GetAttribute("ck-held-RT") then toggle:SetAttribute("ck-used-RT", true) end
         local on = toggle:GetAttribute("ck-layer") or ""
         if not self:GetAttribute("ck-has-" .. on) then return false end
+        self:SetAttribute("ck-pressed", on)
         return "ck" .. on
     end
     local state = GetGamePadState()
@@ -898,11 +911,19 @@ local ROUTE = [[
         or (rtMod == "CTRL" and ctrl) or (rtMod == "ALT" and alt)
     local layer = (ltDown and "LT" or "") .. (rtDown and "RT" or "")
     if not self:GetAttribute("ck-has-" .. layer) then return false end
+    self:SetAttribute("ck-pressed", layer)
     return "ck" .. layer
 ]]
 
 local header
 local routers = {}      -- paddle -> its secure button
+
+-- A wheel on a layer gets the key's release too (its hold option)
+local function setRelease(r, layer, b, action)
+    local wheel = b and type(action) == "string" and action:find("^wheel:") and b
+    r:SetAttribute("ck-up-" .. layer, wheel and true or nil)
+    r:SetAttribute("*clickbutton-ckup" .. layer, wheel or nil)
+end
 M.routers = routers
 
 local function router(inputId)
@@ -961,14 +982,16 @@ local function routeKeys(input, key, taken)
         r:SetAttribute("ck-has-" .. layer, nil)
         r:SetAttribute("*clickbutton-ck" .. layer, nil)
         local action = M:Get(input.id, layer)
+        local b
         if M.Routable(action) and not taken[M:ArrivalPrefix(layer)] then
-            local b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"))
+            b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"))
                 or actionButton(input.id .. ":" .. layer, action)
             -- Clicked by the key's button, once per press
             b:SetAttribute("useOnKeyDown", false)
             r:SetAttribute("*clickbutton-ck" .. layer, b)
             r:SetAttribute("ck-has-" .. layer, true)
         end
+        setRelease(r, layer, b, action)
     end
     for prefix, isTaken in pairs(taken) do
         if not isTaken then
@@ -1103,6 +1126,7 @@ function M:ApplyPad(input, targets, replaced)
             r:SetAttribute("*clickbutton-ck" .. layer, b)
             r:SetAttribute("ck-has-" .. layer, true)
         end
+        setRelease(r, layer, b, t and t.action)
     end
     local o, record = owner, self.bound
     if replaced then o, record = takeOwner, self.taken end

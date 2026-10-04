@@ -1,7 +1,12 @@
 # Changelog
 
-## 1.9.1 (not released yet)
+## 1.10.0 (not released yet)
 
+- **Hold to show a wheel** (Wheels › Opening, off by default, requested on CurseForge): hold a
+  wheel's button to show it, aim with the left stick, let go to use what it aims at; the stick in the
+  middle closes it without using anything. A still uses while it is held. Every wheel, on any button
+  or paddle, in combat too. With Triggers: press to switch on and a bar switched on, the wheel opens
+  on a press as before.
 - **Each layer of a button runs its own, wheels too** (reported on CurseForge): a wheel on a button
   opened in every layer (the consumables wheel on D-pad down opened with RT held too, the game's
   RT + D-pad down lost), and a wheel on a trigger layer (LT + D-pad down) never opened, the button's

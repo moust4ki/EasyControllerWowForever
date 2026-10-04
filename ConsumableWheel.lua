@@ -378,16 +378,28 @@ local HIDE = [[
 ]]
 
 -- A wheel's key (its "ck-wheel"): opens or closes it, on its press (a key
--- bound to it sends a press and a release: the release is let pass; a shared
--- paddle key sends one click, no press: that click counts). Another wheel
--- open: this one takes its place.
+-- bound to it sends a press and a release; a router sends one click on the
+-- press, no "down", and its release as a "ckup" click). Another wheel open:
+-- this one takes its place. The release: with the hold option (Wheels >
+-- Opening), what the stick aims at is used (its slot's button clicked, which
+-- closes the wheel), the stick in the middle closes it; else let pass.
 local TOGGLE = [[
-    if not down and self:GetAttribute("ck-down") then
-        self:SetAttribute("ck-down", false)
-        return false
-    end
-    self:SetAttribute("ck-down", down and true or false)
     local wid = self:GetAttribute("ck-wheel") or "c"
+    local release = (button and strsub(button, 1, 4) == "ckup") or (not down and self:GetAttribute("ck-down"))
+    self:SetAttribute("ck-down", down and true or false)
+    if release then
+        if not (owner:GetAttribute("ck-hold") and owner:IsShown() and owner:GetAttribute("wheel") == wid) then
+            return false
+        end
+        ]] .. AIMED .. [[
+        if slot < 1 then
+            ]] .. HIDE .. [[
+            return false
+        end
+        -- Clicked on this release
+        self:SetAttribute("useOnKeyDown", false)
+        return "s" .. slot
+    end
     if owner:IsShown() and owner:GetAttribute("wheel") == wid then
         ]] .. HIDE .. [[
     elseif (owner:GetAttribute("ck-" .. wid .. "-total") or 0) > 0 then
@@ -464,12 +476,15 @@ function W:Build()
     -- The wheel's key: its press (and a shared paddle key's single click)
     local toggle = keyButton("ControllerKeyboardWheelToggle", wheel, TOGGLE, nil, "AnyDown", "AnyUp")
     toggle:SetAttribute("ck-wheel", "c")
+    -- On a release (hold option): the slot aimed at ("s3")
+    toggle:SetAttribute("type", "click")
     self.toggle = toggle
     -- The key of each wheel of the player's
     self.myToggles = {}
     for n = 1, W.MY_MAX do
         local t = keyButton("ControllerKeyboardMyWheel" .. n, wheel, TOGGLE, nil, "AnyDown", "AnyUp")
         t:SetAttribute("ck-wheel", tostring(n))
+        t:SetAttribute("type", "click")
         self.myToggles[n] = t
     end
     local use = keyButton("ControllerKeyboardWheelUse", wheel, USE, DONE)
@@ -585,6 +600,8 @@ function W:Build()
         b:Hide()
         SecureHandlerSetFrameRef(wheel, "slot" .. i, b)
         use:SetAttribute("*clickbutton-s" .. i, b)
+        self.toggle:SetAttribute("*clickbutton-s" .. i, b)
+        for _, t in ipairs(self.myToggles) do t:SetAttribute("*clickbutton-s" .. i, b) end
 
         self.buttons[i] = b
     end
@@ -658,6 +675,8 @@ function W:Fill()
     self.pending = nil
     self:Build()
     local wheel = self.frame
+    -- Hold its key to show it, let go to use what the stick aims at (option)
+    wheel:SetAttribute("ck-hold", settings().hold and true or nil)
     self.lists = {}
     -- The consumables: by kind, 8 a page
     local items = settings().enabled and self:Scan() or {}

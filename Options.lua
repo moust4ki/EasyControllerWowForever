@@ -642,6 +642,18 @@ local function consumableRows(b)
     end
 end
 
+-- How every wheel opens: pressed (open, A uses, press again closes) or held
+local function wheelOpenRows(b)
+    local s = settings().wheel
+    b.header(L.SEC_WHEEL_OPEN)
+    b.check({ id = "w_hold", label = L.LBL_WHEEL_HOLD, tip = L.TIP_WHEEL_HOLD,
+        get = function() return s.hold end,
+        set = function(v)
+            s.hold = v
+            CK.ConsumableWheel:Fill()
+        end })
+end
+
 local function wheelPositionRows(b)
     local W = CK.ConsumableWheel
     local s = settings().wheel
@@ -665,6 +677,7 @@ Config.pages.wheels = CK.MyWheels:TabPage(Config.NewRailPage({
     sections = {
         { key = "mine", label = L.MYWHEEL_H, tip = L.MYWHEEL_INFO, view = CK.MyWheels.Grid },
         { key = "consumables", label = L.SEC_CONSUMABLES, tip = L.WHEEL_INFO2, rows = consumableRows },
+        { key = "open", label = L.SEC_WHEEL_OPEN, tip = L.TIP_SEC_WHEEL_OPEN, rows = wheelOpenRows },
         { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_WHEELPOS, rows = wheelPositionRows },
     },
 }))
