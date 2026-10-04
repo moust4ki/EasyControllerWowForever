@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.1 (not released yet)
+## 1.11.1
 
 - **Stealth, forms and stances**: in a stance, the game's stance bar takes the place of one of the
   gamepad bars (its gamepad settings, Stance bar) with slots of its own. The Gamepad tab now shows and
