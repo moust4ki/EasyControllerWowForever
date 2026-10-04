@@ -241,8 +241,9 @@ Home › Gamepad › **Triggers: press to switch** (off by default): no need to 
 bar. Press LT alone (no other button while it is down): the left bar stays on, A, B, X, Y and the
 D-pad use it; press LT again: back to the top bar. Same for RT (the right bar); LT then RT: the bottom
 bar. Holding a trigger and pressing a button still works as before, the bar comes back once you let go.
-The back paddles, L3 / R3 and the extra buttons follow the bar on. The bar on is framed; with the
-game's compact action bar (one bar shown), its icons are drawn over it. **Top bar again after combat**
+The back paddles, L3 / R3 and the extra buttons follow the bar on. **It needs the game's compact
+action bar** (the game's gamepad options): the game shows one bar, and the bar switched on shows in its
+place. Without it, the game keeps showing its usual bars and the top one highlighted. **Top bar again after combat**
 (on by default) brings the top bar back when a fight ends; off, a bar stays on until you press its
 trigger again. A game window, the panel or the chat keyboard get their buttons back while open.
 

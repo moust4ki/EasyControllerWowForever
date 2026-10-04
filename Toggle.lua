@@ -14,9 +14,10 @@ local _, CK = ...
 -- button, or what the player put there. A click goes through a relay that
 -- "/click"s it on the press (as the game's binding does) and tells a
 -- trigger held that it was used: released then, it was held, not toggled.
--- The game's top bar stays highlighted: ours shows the bar on, and in the
--- compact layout (the game shows the top bar only) the bar's icons are
--- drawn over it. With the option off, nothing of this is made or bound.
+-- Meant for the game's compact action bar (one bar shown): the game keeps
+-- showing its top bar, so the bar on's icons are drawn over it, each on the
+-- icon of the game's button. With the option off, nothing of this is made
+-- or bound.
 local T = {}
 CK.Toggle = T
 
@@ -234,8 +235,8 @@ function T:Release()
 end
 
 ---------------------------------------------------------------------------
--- What shows: the bar on highlighted; in the compact layout, its icons
--- drawn over the top bar the game keeps showing
+-- What shows, in the compact layout: the bar on's icons over the top bar
+-- the game keeps showing
 ---------------------------------------------------------------------------
 local BAR_KEYS = { "a", "b", "x", "y", "up", "down", "left", "right" }
 local SQUARE = { up = true, down = true, left = true, right = true }
@@ -262,20 +263,7 @@ function T:BuildView()
     local v = CK.NewFrame("Frame", nil, UIParent)
     v:SetFrameStrata("HIGH")
     v:Hide()
-    -- The bar on: a frame around it
-    local glow = CK.NewFrame("Frame", nil, v)
-    glow.edges = {}
-    for i = 1, 4 do
-        local e = glow:CreateTexture(nil, "OVERLAY")
-        e:SetColorTexture(1, 0.78, 0.25, 0.9)
-        glow.edges[i] = e
-    end
-    glow.edges[1]:SetPoint("TOPLEFT") glow.edges[1]:SetPoint("TOPRIGHT") glow.edges[1]:SetHeight(2)
-    glow.edges[2]:SetPoint("BOTTOMLEFT") glow.edges[2]:SetPoint("BOTTOMRIGHT") glow.edges[2]:SetHeight(2)
-    glow.edges[3]:SetPoint("TOPLEFT") glow.edges[3]:SetPoint("BOTTOMLEFT") glow.edges[3]:SetWidth(2)
-    glow.edges[4]:SetPoint("TOPRIGHT") glow.edges[4]:SetPoint("BOTTOMRIGHT") glow.edges[4]:SetWidth(2)
-    v.glow = glow
-    -- The compact layout: the bar's 8 icons over the top bar's buttons
+    -- The bar's 8 icons over the top bar's buttons
     v.slots = {}
     for _, key in ipairs(BAR_KEYS) do
         local s = CK.NewFrame("Frame", nil, v)
@@ -310,26 +298,20 @@ function T:Draw()
     local layer = self:Layer()
     local bar = layer ~= "" and CK.Mapping.LAYER_BAR[layer]
     local frame = bar and barFrame(bar)
-    if not frame then
-        v.glow:Hide()
+    local compact = GetCVarBool and GetCVarBool("GamepadUseCompactActionBar")
+    if not (frame and compact) then
         for _, s in pairs(v.slots) do s:Hide() end
         return
     end
-    local compact = GetCVarBool and GetCVarBool("GamepadUseCompactActionBar")
-    local shown = compact and barFrame("top") or frame
-    v.glow:ClearAllPoints()
-    v.glow:SetPoint("TOPLEFT", shown, "TOPLEFT", -4, 4)
-    v.glow:SetPoint("BOTTOMRIGHT", shown, "BOTTOMRIGHT", 4, -4)
-    v.glow:Show()
     local P = CK.Paddles
     for key, s in pairs(v.slots) do
-        local over = compact and P:NativeButton("bar:top:" .. key)
+        local over = P:NativeButton("bar:top:" .. key)
         local input = byBar()[key]
         local action = input and CK.Mapping:GetReplaced(input.id, layer) or ("bar:" .. bar .. ":" .. key)
         if over and over:IsVisible() then
+            -- On the game's icon exactly (the button also holds its glyph)
             s:ClearAllPoints()
-            s:SetPoint("CENTER", over, "CENTER")
-            s:SetSize(over:GetWidth() * 0.8, over:GetHeight() * 0.8)
+            s:SetAllPoints(over.icon or over)
             local icon = CK.Mapping:ActionIcon(action)
             s.icon:SetTexture(icon)
             s.icon:SetShown(icon ~= nil)
