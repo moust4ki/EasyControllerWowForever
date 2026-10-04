@@ -398,6 +398,7 @@ end
 -- targeting (its class actions are LT + LB and RT + RB, read from the keys
 -- held: they stay the game's)
 local CROSSED = { LB = "RT", RB = "LT" }
+M.CROSSED = CROSSED
 
 function M:Replaceable(input, layer)
     if not self:ReplaceOn() or input.layer or input.paddle then return false end

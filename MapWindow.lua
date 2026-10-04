@@ -71,8 +71,9 @@ function W:Cell(input, layer)
         end
         return { state = "off", name = L.LBL_HELD, why = L.MAP_KEPT_TRIGGER }
     end
-    -- LB / RB with a trigger: the game's class and pet actions
-    if (input.id == "LB" or input.id == "RB") and layer ~= "" then
+    -- LB / RB with a trigger: the game's class and pet actions (LT + LB,
+    -- RT + RB, both triggers); LT + RB and RT + LB can be replaced
+    if (input.id == "LB" or input.id == "RB") and layer ~= "" and layer ~= M.CROSSED[input.id] then
         return { state = "off", name = L.MAP_GAME, why = L.MAP_KEPT_CLASS }
     end
     local state = M:State(input, layer)
