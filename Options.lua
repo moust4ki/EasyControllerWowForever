@@ -123,7 +123,6 @@ local function moduleRows(b)
         get = function() return vib.enabled end,
         set = function(v)
             vib.enabled = v
-            CK.Vibration:Update()
             if v then V:Play("pulse") else V:Stop() end
         end,
         onY = function() Config:SetTab("alerts", 1) end, yVerb = L.V_SETTINGS })
@@ -453,7 +452,6 @@ local function vibrationRows(b)
                     toggle = function()
                         cfg.on = not cfg.on
                         if cfg.on then V:Play(cfg.pattern) end
-                        V:Update()
                     end,
                     pattern = function() return cfg.on and L["VIB_P_" .. cfg.pattern:upper()] or L.VIB_OFF end,
                     -- A pattern picked turns the event on
@@ -461,7 +459,6 @@ local function vibrationRows(b)
                         cfg.pattern = V:NextPattern(cfg.pattern, d)
                         cfg.on = true
                         V:Play(cfg.pattern)
-                        V:Update()
                     end,
                     onY = function()
                         V:Play(cfg.pattern)

@@ -280,7 +280,7 @@ intensity for all, then each event with its own box and its own pattern (micro t
 tick, pulse, long, heartbeat, crescendo): A turns it on or off, the D-pad picks its pattern, Y tests
 it.
 
-- **Combat**: death, your spell interrupted (by someone, not by moving), loss of control, aggro, aggro lost (tanks), critical hit or heal, entering combat, spell proc,
+- **Combat**: death, your spell interrupted (by someone, not by moving), loss of control, aggro, aggro lost (tanks), entering combat, spell proc,
   action impossible.
 - **Social**: whisper, group or raid invite, ready check, resurrection or summon, trade or duel.
 - **Progress**: level up, quest objective or quest complete, rare loot, bags full, gear almost broken.

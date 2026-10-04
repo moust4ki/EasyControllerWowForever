@@ -6,7 +6,10 @@ local _, CK = ...
 -- motors): every controller the game drives feels them.
 --
 -- No event on the player's health: WoW Forever hides it from addons in
--- combat (a secret value), so low health and big hit could not work.
+-- combat (a secret value), so low health and big hit could not work. No
+-- critical hit either: the combat log is the Blizzard UI's only (an addon
+-- registering it, or even unregistering it, is blocked and the game shows
+-- its "blocked" popup, in front of the others: invitations...).
 local V = {}
 CK.Vibration = V
 
@@ -35,7 +38,6 @@ V.EVENTS = {
     { key = "lossOfControl", group = "combat", on = true, pattern = "pulse" },
     { key = "aggro", group = "combat", on = false, pattern = "tick" },
     { key = "aggroLost", group = "combat", on = false, pattern = "double" },
-    { key = "crit", group = "combat", on = false, pattern = "micro" },
     { key = "combat", group = "combat", on = false, pattern = "tick" },
     { key = "proc", group = "combat", on = false, pattern = "tick" },
     { key = "actionFailed", group = "combat", on = false, pattern = "micro" },
@@ -274,52 +276,27 @@ local HANDLERS = {
     end,
 }
 
--- A critical hit or heal of the player (not over time): from the combat
--- log, read only while that event is on (it fires a lot in a raid)
-local CRIT_AT = { SWING_DAMAGE = 18, RANGE_DAMAGE = 21, SPELL_DAMAGE = 21, SPELL_HEAL = 18 }
-function V:CombatLog()
-    if not CombatLogGetCurrentEventInfo then return end
-    local info = { CombatLogGetCurrentEventInfo() }
-    local at = CRIT_AT[info[2]]
-    if not at or secret(info[4]) or info[4] ~= self.playerGUID then return end
-    local critical = info[at]
-    if critical and not secret(critical) then self:Fire("crit") end
-end
-
--- The combat log listened to only while the crit event is on
-function V:Update()
-    if not (self.logFrame and CK.db) then return end
-    local s = self:Settings()
-    local on = s.enabled and s.events.crit and s.events.crit.on and true or false
-    if on == self.logging then return end
-    self.logging = on
-    self.playerGUID = UnitGUID and UnitGUID("player")
-    if on then
-        pcall(self.logFrame.RegisterEvent, self.logFrame, "COMBAT_LOG_EVENT_UNFILTERED")
-    else
-        self.logFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    end
-end
-
 -- /ec fish: the game's events for a minute, in the chat, to find which one
 -- comes when a fish bites (the game has no "bite" event we know of): the
 -- chattiest ones left out, the same one in a row shown once
 local TRACE_TIME = 60
-local CHATTY = {
-    COMBAT_LOG_EVENT_UNFILTERED = true, UNIT_AURA = true, UNIT_POWER_FREQUENT = true, UNIT_POWER_UPDATE = true,
-    CURSOR_CHANGED = true, MODIFIER_STATE_CHANGED = true, ACTIONBAR_UPDATE_COOLDOWN = true, SPELL_UPDATE_COOLDOWN = true,
-    BAG_UPDATE_COOLDOWN = true, UPDATE_MOUSEOVER_UNIT = true, WORLD_CURSOR_TOOLTIP_UPDATE = true, UNIT_HEALTH = true,
-    UNIT_HEALTH_FREQUENT = true, NAME_PLATE_UNIT_ADDED = true, NAME_PLATE_UNIT_REMOVED = true, UNIT_FLAGS = true,
-    CHAT_MSG_ADDON = true, GAME_PAD_POWER_CHANGED = true, ACTIONBAR_UPDATE_USABLE = true, SPELL_UPDATE_USABLE = true,
-    ACTION_RANGE_CHECK_UPDATE = true, UPDATE_INVENTORY_DURABILITY = true, PLAYER_STARTED_MOVING = true,
-    PLAYER_STOPPED_MOVING = true, UNIT_THREAT_LIST_UPDATE = true, UNIT_THREAT_SITUATION_UPDATE = true,
+-- The ones that may come with a bite: the Fishing channel, the bobber as the
+-- soft interact target, the loot; never every event (the combat log, the
+-- Blizzard UI's only, would be blocked)
+local TRACED = {
+    "UNIT_SPELLCAST_SENT", "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_SUCCEEDED",
+    "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_CHANNEL_START",
+    "UNIT_SPELLCAST_CHANNEL_UPDATE", "UNIT_SPELLCAST_CHANNEL_STOP", "PLAYER_SOFT_INTERACT_CHANGED",
+    "PLAYER_SOFT_ENEMY_CHANGED", "PLAYER_SOFT_FRIEND_CHANGED", "PLAYER_TARGET_CHANGED", "CURSOR_CHANGED",
+    "UPDATE_MOUSEOVER_UNIT", "LOOT_READY", "LOOT_OPENED", "LOOT_CLOSED", "UI_ERROR_MESSAGE", "UI_INFO_MESSAGE",
+    "CHAT_MSG_SYSTEM", "SOUNDKIT_FINISHED",
 }
 function V:TraceFishing()
     local f = self.traceFrame
     if not f then
         f = CreateFrame("Frame")
         f:SetScript("OnEvent", function(_, event, ...)
-            if CHATTY[event] or event == f.lastEvent then return end
+            if event == f.lastEvent then return end
             f.lastEvent = event
             local args = {}
             for i = 1, math.min(select("#", ...), 4) do
@@ -331,7 +308,7 @@ function V:TraceFishing()
         self.traceFrame = f
     end
     f.start, f.lastEvent = GetTime(), nil
-    f:RegisterAllEvents()
+    for _, event in ipairs(TRACED) do pcall(f.RegisterEvent, f, event) end
     CK:Print(CK.L.FISH_TRACE_START, TRACE_TIME)
     local token = {}
     f.token = token
@@ -368,8 +345,4 @@ function V:Init()
         hooksecurefunc(CK, name, function() V:Fire("keyPress") end)
     end
     self.durabilityWasLow = durabilityLow()
-    local log = CreateFrame("Frame")
-    log:SetScript("OnEvent", function() V:CombatLog() end)
-    self.logFrame = log
-    self:Update()
 end

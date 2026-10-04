@@ -13,8 +13,8 @@
 - **LT + RB and RT + LB** can take an action (issue #5): the game leaves them to its targeting. LT + LB
   and RT + RB stay the game's class actions.
 - **Vibrations**: **Aggro lost** (tanks, issue #6): a mob you held goes for someone else, in combat
-  (not when it dies or the fight ends; at most every 3 s). **Critical hit** (issue #7): your critical
-  hits and heals, not over time; the combat log is only read while it is on. Both off by default.
+  (not when it dies or the fight ends; at most every 3 s; off by default). No critical hit vibration
+  (issue #7): WoW Forever keeps the combat log to the Blizzard UI, an addon reading it is blocked.
 - `/ec fish` lists the game's events for a minute: to find which one tells a fish bites (issue #8).
 - **Triggers: press to switch** (Home › Gamepad, off by default, issue #1): no need to hold a trigger
   any more. LT pressed alone keeps the left bar on (A, B, X, Y and the D-pad use it), pressed again
