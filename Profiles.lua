@@ -51,11 +51,25 @@ local function realmKey()
     return (realm:gsub("[%s%-]", ""))
 end
 
+-- The character's full name: WoW Forever gives a first name and a surname
+-- (UnitName's second value there; "Fraicheur Rog", "Fraicheur Hunt"). With
+-- the first name alone every "Fraicheur ..." had one profile, shared
+-- (reported: a bind removed on the warlock was gone on the shaman too).
+local function fullName()
+    if not UnitName then return nil end
+    -- (both values: "UnitName and UnitName(...)" would keep the first only)
+    local name, surname = UnitName("player")
+    if not (type(name) == "string" and name ~= "") then return nil end
+    if type(surname) == "string" and surname ~= "" then return name .. " " .. surname, name end
+    return name, name
+end
+
+-- The key, the full name, the first name
 function Pr:Key()
-    local name = UnitName and UnitName("player")
+    local full, first = fullName()
     local realm = realmKey()
-    if not (name and name ~= "" and realm) then return nil end
-    return name .. "-" .. realm
+    if not (full and realm) then return nil end
+    return full .. "-" .. realm, full, first, realm
 end
 
 function Pr:Profile()
@@ -90,7 +104,7 @@ end
 function Pr:Init()
     local db = CK.db
     if type(db.profiles) ~= "table" then db.profiles = {} end
-    local key = self:Key()
+    local key, full, first, realm = self:Key()
     if not key then return end
     self.key = key
     self.shared = {}
@@ -102,9 +116,9 @@ function Pr:Init()
     for k, p in pairs(db.profiles) do
         if type(k) ~= "string" or type(p) ~= "table" or type(p.data) ~= "table" then db.profiles[k] = nil end
     end
-    local name = UnitName("player")
+    local name = full
     local p = db.profiles[key]
-    if not p then
+    if not p and full == first then
         -- Saved under the realm with its spaces (a login where the game gave
         -- no other name): the same character
         for k, other in pairs(db.profiles) do
@@ -114,6 +128,17 @@ function Pr:Init()
                 break
             end
         end
+    end
+    local legacy = full ~= first and db.profiles[first .. "-" .. realm]
+    if not p and legacy then
+        -- Saved by the first name alone (up to 1.11.6), shared by every
+        -- character with that first name: each one starts from a copy of
+        -- it, what it had kept, its own from now on
+        local data = {}
+        for _, f in ipairs(FIELDS) do data[f[1]] = copy(legacy.data[f[1]]) end
+        p = { data = data }
+        db.profiles[key] = p
+        legacy.firstNameOnly = true
     end
     if not p then
         -- First load with profiles: a copy of the account's configuration
@@ -127,6 +152,7 @@ function Pr:Init()
         for i, f in ipairs(FIELDS) do p.data[f[1]] = copy(self.shared[i]) end
     end
     p.mode = "character"
+    p.firstNameOnly = nil
     p.name = name
     p.realm = (GetRealmName and GetRealmName()) or ""
     p.class = select(2, UnitClass("player"))
@@ -176,7 +202,7 @@ function Pr:Diagnose()
     end
     local others = {}
     for key, other in pairs(CK.db.profiles or {}) do
-        if key ~= self.key and type(other) == "table" and type(other.data) == "table" then
+        if key ~= self.key and type(other) == "table" and type(other.data) == "table" and not other.firstNameOnly then
             others[#others + 1] = "  " .. key .. ": " .. summary(other.data)
         end
     end

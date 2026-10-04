@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.11.7 (not released yet)
+
+- **Profiles with WoW Forever's surnames** (reported: a bind removed on the warlock was gone on the
+  shaman too): characters are named with a first name and a surname there ("Fraicheur Rog",
+  "Fraicheur Hunt"), and the profiles were kept by the first name alone, so every character sharing
+  a first name shared one. They are kept by the full name now. At its first login after the update,
+  each character starts from a copy of the profile it shared, so nothing is lost, then they are
+  apart. Realms without surnames: no change.
+
 ## 1.11.6
 
 - **/ec profile**: the character recognised and whether its settings are its own, what each
