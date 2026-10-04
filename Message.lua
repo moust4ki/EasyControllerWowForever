@@ -470,21 +470,47 @@ function CK:SetChannel(i)
     self:Refresh()
 end
 
--- Make the chosen channel the chat's own "sticky" channel, as typing /p in the
--- chat would: every following message goes there, including text typed by a
--- physical keyboard or a dictation tool. Only the channel attributes are set
--- (never the chat's text, which would taint the gamepad UI), out of combat.
--- /w waits until its recipient is known.
+-- The chosen channel kept for the next messages (option, on): the keyboard
+-- reopens on it. Kept by the addon only, never written into the chat's own
+-- attributes (reported: macros stopped running while the addon was on. The
+-- game copies the chat's channel attributes into the box that runs every
+-- macro line; a value an addon wrote there taints the macro, and the game
+-- then blocks its /cast, /startattack...).
+-- The chat's own channel as the game keeps it (read only)
+local function gameSticky(eb)
+    if not eb then return "" end
+    return tostring(eb:GetAttribute("stickyType") or "SAY") .. "|" .. tostring(eb:GetAttribute("channelTarget"))
+        .. "|" .. tostring(eb:GetAttribute("tellTarget"))
+end
+
 function CK:ApplyStickyChannel()
-    if not self.db.settings.stickyChannel or InCombatLockdown() then return end
-    local eb = self.editBox or self.lastEditBox or ChatFrame1EditBox
+    if not self.db.settings.stickyChannel then return end
     local attrs = self.chatAttrs
-    if not (eb and attrs and attrs.chatType) then return end
+    if not (attrs and attrs.chatType) then return end
     if attrs.chatType == "WHISPER" and not (attrs.tellTarget and attrs.tellTarget ~= "") then return end
-    eb:SetAttribute("chatType", attrs.chatType)
-    eb:SetAttribute("stickyType", attrs.chatType)
-    if attrs.chatType == "WHISPER" then eb:SetAttribute("tellTarget", attrs.tellTarget) end
-    if attrs.chatType == "CHANNEL" then eb:SetAttribute("channelTarget", attrs.channelTarget) end
+    self.sticky = { chatType = attrs.chatType, tellTarget = attrs.tellTarget, channelTarget = attrs.channelTarget }
+    -- The chat's own channel then: changed since (a /2 typed on a physical
+    -- keyboard...), the game's choice is the latest and wins
+    self.stickyBase = gameSticky(self.editBox or self.lastEditBox or ChatFrame1EditBox)
+end
+
+-- The channel kept, for a chat the game opened on its usual channel (not a
+-- whisper, a reply, a command it was opened with): nil otherwise
+function CK:StickyFor(eb)
+    local sticky = self.sticky
+    if not (sticky and eb and self.db.settings.stickyChannel) then return nil end
+    local chatType = eb:GetAttribute("chatType") or "SAY"
+    if chatType ~= (eb:GetAttribute("stickyType") or "SAY") or chatType == "WHISPER" or chatType == "BN_WHISPER" then
+        return nil
+    end
+    if (eb:GetText() or ""):sub(1, 1) == "/" then return nil end
+    if gameSticky(eb) ~= self.stickyBase then
+        self.sticky = nil
+        return nil
+    end
+    local attrs = {}
+    for k, v in pairs(sticky) do attrs[k] = v end
+    return attrs
 end
 
 -- delta: 1 = next available channel, -1 = previous
@@ -675,14 +701,16 @@ local KEEP_DRAFT = {
     ["chat deactivated"] = true, ["focus lost (OnUpdate)"] = true, combat = true, toggle = true,
 }
 
-function CK:TakeDraft(chatText, eb)
+-- attrs: the channel the keyboard opens on (the one kept), else the chat's
+function CK:TakeDraft(chatText, eb, attrs)
     local draft = self.draft
     if not draft then return chatText end
-    local chatType = eb and eb:GetAttribute("chatType")
+    local chatType = attrs and attrs.chatType or (eb and eb:GetAttribute("chatType"))
+    local target = attrs and attrs.tellTarget or (eb and eb:GetAttribute("tellTarget"))
     local toWhisper = chatType == "WHISPER" or chatType == "BN_WHISPER"
     local wasWhisper = draft.chatType == "WHISPER" or draft.chatType == "BN_WHISPER"
     if (toWhisper or wasWhisper)
-        and not (draft.chatType == chatType and draft.target == eb:GetAttribute("tellTarget")) then
+        and not (draft.chatType == chatType and draft.target == target) then
         return chatText
     end
     self.draft = nil
@@ -713,8 +741,10 @@ function CK:Open(eb)
             keep = false
         end
     end
+    -- The channel kept (option), the chat opened by the game on its usual one
+    local sticky = not keep and self:StickyFor(eb) or nil
     if not keep then
-        self.buffer = self:TakeDraft(eb:GetText() or "", eb)
+        self.buffer = self:TakeDraft(eb:GetText() or "", eb, sticky)
     end
     self.standalone = false
     self.chatAttrs = nil
@@ -722,6 +752,12 @@ function CK:Open(eb)
     self.whisperTarget = nil
     self.editBox = eb
     self.lastEditBox = eb
+    if sticky then
+        self.chatAttrs = sticky
+        -- No longer there (the group left...): the chat's own
+        local i = self:CurrentChannelIndex()
+        if i and not self:ChannelAvailable(i) then self.chatAttrs = nil end
+    end
     local state = self.state
     state.layer, state.shift, state.caps, state.aim = "letters", false, false, nil
     state.activeRow = "suggestions"
