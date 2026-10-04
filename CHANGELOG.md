@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.4 (not released yet)
+## 1.11.4
 
 - **Stay seated while eating** (Wheels › Consumables, on by default, reported: food picked from a
   wheel with the left stick, the stick still pushed when it closed, and the character walked off,
