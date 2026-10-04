@@ -165,38 +165,42 @@ function W:TakeSticks(frame, on)
     if frame.EnableGamePadStick then pcall(frame.EnableGamePadStick, frame, on) end
 end
 
--- A plain frame that keeps the sticks after the wheel closes, until they
--- are back near the middle (at most 6 seconds)
+-- How far the stick that aims the wheel is pushed now (0 to 1)
+local function aimLength()
+    local state = C_GamePad and C_GamePad.GetDeviceMappedState and C_GamePad.GetDeviceMappedState()
+    local wheel = W.frame
+    local stick = state and state.sticks and state.sticks[wheel and wheel:GetAttribute("ck-stick") or 1]
+    return stick and stick.len or 0
+end
+
+-- After the wheel closes with its stick still pushed, the sticks are kept a
+-- moment, so the character doesn't walk off (or stand up from eating): until
+-- that stick is let go, at most HOLD_MAX. Players lost the character and the
+-- camera for seconds when they kept pushing (to walk on) or another stick or
+-- axis of their pad never read as let go: only the aiming stick counts now,
+-- and only for a moment.
+local HOLD_MAX = 0.4
+
 function W:BuildHold()
     local hold = CK.NewFrame("Frame", nil, UIParent)
     hold:SetAllPoints(UIParent)
     hold:Hide()
-    hold.lens, hold.elapsed = {}, 0
-    hold:SetScript("OnGamePadStick", function(self, stick, x, y, len)
-        self.lens[stick] = len or math.sqrt((x or 0) ^ 2 + (y or 0) ^ 2)
-        local longest = 0
-        for _, value in pairs(self.lens) do longest = math.max(longest, value) end
-        if longest < 0.2 then self:Hide() end
-    end)
+    hold.elapsed = 0
+    hold:SetScript("OnGamePadStick", function() end)
     hold:SetScript("OnShow", function(self)
-        self.lens, self.elapsed = {}, 0
+        self.elapsed = 0
         W:TakeSticks(self, true)
     end)
+    hold:SetScript("OnHide", function(self) W:TakeSticks(self, false) end)
     hold:SetScript("OnUpdate", function(self, elapsed)
         self.elapsed = self.elapsed + elapsed
-        if self.elapsed > 6 then self:Hide() end
+        if self.elapsed > HOLD_MAX or aimLength() < 0.2 then self:Hide() end
     end)
     self.hold = hold
 end
 
 function W:HoldSticks()
-    local state = C_GamePad and C_GamePad.GetDeviceMappedState and C_GamePad.GetDeviceMappedState()
-    for _, stick in ipairs(state and state.sticks or {}) do
-        if (stick.len or 0) >= 0.2 then
-            self.hold:Show()
-            return
-        end
-    end
+    if aimLength() >= 0.2 then self.hold:Show() end
 end
 
 -- What happened on the last openings and presses, for /ec wheel
