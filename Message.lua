@@ -479,8 +479,8 @@ end
 -- The chat's own channel as the game keeps it (read only)
 local function gameSticky(eb)
     if not eb then return "" end
-    return tostring(eb:GetAttribute("stickyType") or "SAY") .. "|" .. tostring(eb:GetAttribute("channelTarget"))
-        .. "|" .. tostring(eb:GetAttribute("tellTarget"))
+    return tostring(eb:GetAttribute("stickyType") or "SAY") .. "|" .. tostring((eb:GetAttribute("channelTarget")))
+        .. "|" .. tostring((eb:GetAttribute("tellTarget")))
 end
 
 function CK:ApplyStickyChannel()
