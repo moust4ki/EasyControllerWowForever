@@ -224,6 +224,8 @@ local function slash(msg)
         CK.Vibration:Diagnose(arg)
     elseif cmd == "wheel" then
         CK.ConsumableWheel:Diagnose()
+    elseif cmd == "fish" then
+        CK.Vibration:TraceFishing()
     elseif cmd == "binds" then
         CK.Mapping:Diagnose()
     elseif cmd == "debug" then

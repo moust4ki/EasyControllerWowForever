@@ -235,6 +235,12 @@ it back; the mouse clicks a button then a place; the right side mirrors the left
 off), X puts a button back. Places follow the compact layout. With **Free placement** on (Home ›
 Gamepad), the buttons go anywhere: a few pixels at a time with the D-pad, or dragged with the mouse.
 
+### LT + RB and RT + LB
+
+The game gives these two combinations no function of their own (they fall on the targeting): like the
+game's other buttons, they can take a spell, an item, a macro, a wheel or a game function (both
+triggers as modifiers). LT + LB and RT + RB stay the game's class actions.
+
 ### Triggers: press to switch
 
 Home › Gamepad › **Triggers: press to switch** (off by default): no need to hold a trigger to use its
@@ -274,7 +280,7 @@ intensity for all, then each event with its own box and its own pattern (micro t
 tick, pulse, long, heartbeat, crescendo): A turns it on or off, the D-pad picks its pattern, Y tests
 it.
 
-- **Combat**: death, your spell interrupted (by someone, not by moving), loss of control, aggro, entering combat, spell proc,
+- **Combat**: death, your spell interrupted (by someone, not by moving), loss of control, aggro, aggro lost (tanks), critical hit or heal, entering combat, spell proc,
   action impossible.
 - **Social**: whisper, group or raid invite, ready check, resurrection or summon, trade or duel.
 - **Progress**: level up, quest objective or quest complete, rare loot, bags full, gear almost broken.
@@ -423,7 +429,8 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec forget confirm` | forget learned words |
 | `/ec config` | configuration panel (also RB + D-pad down) |
 | `/ec map` | gamepad mapping (free buttons, back paddles) |
-| `/ec keys` | list the keys and buttons the game receives (back paddles) |
+| `/ec keys` | list the keys and buttons the game receives, with the modifiers and triggers held (back paddles) |
+| `/ec fish` | list the game's events for a minute, to find which one comes when a fish bites |
 | `/ec vibe [pattern]` | test the controller vibration |
 | `/ec wheel` | what the consumables wheel holds, and why an item is not in it |
 | `/ec binds` | the game's buttons replaced, and what each key runs now |

@@ -394,9 +394,14 @@ end
 
 -- The game's own: never the triggers (its bars), LB / RB alone only (with
 -- a trigger, its class and pet actions read the buttons themselves)
+-- LB / RB: alone, and LT + RB / RT + LB, which the game leaves to the
+-- targeting (its class actions are LT + LB and RT + RB, read from the keys
+-- held: they stay the game's)
+local CROSSED = { LB = "RT", RB = "LT" }
+
 function M:Replaceable(input, layer)
     if not self:ReplaceOn() or input.layer or input.paddle then return false end
-    if (input.id == "LB" or input.id == "RB") and layer ~= "" then return false end
+    if (input.id == "LB" or input.id == "RB") and layer ~= "" and layer ~= CROSSED[input.id] then return false end
     local state = self:State(input, layer)
     return state == "native" or state == "slot"
 end

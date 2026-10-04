@@ -34,6 +34,8 @@ V.EVENTS = {
     { key = "interrupted", group = "combat", on = true, pattern = "double" },
     { key = "lossOfControl", group = "combat", on = true, pattern = "pulse" },
     { key = "aggro", group = "combat", on = false, pattern = "tick" },
+    { key = "aggroLost", group = "combat", on = false, pattern = "double" },
+    { key = "crit", group = "combat", on = false, pattern = "micro" },
     { key = "combat", group = "combat", on = false, pattern = "tick" },
     { key = "proc", group = "combat", on = false, pattern = "tick" },
     { key = "actionFailed", group = "combat", on = false, pattern = "micro" },
@@ -133,15 +135,16 @@ function V:Play(key, strength)
 end
 
 -- An event happened: its pattern, if it is on (the same event at most every
--- 0.4 s)
+-- 0.4 s; aggro lost every 3 s, a mob going back and forth doesn't buzz)
 local last = {}
+local GAPS = { aggroLost = 3 }
 function V:Fire(key, strength)
     if not CK.db then return end
     local s = self:Settings()
     local cfg = s.events[key]
     if not (s.enabled and cfg and cfg.on) then return end
     local now = GetTime()
-    local gap = (key == "wheelTick" or key == "keyPress") and 0.03 or 0.4
+    local gap = (key == "wheelTick" or key == "keyPress") and 0.03 or GAPS[key] or 0.4
     if last[key] and now - last[key] < gap then return end
     last[key] = now
     self:Play(cfg.pattern, strength)
@@ -229,6 +232,12 @@ local HANDLERS = {
         local status = UnitThreatSituation("player")
         if secret(status) then return end
         if status and status >= 2 and (V.threat or 0) < 2 then V:Fire("aggro") end
+        -- Tanking, then not, still in combat and the target alive: a mob
+        -- went for someone else (leaving combat or a kill doesn't count)
+        if (V.threat or 0) >= 2 and (status or 0) < 2 and UnitAffectingCombat("player")
+            and not (UnitExists("target") and UnitIsDead("target")) then
+            V:Fire("aggroLost")
+        end
         V.threat = status
     end,
     PLAYER_REGEN_DISABLED = function() V:Fire("combat") end,
@@ -265,6 +274,74 @@ local HANDLERS = {
     end,
 }
 
+-- A critical hit or heal of the player (not over time): from the combat
+-- log, read only while that event is on (it fires a lot in a raid)
+local CRIT_AT = { SWING_DAMAGE = 18, RANGE_DAMAGE = 21, SPELL_DAMAGE = 21, SPELL_HEAL = 18 }
+function V:CombatLog()
+    if not CombatLogGetCurrentEventInfo then return end
+    local info = { CombatLogGetCurrentEventInfo() }
+    local at = CRIT_AT[info[2]]
+    if not at or secret(info[4]) or info[4] ~= self.playerGUID then return end
+    local critical = info[at]
+    if critical and not secret(critical) then self:Fire("crit") end
+end
+
+-- The combat log listened to only while the crit event is on
+function V:Update()
+    if not (self.logFrame and CK.db) then return end
+    local s = self:Settings()
+    local on = s.enabled and s.events.crit and s.events.crit.on and true or false
+    if on == self.logging then return end
+    self.logging = on
+    self.playerGUID = UnitGUID and UnitGUID("player")
+    if on then
+        pcall(self.logFrame.RegisterEvent, self.logFrame, "COMBAT_LOG_EVENT_UNFILTERED")
+    else
+        self.logFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    end
+end
+
+-- /ec fish: the game's events for a minute, in the chat, to find which one
+-- comes when a fish bites (the game has no "bite" event we know of): the
+-- chattiest ones left out, the same one in a row shown once
+local TRACE_TIME = 60
+local CHATTY = {
+    COMBAT_LOG_EVENT_UNFILTERED = true, UNIT_AURA = true, UNIT_POWER_FREQUENT = true, UNIT_POWER_UPDATE = true,
+    CURSOR_CHANGED = true, MODIFIER_STATE_CHANGED = true, ACTIONBAR_UPDATE_COOLDOWN = true, SPELL_UPDATE_COOLDOWN = true,
+    BAG_UPDATE_COOLDOWN = true, UPDATE_MOUSEOVER_UNIT = true, WORLD_CURSOR_TOOLTIP_UPDATE = true, UNIT_HEALTH = true,
+    UNIT_HEALTH_FREQUENT = true, NAME_PLATE_UNIT_ADDED = true, NAME_PLATE_UNIT_REMOVED = true, UNIT_FLAGS = true,
+    CHAT_MSG_ADDON = true, GAME_PAD_POWER_CHANGED = true, ACTIONBAR_UPDATE_USABLE = true, SPELL_UPDATE_USABLE = true,
+    ACTION_RANGE_CHECK_UPDATE = true, UPDATE_INVENTORY_DURABILITY = true, PLAYER_STARTED_MOVING = true,
+    PLAYER_STOPPED_MOVING = true, UNIT_THREAT_LIST_UPDATE = true, UNIT_THREAT_SITUATION_UPDATE = true,
+}
+function V:TraceFishing()
+    local f = self.traceFrame
+    if not f then
+        f = CreateFrame("Frame")
+        f:SetScript("OnEvent", function(_, event, ...)
+            if CHATTY[event] or event == f.lastEvent then return end
+            f.lastEvent = event
+            local args = {}
+            for i = 1, math.min(select("#", ...), 4) do
+                local v = select(i, ...)
+                args[i] = secret(v) and "?" or tostring(v)
+            end
+            CK:Print("+%.1f s  %s  %s", GetTime() - f.start, event, table.concat(args, ", "))
+        end)
+        self.traceFrame = f
+    end
+    f.start, f.lastEvent = GetTime(), nil
+    f:RegisterAllEvents()
+    CK:Print(CK.L.FISH_TRACE_START, TRACE_TIME)
+    local token = {}
+    f.token = token
+    C_Timer.After(TRACE_TIME, function()
+        if f.token ~= token then return end
+        f:UnregisterAllEvents()
+        CK:Print(CK.L.FISH_TRACE_END)
+    end)
+end
+
 -- /ec vibe [pattern]: what this client allows, then a pattern
 function V:Diagnose(key)
     local L = CK.L
@@ -291,4 +368,8 @@ function V:Init()
         hooksecurefunc(CK, name, function() V:Fire("keyPress") end)
     end
     self.durabilityWasLow = durabilityLow()
+    local log = CreateFrame("Frame")
+    log:SetScript("OnEvent", function() V:CombatLog() end)
+    self.logFrame = log
+    self:Update()
 end

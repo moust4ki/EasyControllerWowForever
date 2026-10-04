@@ -124,6 +124,10 @@ function T:SetTarget(slot, input, layer)
     local combo = M:Combo(input, layer)
     local kind, name, button
     if combo then kind, name, button = M:BindingOf(combo) end
+    -- Off the bar, only what the player put there: a game function we only
+    -- kept on a layer of a replaced button (LB's targeting, held) stays on
+    -- its own key, as the game binds it
+    if kind and not input.bar and M.taken[combo] and not M:GetReplaced(input.id, layer) then kind = nil end
     if not kind and input.bar then
         local native = M:NativeBarButton(input, layer)
         name = native and native:GetName()
@@ -174,7 +178,7 @@ function T:Apply()
     end
     local n, slot = 0, 0
     for _, input in ipairs(M.INPUTS) do
-        if input.key and not (input.layer or input.paddle or input.id == "LB" or input.id == "RB") then
+        if input.key and not (input.layer or input.paddle) then
             slot = slot + 1
             for _, layer in ipairs(LAYERS) do self:SetTarget(slot, input, layer) end
             for _, prefix in ipairs(PREFIXES) do
@@ -239,6 +243,8 @@ end
 -- the game keeps showing
 ---------------------------------------------------------------------------
 local BAR_KEYS = { "a", "b", "x", "y", "up", "down", "left", "right" }
+-- The usual crop of an action icon, if the game's can't be read
+local ICON_CROP = 0.08
 local SQUARE = { up = true, down = true, left = true, right = true }
 
 -- The inputs by their key on the bar ("a", "up"...)
@@ -333,6 +339,14 @@ function T:Draw()
             s.frame:SetShown(atlas ~= nil)
             local icon = CK.Mapping:ActionIcon(action)
             s.icon:SetTexture(icon)
+            -- The game's crop of its icons (their dark edges cut off)
+            local ul, ur, ll, lr, a1, a2, a3, a4
+            if over.icon and over.icon.GetTexCoord then ul, ur, ll, lr, a1, a2, a3, a4 = over.icon:GetTexCoord() end
+            if type(ul) == "number" and type(a4) == "number" then
+                s.icon:SetTexCoord(ul, ur, ll, lr, a1, a2, a3, a4)
+            else
+                s.icon:SetTexCoord(ICON_CROP, 1 - ICON_CROP, ICON_CROP, 1 - ICON_CROP)
+            end
             s.icon:SetShown(icon ~= nil)
             local slot = action:find("^bar:") and P:NativeSlot(action)
             local count = slot and C_ActionBar and C_ActionBar.GetActionDisplayCount and select(2, pcall(C_ActionBar.GetActionDisplayCount, slot))
