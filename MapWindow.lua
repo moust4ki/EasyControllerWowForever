@@ -89,7 +89,10 @@ function W:Cell(input, layer)
         local rep = M:NativeInfo(input, layer)
         local cell = { name = M:ActionName(replaced), icon = M:ActionIcon(replaced), action = replaced,
             replaced = true, rep = rep or L.MAP_GAME }
-        if M:OwnKeys() then
+        if layer ~= "" and not input.paddle and M.IsBoundAction(replaced) then
+            -- A game function with a trigger: never run (kept from before)
+            cell.state, cell.why = "off", L.MAP_BOUND_LAYER
+        elseif M:OwnKeys() then
             cell.state = "yours"
         else
             cell.state, cell.why = "off", L.MAP_REPLACED_INACTIVE
@@ -106,6 +109,15 @@ function W:Cell(input, layer)
             local shown = M:EffectiveAction(input, layer)
             return { state = "off", name = M:ActionName(shown) or L.MAP_GAME,
                 why = format(L.MAP_SHARED_LOCKED, K.ComboMarkup(input.id, base, 14), M:ActionName(M:Get(input.id, base)) or "") }
+        end
+        -- A face / D-pad button given a game function alone: the same
+        if M:CommandAlone(input) then
+            local kept = M:GetReplaced(input.id, layer)
+            local slotName, slotIcon = M:NativeInfo(input, layer)
+            local alone = M:ActionName(M:GetReplaced(input.id, "")) or L.MAP_GAME
+            return { state = "off", name = kept and M:ActionName(kept) or slotName or L.MAP_GAME,
+                icon = kept and M:ActionIcon(kept) or slotIcon, action = kept,
+                why = format(L.MAP_STICK_HELD, input.id, alone, input.id) }
         end
         -- L3 / R3 alone still the game's: its layers wait for it to be freed
         if M:StickHeld(input) then
@@ -745,7 +757,8 @@ function W:Choose()
     local current = (replace and M:GetReplaced(input.id, layer)) or (slot and M:SlotAction(slot)) or M:Get(input.id, layer)
     local lists = {}
     for _, tab in ipairs(tabs) do
-        lists[#lists + 1] = { key = tab, label = L["MAP_TAB_" .. tab:upper()], entries = function() return M:Catalog(tab, forSlot) end }
+        local noBound = layer ~= "" and not input.paddle
+        lists[#lists + 1] = { key = tab, label = L["MAP_TAB_" .. tab:upper()], entries = function() return M:Catalog(tab, forSlot, noBound) end }
     end
     local name = cell.name or L.MAP_FREE
     self.picker:Open({

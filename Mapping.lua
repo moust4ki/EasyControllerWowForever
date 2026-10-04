@@ -379,10 +379,27 @@ function M:StickHeld(input)
     return key and self:NativeBinding(key) and true or false
 end
 
+-- A game function on a key (a binding): it can't be run by a router, and
+-- with a trigger held the pad sends the button without the trigger
+local function bound(action)
+    return type(action) == "string" and not M.Routable(action) and action ~= M.NOTHING
+        and not action:find("^bar:")
+end
+M.IsBoundAction = bound
+
+-- The same for a face or D-pad button the player gave a game function alone
+-- ("Target allies" on X): that function takes its trigger layers too
+-- (reported: RT + X targeted an ally instead of casting the right bar's
+-- spell). They work again once X alone holds a spell, a wheel or Nothing.
+function M:CommandAlone(input)
+    if not (input.bar and self:ReplaceOn() and self:OwnKeys()) then return false end
+    return bound(self:GetReplaced(input.id, ""))
+end
+
 -- "free", "native", "slot", "locked" (layer unavailable) for an input
 function M:State(input, layer)
     if input.layer or M.SYSTEM[input.id] then return "native" end
-    if layer ~= "" and self:StickHeld(input) then return "locked" end
+    if layer ~= "" and (self:StickHeld(input) or self:CommandAlone(input)) then return "locked" end
     -- The bars' buttons, and LB / RB (targeting, and the game's class
     -- actions on LT + LB / RT + RB) always belong to the game, in every
     -- layer: the game switches its bars itself, triggers modifiers or not
@@ -742,8 +759,10 @@ end
 
 M.WHEEL_ICON = "Interface\\Icons\\INV_Potion_54"
 
--- forSlot: for one of the game's bar slots (spells, items, macros only)
-function M:Catalog(tab, forSlot)
+-- forSlot: for one of the game's bar slots (spells, items, macros only).
+-- noBound: a trigger layer of a pad button, where a game function (a key
+-- binding) never runs: the controller sends the button without the trigger
+function M:Catalog(tab, forSlot, noBound)
     local list = {}
     if tab == "game" then
         local known, cats, byCategory = {}, {}, {}
@@ -765,10 +784,11 @@ function M:Catalog(tab, forSlot)
         list[#list + 1] = { header = L.CAT_GAMEPAD }
         list[#list + 1] = { action = M.NOTHING, name = L.MAP_NO_ACTION, icon = M:ActionIcon(M.NOTHING) }
         for _, action in ipairs(M.PAD_FUNCTIONS) do
-            if not action:find("^bar:") or CK.Paddles:NativeButton(action) then
+            if (not action:find("^bar:") or CK.Paddles:NativeButton(action)) and not (noBound and bound(action)) then
                 list[#list + 1] = { action = action, name = M:ActionName(action), icon = M:ActionIcon(action) }
             end
         end
+        if noBound then return list end
         list[#list + 1] = { header = L.CAT_COMMON }
         for _, command in ipairs(M.COMMON) do
             if known[command] then list[#list + 1] = commandEntry(command) end
