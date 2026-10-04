@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.8.2 (not released yet)
+## 1.8.2
 
 - **Back paddle layers with Steam Input** (issue #3): with the paddles sent as keyboard keys (Steam
   Controller, Steam Deck), the key could reach the game without the triggers' modifiers, and every
@@ -22,6 +22,10 @@
   works as before. The paddles, L3 / R3 and the extra buttons follow the bar on. Needs the game's
   compact action bar: the bar switched on shows in place of the top bar. Back to the top bar after
   combat (option, on). Off, nothing changes.
+- **Fixes**: at merchants, the chat line counts a grey item whose price wasn't loaded yet (it says
+  what the merchant paid); a section whose last rows are greyed (a module off) scrolls to show them;
+  the vibration rows' help bar shows the D-pad first, like every other row; an old saved tab name
+  reopens on its section; the panel no longer redraws itself after it closed.
 
 ## 1.8.1
 

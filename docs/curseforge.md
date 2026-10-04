@@ -7,17 +7,24 @@ Every feature you don't need can be turned off to save even more resources.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
+## What's new in 1.8.2
+- **Triggers: press to switch** (option): press LT alone and the left bar stays on, press it again to come back; same for RT, LT then RT for the bottom bar. Holding still works as before. Made for the game's compact action bar.
+- **Back paddles on Steam Deck / Steam Controller**: each trigger layer now works, even when Steam Input sends the paddles as plain keys.
+- **Spells like Ghost Wolf** now cast from paddles, buttons and wheels (cast by name, with the rank you chose).
+- **LT + RB and RT + LB** can take a spell, an item, a macro or a wheel.
+- **Aggro lost vibration** for tanks.
+
 ## What's new in 1.8
 - **Extra buttons**: up to 8 more buttons, for controllers with more buttons (Vader Pro…) or touchpads set as buttons (Steam Deck, Steam Controller), working like the back paddles.
 - **Red when out of range**: the whole spell turns red on the gamepad bar, not just the small dot (too far, or too close for a hunter).
 - **Free placement** of the extra buttons next to the gamepad bar.
 - **Gamepad options in Home › Gamepad**, under the Gamepad extras switch.
 - **Keyboard suggestions** always show whole words.
-- **1.8.1**: trigger layers kept apart (a wheel on L3 no longer opens with LT / RT held), and RB + D-pad down only opens the panel.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…)
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
+- **Triggers: press to switch** instead of holding them (option)
 - **Chat keyboard** with smartphone-style word prediction
 - **Red when out of range**: the whole spell, not just a dot
 - **Quest items** marked in your bags, quest links in the chat
@@ -116,7 +123,7 @@ Place the bar anywhere (mouse or D-pad), lock it; a click opens your bags.
 
 **Vibrations**
 The controller vibrates on the game events you choose: combat (death, interrupted, loss of control,
-aggro…), social (whisper, invite, ready check, resurrection…) and progress (level up, quest
+aggro gained or lost…), social (whisper, invite, ready check, resurrection…) and progress (level up, quest
 objective, rare loot, bags full…). Each event has its own switch and its own pattern (tick, double
 tick, pulse, heartbeat, crescendo…), with one intensity for all. Any controller the game drives
 vibrates.
@@ -129,13 +136,15 @@ unused trigger combinations (LT + Start…) and the back paddles can run a game 
 autorun, game menu, map, bags, any key binding of the game), one of the game's own gamepad functions
 (jump, back, interact, inspect, Start menu, ping, targeting…), a spell, an item, a macro, or press a
 button of the gamepad action bar. The game's own buttons (A, B, X, Y, D-pad, LB / RB, Start, Select)
-can be replaced too, its menus keeping their buttons; one button gives them all back. Each trigger
-layer keeps its own function: what you put on L3 alone stays on L3 alone.
+can be replaced too, its menus keeping their buttons; one button gives them all back, and LT + RB / RT + LB
+(which the game leaves to its targeting) can take an action too. Each trigger layer keeps its own
+function: what you put on L3 alone stays on L3 alone.
 
 **Back paddles (L4 / R4 / L5 / R5)**
 Steam Deck and other controllers: set each paddle to a keyboard key in Steam Input (F13 to F16 for
 example), then "Identify paddles" asks for each one in turn. Each paddle has the four trigger layers
-(alone, LT, RT, LT + RT) for spells, items and macros, even when RT is no modifier; game functions
+(alone, LT, RT, LT + RT) for spells, items and macros, even when RT is no modifier or Steam Input
+sends the paddle without the trigger's modifier; game functions
 too once "RT as a modifier" is on (Home › Gamepad). The extra buttons (back paddles, L3, R3) are shown
 around the gamepad action bar, in its own round slot style, with the action's icon, count and
 cooldown, and press down like the game's buttons. Place each one where you want among fixed places
@@ -148,6 +157,13 @@ Controller: 4 buttons a touchpad): make each button send a keyboard key in Steam
 example), turn on the ones you use in Home › Gamepad, and "Identify paddles" learns them. Up to 8
 more buttons, working like the back paddles: the four trigger layers, spells, items, macros, game
 functions, shown next to the gamepad bar.
+
+**Triggers: press to switch**
+An option in Home › Gamepad: press LT alone (no other button while it is down) and the left bar stays
+on; press LT again to come back to the top bar. Same for RT (the right bar); LT then RT: the bottom bar.
+Holding a trigger and pressing a button still works as before. The back paddles, L3 / R3 and the extra
+buttons follow the bar on. Made for the game's compact action bar (one bar shown): the bar switched on
+shows in place of the top bar. Optionally back to the top bar after each fight.
 
 **Red when out of range**
 Turn it on in Home › Gamepad: when the target is out of range (too far, or too close for a hunter's
