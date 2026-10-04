@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.0 (not released yet)
+
+- **Profiles** (a new tab, issue #4): each character has its own buttons and paddles, its own wheels,
+  supplies and consumables wheel categories. On first load, every character starts from a copy of the
+  configuration, so nothing is lost and a player with one character sees no change. The Profiles tab
+  sets a character on its own settings or on the shared ones, copies another character's, or starts
+  from scratch. The paddles' keys, the look, the keyboard and the vibrations stay the same for all.
+
 ## 1.8.2
 
 - **Back paddle layers with Steam Input** (issue #3): with the paddles sent as keyboard keys (Steam

@@ -17,7 +17,7 @@ local K = CK.ConfigKit
 local KC = K.C
 local W, H = 820, 580
 
-C.TABS = { "home", "gamepad", "wheels", "keyboard", "alerts" }
+C.TABS = { "home", "gamepad", "wheels", "keyboard", "alerts", "profiles" }
 -- Earlier tab names (slash commands, other modules): a tab and a section
 C.ALIASES = {
     general = { "home" }, map = { "gamepad" }, wheel = { "wheels" },
@@ -880,22 +880,23 @@ function C:Build()
     close.label:SetTextColor(unpack(KC.cream))
     close:SetScript("OnClick", function() C:Close() end)
 
-    -- Tabs, centered: LB, the five tabs, RB
-    local tabsW = 34 + 6 + #C.TABS * 126 + (#C.TABS - 1) * 6 + 6 + 34
+    -- Tabs, centered: LB, the tabs (as wide as the window lets them), RB
+    local tabW = math.min(126, math.floor((W - 2 * (34 + 6) - 40 - (#C.TABS - 1) * 6) / #C.TABS))
+    local tabsW = 34 + 6 + #C.TABS * tabW + (#C.TABS - 1) * 6 + 6 + 34
     local x = math.floor((W - tabsW) / 2)
     f.lbGlyph = K.Glyph(f, 34)
     f.lbGlyph:SetPoint("TOPLEFT", x, -47)
     f.tabs = {}
     for i, key in ipairs(C.TABS) do
         local t = K.Button(f, 16)
-        t:SetSize(126, 32)
-        t:SetPoint("TOPLEFT", x + 40 + (i - 1) * 132, -48)
+        t:SetSize(tabW, 32)
+        t:SetPoint("TOPLEFT", x + 40 + (i - 1) * (tabW + 6), -48)
         t.key = key
         t:SetScript("OnClick", function() C:SetTab(key) end)
         f.tabs[i] = t
     end
     f.rbGlyph = K.Glyph(f, 34)
-    f.rbGlyph:SetPoint("TOPLEFT", x + 40 + #C.TABS * 132, -47)
+    f.rbGlyph:SetPoint("TOPLEFT", x + 40 + #C.TABS * (tabW + 6), -47)
 
     -- Body: 784 x 424 inside its margins
     f.body = CK.NewFrame("Frame", nil, f)

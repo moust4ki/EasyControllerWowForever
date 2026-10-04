@@ -41,4 +41,5 @@ ConfigWindow.lua
 MyWheels.lua
 MapWindow.lua
 Options.lua
+Profiles.lua
 Chat.lua
