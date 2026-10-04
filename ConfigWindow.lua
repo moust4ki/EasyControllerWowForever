@@ -17,7 +17,7 @@ local K = CK.ConfigKit
 local KC = K.C
 local W, H = 820, 580
 
-C.TABS = { "home", "gamepad", "wheels", "keyboard", "alerts", "profiles" }
+C.TABS = { "home", "gamepad", "wheels", "keyboard", "alerts" }
 -- Earlier tab names (slash commands, other modules): a tab and a section
 C.ALIASES = {
     general = { "home" }, map = { "gamepad" }, wheel = { "wheels" },

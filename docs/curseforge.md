@@ -20,7 +20,7 @@ Every feature you don't need can be turned off to save even more resources.
 - A broken saved file no longer stops the addon.
 
 ## What's new in 1.9
-- **Profiles** (new tab): each character has its own buttons and paddles, wheels and supplies, or uses the shared ones. Copy another character's or start from scratch. Every character starts from your current setup, so with one character nothing changes.
+- **Profiles**: each character has its own buttons and paddles, wheels and supplies, automatically. Every character starts from your current setup, so with one character nothing changes.
 - **LT + RB and RT + LB** can now be set from the Gamepad tab (they showed "Unavailable" in 1.8.2).
 
 ## Also since 1.8 (1.8.1 and 1.8.2)
@@ -43,7 +43,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…)
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
 - **Triggers: press to switch** instead of holding them (option)
-- **Profiles**: each character its own buttons, wheels and supplies, or shared
+- **Profiles**: each character its own buttons, wheels and supplies, automatically
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...)
 - **Red when out of range**: the whole spell, not just a dot
 - **Quest items** marked in your bags, quest links in the chat

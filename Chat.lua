@@ -302,9 +302,10 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
             CK:Print(L.OLD_FOLDER)
         end
     elseif event == "PLAYER_LOGOUT" then
-        CK.Predict:Prune()
-        -- The account's values back before the game saves
-        CK.Profiles:Store()
+        -- The account's values back before the game saves, first and
+        -- whatever else fails: never saved with a character's in their place
+        xpcall(function() CK.Profiles:Store() end, geterrorhandler())
+        xpcall(function() CK.Predict:Prune() end, geterrorhandler())
     elseif event == "GAME_PAD_ACTIVE_CHANGED" then
         CK.gamepadActive = arg1
     elseif event == "PLAYER_REGEN_DISABLED" then
