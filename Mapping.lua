@@ -363,16 +363,18 @@ end
 M.NOTHING = "none:none"
 local NOOP_BINDING = "CONTROLLERKEYBOARD_NOOP"
 
--- L3 / R3 alone keep the game's function (autorun, ping): the game then
--- takes them with a trigger held too, the pad sending the stick's key
--- without the trigger's modifier (checked in game: a binding of our own on
--- Shift + L3, even with priority, never ran; the character ran). Their
--- trigger layers work once L3 / R3 alone hold something of the player's,
--- or Nothing: the key is then ours, read with the triggers held.
-local STICKS = { L3 = true, R3 = true }
+-- L3 / R3 / LB / RB alone keep the game's function (autorun, ping, its
+-- targeting): the game then takes them with a trigger held too, the pad
+-- sending the button's key without the trigger's modifier (checked in
+-- game: a binding of our own on Shift + L3, even with priority, never ran;
+-- the character ran; a spell on LT + RB never ran either). Their trigger
+-- layers (for LB / RB, the crossed ones: RT + LB, LT + RB) work once the
+-- button alone holds something of the player's, or Nothing: the key is
+-- then ours, read with the triggers held.
+local HELD_ALONE = { L3 = true, R3 = true, LB = true, RB = true }
 
 function M:StickHeld(input)
-    if not STICKS[input.id] or self:GetReplaced(input.id, "") then return false end
+    if not HELD_ALONE[input.id] or self:GetReplaced(input.id, "") then return false end
     local key = self:InputKey(input)
     return key and self:NativeBinding(key) and true or false
 end
@@ -1170,7 +1172,10 @@ function M:PadTargets(input)
                 isReplaced = action ~= nil
             end
             local native = action and action:find("^bar:") and CK.Paddles:NativeButton(action)
-            if action == M.NOTHING then
+            -- LB / RB with a trigger: the game's class actions, read from
+            -- the buttons held whatever the key runs (LT + LB, RT + RB...)
+            local classLayer = (input.id == "LB" or input.id == "RB") and layer ~= "" and layer ~= CROSSED[input.id]
+            if action == M.NOTHING or (classLayer and not action) then
                 targets[layer] = nil
             elseif action and M.Routable(action) then
                 targets[layer] = { action = action }
@@ -1182,7 +1187,7 @@ function M:PadTargets(input)
                 native = self:NativeBarButton(input, layer)
                 if native then
                     targets[layer] = { bar = self:BarAction(input, layer) }
-                elseif self:NativeBinding(combo) or (input.id ~= "L3" and input.id ~= "R3"
+                elseif self:NativeBinding(combo) or (not HELD_ALONE[input.id]
                     and self:NativeBinding(self:InputKey(input))) then
                     -- The game's command there (or the key without the
                     -- modifier's, it falls back to): a key binding

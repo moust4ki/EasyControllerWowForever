@@ -109,7 +109,7 @@ function W:Cell(input, layer)
         end
         -- L3 / R3 alone still the game's: its layers wait for it to be freed
         if M:StickHeld(input) then
-            local kept = M:Get(input.id, layer)
+            local kept = M:Get(input.id, layer) or M:GetReplaced(input.id, layer)
             local native = M:NativeInfo(input, "") or L.MAP_GAME
             return { state = "off", name = kept and M:ActionName(kept) or L.MAP_GAME, icon = kept and M:ActionIcon(kept),
                 action = kept, why = format(L.MAP_STICK_HELD, input.id, native, input.id) }

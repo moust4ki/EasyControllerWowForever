@@ -2,12 +2,13 @@
 
 ## 1.11.3 (not released yet)
 
-- **L3 / R3 trigger layers** (reported: a spell on LT + L3 never ran): while L3 alone (or R3 alone)
-  keeps the game's function (autorun, ping), the game takes its trigger layers too, the controller
-  sending the button without the trigger (checked in game). Those layers are now shown unavailable,
-  with why and what to do. Put a spell, a wheel or **Nothing** (new, first in the Game list) on L3
-  alone, and its trigger layers work, read with the triggers held. What was already on them is kept
-  and works once L3 alone is freed.
+- **L3 / R3 trigger layers, LT + RB and RT + LB** (reported: a spell on LT + L3 never ran; LT + RB
+  neither): while the button alone keeps the game's function (L3: autorun, R3: ping, LB / RB:
+  targeting), the game takes its trigger layers too, the controller sending the button without the
+  trigger (checked in game). Those layers are now shown unavailable, with why and what to do. Put a
+  spell, a wheel or **Nothing** (new, first in the Game list) on the button alone, and its trigger
+  layers work, read with the triggers held. What was already on them is kept and works once the
+  button alone is freed. LT + LB and RT + RB stay the game's class actions.
 
 ## 1.11.2
 
