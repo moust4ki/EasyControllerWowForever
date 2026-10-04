@@ -611,7 +611,8 @@ local function store(wheel, wid, pages, unitOf)
             local e = list[i]
             local key = "ck-" .. wid .. "-" .. page .. "-" .. i
             wheel:SetAttribute(key .. "-t", e and e.kind or nil)
-            wheel:SetAttribute(key, e and (e.kind == "item" and ("item:" .. e.id) or e.kind == "spell" and e.id or e.name) or nil)
+            wheel:SetAttribute(key, e and (e.kind == "item" and ("item:" .. e.id)
+                or e.kind == "spell" and CK.Mapping.SpellCast(e.id) or e.name) or nil)
             wheel:SetAttribute(key .. "-u", e and unitOf and unitOf(e) or nil)
             if e then total = total + 1 end
         end

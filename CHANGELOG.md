@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.8.2 (not released yet)
+
+- **Back paddle layers with Steam Input** (issue #3): with the paddles sent as keyboard keys (Steam
+  Controller, Steam Deck), the key could reach the game without the triggers' modifiers, and every
+  layer ran the paddle's "alone" action. Each paddle now has one secure button for its four layers,
+  bound to its key with every modifier: the layer comes from the triggers held (the gamepad's state),
+  or the modifier in the key, or the modifier held. A layer with nothing does nothing.
+- **Spells cast by name** (issue #2): some spells (Ghost Wolf, shapeshift forms) didn't cast from a
+  button or a wheel, while a macro did. Spells now cast by their name, with the rank you chose.
+- `/ec keys` shows the modifiers and triggers the game sees held with each key.
+
 ## 1.8.1
 
 - **Trigger layers kept apart**: a function on a button in one layer only (a wheel on L3, a spell on

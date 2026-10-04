@@ -1235,6 +1235,21 @@ end
 ---------------------------------------------------------------------------
 local DETECT_TIME = 15
 
+-- "[Shift Alt | LT RT]": the modifiers held and the triggers the gamepad's
+-- state shows held (for /ec keys: what a paddle's layer is read from)
+function CK:HeldText()
+    local mods = {}
+    if IsShiftKeyDown() then mods[#mods + 1] = "Shift" end
+    if IsControlKeyDown() then mods[#mods + 1] = "Ctrl" end
+    if IsAltKeyDown() then mods[#mods + 1] = "Alt" end
+    local state = padState()
+    local pads = {}
+    if padButtonDown(state, "PADLTRIGGER") then pads[#pads + 1] = "LT" end
+    if padButtonDown(state, "PADRTRIGGER") then pads[#pads + 1] = "RT" end
+    return format("[%s | %s%s]", #mods > 0 and table.concat(mods, " ") or "-",
+        #pads > 0 and table.concat(pads, " ") or "-", state and "" or " (no gamepad state)")
+end
+
 function CK:DetectKeys()
     if InCombatLockdown() then
         self:BlockedByCombat()
@@ -1247,9 +1262,11 @@ function CK:DetectKeys()
         f:SetScript("OnKeyDown", function(frame, key)
             -- Let the key do its usual job as well
             if not InCombatLockdown() then frame:SetPropagateKeyboardInput(true) end
-            if not frame.seen[key] then
-                frame.seen[key] = true
-                CK:Print(L.DETECT_KEY, key)
+            -- With what the game sees held: a paddle's layers depend on it
+            local line = key .. "  " .. CK:HeldText()
+            if not frame.seen[line] then
+                frame.seen[line] = true
+                CK:Print(L.DETECT_KEY, line)
             end
         end)
         if f.EnableGamePadButton then

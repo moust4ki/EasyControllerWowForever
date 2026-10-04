@@ -471,8 +471,9 @@ function M:EffectiveAction(input, layer)
     local baseAction = self:Get(input.id, base)
     if not input.paddle or (baseAction and not M.Routable(baseAction)) then return baseAction end
     local own = self:Get(input.id, layer)
-    if layer ~= base and not M.Routable(own) then own = nil end
-    return own or baseAction
+    -- Each layer its own: a layer with nothing runs nothing
+    if layer ~= base and not M.Routable(own) then return nil end
+    return own
 end
 
 -- A game function left on a layer that now shares its key (RT no longer a
@@ -572,6 +573,19 @@ function M.SpellName(id, rank)
     if not name then return nil end
     rank = rank or (C_Spell.GetSpellSubtext and C_Spell.GetSpellSubtext(id))
     if rank and rank ~= "" then name = name .. " |cff9d9a8c(" .. rank .. ")|r" end
+    return name
+end
+
+-- What a secure button casts for a spell: its name, with its rank when the
+-- spell book lists ranks ("Name(Rank 3)", the rank chosen stays the one
+-- cast); its ID only while the name is not known. Some spells (Ghost Wolf,
+-- shapeshift forms) don't cast by ID, a macro casting them by name did.
+function M.SpellCast(id)
+    id = tonumber(id)
+    local name = id and C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+    if not name then return id end
+    local sub = C_Spell.GetSpellSubtext and C_Spell.GetSpellSubtext(id)
+    if type(sub) == "string" and sub:find("%d") then return name .. "(" .. sub .. ")" end
     return name
 end
 
@@ -799,7 +813,7 @@ local function actionButton(comboId, action)
     local kind, value = action:match("^(%a+):(.+)$")
     local b = secureButton(comboId)
     b:SetAttribute("type", kind)
-    b:SetAttribute("spell", kind == "spell" and tonumber(value) or nil)
+    b:SetAttribute("spell", kind == "spell" and M.SpellCast(value) or nil)
     b:SetAttribute("item", kind == "item" and ("item:" .. value) or nil)
     b:SetAttribute("macro", kind == "macro" and value or nil)
     return b
@@ -840,32 +854,41 @@ local function bindAction(combo, comboId, action, replace)
     end
 end
 
--- A shared paddle key: a secure button bound to it reads the triggers when
--- it is pressed and clicks the button of that layer's action. Its click
--- "button" names the layer ("ckRT"...): it picks the "*clickbutton-ckRT"
--- attribute. The gamepad state lists its buttons from 1, the index the game
--- gives from 0. Shift / Ctrl / Alt cover the triggers that are modifiers.
+-- A paddle's key: one secure button for all its layers, bound to the key
+-- with every modifier the triggers can add. When it is pressed it reads the
+-- triggers held and clicks the button of that layer's action. A trigger
+-- counts as held from the gamepad's state, or from the modifier it adds:
+-- in the key's name (the binding's click "button" names them: "kmSA" for
+-- ALT-SHIFT-) or held (Shift / Ctrl / Alt). Steam Input sends the paddles as
+-- keyboard keys, which can come without the triggers' modifiers: any of
+-- these is enough. Its click "button" for the action names the layer
+-- ("ckRT"...): it picks the "*clickbutton-ckRT" attribute. The gamepad
+-- state lists its buttons from 1, the index the game gives from 0. A layer
+-- with nothing does nothing.
 local ROUTE = [[
     if not down then return false end
     local state = GetGamePadState()
     local pad = state and state.buttons
+    local came = button or ""
+    local shift = strfind(came, "S", 3, true) or IsShiftKeyDown()
+    local ctrl = strfind(came, "C", 3, true) or IsControlKeyDown()
+    local alt = strfind(came, "A", 3, true) or IsAltKeyDown()
     local lt, rt = self:GetAttribute("ck-lt"), self:GetAttribute("ck-rt")
     local ltMod, rtMod = self:GetAttribute("ck-lt-mod"), self:GetAttribute("ck-rt-mod")
-    local ltDown = (pad and lt and pad[lt]) or (ltMod == "SHIFT" and IsShiftKeyDown())
-        or (ltMod == "CTRL" and IsControlKeyDown()) or (ltMod == "ALT" and IsAltKeyDown())
-    local rtDown = (pad and rt and pad[rt]) or (rtMod == "SHIFT" and IsShiftKeyDown())
-        or (rtMod == "CTRL" and IsControlKeyDown()) or (rtMod == "ALT" and IsAltKeyDown())
+    local ltDown = (pad and lt and pad[lt]) or (ltMod == "SHIFT" and shift)
+        or (ltMod == "CTRL" and ctrl) or (ltMod == "ALT" and alt)
+    local rtDown = (pad and rt and pad[rt]) or (rtMod == "SHIFT" and shift)
+        or (rtMod == "CTRL" and ctrl) or (rtMod == "ALT" and alt)
     local layer = (ltDown and "LT" or "") .. (rtDown and "RT" or "")
-    if not self:GetAttribute("ck-has-" .. layer) then layer = self:GetAttribute("ck-base") end
-    if not (layer and self:GetAttribute("ck-has-" .. layer)) then return false end
+    if not self:GetAttribute("ck-has-" .. layer) then return false end
     return "ck" .. layer
 ]]
 
 local header
-local routers = {}      -- key -> its secure button
+local routers = {}      -- paddle -> its secure button
 
-local function router(combo)
-    local r = routers[combo]
+local function router(inputId)
+    local r = routers[inputId]
     if not r then
         header = header or CK.NewFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
         local n = 0
@@ -879,7 +902,7 @@ local function router(combo)
         end)
         SecureHandlerWrapScript(r, "OnClick", header, ROUTE)
         r:Hide()
-        routers[combo] = r
+        routers[inputId] = r
     end
     return r
 end
@@ -889,59 +912,65 @@ local function padIndex(button)
     return index and index + 1
 end
 
-local function routeKey(combo, input, shared)
-    local r = router(combo)
-    local base = shared[1]
+M.padIndex = padIndex
+
+-- The binding's click "button" for a key's modifiers: "km", "kmS", "kmSA"...
+local function modHint(prefix)
+    return "km" .. (prefix:find("SHIFT", 1, true) and "S" or "") .. (prefix:find("ALT", 1, true) and "A" or "")
+        .. (prefix:find("CTRL", 1, true) and "C" or "")
+end
+
+-- A paddle's spells, items, macros and wheels: its router, bound to the key
+-- with each modifier the triggers add, but those a game function takes
+local function routeKeys(input, key, taken)
+    local r = router(input.id)
     r.ckInput = input.id
     r:SetAttribute("ck-lt", padIndex("PADLTRIGGER"))
     r:SetAttribute("ck-rt", padIndex("PADRTRIGGER"))
     r:SetAttribute("ck-lt-mod", M:TriggerModifier("PADLTRIGGER"))
     r:SetAttribute("ck-rt-mod", M:TriggerModifier("PADRTRIGGER"))
-    r:SetAttribute("ck-base", base)
     for _, layer in ipairs(M.LAYERS) do
         r:SetAttribute("ck-has-" .. layer, nil)
         r:SetAttribute("*clickbutton-ck" .. layer, nil)
-    end
-    for _, layer in ipairs(shared) do
-        local from = M:Get(input.id, layer) and layer or base
-        local action = M:Get(input.id, from)
-        if M.Routable(action) then
+        local action = M:Get(input.id, layer)
+        if M.Routable(action) and not taken[M:ArrivalPrefix(layer)] then
             local b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"))
-                or actionButton(input.id .. ":" .. from, action)
+                or actionButton(input.id .. ":" .. layer, action)
             -- Clicked by the key's button, once per press
             b:SetAttribute("useOnKeyDown", false)
             r:SetAttribute("*clickbutton-ck" .. layer, b)
             r:SetAttribute("ck-has-" .. layer, true)
         end
     end
-    SetOverrideBindingClick(owner, false, combo, r:GetName(), "LeftButton")
-    M.bound[combo] = "CLICK " .. r:GetName() .. ":LeftButton"
+    for prefix, isTaken in pairs(taken) do
+        if not isTaken then
+            local hint = modHint(prefix)
+            SetOverrideBindingClick(owner, false, prefix .. key, r:GetName(), hint)
+            M.bound[prefix .. key] = "CLICK " .. r:GetName() .. ":" .. hint
+        end
+    end
 end
 
--- Each key a paddle sends: bound to its layer's action, or shared and routed
+-- Each key a paddle sends. A game function takes the key of its layer (and
+-- of the layers sharing it, a trigger that is no modifier adds nothing to
+-- the key); the spells, items, macros and wheels of every layer go to the
+-- paddle's router, on all the other keys.
 function M:ApplyPaddle(input)
     local key = self:InputKey(input)
     if not key then return end
-    local done = {}
+    local taken, routed = {}, false
     for _, layer in ipairs(M.LAYERS) do
         local prefix = self:ArrivalPrefix(layer)
-        if not done[prefix] then
-            done[prefix] = true
-            local shared = self:SharedLayers(layer)
-            local baseAction = self:Get(input.id, layer)
-            local routed = false
-            if not (baseAction and not M.Routable(baseAction)) then
-                for i = 2, #shared do
-                    if M.Routable(self:Get(input.id, shared[i])) then routed = true end
-                end
-            end
-            if routed then
-                routeKey(prefix .. key, input, shared)
-            elseif type(baseAction) == "string" then
-                bindAction(prefix .. key, input.id .. ":" .. layer, baseAction)
-            end
+        if taken[prefix] == nil then
+            local action = self:Get(input.id, layer)
+            taken[prefix] = type(action) == "string" and not M.Routable(action)
+            if taken[prefix] then bindAction(prefix .. key, input.id .. ":" .. layer, action) end
         end
     end
+    for _, layer in ipairs(M.LAYERS) do
+        if M.Routable(self:Get(input.id, layer)) and not taken[self:ArrivalPrefix(layer)] then routed = true end
+    end
+    if routed then routeKeys(input, key, taken) end
 end
 
 -- Ours were replaced (a gamepad window of the game rebinds the pad when it
@@ -1243,8 +1272,16 @@ function M:Init()
     events:RegisterEvent("PLAYER_ENTERING_WORLD")
     events:RegisterEvent("PLAYER_REGEN_ENABLED")
     events:RegisterEvent("CVAR_UPDATE")
+    -- A gamepad connected: the triggers' indexes the routers read
+    pcall(events.RegisterEvent, events, "GAME_PAD_CONNECTED")
+    pcall(events.RegisterEvent, events, "GAME_PAD_ACTIVE_CHANGED")
     events:SetScript("OnEvent", function(_, event, name)
         if event == "CVAR_UPDATE" and not (name and tostring(name):find("GamePadEmulate")) then return end
+        if event == "GAME_PAD_CONNECTED" or event == "GAME_PAD_ACTIVE_CHANGED" then
+            local lt, rt = padIndex("PADLTRIGGER"), padIndex("PADRTRIGGER")
+            if lt == M.ltIndex and rt == M.rtIndex then return end
+            M.ltIndex, M.rtIndex = lt, rt
+        end
         -- Let the game set its own bindings first
         C_Timer.After(event == "PLAYER_ENTERING_WORLD" and 1 or 0, function()
             if event == "PLAYER_REGEN_ENABLED" then M:Repair() else M:Apply() end

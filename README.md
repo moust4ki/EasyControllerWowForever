@@ -208,15 +208,17 @@ from button to button, up to the layers, down to the actions under the controlle
 For the Steam Deck and other controllers with back paddles: set each paddle to a keyboard key in
 Steam Input (F13 to F16 for example), then **Identify paddles** (under the controller) asks you to
 press each one in turn; X skips a paddle your controller doesn't have, B stops. Y on one paddle
-learns it again. `/ec keys` lists the keys the game receives. Controllers whose paddles the game sees
-directly (PADPADDLE1-4) work as they are.
+learns it again. `/ec keys` lists the keys the game receives, with the modifiers and triggers it sees
+held. Controllers whose paddles the game sees directly (PADPADDLE1-4) work as they are.
 
-The paddles have the four layers: alone, LT, RT, LT + RT. A trigger that is not a keyboard modifier
-in the game's gamepad settings (RT, by default) doesn't change the key a paddle sends: RT + L4 is the
-same key as L4. The addon then reads the triggers when the paddle is pressed, from the game's
-secure code, and runs that layer's **spell, item or macro**. A game function (run / walk, map...) is
-a key binding and needs a key of its own: on such a layer, turn on **RT as a modifier**
-(Home › Gamepad), or the layers share it.
+The paddles have the four layers: alone, LT, RT, LT + RT. When a paddle is pressed, the addon reads
+the triggers held from the game's secure code (the gamepad's state, or the modifier a trigger adds)
+and runs that layer's **spell, item, macro or wheel**; a layer with nothing does nothing. This works
+whether or not the key a paddle sends comes with the triggers' modifiers (Steam Input's keyboard keys
+may come without them). A game function (run / walk, map...) is a key binding and needs a key of its
+own: the trigger must be a modifier in the game's gamepad settings, so the key changes with it (turn
+on **RT as a modifier** in Home › Gamepad), or the layers share it. Spells are cast by their name
+(with the rank you chose), like a macro: shapeshift forms such as Ghost Wolf cast too.
 
 L3 / R3 can be shown too (Home › Gamepad), with what the game does with them (autorun, ping...) or what
 you put on them. Spells are listed with their rank.
