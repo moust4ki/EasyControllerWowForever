@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.7 (not released yet)
+## 1.11.7
 
 - **Macros**: the keyboard no longer opens in the macro window, nor in any field of several lines
   (reported: macros could not be edited, and were saved on one line, "/startattack /cast ..."
