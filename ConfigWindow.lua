@@ -138,6 +138,9 @@ end
 -- else near its place, else the first
 function RailPage:FocusIndex()
     local rows, key = self.rows, self:Section().key
+    -- A row without an id: found again by its place
+    local at = self.focusIndex[key]
+    if self.focusId[key] == nil and at and rows[at] and rows[at].id == nil and focusable(rows[at]) then return at end
     local ids = { self.focusId[key], self.focusNext[key], self.focusPrev[key] }
     for n = 1, 3 do
         local id = ids[n]
@@ -561,6 +564,15 @@ function RailPage:Render()
         end
         if last then
             while start < fi and sum(start, #rows) > BUDGET do start = start + 1 end
+            -- Asked to go further down (only greyed rows left): those shown
+            -- too, the focus staying where it is
+            local peek = self.peek and self.peek[sec.key] or 0
+            local moved = 0
+            while moved < peek and start < #rows and sum(start, #rows) > BUDGET do
+                start = start + 1
+                moved = moved + 1
+            end
+            if self.peek then self.peek[sec.key] = moved end
         end
     end
     while start > 1 and sum(start - 1, #rows) <= BUDGET do start = start - 1 end
@@ -625,6 +637,15 @@ function RailPage:MoveFocus(delta, count)
         local j = i + delta
         while rows[j] and not focusable(rows[j]) do j = j + delta end
         if rows[j] then i = j end
+    end
+    -- Nothing to focus further down: the list still shows the rows below
+    -- (greyed ones, a module off); going up brings the focus back in view
+    local key = self:Section().key
+    self.peek = self.peek or {}
+    if i == from and delta > 0 then
+        self.peek[key] = (self.peek[key] or 0) + (count or 1)
+    else
+        self.peek[key] = nil
     end
     -- The focus moved: an armed button lets go
     if i ~= from then C:Disarm() end
@@ -802,8 +823,9 @@ function RailPage:Help()
     elseif kind == "choice" or kind == "slider" then
         hints[#hints + 1] = H({ "DPAD_LR" }, L.V_CHANGE, "RIGHT")
     elseif kind == "event" then
-        hints[#hints + 1] = H({ "A" }, resolve(row.on) and L.V_OFF or L.V_ON, "A")
+        -- The design's order: the D-pad first, then A
         hints[#hints + 1] = H({ "DPAD_LR" }, L.V_PATTERN, "RIGHT")
+        hints[#hints + 1] = H({ "A" }, resolve(row.on) and L.V_OFF or L.V_ON, "A")
     elseif kind == "button" then
         hints[#hints + 1] = H({ "A" }, row.verb or (row.danger and L.V_DELETE or L.V_SELECT), "A")
     elseif kind == "value" then
@@ -1133,7 +1155,8 @@ function C:Open(tab, section)
     if not (key and self.pages[key]) then
         key = settings().configTab
         local old = key and C.ALIASES[key]
-        if old then key = old[1] end
+        -- with its section ("supplies": Alerts, Supplies)
+        if old then key, section = old[1], section or old[2] end
     end
     if not self.pages[key or ""] then key = "home" end
     self.tab = key
@@ -1241,7 +1264,8 @@ function C:Init()
         redraw = true
         C_Timer.After(0.2, function()
             redraw = nil
-            C:Render()
+            -- Closed meanwhile, or placing on the HUD: nothing to draw
+            if C.frame and C.frame:IsShown() and not C.placing then C:Render() end
         end)
     end)
     -- A game window opened meanwhile (Start menu...) rebinds the pad when it

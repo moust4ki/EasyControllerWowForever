@@ -84,19 +84,29 @@ function A:SellJunk(onDone)
     end
     self.selling = true
     local sold, total, i = 0, 0, 0
+    local soldItems = {}
     local start = GetMoney()
     local function step()
         i = i + 1
         local item = list[i]
         if not item or not self.atMerchant or InCombatLockdown() then
             self.selling = false
-            if sold > 0 then CK:Print(L.MSG_JUNK_SOLD, sold, money(total)) end
+            -- The merchant pays a moment after each sale: once the items
+            -- sold left the bags, what was paid (an item whose price was
+            -- unknown when listed counts too), then onDone
             local tries = 0
             local function paid()
-                if not onDone or not self.atMerchant or InCombatLockdown() then return end
                 tries = tries + 1
-                if GetMoney() < start + total and tries < 20 then return C_Timer.After(0.1, paid) end
-                onDone()
+                local waiting = GetMoney() < start + total
+                for _, s in ipairs(soldItems) do
+                    local info = C_Container.GetContainerItemInfo(s.bag, s.slot)
+                    if info and info.hyperlink == s.link then waiting = true end
+                end
+                if waiting and tries < 20 and self.atMerchant and not InCombatLockdown() then
+                    return C_Timer.After(0.1, paid)
+                end
+                if sold > 0 then CK:Print(L.MSG_JUNK_SOLD, sold, money(math.max(total, GetMoney() - start))) end
+                if onDone and self.atMerchant and not InCombatLockdown() then onDone() end
             end
             paid()
             return
@@ -105,7 +115,12 @@ function A:SellJunk(onDone)
         local info = C_Container.GetContainerItemInfo(item.bag, item.slot)
         if info and info.hyperlink == item.link and not info.isLocked then
             C_Container.UseContainerItem(item.bag, item.slot)
-            sold, total = sold + 1, total + item.value
+            -- Its price unknown when listed (item data not loaded yet): read
+            -- again now, for the total in the chat
+            local value = item.value
+            if value == 0 then value = (itemPrice(info.hyperlink or info.itemID) or 0) * (info.stackCount or 1) end
+            sold, total = sold + 1, total + value
+            soldItems[#soldItems + 1] = { bag = item.bag, slot = item.slot, link = item.link }
         end
         C_Timer.After(SELL_GAP, step)
     end
