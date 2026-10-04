@@ -129,6 +129,15 @@ With `/w`, first pick the recipient: type the name (names may contain a space) a
 suggestion (recent correspondents, group members, online friends, guild) or press A to confirm what
 you typed; then type the message. Deleting on an empty message goes back to the name.
 
+## The game's other fields
+
+The keyboard also opens when a field of the game gets the focus: the **Auction House search**, the
+bags' search, mail, notes... (Keyboard › Opening › Open in the game's fields, on by default). What you
+type goes into the field as you type it; **A** is Enter there (the Auction House searches), **B**
+closes the keyboard and leaves the field (what you typed stays). A field for numbers opens on the
+numbers. The channel row does nothing there. Never for the chat (it has its own keyboard), password
+fields, the game's confirmation popups, settings and key bindings, nor in combat.
+
 ## Quest links and drafts
 
 - The channel row ends with a **Quests** chip: select it to turn the suggestions row into the list of

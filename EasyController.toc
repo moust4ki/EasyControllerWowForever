@@ -26,6 +26,7 @@ UI.lua
 Wheel.lua
 StickKeyboard.lua
 Input.lua
+Fields.lua
 QuestItems.lua
 QuestLinks.lua
 Paddles.lua

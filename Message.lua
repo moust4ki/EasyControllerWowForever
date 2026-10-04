@@ -541,6 +541,8 @@ function CK:RestoreChannelsFrom()
 end
 
 function CK:FocusChannels()
+    -- A field of the game: no channel
+    if self.field then return end
     if self.state.activeRow ~= "channels" then self:NoteChannelsFrom() end
     self:SetActiveRow("channels")
 end

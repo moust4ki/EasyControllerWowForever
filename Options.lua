@@ -267,6 +267,8 @@ local function openingRows(b)
         get = function() return s.autoOpen end, set = function(v) s.autoOpen = v end })
     b.check({ id = "k_pad", label = L.LBL_ONLY_GAMEPAD, indent = true, disabled = not s.autoOpen, tip = L.OPT_PAD_ONLY,
         get = function() return s.onlyWithGamepad end, set = function(v) s.onlyWithGamepad = v end })
+    b.check({ id = "k_fields", label = L.LBL_OPEN_FIELDS, tip = L.OPT_FIELDS,
+        get = function() return s.openFields end, set = function(v) s.openFields = v end })
     b.header(L.HDR_MESSAGES)
     b.check({ id = "k_sticky", label = L.LBL_CHANNEL_STICKS, tip = L.OPT_STICKY,
         get = function() return s.stickyChannel end, set = function(v) s.stickyChannel = v end })
