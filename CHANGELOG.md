@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.11.11
+
+- **Red when out of range**: the red follows the button's shape, round on the face buttons, square
+  on the D-pad (reported: a big red square over a round button).
+- **Triggers: press to switch**: the bar's icons drawn over the top bar no longer show their square
+  edges on the D-pad, and the cooldown (the global cooldown when casting) is round on the round
+  buttons (reported: square corners over the spells).
+
 ## 1.11.10
 
 - **Macros in the game's gamepad bar slots work through the addon** (reported: a macro on RT + A did

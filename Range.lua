@@ -27,30 +27,48 @@ local function inRange(slot)
 end
 R.InRange = inRange
 
--- The game's bar buttons: each bar's, and the stance bar's in their place
+-- The D-pad's buttons are square, the others round (as the game draws them)
+local SQUARE = { up = true, down = true, left = true, right = true }
+
+-- The game's bar buttons: each bar's, and the stance bar's in their place,
+-- with the shape of their place
 local function gameButtons()
-    local P, list = CK.Paddles, {}
+    local P, list, shapes = CK.Paddles, {}, {}
     for _, bar in ipairs(P.BARS) do
         for _, b in ipairs(P.BUTTONS) do
             local action = "bar:" .. bar.key .. ":" .. b.key
-            list[#list + 1] = P:NativeButton(action)
-            list[#list + 1] = P:StanceButton(action)
+            for _, button in ipairs({ P:NativeButton(action) or false, P:StanceButton(action) or false }) do
+                if button then
+                    list[#list + 1] = button
+                    shapes[button] = SQUARE[b.key] and "square" or "round"
+                end
+            end
         end
     end
-    return list
+    return list, shapes
 end
 
--- Where the game draws the icon: inside its round or square mask, else the
--- icon itself
 local function region(r)
     return type(r) == "table" and r.IsShown and r or nil
 end
 
-local function iconArea(button)
-    local circle, square = region(button.CircleMask), region(button.SquareMask)
-    if circle and circle:IsShown() then return circle end
-    if square and square:IsShown() then return square end
-    return region(button.icon)
+-- The button's shape: its own (the game's activeButtonShape), else its place's
+local function shapeOf(button, fallback)
+    local shape = type(button.activeButtonShape) == "string" and button.activeButtonShape:lower() or ""
+    if shape:find("circle") then return "round" end
+    if shape:find("square") then return "square" end
+    return fallback or "round"
+end
+
+-- Where the game draws the icon: the region of its mask for that shape,
+-- else the icon itself
+local function iconArea(button, shape)
+    if shape == "round" then return region(button.CircleMask) or region(button.icon) end
+    return region(button.SquareMask) or region(button.icon)
+end
+
+local function hasAtlas(name)
+    return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
 end
 
 local veils = {}
@@ -74,25 +92,28 @@ local function veilFor(button)
     return v
 end
 
--- Laid over the button's icon, in its shape, above its cooldown. Out of
--- combat only: in combat the veils stay where they are.
-local function place(v)
+-- Laid over the button's icon, in its shape (our own circle: copying the
+-- game's mask left a square, reported), above its cooldown. Out of combat
+-- only: in combat the veils stay where they are.
+local function place(v, fallback)
     local button = v.button
-    local area = iconArea(button)
+    local shape = shapeOf(button, fallback)
+    local area = iconArea(button, shape)
     if not area then return end
     v:SetFrameStrata(button:GetFrameStrata())
     v:SetFrameLevel(button:GetFrameLevel() + 3)
-    if v.area == area then return end
-    v.area = area
+    if v.area == area and v.shape == shape then return end
+    v.area, v.shape = area, shape
     v:ClearAllPoints()
     v:SetAllPoints(area)
-    local shape = area ~= button.icon and area or nil
-    local atlas = shape and shape.GetAtlas and shape:GetAtlas()
-    local file = shape and shape.GetTexture and shape:GetTexture()
-    if atlas then
-        v.mask:SetAtlas(atlas)
-    elseif file then
-        v.mask:SetTexture(file, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    if shape == "round" then
+        if hasAtlas("CircleMask") then
+            v.mask:SetAtlas("CircleMask")
+        else
+            v.mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+        end
+    elseif hasAtlas("SquareMask") then
+        v.mask:SetAtlas("SquareMask")
     else
         v.mask:SetTexture(WHITE)
     end
@@ -107,11 +128,12 @@ function R:Check()
     end
     local seen = {}
     local free = not InCombatLockdown()
-    for _, button in ipairs(gameButtons()) do
+    local buttons, shapes = gameButtons()
+    for _, button in ipairs(buttons) do
         seen[button] = true
         local v = veils[button] or (free and veilFor(button))
         if v then
-            if free then place(v) end
+            if free then place(v, shapes[button]) end
             v.out = v.area ~= nil and button:IsVisible() and inRange(button.action) == false
         end
     end
