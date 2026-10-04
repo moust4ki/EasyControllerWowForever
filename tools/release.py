@@ -37,7 +37,7 @@ def notes(ver=None):
     """The CHANGELOG section of a version, without its title."""
     ver = ver or version()
     text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    match = re.search(rf"^## {re.escape(ver)}\b.*?$\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+    match = re.search(rf"^## {re.escape(ver)}(?=\s|$).*?$\n(.*?)(?=^## |\Z)", text, re.M | re.S)
     if not match:
         sys.exit(f"CHANGELOG.md has no '## {ver}' section")
     return match.group(1).strip() + "\n"
