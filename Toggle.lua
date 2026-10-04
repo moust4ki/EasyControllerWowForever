@@ -292,7 +292,8 @@ function T:BuildView()
         local s = CK.NewFrame("Frame", nil, v)
         s.icon = s:CreateTexture(nil, "ARTWORK")
         s.icon:SetAllPoints()
-        if not SQUARE[key] then
+        s.round = not SQUARE[key]
+        if s.round then
             local mask = s:CreateMaskTexture()
             mask:SetAllPoints(s.icon)
             -- The game's own circle (its buttons use this mask)
@@ -308,6 +309,11 @@ function T:BuildView()
         s.cooldown = CK.NewFrame("Cooldown", nil, s, "CooldownFrameTemplate")
         s.cooldown:SetAllPoints()
         s.cooldown:SetDrawEdge(false)
+        -- On a round button, a round swipe (a square one showed its corners)
+        if s.round then
+            s.cooldown:SetSwipeTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask")
+            if s.cooldown.SetUseCircularEdge then s.cooldown:SetUseCircularEdge(true) end
+        end
         s.count = s:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
         s.count:SetPoint("BOTTOMRIGHT", -2, 2)
         s.key = key
@@ -356,10 +362,13 @@ function T:Draw()
             s.frame:SetShown(atlas ~= nil)
             local icon = CK.Mapping:ActionIcon(action)
             s.icon:SetTexture(icon)
-            -- The game's crop of its icons (their dark edges cut off)
+            -- The game's crop of its icons (their dark edges cut off). The
+            -- whole icon on a square button (the game hides its edges with
+            -- its mask, ours has none: they showed, reported): cropped
             local ul, ur, ll, lr, a1, a2, a3, a4
             if over.icon and over.icon.GetTexCoord then ul, ur, ll, lr, a1, a2, a3, a4 = over.icon:GetTexCoord() end
-            if type(ul) == "number" and type(a4) == "number" then
+            local whole = ul == 0 and ur == 0 and a3 == 1 and a4 == 1
+            if type(ul) == "number" and type(a4) == "number" and not (whole and not s.round) then
                 s.icon:SetTexCoord(ul, ur, ll, lr, a1, a2, a3, a4)
             else
                 s.icon:SetTexCoord(ICON_CROP, 1 - ICON_CROP, ICON_CROP, 1 - ICON_CROP)

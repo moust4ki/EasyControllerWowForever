@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **Round where the buttons are round** (1.11.11): the out-of-range red and, with "Triggers: press to switch", the icons and cooldowns follow the shape of the game's buttons.
 - **Macros in the game's bar slots** (1.11.10): a macro on a trigger layer (RT + A...) now runs when the addon handles that button, with "Triggers: press to switch" too.
 - **Fixes from a contributor** (1.11.9): learned words no longer lost past the limit, next-word suggestions in your language, no more wrong upgrade arrows while items load, important vibrations no longer cut by small ones.
 - **Red when out of range** (1.11.8): now drawn over the game's bar without touching its buttons (fixes a Lua error in ActionButton.lua).
