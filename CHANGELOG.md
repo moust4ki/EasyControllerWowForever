@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.11.10
+
+- **Macros in the game's gamepad bar slots work through the addon** (reported: a macro on RT + A did
+  nothing once the addon handled A, for example with a wheel on LT + A; the spell alone in that slot
+  worked). The addon pressed the game's button with a small macro of its own, and a macro started
+  from a macro doesn't run. A slot holding a macro is now run directly, as the game does (its page
+  and the stance bar's in a stance included); spells and items keep the game's button press.
+- **Triggers: press to switch**: the same with a bar switched on.
+
 ## 1.11.9
 
 Fixes contributed by rampagingrhinoceros (thanks!):

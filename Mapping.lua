@@ -1013,6 +1013,14 @@ local function setRelease(r, layer, b, action)
 end
 M.routers = routers
 
+-- A router's name (a key the toggle binds straight to it)
+function M:IsRouter(name)
+    for _, r in pairs(routers) do
+        if r:GetName() == name then return true end
+    end
+    return false
+end
+
 local function router(inputId)
     local r = routers[inputId]
     if not r then
@@ -1123,11 +1131,46 @@ end
 -- clicked: such a button keeps its keys bound as before.
 ---------------------------------------------------------------------------
 local relays = {}
-M.relayMacros = {}      -- relay's name -> its macro (the toggle reuses it)
+M.relayMacros = {}      -- relay's name -> its macro
+M.relayBars = {}        -- relay's name -> the bar button it presses ("bar:right:a")
+
+-- A macro in the game's slot runs from the slot itself (UseAction, as the
+-- game's button does), not through the "/click": a macro started by a macro
+-- doesn't run (reported, and checked in game: a macro on RT + A did nothing
+-- once the addon routed A, the spell alone in that slot worked). The slot
+-- is read on the press from the game's button, as the game computes it: its
+-- storage id on the action page; the stance bar's in a stance. Anything
+-- else (spells, items, flyouts, the game's own functions) keeps the click.
+local RELAY_SLOT = [[
+    local b = self:GetFrameRef("ck-native")
+    local stance = self:GetFrameRef("ck-stance")
+    if stance and SecureCmdOptionParse("[bonusbar] 1; 0") == "1" then b = stance end
+    local id = b and b:GetID()
+    local slot
+    if id and id > 0 then
+        local page = b:GetAttribute("actionpage") or GetActionBarPage() or 1
+        slot = id + (page - 1) * 12
+    end
+    if slot and GetActionInfo(slot) == "macro" then
+        self:SetAttribute("type", "action")
+        self:SetAttribute("action", slot)
+    else
+        self:SetAttribute("type", "macro")
+    end
+]]
+
+-- The game's button a relay reads its slot from (nothing when it can't be
+-- referenced: the click alone then)
+local function setRef(r, label, button)
+    if not (button and pcall(SecureHandlerSetFrameRef, r, label, button)) then
+        r:SetAttribute("frameref-" .. label, nil)
+    end
+end
 
 -- The game's bar button "/click"ed down, as its own binding presses it (a
--- macro: the stance bar's in a stance, see StanceMacro). Clicked by a
--- router (once per press), or by a key bound to it (on the press).
+-- macro: the stance bar's in a stance, see StanceMacro), or its slot run
+-- when it holds a macro (RELAY_SLOT). Clicked by a router (once per press),
+-- or by a key bound to it (on the press).
 local function newRelay(id, macro, onKey)
     local key = (onKey and "key:" or "router:") .. id
     local r = relays[key]
@@ -1137,18 +1180,26 @@ local function newRelay(id, macro, onKey)
         r = CK.NewFrame("Button", "ControllerKeyboardBarRelay" .. (n + 1), nil, "SecureActionButtonTemplate")
         if onKey then r:RegisterForClicks("AnyDown") else r:RegisterForClicks("AnyDown", "AnyUp") end
         r:SetAttribute("useOnKeyDown", onKey and true or false)
-        r:SetAttribute("type", "macro")
+        header = header or CK.NewFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
+        SecureHandlerWrapScript(r, "OnClick", header, RELAY_SLOT)
         r:Hide()
         relays[key] = r
     end
+    r:SetAttribute("type", "macro")
     r:SetAttribute("macrotext", macro)
+    local P = CK.Paddles
+    setRef(r, "ck-native", P:NativeButton(id))
+    setRef(r, "ck-stance", M:StanceMacro(id) and P:StanceButton(id) or nil)
     M.relayMacros[r:GetName()] = macro
+    M.relayBars[r:GetName()] = id
     return r
 end
 
 local function relay(barAction)
     return newRelay(barAction, M:BarMacro(barAction), false)
 end
+-- The relay a router clicks (the trigger toggle clicks it too)
+M.BarRelay = relay
 
 function M.KeyRelay(barAction, macro)
     return newRelay(barAction, macro, true)
