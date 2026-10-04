@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **/ec profile** (1.11.6): shows whether this character has its own settings, and what each character holds.
 - **Macros work again with the addon on** (1.11.5): choosing a channel on the chat keyboard no longer touches the game's chat box, which blocked the /cast of your macros.
 - **Stay seated while eating** (1.11.4, Wheels › Consumables, on by default): a stick still pushed from the wheel, or nudged, no longer stands you up and wastes the meal. Push the left stick all the way for half a second to get up.
 - **Supplies buttons** (1.11.4): their tooltip says they are Easy Controller's and where to set or hide them.
