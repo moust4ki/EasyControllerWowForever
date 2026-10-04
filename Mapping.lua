@@ -174,6 +174,7 @@ end
 ---------------------------------------------------------------------------
 M.bound = {}    -- combo -> what we bound there
 M.taken = {}    -- combo -> what we bound there over the game (replaced buttons)
+M.padRouted = {} -- input id -> its keys go to its router (ApplyPad)
 
 function M:NativeBinding(combo)
     local action = GetBindingAction(combo, true)
@@ -1000,6 +1001,123 @@ function M:ApplyPaddle(input)
     if routed then routeKeys(input, key, taken) end
 end
 
+---------------------------------------------------------------------------
+-- The pad's own buttons with something of ours on them (a free button's
+-- spell, a replaced button's wheel...) go to a router too. Players saw a
+-- wheel on D-pad down open with RT held as well, and one on LT + D-pad down
+-- never open: the key had come without the trigger's modifier, which the
+-- game itself doesn't need (its bars read the triggers held). The router
+-- reads the triggers held when the key is pressed, whatever the key came
+-- with, and runs that layer's: ours, or the game's bar button of that
+-- layer. A layer the game runs with a key binding (a command) can't be
+-- clicked: such a button keeps its keys bound as before.
+---------------------------------------------------------------------------
+local relays = {}
+
+-- The game's bar button "/click"ed down, as its own binding presses it
+local function relay(name)
+    local r = relays[name]
+    if not r then
+        local n = 0
+        for _ in pairs(relays) do n = n + 1 end
+        r = CK.NewFrame("Button", "ControllerKeyboardBarRelay" .. (n + 1), nil, "SecureActionButtonTemplate")
+        r:RegisterForClicks("AnyDown", "AnyUp")
+        -- Clicked by the router, once per press
+        r:SetAttribute("useOnKeyDown", false)
+        r:SetAttribute("type", "macro")
+        r:SetAttribute("macrotext", "/click " .. name .. " LeftButton true")
+        r:Hide()
+        relays[name] = r
+    end
+    return r
+end
+
+-- What each layer of a pad button runs through its router: { action } or
+-- { native = the game's button }, nothing for a layer left empty. Nil when
+-- the button has nothing of ours, or a layer only a key binding runs.
+-- Second value: a replaced button of the game (bound with priority).
+function M:PadTargets(input)
+    if input.layer or input.paddle or not self:InputKey(input) then return nil end
+    local targets, ours, replaced = {}, false, false
+    local replaceOn = self:ReplaceOn() and self:OwnKeys()
+    for _, layer in ipairs(M.LAYERS) do
+        local combo = self:Combo(input, layer)
+        if combo then
+            local action, isReplaced
+            if self:State(input, layer) == "free" then action = self:Get(input.id, layer) end
+            if not action and replaceOn and self:Replaceable(input, layer) then
+                action = self:GetReplaced(input.id, layer)
+                isReplaced = action ~= nil
+            end
+            local native = action and action:find("^bar:") and CK.Paddles:NativeButton(action)
+            if action and M.Routable(action) then
+                targets[layer] = { action = action }
+            elseif native then
+                targets[layer] = { native = native }
+            elseif action then
+                return nil
+            else
+                native = self:NativeBarButton(input, layer)
+                if native then
+                    targets[layer] = { native = native }
+                elseif self:NativeBinding(combo) or (input.id ~= "L3" and input.id ~= "R3"
+                    and self:NativeBinding(self:InputKey(input))) then
+                    -- The game's command there (or the key without the
+                    -- modifier's, it falls back to): a key binding
+                    return nil
+                end
+            end
+            if action then ours, replaced = true, replaced or isReplaced end
+        end
+    end
+    if not ours then return nil end
+    -- A trigger that is no modifier: its layer shares the key of the one
+    -- without it, and what it runs (as before)
+    for _, layer in ipairs(M.LAYERS) do
+        if not self:Combo(input, layer) then targets[layer] = targets[self:SharedLayers(layer)[1]] end
+    end
+    return targets, replaced
+end
+
+function M:ApplyPad(input, targets, replaced)
+    local key = self:InputKey(input)
+    local r = router(input.id)
+    r.ckInput = input.id
+    r:SetAttribute("ck-lt", padIndex("PADLTRIGGER"))
+    r:SetAttribute("ck-rt", padIndex("PADRTRIGGER"))
+    r:SetAttribute("ck-lt-mod", M:TriggerModifier("PADLTRIGGER"))
+    r:SetAttribute("ck-rt-mod", M:TriggerModifier("PADRTRIGGER"))
+    for _, layer in ipairs(M.LAYERS) do
+        r:SetAttribute("ck-has-" .. layer, nil)
+        r:SetAttribute("*clickbutton-ck" .. layer, nil)
+        local t, b = targets[layer], nil
+        if t and t.action then
+            b = t.action:find("^wheel:") and CK.ConsumableWheel:Toggle(t.action:match("^wheel:(.+)$"))
+                or actionButton(input.id .. ":" .. layer, t.action)
+            -- Clicked by the key's button, once per press
+            b:SetAttribute("useOnKeyDown", false)
+        elseif t and t.native then
+            b = relay(t.native:GetName())
+        end
+        if b then
+            r:SetAttribute("*clickbutton-ck" .. layer, b)
+            r:SetAttribute("ck-has-" .. layer, true)
+        end
+    end
+    local o, record = owner, self.bound
+    if replaced then o, record = takeOwner, self.taken end
+    local done = {}
+    for _, layer in ipairs(M.LAYERS) do
+        local combo = self:Combo(input, layer)
+        if combo and not done[combo] then
+            done[combo] = true
+            local hint = modHint(combo:sub(1, #combo - #key))
+            SetOverrideBindingClick(o, replaced and true or false, combo, r:GetName(), hint)
+            record[combo] = "CLICK " .. r:GetName() .. ":" .. hint
+        end
+    end
+end
+
 -- Ours were replaced (a gamepad window of the game rebinds the pad when it
 -- closes): set them again. Only then, so the game's own refreshes don't
 -- make us rebind for nothing.
@@ -1046,12 +1164,22 @@ function M:Apply()
     takeOwner = takeOwner or CK.NewFrame("Frame")
     unbindAll(owner, self.bound, false)
     unbindAll(takeOwner, self.taken, true)
+    self.padRouted = {}
     if self:Enabled() then
+        -- The pad's buttons with something of ours: their routers
+        for _, input in ipairs(M.INPUTS) do
+            local targets, replaced = self:PadTargets(input)
+            if targets then
+                self.padRouted[input.id] = true
+                self:ApplyPad(input, targets, replaced)
+            end
+        end
         for comboId, action in pairs(settings().mapping) do
             local inputId, layer = comboId:match("^(%w+):(%a*)$")
             local input = inputId and M.BY_ID[inputId]
             -- Never on an input the game uses
-            if input and not input.paddle and type(action) == "string" and self:State(input, layer) == "free" then
+            if input and not input.paddle and not self.padRouted[inputId] and type(action) == "string"
+                and self:State(input, layer) == "free" then
                 bindAction(self:Combo(input, layer), comboId, action)
             end
         end
@@ -1123,7 +1251,7 @@ function M:ApplyReplaced()
     if not (self:ReplaceOn() and self:OwnKeys()) then return end
     for _, input in ipairs(M.INPUTS) do
         local replaced = {}
-        for _, layer in ipairs(M.LAYERS) do
+        for _, layer in ipairs(M.padRouted[input.id] and {} or M.LAYERS) do
             local action = self:Replaceable(input, layer) and self:GetReplaced(input.id, layer)
             if action then replaced[layer] = action end
         end

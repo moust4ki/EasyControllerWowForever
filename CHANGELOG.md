@@ -2,6 +2,14 @@
 
 ## 1.9.1 (not released yet)
 
+- **Each layer of a button runs its own, wheels too** (reported on CurseForge): a wheel on a button
+  opened in every layer (the consumables wheel on D-pad down opened with RT held too, the game's
+  RT + D-pad down lost), and a wheel on a trigger layer (LT + D-pad down) never opened, the button's
+  own function ran instead. The key could reach the addon without the trigger's modifier. The
+  gamepad's buttons with something of yours on them (spells, items, macros, wheels, replaced
+  buttons) now read the triggers held when pressed, like the back paddles since 1.8.2: each layer
+  runs what you put there, else the game's bar button of that layer. A button with a game function
+  on one of its layers keeps working as before.
 - **A saved file with broken entries** no longer stops the addon: a button, a supplies entry, an
   item added, a wheel or a wheel's slot that the addon can't read is left out at load and when a
   character's profile is put in use; the good ones are kept. Another character's broken profile is
