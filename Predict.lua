@@ -10,7 +10,13 @@ local START_WEIGHT = 20    -- per time a message started with the word
 local WOW_SCORE = 36       -- score of the WoW chat vocabulary (~ rank 250)
 
 -- Filler for the next-word bar when nothing better is known
-local FALLBACK = { "et", "de", "pour", "le", "la", "à", "un" }
+local FALLBACK = {
+    fr = { "et", "de", "pour", "le", "la", "à", "un" },
+    en = { "and", "the", "to", "for", "a", "in", "with" },
+    de = { "und", "die", "der", "zu", "für", "ein", "mit" },
+    es = { "y", "de", "para", "el", "la", "un", "con" },
+    it = { "e", "di", "per", "il", "la", "un", "con" },
+}
 
 local entries = {}         -- word -> { word, norm, dict }
 local buckets = {}         -- first normalized byte -> array of entries
@@ -222,8 +228,9 @@ function P:Query(prefix, ctx, n)
             consider(out, scores, n, word, score)
         end
         if not ctx.start then
-            for i = 1, #FALLBACK do
-                consider(out, scores, n, FALLBACK[i], -i)
+            local fallback = FALLBACK[CK:GetLanguage().accents] or FALLBACK.en
+            for i = 1, #fallback do
+                consider(out, scores, n, fallback[i], -i)
             end
         end
         return out
@@ -305,15 +312,15 @@ function P:Prune()
     local words = db.words
     local max = db.settings.maxWords
     local n = self:NumLearned()
-    local threshold = 1
-    while n > max and threshold < 1000 do
-        for word, count in pairs(words) do
-            if count <= threshold then
-                words[word] = nil
-                n = n - 1
-            end
-        end
-        threshold = threshold + 1
+    if n > max then
+        local ranked = {}
+        for word in pairs(words) do ranked[#ranked + 1] = word end
+        table.sort(ranked, function(a, b)
+            if words[a] ~= words[b] then return words[a] < words[b] end
+            return a < b
+        end)
+        -- Remove only the excess, even when many words share a count.
+        for i = 1, math.min(n, n - max) do words[ranked[i]] = nil end
     end
 
     -- Short words ("a", "y") and elisions ("j'") are never stored in `words`
