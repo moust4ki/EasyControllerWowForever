@@ -272,9 +272,16 @@ function T:BuildView()
         if not SQUARE[key] then
             local mask = s:CreateMaskTexture()
             mask:SetAllPoints(s.icon)
-            mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+            -- The game's own circle (its buttons use this mask)
+            if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("CircleMask") then
+                mask:SetAtlas("CircleMask")
+            else
+                mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+            end
             s.icon:AddMaskTexture(mask)
         end
+        -- The game's frame of the button (its ring), drawn again over ours
+        s.frame = s:CreateTexture(nil, "OVERLAY")
         s.cooldown = CK.NewFrame("Cooldown", nil, s, "CooldownFrameTemplate")
         s.cooldown:SetAllPoints()
         s.cooldown:SetDrawEdge(false)
@@ -309,9 +316,21 @@ function T:Draw()
         local input = byBar()[key]
         local action = input and CK.Mapping:GetReplaced(input.id, layer) or ("bar:" .. bar .. ":" .. key)
         if over and over:IsVisible() then
-            -- On the game's icon exactly (the button also holds its glyph)
+            -- Where the game shows its icon: inside its mask (3 px in from
+            -- the button), else on its icon (the button also holds its glyph)
+            local area = (over.CircleMask and over.CircleMask:IsShown() and over.CircleMask)
+                or (over.SquareMask and over.SquareMask:IsShown() and over.SquareMask) or over.icon or over
             s:ClearAllPoints()
-            s:SetAllPoints(over.icon or over)
+            s:SetAllPoints(area)
+            -- Its ring, over our icon as over the game's
+            local normal = over.GetNormalTexture and over:GetNormalTexture()
+            local atlas = normal and normal.GetAtlas and normal:GetAtlas()
+            if atlas then
+                s.frame:SetAtlas(atlas)
+                s.frame:ClearAllPoints()
+                s.frame:SetAllPoints(normal)
+            end
+            s.frame:SetShown(atlas ~= nil)
             local icon = CK.Mapping:ActionIcon(action)
             s.icon:SetTexture(icon)
             s.icon:SetShown(icon ~= nil)
