@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **Red when out of range** (1.11.8): now drawn over the game's bar without touching its buttons (fixes a Lua error in ActionButton.lua).
 - **Characters sharing a first name** (1.11.7): WoW Forever's surnames are now part of the profile, so "Fraicheur Rog" and "Fraicheur Hunt" each keep their own settings. Each one starts from the settings they shared, nothing lost.
 - **Macro window** (1.11.7): the controller keyboard no longer opens in the macro window or in fields of several lines (a mail's text); type them on a keyboard as before.
 - **/ec profile** (1.11.6): shows whether this character has its own settings, and what each character holds.
