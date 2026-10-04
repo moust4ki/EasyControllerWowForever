@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.11.12
+
+- **A face or D-pad button given a game function alone** ("Target allies" on X...): the controller
+  sends the button without the trigger, so that function took its trigger layers too (seen in game:
+  RT + X targeted an ally instead of casting the right bar's spell). Its LT / RT layers are now shown
+  locked in the Gamepad tab, with how to free them (a spell, a wheel or Nothing on the button
+  alone), as for L3, R3, LB and RB.
+- **Game functions are no longer offered on a trigger layer** of a controller button, where they
+  never run for the same reason; one kept from before shows as inactive, explained.
+
 ## 1.11.11
 
 - **Red when out of range**: the red follows the button's shape, round on the face buttons, square
