@@ -95,6 +95,7 @@ end
 -- Playing a pattern
 ---------------------------------------------------------------------------
 local timers = {}
+local playingPriority
 
 local function motors(low, high)
     C_GamePad.SetVibration("Low", low)
@@ -112,16 +113,20 @@ end
 function V:Stop()
     for _, t in ipairs(timers) do t:Cancel() end
     wipe(timers)
+    playingPriority = nil
     if C_GamePad and C_GamePad.StopVibration then C_GamePad.StopVibration() end
 end
 
--- A pattern at the global intensity (times strength, 0 to 1); the newest
--- one replaces the one playing
-function V:Play(key, strength)
+-- Events replace an equal or lower-priority pattern; weaker events are
+-- dropped, never queued. A direct call (settings preview or /ec vibe)
+-- always replaces playback and lets the player hear the whole pattern.
+function V:Play(key, strength, priority)
     if not (C_GamePad and C_GamePad.SetVibration and CK.db) then return end
+    if priority and playingPriority and priority < playingPriority then return end
     local pattern = PATTERN[key] or PATTERN.tick
     local gain = math.max(0, math.min(1, self:Settings().intensity * (strength or 1)))
     self:Stop()
+    playingPriority = priority or math.huge
     local t = 0
     for _, step in ipairs(pattern.steps) do
         local low, high, length = step[1] * gain, step[2] * gain, step[3]
@@ -133,13 +138,24 @@ function V:Play(key, strength)
         until at >= length
         t = t + length
     end
-    later(t, function() C_GamePad.StopVibration() end)
+    later(t, function()
+        wipe(timers)
+        playingPriority = nil
+        C_GamePad.StopVibration()
+    end)
 end
 
 -- An event happened: its pattern, if it is on (the same event at most every
 -- 0.4 s; aggro lost every 3 s, a mob going back and forth doesn't buzz)
 local last = {}
 local GAPS = { aggroLost = 3 }
+-- Death, urgent warnings, ordinary notifications, then UI feedback.
+local PRIORITY = {
+    death = 3,
+    interrupted = 2, lossOfControl = 2, aggro = 2, aggroLost = 2,
+    readyCheck = 2, rezSummon = 2,
+    wheelTick = 0, keyPress = 0,
+}
 function V:Fire(key, strength)
     if not CK.db then return end
     local s = self:Settings()
@@ -149,7 +165,7 @@ function V:Fire(key, strength)
     local gap = (key == "wheelTick" or key == "keyPress") and 0.03 or GAPS[key] or 0.4
     if last[key] and now - last[key] < gap then return end
     last[key] = now
-    self:Play(cfg.pattern, strength)
+    self:Play(cfg.pattern, strength, PRIORITY[key] or 1)
 end
 
 -- Combat values WoW Forever hides from addons
