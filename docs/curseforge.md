@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **L3 / R3 and LT + RB / RT + LB layers** (1.11.3): while the button alone keeps the game's function (autorun, ping, targeting), the game takes its trigger layers too, so the Gamepad tab now says so. Put a spell, a wheel or the new **Nothing** on the button alone, and its trigger layers work.
 - **Profiles are automatic** (1.11.2): each character keeps its own buttons, wheels and supplies, with nothing to set, and nothing done on one character changes another's. The Profiles tab is gone.
 - **Start and Select stay the game's** (1.11.2): they can't be changed any more; what was on them is removed and the chat tells you once.
 - **Stealth, forms and stances** (1.11.1): the stance bar that takes the place of a gamepad bar in stealth or a form can now be set from the Gamepad tab, and your replaced buttons press its spells while you are in the stance.

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.3 (not released yet)
+## 1.11.3
 
 - **L3 / R3 trigger layers, LT + RB and RT + LB** (reported: a spell on LT + L3 never ran; LT + RB
   neither): while the button alone keeps the game's function (L3: autorun, R3: ping, LB / RB:
