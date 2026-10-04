@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.8
+
+- **Red when out of range**: drawn as a red veil of the addon's own over the game's gamepad bar
+  buttons, which are no longer hooked at all (reported: a Lua error, "attempt to call a nil value"
+  in ActionButton.lua, when the game refreshed its bar with its taint log on).
+
 ## 1.11.7
 
 - **Macros**: the keyboard no longer opens in the macro window, nor in any field of several lines
