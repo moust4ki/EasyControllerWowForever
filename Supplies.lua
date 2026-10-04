@@ -190,6 +190,10 @@ local function tooltip(owner, b)
     GameTooltip:AddLine(format(L.SUP_TIP_COUNT, r.count), 1, 0.82, 0)
     GameTooltip:AddLine(format(L.SUP_TIP_THRESHOLDS, r.cfg.low, r.cfg.critical), 0.7, 0.7, 0.7)
     GameTooltip:AddLine(L.SUP_TIP_CLICK, 0.6, 0.6, 0.6)
+    -- Whose buttons these are, and where to change or hide them (players
+    -- didn't know what the buttons over the bars were)
+    local shortcut = CK.Mapping.ChordLabel and CK.Mapping:ChordLabel(CK.db.settings.shortcut) or ""
+    GameTooltip:AddLine(format(L.SUP_TIP_ADDON, L.TAB_ALERTS .. " › " .. L.SEC_SUPPLIES, shortcut), 0.2, 0.8, 1, true)
     GameTooltip:Show()
 end
 

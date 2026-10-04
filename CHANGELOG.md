@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.11.4
+
+- **Stay seated while eating** (Wheels › Consumables, on by default, reported: food picked from a
+  wheel with the left stick, the stick still pushed when it closed, and the character walked off,
+  the meal wasted): while you eat or drink, a stick nudged doesn't stand you up; push the left stick
+  all the way for half a second to get up. The camera stays still too while you eat. Never in
+  combat.
+- **Supplies buttons**: their tooltip says they are Easy Controller's, and where to set or hide them
+  (Alerts › Supplies, with the panel's shortcut): players didn't know what the buttons over the bars
+  were.
+
 ## 1.11.3
 
 - **L3 / R3 trigger layers, LT + RB and RT + LB** (reported: a spell on LT + L3 never ran; LT + RB

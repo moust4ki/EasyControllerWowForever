@@ -8,6 +8,8 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **Stay seated while eating** (1.11.4, Wheels › Consumables, on by default): a stick still pushed from the wheel, or nudged, no longer stands you up and wastes the meal. Push the left stick all the way for half a second to get up.
+- **Supplies buttons** (1.11.4): their tooltip says they are Easy Controller's and where to set or hide them.
 - **L3 / R3 and LT + RB / RT + LB layers** (1.11.3): while the button alone keeps the game's function (autorun, ping, targeting), the game takes its trigger layers too, so the Gamepad tab now says so. Put a spell, a wheel or the new **Nothing** on the button alone, and its trigger layers work.
 - **Profiles are automatic** (1.11.2): each character keeps its own buttons, wheels and supplies, with nothing to set, and nothing done on one character changes another's. The Profiles tab is gone.
 - **Start and Select stay the game's** (1.11.2): they can't be changed any more; what was on them is removed and the chat tells you once.
