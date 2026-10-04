@@ -241,6 +241,15 @@ The game gives these two combinations no function of their own (they fall on the
 game's other buttons, they can take a spell, an item, a macro, a wheel or a game function (both
 triggers as modifiers). LT + LB and RT + RB stay the game's class actions.
 
+### Profiles
+
+The **Profiles** tab: each character has its own buttons and paddles (and the game's buttons
+replaced), its own wheels, supplies and consumables wheel categories. On first load, every character
+starts from a copy of the configuration: nothing is lost, and with one character there is nothing to
+do. A character can use its own settings or the shared ones (switching back finds its own again),
+take another character's (Copy from: every character logged in once with profiles is listed), or
+start from scratch. The paddles' keys, the look, the keyboard and the vibrations are the same for all.
+
 ### Triggers: press to switch
 
 Home › Gamepad › **Triggers: press to switch** (off by default): no need to hold a trigger to use its

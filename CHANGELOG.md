@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.9.0
+
+- **Profiles** (a new tab, issue #4): each character has its own buttons and paddles, its own wheels,
+  supplies and consumables wheel categories. On first load, every character starts from a copy of the
+  configuration, so nothing is lost and a player with one character sees no change. The Profiles tab
+  sets a character on its own settings or on the shared ones, copies another character's, or starts
+  from scratch. The paddles' keys, the look, the keyboard and the vibrations stay the same for all.
+- **LT + RB and RT + LB in the Gamepad tab** (issue #5): in 1.8.2 their cells still showed
+  "Unavailable"; they now open on A like the other cells.
+
+### Also since 1.8.0 (1.8.1 and 1.8.2)
+
+- **Triggers: press to switch** (Home › Gamepad, off by default): LT pressed alone keeps the left bar
+  on, pressed again back to the top bar; same for RT; LT then RT: the bottom bar. Holding still works.
+  Needs the game's compact action bar.
+- **Back paddle layers with Steam Input** (Steam Deck, Steam Controller): each trigger layer of a
+  paddle sent as a keyboard key now runs its own action.
+- **Trigger layers kept apart**: an action on one layer of a button no longer runs on its other layers.
+- **Spells cast by name**, with the rank you chose: Ghost Wolf and the shapeshift forms now cast from
+  buttons, paddles and wheels.
+- **LT + RB and RT + LB** can take a spell, an item, a macro or a wheel. LT + LB and RT + RB stay the
+  game's class and pet actions.
+- **Aggro lost vibration** for tanks (off by default). No critical hit vibration: WoW Forever keeps the
+  combat log to its own UI.
+- **The panel's shortcut alone**: RB + D-pad down no longer also runs what you put on D-pad down.
+- `/ec keys` shows the modifiers and triggers held with each key; `/ec fish` lists the game's events
+  for a minute.
+- **Fixes**: the merchant's sale total counts grey items whose price wasn't loaded yet; greyed rows at
+  the end of a section scroll into view; the vibration rows' help bar shows the D-pad first; an old
+  saved tab name reopens on its section; the panel no longer redraws itself once closed.
+
 ## 1.8.2
 
 - **Back paddle layers with Steam Input** (issue #3): with the paddles sent as keyboard keys (Steam

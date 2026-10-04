@@ -271,6 +271,8 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         CK:InitDB()
     elseif event == "PLAYER_LOGIN" then
         local function safe(fn) xpcall(fn, geterrorhandler()) end
+        -- This character's profile first: the modules read its settings
+        safe(function() CK.Profiles:Init() end)
         safe(function() CK.Predict:Load() end)
         safe(function() CK:HookChat() end)
         safe(function() CK:HookLinks() end)
@@ -300,6 +302,8 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         end
     elseif event == "PLAYER_LOGOUT" then
         CK.Predict:Prune()
+        -- The account's values back before the game saves
+        CK.Profiles:Store()
     elseif event == "GAME_PAD_ACTIVE_CHANGED" then
         CK.gamepadActive = arg1
     elseif event == "PLAYER_REGEN_DISABLED" then

@@ -7,6 +7,10 @@ Every feature you don't need can be turned off to save even more resources.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
+## What's new in 1.9
+- **Profiles** (new tab): each character has its own buttons and paddles, wheels and supplies, or uses the shared ones. Copy another character's or start from scratch. Every character starts from your current setup, so with one character nothing changes.
+- **LT + RB and RT + LB** can now be set from the Gamepad tab (they showed "Unavailable" in 1.8.2).
+
 ## What's new in 1.8.2
 - **Triggers: press to switch** (option): press LT alone and the left bar stays on, press it again to come back; same for RT, LT then RT for the bottom bar. Holding still works as before. Made for the game's compact action bar.
 - **Back paddles on Steam Deck / Steam Controller**: each trigger layer now works, even when Steam Input sends the paddles as plain keys.
@@ -25,6 +29,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…)
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
 - **Triggers: press to switch** instead of holding them (option)
+- **Profiles**: each character its own buttons, wheels and supplies, or shared
 - **Chat keyboard** with smartphone-style word prediction
 - **Red when out of range**: the whole spell, not just a dot
 - **Quest items** marked in your bags, quest links in the chat
