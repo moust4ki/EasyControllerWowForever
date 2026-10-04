@@ -216,6 +216,8 @@ local function slash(msg)
     elseif cmd == "map" or cmd == "config" or cmd == "options" then
         -- The chat edit box is still sending this command: open once it is closed
         CK.Config:OpenWhenFree(cmd == "map" and "gamepad" or nil)
+    elseif cmd == "profile" or cmd == "profil" then
+        CK.Profiles:Diagnose()
     elseif cmd == "keys" then
         CK:DetectKeys()
     elseif cmd == "glyphs" then
