@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.10.0 (not released yet)
+## 1.10.0
 
 - **Hold to show a wheel** (Wheels › Opening, off by default, requested on CurseForge): hold a
   wheel's button to show it, aim with the left stick, let go to use what it aims at; the stick in the
