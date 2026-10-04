@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.11.9
+
+Fixes contributed by rampagingrhinoceros (thanks!):
+
+- **Learned words**: past the limit (8000 by default), only the excess is forgotten, the least
+  used first. Before, every word seen only once was erased at once, a large part of what was learned.
+- **Next-word suggestions**: the filler words ("and", "the"...) follow the chosen language; they
+  were French for every language.
+- **Upgrade arrows**: an equipped item the game hasn't loaded yet is no longer taken for an empty
+  slot (wrong "upgrade" arrows); the comparison waits for it.
+- **Vibrations**: an important one (death, loss of control) is no longer cut by the small
+  vibration of a key or a wheel.
+
 ## 1.11.8
 
 - **Red when out of range**: drawn as a red veil of the addon's own over the game's gamepad bar
