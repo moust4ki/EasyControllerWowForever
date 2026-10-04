@@ -101,19 +101,28 @@ function T:Build()
     self.relays = {}
 end
 
--- A relay: "/click" the target on the press, the triggers held told
-function T:Relay(id, target, button, macro)
+-- A relay: "/click" the target on the press, the triggers held told. The
+-- game's bar button: a click on the mapping's relay to it instead (no macro:
+-- a macro in the game's slot doesn't run from a macro, see RELAY_SLOT).
+function T:Relay(id, target, button, macro, delegate)
     local r = self.relays[id]
     if not r then
         r = CK.NewFrame("Button", "ControllerKeyboardToggleRelay" .. id, nil, "SecureActionButtonTemplate")
         r:RegisterForClicks("AnyDown")
         r:SetAttribute("useOnKeyDown", true)
-        r:SetAttribute("type", "macro")
         SecureHandlerWrapScript(r, "OnClick", self.header, RELAY)
         r:Hide()
         self.relays[id] = r
     end
-    r:SetAttribute("macrotext", macro or ("/click " .. target .. " " .. (button or "LeftButton") .. " true"))
+    if delegate then
+        r:SetAttribute("type", "click")
+        r:SetAttribute("clickbutton", delegate)
+        r:SetAttribute("macrotext", nil)
+    else
+        r:SetAttribute("type", "macro")
+        r:SetAttribute("clickbutton", nil)
+        r:SetAttribute("macrotext", macro or ("/click " .. target .. " " .. (button or "LeftButton") .. " true"))
+    end
     return r
 end
 
@@ -129,16 +138,16 @@ function T:SetTarget(slot, input, layer)
     -- its own key, as the game binds it
     if kind and not input.bar and M.taken[combo] and not M:GetReplaced(input.id, layer) then kind = nil end
     -- The game's bar button (the stance bar's in a stance), or one of the
-    -- mapping's relays to it: their macro, not a /click of a /click
-    local macro = kind == "click" and M.relayMacros[name]
+    -- mapping's relays to it: a click on the mapping's relay to that button
+    local bar = kind == "click" and M.relayBars[name]
     if not kind and input.bar then
         local native = M:NativeBarButton(input, layer)
         name = native and native:GetName()
-        if name then kind, button, macro = "click", "LeftButton", M:BarMacro(M:BarAction(input, layer)) end
+        if name then kind, button, bar = "click", "LeftButton", M:BarAction(input, layer) end
     end
     local value
     if kind == "click" then
-        value = self:Relay(layer .. input.id, name, button, macro or nil):GetName()
+        value = self:Relay(layer .. input.id, name, button, nil, bar and M.BarRelay(bar) or nil):GetName()
     elseif kind == "cmd" then
         value = name
     end
