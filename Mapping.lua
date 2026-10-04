@@ -207,16 +207,18 @@ function M:LiveBarButton(input, layer)
 end
 
 -- A press on the game's bar button, as a macro: in a stance, the stance
--- bar's button where it takes that bar ([bonusbar]: decided by the game on
--- the press, in combat too), else the bar's own. For a character with no
--- stance or form, nil: its button is clicked as before.
+-- bar's button where it takes that bar (decided on the press, in combat
+-- too), else the bar's own. For a character with no stance or form, nil:
+-- its button is clicked as before. [bonusbar] alone is false in WoW
+-- Forever, even in stealth (checked in game: [bonusbar:1] true): the bonus
+-- bars by number. The relays decide it themselves (RELAY_SLOT).
 function M:StanceMacro(barAction)
     local P = CK.Paddles
     if not P:HasStances() then return nil end
     local native, stance = P:NativeButton(barAction), P:StanceButton(barAction)
     local nativeName, stanceName = native and native:GetName(), stance and stance:GetName()
     if not (nativeName and stanceName) then return nil end
-    return "/click [bonusbar] " .. stanceName .. " LeftButton true; " .. nativeName .. " LeftButton true"
+    return "/click [bonusbar:1/2/3/4/5] " .. stanceName .. " LeftButton true; " .. nativeName .. " LeftButton true"
 end
 
 function M:BarMacro(barAction)
@@ -1163,8 +1165,14 @@ M.relayBars = {}        -- relay's name -> the bar button it presses ("bar:right
 -- else (spells, items, flyouts, the game's own functions) keeps the click.
 local RELAY_SLOT = [[
     local b = self:GetFrameRef("ck-native")
+    -- In a stance (stealth, a form, a warrior's stance): the stance bar's
+    -- button, as the game shows its stance bar (a bonus bar on). Not the
+    -- macro option [bonusbar]: false in stealth in WoW Forever (reported:
+    -- RT + D-pad up did nothing in stealth once the addon routed it)
     local stance = self:GetFrameRef("ck-stance")
-    if stance and SecureCmdOptionParse("[bonusbar] 1; 0") == "1" then b = stance end
+    local inStance = stance and (GetBonusBarOffset() or 0) > 0
+    if inStance then b = stance end
+    self:SetAttribute("macrotext", self:GetAttribute(inStance and "ck-text-stance" or "ck-text-native"))
     local id = b and b:GetID()
     local slot
     if id and id > 0 then
@@ -1205,11 +1213,21 @@ local function newRelay(id, macro, onKey)
         r:Hide()
         relays[key] = r
     end
-    r:SetAttribute("type", "macro")
-    r:SetAttribute("macrotext", macro)
     local P = CK.Paddles
-    setRef(r, "ck-native", P:NativeButton(id))
-    setRef(r, "ck-stance", M:StanceMacro(id) and P:StanceButton(id) or nil)
+    local native = P:NativeButton(id)
+    local stance = M:StanceMacro(id) and P:StanceButton(id) or nil
+    local function click(b)
+        local name = b and b:GetName()
+        return name and ("/click " .. name .. " LeftButton true") or nil
+    end
+    -- The click for each case, chosen on the press (RELAY_SLOT)
+    local nativeText = click(native) or macro
+    r:SetAttribute("type", "macro")
+    r:SetAttribute("macrotext", nativeText)
+    r:SetAttribute("ck-text-native", nativeText)
+    r:SetAttribute("ck-text-stance", click(stance))
+    setRef(r, "ck-native", native)
+    setRef(r, "ck-stance", stance)
     M.relayMacros[r:GetName()] = macro
     M.relayBars[r:GetName()] = id
     return r

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.11.13
+
+- **Stances, stealth and forms with the addon on a button** (reported: a wheel on D-pad up alone,
+  and RT + D-pad up did nothing for a warrior; reproduced in stealth): the addon pressed the hidden
+  normal bar's button instead of the stance bar's. It asked the game with the macro option
+  [bonusbar], which WoW Forever answers "no" even in stealth. It now reads the game's bonus bar
+  itself on each press, as the game does to show its stance bar.
+
 ## 1.11.12
 
 - **A face or D-pad button given a game function alone** ("Target allies" on X...): the controller
