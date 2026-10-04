@@ -185,6 +185,10 @@ from button to button, up to the layers, down to the actions under the controlle
   in the game's own slot, like with its action bar editor (X empties it).
 - **Start and Select stay the game's** (its radial menu, the interface's focus), in every layer:
   they can't be changed.
+- **L3 / R3 with a trigger**: while L3 alone (or R3 alone) keeps the game's function (autorun,
+  ping), the game takes its trigger layers too: the controller sends the button without the
+  trigger. Put a spell, a wheel or **Nothing** (first in the Game list) on L3 alone, and the game's
+  function on another button if you want it: then LT / RT + L3 take what you put there.
 - **The free inputs get the missing functions**: L3 / R3, trigger combinations nothing is bound to
   and the back paddles. Press A on one and pick in the lists on the right, LB / RB
   to change list:

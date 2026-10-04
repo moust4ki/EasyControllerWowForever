@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.11.3 (not released yet)
+
+- **L3 / R3 trigger layers** (reported: a spell on LT + L3 never ran): while L3 alone (or R3 alone)
+  keeps the game's function (autorun, ping), the game takes its trigger layers too, the controller
+  sending the button without the trigger (checked in game). Those layers are now shown unavailable,
+  with why and what to do. Put a spell, a wheel or **Nothing** (new, first in the Game list) on L3
+  alone, and its trigger layers work, read with the triggers held. What was already on them is kept
+  and works once L3 alone is freed.
+
 ## 1.11.2
 
 - **Profiles are automatic**: each character keeps its own buttons, paddles, wheels and supplies,

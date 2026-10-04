@@ -107,6 +107,13 @@ function W:Cell(input, layer)
             return { state = "off", name = M:ActionName(shown) or L.MAP_GAME,
                 why = format(L.MAP_SHARED_LOCKED, K.ComboMarkup(input.id, base, 14), M:ActionName(M:Get(input.id, base)) or "") }
         end
+        -- L3 / R3 alone still the game's: its layers wait for it to be freed
+        if M:StickHeld(input) then
+            local kept = M:Get(input.id, layer)
+            local native = M:NativeInfo(input, "") or L.MAP_GAME
+            return { state = "off", name = kept and M:ActionName(kept) or L.MAP_GAME, icon = kept and M:ActionIcon(kept),
+                action = kept, why = format(L.MAP_STICK_HELD, input.id, native, input.id) }
+        end
         return { state = "off", name = L.MAP_GAME, why = L.MAP_LOCKED }
     end
     if state == "slot" then
