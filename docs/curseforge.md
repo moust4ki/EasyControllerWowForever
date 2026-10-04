@@ -7,6 +7,10 @@ Every feature you don't need can be turned off to save even more resources.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
+## What's new in 1.11
+- **The keyboard in the game's fields**: it now opens for the Auction House search, the bags' search, mail, notes... What you type goes into the field, A is Enter (the Auction House searches), B closes it. Option in Keyboard › Opening, on by default.
+- **Supplies**: no more "item:0" row for characters without ammo.
+
 ## What's new in 1.10
 - **Hold to show a wheel** (option, Wheels › Opening): hold the wheel's button, aim with the left stick, let go to use what it aims at. Let go with the stick in the middle to close it.
 - **Each trigger layer of a button runs its own**: a wheel on D-pad down no longer opens with LT or RT held (the game's bar comes back there), and a wheel on LT + a button now opens.
@@ -39,7 +43,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
 - **Triggers: press to switch** instead of holding them (option)
 - **Profiles**: each character its own buttons, wheels and supplies, or shared
-- **Chat keyboard** with smartphone-style word prediction
+- **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...)
 - **Red when out of range**: the whole spell, not just a dot
 - **Quest items** marked in your bags, quest links in the chat
 - **Vibrations** on the events you pick
@@ -60,7 +64,8 @@ can be turned off, and the look matches WoW Forever's gamepad UI. The details of
 
 The keyboard opens as soon as you open the chat. Pick the input method that suits you, let the
 prediction finish your words and sentences, choose the channel, and send with A. Everything stays
-clickable with the mouse or the Steam Controller trackpad.
+clickable with the mouse or the Steam Controller trackpad. It also opens in the game's own fields
+(the Auction House search, the bags' search, mail...): what you type goes into the field, A is Enter.
 
 ## Two input methods
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.0 (not released yet)
+## 1.11.0
 
 - **The keyboard in the game's other fields** (requested on CurseForge): it also opens when a field of
   the game gets the focus, like the Auction House search, the bags' search, mail or notes (Keyboard ›
