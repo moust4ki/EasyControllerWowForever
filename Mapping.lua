@@ -1013,6 +1013,14 @@ local function setRelease(r, layer, b, action)
 end
 M.routers = routers
 
+-- A router's name (a key the toggle binds straight to it)
+function M:IsRouter(name)
+    for _, r in pairs(routers) do
+        if r:GetName() == name then return true end
+    end
+    return false
+end
+
 local function router(inputId)
     local r = routers[inputId]
     if not r then

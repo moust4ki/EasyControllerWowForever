@@ -146,7 +146,12 @@ function T:SetTarget(slot, input, layer)
         if name then kind, button, bar = "click", "LeftButton", M:BarAction(input, layer) end
     end
     local value
-    if kind == "click" then
+    if kind == "click" and M:IsRouter(name) then
+        -- A routed button: its router itself, which reads the layer on (a
+        -- "/click" to it would be a macro, and a macro in the game's slot
+        -- doesn't run from a macro)
+        value = name
+    elseif kind == "click" then
         value = self:Relay(layer .. input.id, name, button, nil, bar and M.BarRelay(bar) or nil):GetName()
     elseif kind == "cmd" then
         value = name
