@@ -88,6 +88,8 @@ function Pr:Activate()
             t[k] = self.shared[i]
         end
     end
+    -- A broken entry in its file never stops the addon
+    CK.CleanEntries(CK.db.settings)
 end
 
 -- At login, before the modules start
@@ -102,8 +104,12 @@ function Pr:Init()
         local t, k = slot(f[2])
         self.shared[i] = t[k]
     end
+    -- Other characters' profiles broken in the file: left out
+    for k, p in pairs(db.profiles) do
+        if type(k) ~= "string" or type(p) ~= "table" or type(p.data) ~= "table" then db.profiles[k] = nil end
+    end
     local p = db.profiles[key]
-    if type(p) ~= "table" or type(p.data) ~= "table" then
+    if type(p) ~= "table" then
         -- First load with profiles: a copy of the configuration
         local data = {}
         for i, f in ipairs(FIELDS) do data[f[1]] = copy(self.shared[i]) end
@@ -192,8 +198,10 @@ end
 
 local function nameOf(entry)
     local p = entry.p
-    local text = (p.name or entry.key) .. (p.realm and p.realm ~= "" and (" - " .. p.realm) or "")
-    local color = p.class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[p.class]
+    local name = type(p.name) == "string" and p.name or entry.key
+    local realm = type(p.realm) == "string" and p.realm or ""
+    local text = name .. (realm ~= "" and (" - " .. realm) or "")
+    local color = type(p.class) == "string" and RAID_CLASS_COLORS and RAID_CLASS_COLORS[p.class]
     if color and color.colorStr then text = "|c" .. color.colorStr .. text .. "|r" end
     return text
 end

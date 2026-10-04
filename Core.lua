@@ -3343,6 +3343,65 @@ local function copyDefaults(src, dst)
     end
 end
 
+-- Entries a saved file may hold broken (edited by hand, an old bug): left
+-- out, so a wrong one never stops the addon. The account's settings at
+-- load, each character's profile when it is put in use (Profiles.lua).
+function CK.CleanEntries(s)
+    local function tbl(parent, k)
+        if type(parent[k]) ~= "table" then parent[k] = {} end
+        return parent[k]
+    end
+    -- A list kept in place (the profiles hold it), with its good items only
+    local function keep(t, items)
+        for k in pairs(t) do t[k] = nil end
+        for i, v in ipairs(items) do t[i] = v end
+    end
+    -- Buttons: { ["L3:LT"] = "spell:133" } (older names, "L4" or "PAD2",
+    -- are moved by Mapping.lua: kept)
+    for _, name in ipairs({ "mapping", "replaced" }) do
+        local t = tbl(s, name)
+        for k, v in pairs(t) do
+            if type(k) ~= "string" or type(v) ~= "string" then t[k] = nil end
+        end
+    end
+    -- Supplies: { [key] = { on, low, critical } }, and the items added
+    local sup = tbl(s, "supplies")
+    local list = tbl(sup, "list")
+    for k, cfg in pairs(list) do
+        if type(k) ~= "string" or type(cfg) ~= "table" or type(cfg.low) ~= "number"
+            or type(cfg.critical) ~= "number" then
+            list[k] = nil
+        end
+    end
+    local custom, seen = {}, {}
+    for _, id in ipairs(tbl(sup, "custom")) do
+        if type(id) == "number" and id > 0 and not seen[id] then
+            seen[id] = true
+            custom[#custom + 1] = id
+        end
+    end
+    keep(sup.custom, custom)
+    -- Own wheels: { { id, name, slots = { [1-8] = action } } }
+    local wheels, used = {}, {}
+    for _, w in ipairs(tbl(tbl(s, "myWheels"), "list")) do
+        if type(w) == "table" and type(w.id) == "number" and w.id > 0 and not used[w.id] then
+            used[w.id] = true
+            if type(w.name) ~= "string" then w.name = format(CK.L.MYWHEEL_DEFAULT or "%d", w.id) end
+            local slots = {}
+            if type(w.slots) == "table" then
+                for i = 1, 8 do
+                    if type(w.slots[i]) == "string" then slots[i] = w.slots[i] end
+                end
+            end
+            w.slots = slots
+            wheels[#wheels + 1] = w
+        end
+    end
+    keep(s.myWheels.list, wheels)
+    -- The consumables wheel's kinds
+    copyDefaults(DEFAULTS.wheel.categories, tbl(tbl(s, "wheel"), "categories"))
+end
+
 function CK:InitDB()
     if type(ControllerKeyboardDB) ~= "table" then ControllerKeyboardDB = {} end
     local db = ControllerKeyboardDB
@@ -3356,6 +3415,7 @@ function CK:InitDB()
         db.settings.lang = (d.frFR and d.enUS) and "fren" or (d.enUS and "en") or "fr"
     end
     copyDefaults(DEFAULTS, db.settings)
+    CK.CleanEntries(db.settings)
     -- v2: auto-open no longer requires the gamepad to be the active input
     if (tonumber(db.version) or 1) < 2 then
         db.settings.onlyWithGamepad = false

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.1 (not released yet)
+
+- **A saved file with broken entries** no longer stops the addon: a button, a supplies entry, an
+  item added, a wheel or a wheel's slot that the addon can't read is left out at load and when a
+  character's profile is put in use; the good ones are kept. Another character's broken profile is
+  left out of the Profiles tab.
+
 ## 1.9.0
 
 - **Profiles** (a new tab, issue #4): each character has its own buttons and paddles, its own wheels,
