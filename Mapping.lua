@@ -192,7 +192,39 @@ end
 -- The game's gamepad bar button for an input and a layer
 function M:NativeBarButton(input, layer)
     if not input.bar then return end
-    return CK.Paddles:NativeButton("bar:" .. M.LAYER_BAR[layer] .. ":" .. input.bar)
+    return CK.Paddles:NativeButton(self:BarAction(input, layer))
+end
+
+-- "bar:right:a": the game's bar button of an input in a layer
+function M:BarAction(input, layer)
+    return input.bar and ("bar:" .. M.LAYER_BAR[layer] .. ":" .. input.bar) or nil
+end
+
+-- The one shown now: in a stance (stealth, a form), the stance bar's
+function M:LiveBarButton(input, layer)
+    if not input.bar then return end
+    return CK.Paddles:LiveButton(self:BarAction(input, layer))
+end
+
+-- A press on the game's bar button, as a macro: in a stance, the stance
+-- bar's button where it takes that bar ([bonusbar]: decided by the game on
+-- the press, in combat too), else the bar's own. For a character with no
+-- stance or form, nil: its button is clicked as before.
+function M:StanceMacro(barAction)
+    local P = CK.Paddles
+    if not P:HasStances() then return nil end
+    local native, stance = P:NativeButton(barAction), P:StanceButton(barAction)
+    local nativeName, stanceName = native and native:GetName(), stance and stance:GetName()
+    if not (nativeName and stanceName) then return nil end
+    return "/click [bonusbar] " .. stanceName .. " LeftButton true; " .. nativeName .. " LeftButton true"
+end
+
+function M:BarMacro(barAction)
+    local stance = self:StanceMacro(barAction)
+    if stance then return stance end
+    local native = CK.Paddles:NativeButton(barAction)
+    local name = native and native:GetName()
+    return name and ("/click " .. name .. " LeftButton true") or nil
 end
 
 local FIXED_FACE = { a = "JUMP", x = "INTERACT", b = "BACK", y = "INSPECT" }
@@ -213,7 +245,7 @@ function M:NativeInfo(input, layer)
     if layer == "" and FIXED_FACE[input.bar] then
         return L["NAT_" .. FIXED_FACE[input.bar]], FIXED_ICON[FIXED_FACE[input.bar]]
     end
-    local native = self:NativeBarButton(input, layer)
+    local native = self:LiveBarButton(input, layer)
     if native then
         local slot = native.action
         local name = slot and CK.Paddles.SlotName(slot)
@@ -242,7 +274,7 @@ end
 ---------------------------------------------------------------------------
 function M:NativeSlot(input, layer)
     if not input.bar or (layer == "" and FIXED_FACE[input.bar]) then return nil end
-    local native = self:NativeBarButton(input, layer)
+    local native = self:LiveBarButton(input, layer)
     local slot = native and native.action
     if type(slot) == "number" and slot > 0 then return slot end
 end
@@ -844,8 +876,9 @@ local function bindAction(combo, comboId, action, replace)
         bindCommand(o, replace or false, combo, value)
         record[combo] = value
     elseif kind == "bar" then
+        local stance = M:StanceMacro(action)
         local native = CK.Paddles:NativeButton(action)
-        click = native and native:GetName()
+        click = stance and M.KeyRelay(action, stance):GetName() or (native and native:GetName())
     elseif kind == "wheel" then
         -- Its key opens that wheel
         click = CK.ConsumableWheel:Toggle(value):GetName()
@@ -1036,23 +1069,35 @@ end
 -- clicked: such a button keeps its keys bound as before.
 ---------------------------------------------------------------------------
 local relays = {}
+M.relayMacros = {}      -- relay's name -> its macro (the toggle reuses it)
 
--- The game's bar button "/click"ed down, as its own binding presses it
-local function relay(name)
-    local r = relays[name]
+-- The game's bar button "/click"ed down, as its own binding presses it (a
+-- macro: the stance bar's in a stance, see StanceMacro). Clicked by a
+-- router (once per press), or by a key bound to it (on the press).
+local function newRelay(id, macro, onKey)
+    local key = (onKey and "key:" or "router:") .. id
+    local r = relays[key]
     if not r then
         local n = 0
         for _ in pairs(relays) do n = n + 1 end
         r = CK.NewFrame("Button", "ControllerKeyboardBarRelay" .. (n + 1), nil, "SecureActionButtonTemplate")
-        r:RegisterForClicks("AnyDown", "AnyUp")
-        -- Clicked by the router, once per press
-        r:SetAttribute("useOnKeyDown", false)
+        if onKey then r:RegisterForClicks("AnyDown") else r:RegisterForClicks("AnyDown", "AnyUp") end
+        r:SetAttribute("useOnKeyDown", onKey and true or false)
         r:SetAttribute("type", "macro")
-        r:SetAttribute("macrotext", "/click " .. name .. " LeftButton true")
         r:Hide()
-        relays[name] = r
+        relays[key] = r
     end
+    r:SetAttribute("macrotext", macro)
+    M.relayMacros[r:GetName()] = macro
     return r
+end
+
+local function relay(barAction)
+    return newRelay(barAction, M:BarMacro(barAction), false)
+end
+
+function M.KeyRelay(barAction, macro)
+    return newRelay(barAction, macro, true)
 end
 
 -- What each layer of a pad button runs through its router: { action } or
@@ -1076,13 +1121,13 @@ function M:PadTargets(input)
             if action and M.Routable(action) then
                 targets[layer] = { action = action }
             elseif native then
-                targets[layer] = { native = native }
+                targets[layer] = { bar = action }
             elseif action then
                 return nil
             else
                 native = self:NativeBarButton(input, layer)
                 if native then
-                    targets[layer] = { native = native }
+                    targets[layer] = { bar = self:BarAction(input, layer) }
                 elseif self:NativeBinding(combo) or (input.id ~= "L3" and input.id ~= "R3"
                     and self:NativeBinding(self:InputKey(input))) then
                     -- The game's command there (or the key without the
@@ -1119,8 +1164,8 @@ function M:ApplyPad(input, targets, replaced)
                 or actionButton(input.id .. ":" .. layer, t.action)
             -- Clicked by the key's button, once per press
             b:SetAttribute("useOnKeyDown", false)
-        elseif t and t.native then
-            b = relay(t.native:GetName())
+        elseif t and t.bar then
+            b = relay(t.bar)
         end
         if b then
             r:SetAttribute("*clickbutton-ck" .. layer, b)
@@ -1296,7 +1341,8 @@ end
 -- its binding (the key's own, or the one without modifiers it fell back to)
 function M:KeepNative(input, layer, combo)
     local native = self:NativeBarButton(input, layer)
-    local name = native and native:GetName()
+    local stance = native and self:StanceMacro(self:BarAction(input, layer))
+    local name = stance and M.KeyRelay(self:BarAction(input, layer), stance):GetName() or (native and native:GetName())
     if name then
         SetOverrideBindingClick(takeOwner, true, combo, name, "LeftButton")
         self.taken[combo] = "CLICK " .. name .. ":LeftButton"
@@ -1462,8 +1508,22 @@ function M:Init()
     -- A gamepad connected: the triggers' indexes the routers read
     pcall(events.RegisterEvent, events, "GAME_PAD_CONNECTED")
     pcall(events.RegisterEvent, events, "GAME_PAD_ACTIVE_CHANGED")
+    -- A stance or form learned (the stance bar's presses), a stance taken
+    -- (the Gamepad tab shows the stance bar's slots)
+    pcall(events.RegisterEvent, events, "UPDATE_SHAPESHIFT_FORMS")
+    pcall(events.RegisterEvent, events, "UPDATE_BONUS_ACTIONBAR")
     events:SetScript("OnEvent", function(_, event, name)
-        if event == "CVAR_UPDATE" and not (name and tostring(name):find("GamePadEmulate")) then return end
+        if event == "UPDATE_BONUS_ACTIONBAR" then
+            if CK.Config and CK.Config:IsOpen() and not InCombatLockdown() then CK.Config:Render() end
+            return
+        end
+        if event == "UPDATE_SHAPESHIFT_FORMS" then
+            local has = CK.Paddles:HasStances()
+            if has == M.hadStances then return end
+            M.hadStances = has
+        end
+        if event == "CVAR_UPDATE" and not (name and (tostring(name):find("GamePadEmulate")
+            or tostring(name) == "GamepadStanceBarOverride")) then return end
         if event == "GAME_PAD_CONNECTED" or event == "GAME_PAD_ACTIVE_CHANGED" then
             local lt, rt = padIndex("PADLTRIGGER"), padIndex("PADRTRIGGER")
             if lt == M.ltIndex and rt == M.rtIndex then return end

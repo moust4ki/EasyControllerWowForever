@@ -102,7 +102,7 @@ function T:Build()
 end
 
 -- A relay: "/click" the target on the press, the triggers held told
-function T:Relay(id, target, button)
+function T:Relay(id, target, button, macro)
     local r = self.relays[id]
     if not r then
         r = CK.NewFrame("Button", "ControllerKeyboardToggleRelay" .. id, nil, "SecureActionButtonTemplate")
@@ -113,7 +113,7 @@ function T:Relay(id, target, button)
         r:Hide()
         self.relays[id] = r
     end
-    r:SetAttribute("macrotext", "/click " .. target .. " " .. (button or "LeftButton") .. " true")
+    r:SetAttribute("macrotext", macro or ("/click " .. target .. " " .. (button or "LeftButton") .. " true"))
     return r
 end
 
@@ -128,14 +128,17 @@ function T:SetTarget(slot, input, layer)
     -- kept on a layer of a replaced button (LB's targeting, held) stays on
     -- its own key, as the game binds it
     if kind and not input.bar and M.taken[combo] and not M:GetReplaced(input.id, layer) then kind = nil end
+    -- The game's bar button (the stance bar's in a stance), or one of the
+    -- mapping's relays to it: their macro, not a /click of a /click
+    local macro = kind == "click" and M.relayMacros[name]
     if not kind and input.bar then
         local native = M:NativeBarButton(input, layer)
         name = native and native:GetName()
-        if name then kind, button = "click", "LeftButton" end
+        if name then kind, button, macro = "click", "LeftButton", M:BarMacro(M:BarAction(input, layer)) end
     end
     local value
     if kind == "click" then
-        value = self:Relay(layer .. input.id, name, button):GetName()
+        value = self:Relay(layer .. input.id, name, button, macro or nil):GetName()
     elseif kind == "cmd" then
         value = name
     end

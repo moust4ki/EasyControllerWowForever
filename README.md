@@ -212,6 +212,16 @@ from button to button, up to the layers, down to the actions under the controlle
   game's slots, on the free buttons, on the paddles and in your wheels stays.
 - `/ec binds` lists the replaced keys and what each one runs right now.
 
+### Stealth, forms and stances
+
+In stealth, a druid form or a warrior stance, the game's **stance bar** takes the place of one of the
+gamepad bars (the game's gamepad settings, *Stance bar*: the left, right or bottom bar of the first
+page), with slots of its own. While you are in that stance, the Gamepad tab shows that bar's slots in
+its layer, and what you put there goes in the stance bar, as with the game's own editor. The layers
+left to the game on a replaced button, and a game bar button chosen for a free button or a paddle,
+press the stance bar's button while you are in a stance (in combat too). A character with no stance
+or form keeps its bindings as they were.
+
 ### Back paddles (L4 / R4 / L5 / R5) and extra buttons
 
 For the Steam Deck and other controllers with back paddles: set each paddle to a keyboard key in

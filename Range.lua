@@ -70,6 +70,8 @@ function R:HookBar()
     for _, bar in ipairs(P.BARS) do
         for _, b in ipairs(P.BUTTONS) do
             hook(P:NativeButton("bar:" .. bar.key .. ":" .. b.key))
+            -- In a stance (stealth...), the stance bar's in its place
+            hook(P:StanceButton("bar:" .. bar.key .. ":" .. b.key))
         end
     end
 end
