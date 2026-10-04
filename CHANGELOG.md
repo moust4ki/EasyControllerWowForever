@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.2 (not released yet)
+## 1.11.2
 
 - **Profiles are automatic**: each character keeps its own buttons, paddles, wheels and supplies,
   with no option any more (no Profiles tab, no shared settings, no copy, no start from scratch).
