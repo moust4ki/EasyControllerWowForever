@@ -185,6 +185,11 @@ from button to button, up to the layers, down to the actions under the controlle
   in the game's own slot, like with its action bar editor (X empties it).
 - **Start and Select stay the game's** (its radial menu, the interface's focus), in every layer:
   they can't be changed.
+- **L3 / R3 with a trigger, LT + RB and RT + LB**: while the button alone keeps the game's function
+  (L3: autorun, R3: ping, LB / RB: targeting), the game takes its trigger layers too: the controller
+  sends the button without the trigger. Put a spell, a wheel or **Nothing** (first in the Game list)
+  on the button alone, and the game's function on another button if you want it: then its trigger
+  layers take what you put there. LT + LB and RT + RB stay the game's class actions.
 - **The free inputs get the missing functions**: L3 / R3, trigger combinations nothing is bound to
   and the back paddles. Press A on one and pick in the lists on the right, LB / RB
   to change list:
@@ -258,9 +263,9 @@ Gamepad), the buttons go anywhere: a few pixels at a time with the D-pad, or dra
 
 ### LT + RB and RT + LB
 
-The game gives these two combinations no function of their own (they fall on the targeting): like the
-game's other buttons, they can take a spell, an item, a macro, a wheel or a game function (both
-triggers as modifiers). LT + LB and RT + RB stay the game's class actions.
+They take a spell, an item, a macro or a wheel once RB alone (or LB alone) holds something of yours
+or Nothing: while RB alone is the game's targeting, the game takes LT + RB too (the controller sends
+RB without the trigger). LT + LB and RT + RB stay the game's class and pet actions.
 
 ### Profiles
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.11.3
+
+- **L3 / R3 trigger layers, LT + RB and RT + LB** (reported: a spell on LT + L3 never ran; LT + RB
+  neither): while the button alone keeps the game's function (L3: autorun, R3: ping, LB / RB:
+  targeting), the game takes its trigger layers too, the controller sending the button without the
+  trigger (checked in game). Those layers are now shown unavailable, with why and what to do. Put a
+  spell, a wheel or **Nothing** (new, first in the Game list) on the button alone, and its trigger
+  layers work, read with the triggers held. What was already on them is kept and works once the
+  button alone is freed. LT + LB and RT + RB stay the game's class actions.
+
 ## 1.11.2
 
 - **Profiles are automatic**: each character keeps its own buttons, paddles, wheels and supplies,
