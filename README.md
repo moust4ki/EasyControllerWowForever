@@ -354,6 +354,10 @@ kind can be left out (Wheels › Consumables).
   stick stays the game's (for its own spell wheels). The mouse works too. While it is open it takes
   the sticks, like the game's own wheels: the camera and the character stay still. The aimed item's
   name shows in the game's banner under the wheel.
+- **Stay seated while eating** (Wheels › Consumables, on by default): while you eat or drink, a
+  stick still pushed from aiming the wheel, or nudged, doesn't stand you up and waste the food; push
+  the left stick all the way for half a second to get up. The camera stays still too while you eat.
+  Never in combat.
 - **Hold to show** (Wheels › Opening, off by default, every wheel): hold the wheel's button, aim
   with the left stick, let go to use what it aims at; let go with the stick in the middle closes it
   without using anything. A still uses while you hold it. With Triggers: press to switch on and a

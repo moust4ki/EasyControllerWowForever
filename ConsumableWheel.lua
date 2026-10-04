@@ -596,7 +596,10 @@ function W:Build()
         end)
         b:SetScript("OnLeave", function() GameTooltip:Hide() end)
         SecureHandlerWrapScript(b, "OnClick", wheel, "return nil, true", DONE)
-        b:HookScript("OnClick", function() W:Log("use " .. i) end)
+        b:HookScript("OnClick", function()
+            W:Log("use " .. i)
+            W:NoteMeal(i)
+        end)
         b:Hide()
         SecureHandlerSetFrameRef(wheel, "slot" .. i, b)
         use:SetAttribute("*clickbutton-s" .. i, b)
@@ -620,6 +623,99 @@ local function stickIndex(name, default)
         end
     end
     return default
+end
+
+---------------------------------------------------------------------------
+-- Staying seated while eating (Wheels > Consumables, on by default): while
+-- the player eats or drinks, the sticks are kept, so a stick still pushed
+-- from aiming the wheel, or nudged, doesn't stand the character up and
+-- waste the food (reported). The left stick pushed all the way for half a
+-- second lets the character go. Never in combat. The camera stays still
+-- too: the game gives a frame the sticks all together.
+---------------------------------------------------------------------------
+local SEATED_PUSH, SEATED_TIME = 0.9, 0.5
+-- The auras of eating and drinking, by name: the game's own Food and
+-- Drink, and the use of each food or drink a wheel used
+local mealNames = {}
+
+local function eating()
+    if not next(mealNames) then
+        local get = C_Spell and C_Spell.GetSpellName or GetSpellInfo
+        for _, id in ipairs({ 433, 430 }) do
+            local name = get and get(id)
+            if name then mealNames[name] = true end
+        end
+    end
+    local find = AuraUtil and AuraUtil.FindAuraByName
+    for name in pairs(mealNames) do
+        if find then
+            if find(name, "player", "HELPFUL") then return true end
+        elseif C_UnitAuras and C_UnitAuras.GetAuraDataBySpellName then
+            if C_UnitAuras.GetAuraDataBySpellName("player", name, "HELPFUL") then return true end
+        end
+    end
+    return false
+end
+W.Eating = eating
+
+-- A food or drink used from a wheel: its aura's name (the item's use)
+function W:NoteMeal(slot)
+    local entry = self:PageItems()[slot]
+    if not (entry and entry.kind == "item" and entry.id) then return end
+    local cat = entry.cat or W.Category(entry.id)
+    if cat ~= "food" and cat ~= "drink" and cat ~= "buffFood" then return end
+    local name = C_Item and C_Item.GetItemSpell and C_Item.GetItemSpell(entry.id)
+    if type(name) == "string" and name ~= "" then mealNames[name] = true end
+end
+
+local function moveLength()
+    local state = C_GamePad and C_GamePad.GetDeviceMappedState and C_GamePad.GetDeviceMappedState()
+    local stick = state and state.sticks and state.sticks[stickIndex("Movement", 1)]
+    return stick and stick.len or 0
+end
+
+function W:BuildSeated()
+    if self.seated then return end
+    local f = CK.NewFrame("Frame", nil, UIParent)
+    f:SetAllPoints(UIParent)
+    f:Hide()
+    f.pushed = 0
+    f:SetScript("OnGamePadStick", function() end)
+    f:SetScript("OnShow", function(frame)
+        frame.pushed = 0
+        W:TakeSticks(frame, true)
+    end)
+    f:SetScript("OnHide", function(frame) W:TakeSticks(frame, false) end)
+    f:SetScript("OnUpdate", function(frame, elapsed)
+        if moveLength() >= SEATED_PUSH then frame.pushed = frame.pushed + elapsed else frame.pushed = 0 end
+        if frame.pushed >= SEATED_TIME then
+            -- Pushed on purpose: up, and not held again for this meal
+            frame.released = true
+            frame:Hide()
+        elseif InCombatLockdown() or not eating() then
+            frame:Hide()
+        end
+    end)
+    local events = CK.NewFrame("Frame")
+    if events.RegisterUnitEvent then
+        events:RegisterUnitEvent("UNIT_AURA", "player")
+    else
+        events:RegisterEvent("UNIT_AURA")
+    end
+    events:RegisterEvent("PLAYER_REGEN_DISABLED")
+    events:SetScript("OnEvent", function(_, event, unit)
+        if event == "PLAYER_REGEN_DISABLED" then
+            f:Hide()
+            return
+        end
+        if unit and unit ~= "player" then return end
+        if not eating() then
+            f.released = nil
+            return
+        end
+        if settings().staySeated and not f.released and not f:IsShown() and not InCombatLockdown() then f:Show() end
+    end)
+    self.seated, self.seatedEvents = f, events
 end
 
 -- A wheel's pages ({ page = { [slot] = entry } }) into its attributes
@@ -1046,6 +1142,7 @@ end
 ---------------------------------------------------------------------------
 function W:Init()
     self:RestoreSettings()
+    self:BuildSeated()
     -- In combat (a /reload there) the game would block their setup: made
     -- when it ends (Fill waits for it)
     if not InCombatLockdown() then self:Build() end

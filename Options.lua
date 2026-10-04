@@ -632,6 +632,12 @@ local function consumableRows(b)
             s.variants = v
             W:Fill()
         end })
+    b.check({ id = "cw_seated", label = L.LBL_STAY_SEATED, tip = L.TIP_STAY_SEATED,
+        get = function() return s.staySeated end,
+        set = function(v)
+            s.staySeated = v
+            if not v and W.seated then W.seated:Hide() end
+        end })
     b.header(L.WHEEL_H_CATEGORIES)
     for _, cat in ipairs(W.CATEGORIES) do
         b.check({ id = "cat_" .. cat, label = L["WHEEL_CAT_" .. cat:upper()], disabled = not s.enabled,
