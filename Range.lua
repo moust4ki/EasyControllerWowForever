@@ -1,13 +1,19 @@
 local _, CK = ...
 
 -- Out of range, the whole spell in red (the game only turns its small dot
--- red): the gamepad bar's buttons and our extra buttons. The game's buttons
--- are only recoloured, after the game's own colouring (secure hooks on their
--- RefreshRange and UpdateUsable), never called nor changed otherwise.
+-- red): the gamepad bar's buttons and our extra buttons. Over the game's
+-- buttons, a red veil of ours multiplied over the icon: the game's buttons
+-- are only read, never hooked, called nor changed. (Secure hooks on their
+-- RefreshRange and UpdateUsable broke the game's own bar refresh with the
+-- taint log on: "attempt to call a nil value", ActionButton.lua:584.)
 local R = {}
 CK.Range = R
 
 R.RED = { 0.9, 0.15, 0.15 }
+-- Range checked five times a second, the veils follow their buttons
+-- (shown, faded) every frame
+local CHECK = 0.2
+local WHITE = "Interface\\Buttons\\WHITE8X8"
 
 local function on()
     return CK.db and CK.db.settings.features.rangeTint == true
@@ -21,78 +27,146 @@ local function inRange(slot)
 end
 R.InRange = inRange
 
--- The game's colour for a slot (usable, not enough mana, unusable)
-local function usableColor(icon, slot)
-    local isUsable = C_ActionBar and C_ActionBar.IsUsableAction or IsUsableAction
-    local usable, noMana = true, false
-    if isUsable and slot then usable, noMana = isUsable(slot) end
-    if usable then
-        icon:SetVertexColor(1, 1, 1)
-    elseif noMana then
-        icon:SetVertexColor(0.5, 0.5, 1)
-    else
-        icon:SetVertexColor(0.4, 0.4, 0.4)
-    end
-end
-
-local function paint(button)
-    local icon = button.icon
-    if not icon then return end
-    if on() and button.ckOutOfRange then
-        icon:SetVertexColor(R.RED[1], R.RED[2], R.RED[3])
-    elseif button.ckTinted then
-        usableColor(icon, button.action)
-    end
-    button.ckTinted = on() and button.ckOutOfRange or nil
-end
-
-local hooked = {}
-local function hook(button)
-    if not button or hooked[button] or (button.IsForbidden and button:IsForbidden()) then return end
-    if type(button.RefreshRange) ~= "function" or type(button.UpdateUsable) ~= "function" then return end
-    hooked[button] = true
-    hooksecurefunc(button, "RefreshRange", function(self, checksRange, isInRange)
-        self.ckOutOfRange = (checksRange and not isInRange) or nil
-        paint(self)
-    end)
-    hooksecurefunc(button, "UpdateUsable", function(self)
-        if self.ckOutOfRange and on() then paint(self) end
-    end)
-    -- Already out of range when hooked
-    local range = inRange(button.action)
-    button.ckOutOfRange = (range == false) or nil
-    paint(button)
-end
-
--- Every button of the game's gamepad bar (once it is loaded). Only with the
--- option on: off (the default), the game's buttons are never touched.
-function R:HookBar()
-    if not on() then return end
-    local P = CK.Paddles
+-- The game's bar buttons: each bar's, and the stance bar's in their place
+local function gameButtons()
+    local P, list = CK.Paddles, {}
     for _, bar in ipairs(P.BARS) do
         for _, b in ipairs(P.BUTTONS) do
-            hook(P:NativeButton("bar:" .. bar.key .. ":" .. b.key))
-            -- In a stance (stealth...), the stance bar's in its place
-            hook(P:StanceButton("bar:" .. bar.key .. ":" .. b.key))
+            local action = "bar:" .. bar.key .. ":" .. b.key
+            list[#list + 1] = P:NativeButton(action)
+            list[#list + 1] = P:StanceButton(action)
         end
+    end
+    return list
+end
+
+-- Where the game draws the icon: inside its round or square mask, else the
+-- icon itself
+local function region(r)
+    return type(r) == "table" and r.IsShown and r or nil
+end
+
+local function iconArea(button)
+    local circle, square = region(button.CircleMask), region(button.SquareMask)
+    if circle and circle:IsShown() then return circle end
+    if square and square:IsShown() then return square end
+    return region(button.icon)
+end
+
+local veils = {}
+R.veils = veils
+
+local function veilFor(button)
+    local v = veils[button]
+    if v then return v end
+    v = CK.NewFrame("Frame", nil, R.holder)
+    v.tex = v:CreateTexture(nil, "OVERLAY")
+    v.tex:SetAllPoints()
+    v.tex:SetTexture(WHITE)
+    v.tex:SetBlendMode("MOD")
+    v.mask = v:CreateMaskTexture()
+    v.mask:SetAllPoints(v.tex)
+    v.tex:AddMaskTexture(v.mask)
+    v.button = button
+    v.out = false
+    v:Hide()
+    veils[button] = v
+    return v
+end
+
+-- Laid over the button's icon, in its shape, above its cooldown. Out of
+-- combat only: in combat the veils stay where they are.
+local function place(v)
+    local button = v.button
+    local area = iconArea(button)
+    if not area then return end
+    v:SetFrameStrata(button:GetFrameStrata())
+    v:SetFrameLevel(button:GetFrameLevel() + 3)
+    if v.area == area then return end
+    v.area = area
+    v:ClearAllPoints()
+    v:SetAllPoints(area)
+    local shape = area ~= button.icon and area or nil
+    local atlas = shape and shape.GetAtlas and shape:GetAtlas()
+    local file = shape and shape.GetTexture and shape:GetTexture()
+    if atlas then
+        v.mask:SetAtlas(atlas)
+    elseif file then
+        v.mask:SetTexture(file, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    else
+        v.mask:SetTexture(WHITE)
     end
 end
 
--- The option turned on or off: every hooked button repainted
+-- Which buttons are out of range. Out of combat every button gets its veil
+-- ready (placed), so that it can show in combat.
+function R:Check()
+    if not on() then
+        for _, v in pairs(veils) do v.out = false end
+        return
+    end
+    local seen = {}
+    local free = not InCombatLockdown()
+    for _, button in ipairs(gameButtons()) do
+        seen[button] = true
+        local v = veils[button] or (free and veilFor(button))
+        if v then
+            if free then place(v) end
+            v.out = v.area ~= nil and button:IsVisible() and inRange(button.action) == false
+        end
+    end
+    for button, v in pairs(veils) do
+        if not seen[button] then v.out = false end
+    end
+end
+
+-- Every frame: a veil shows while its button does, as faded as it is (a
+-- multiplied colour has no transparency: white is "no change")
+function R:Paint()
+    local red = R.RED
+    for button, v in pairs(veils) do
+        local show = v.out and button:IsVisible()
+        if show then
+            local a = button:GetEffectiveAlpha() or 1
+            if a ~= v.alpha then
+                v.alpha = a
+                v.tex:SetVertexColor(1 - (1 - red[1]) * a, 1 - (1 - red[2]) * a, 1 - (1 - red[3]) * a)
+            end
+        end
+        if show ~= v:IsShown() then v:SetShown(show) end
+    end
+end
+
+-- The option turned on or off
 function R:Apply()
-    self:HookBar()
-    for button in pairs(hooked) do
-        local range = inRange(button.action)
-        button.ckOutOfRange = (range == false) or nil
-        paint(button)
+    if not self.holder then return end
+    if on() then
+        self.holder:Show()
+        self:Check()
+        self:Paint()
+    else
+        self.holder:Hide()
+        for _, v in pairs(veils) do
+            v.out = false
+            v:Hide()
+        end
     end
     if CK.Paddles.Refresh and CK.Paddles.frame then CK.Paddles:Refresh(false) end
 end
 
 function R:Init()
-    local f = CreateFrame("Frame")
-    f:RegisterEvent("PLAYER_ENTERING_WORLD")
-    f:RegisterEvent("ADDON_LOADED")
-    f:SetScript("OnEvent", function() R:HookBar() end)
-    self:HookBar()
+    local holder = CK.NewFrame("Frame", nil, UIParent)
+    holder:SetAllPoints()
+    holder:Hide()
+    local elapsed = CHECK
+    holder:SetScript("OnUpdate", function(_, dt)
+        elapsed = elapsed + (dt or 0)
+        if elapsed >= CHECK then
+            elapsed = 0
+            R:Check()
+        end
+        R:Paint()
+    end)
+    self.holder = holder
+    self:Apply()
 end
