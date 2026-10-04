@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.11.6
+
+- **/ec profile**: the character recognised and whether its settings are its own, what each
+  character holds (buttons, game buttons replaced, wheels), and a reminder that the slots of the
+  game's gamepad bar (D-pad, A / B / X / Y) are saved by the game, outside the profiles.
+- **A character not known when the addon loaded** (its name or realm not given yet) gets its own
+  settings once the world is loaded, instead of the ones common to every character.
+
 ## 1.11.5
 
 - **Macros work again with the addon on** (reported: a macro with /startattack and /cast did

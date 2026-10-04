@@ -133,6 +133,58 @@ function Pr:Init()
     self:Activate()
 end
 
+-- The character not known at login (its name or realm not given yet): its
+-- profile once the world is loaded, and everything that reads it again
+function Pr:Retry()
+    if self.key or not CK.db then return end
+    self:Init()
+    if not self.key then return end
+    CK.Mapping:Apply()
+    CK.Paddles:Apply()
+    if CK.MyWheels and CK.MyWheels.UpdateBindingNames then CK.MyWheels:UpdateBindingNames() end
+    if CK.ConsumableWheel then CK.ConsumableWheel:Fill() end
+    if CK.Supplies then CK.Supplies:Refresh() end
+end
+
+do
+    local f = CreateFrame("Frame")
+    f:RegisterEvent("PLAYER_ENTERING_WORLD")
+    f:SetScript("OnEvent", function() Pr:Retry() end)
+end
+
+-- /ec profile: the character recognised, whether its settings are its own,
+-- and what each character holds (players can tell in one line)
+local function count(t)
+    local n = 0
+    if type(t) == "table" then for _ in pairs(t) do n = n + 1 end end
+    return n
+end
+
+local function summary(data)
+    local wheels = type(data.myWheels) == "table" and data.myWheels.list
+    return format(CK.L.PROFILE_DIAG_LINE, count(data.mapping), count(data.replaced), count(wheels))
+end
+
+function Pr:Diagnose()
+    local L = CK.L
+    local p = self:Profile()
+    if not p then
+        CK:Print(L.PROFILE_DIAG_OFF)
+    else
+        local s = CK.db.settings
+        CK:Print(L.PROFILE_DIAG_ON, self.key, summary({ mapping = s.mapping, replaced = s.replaced, myWheels = s.myWheels }))
+    end
+    local others = {}
+    for key, other in pairs(CK.db.profiles or {}) do
+        if key ~= self.key and type(other) == "table" and type(other.data) == "table" then
+            others[#others + 1] = "  " .. key .. ": " .. summary(other.data)
+        end
+    end
+    table.sort(others)
+    for _, line in ipairs(others) do DEFAULT_CHAT_FRAME:AddMessage(line) end
+    CK:Print(L.PROFILE_DIAG_BAR)
+end
+
 -- Before the game saves: the account's values back in settings, the
 -- character's kept in its profile. Done first at logout (Chat.lua): the
 -- account's configuration must never be saved with a character's in it.
