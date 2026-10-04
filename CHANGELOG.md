@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.11.5
+
+- **Macros work again with the addon on** (reported: a macro with /startattack and /cast did
+  nothing while the addon was on, from its buttons or the game's bar). Choosing a channel on the
+  keyboard wrote it into the game's chat box, as its own sticky channel; the game copies that box's
+  channel into the one that runs every macro line, and a value an addon wrote there taints the
+  macro: the game then blocks its /cast, /startattack... The keyboard now keeps the chosen channel
+  itself (Keyboard › Messages › Channel sticks) and never writes into the game's chat. A channel
+  chosen in the game's chat since (a /p typed on a keyboard) wins. A /reload clears a session
+  already affected.
+
 ## 1.11.4
 
 - **Stay seated while eating** (Wheels › Consumables, on by default, reported: food picked from a
