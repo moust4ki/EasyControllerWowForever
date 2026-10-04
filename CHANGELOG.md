@@ -8,6 +8,8 @@
   searches), B closes the keyboard and leaves the field, what you typed kept. A field for numbers
   opens on the numbers. Never for the chat (it keeps its own keyboard), password fields, the game's
   confirmation popups, settings and key bindings, nor in combat.
+- **Supplies**: a character without ammo no longer gets a row named "item:0" (WoW Forever answers 0
+  for an empty ammo slot).
 
 ## 1.10.0
 

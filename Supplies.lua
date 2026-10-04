@@ -66,8 +66,11 @@ local function freeBagSlots()
     return free
 end
 
+-- The ammo equipped, nil when none: an empty slot answers 0 in WoW Forever
+-- (a row named "item:0" showed for characters without ammo)
 local function ammoID()
     local id = GetInventoryItemID and GetInventoryItemID("player", AMMO_SLOT)
+    if type(id) ~= "number" or id <= 0 then return nil end
     return id
 end
 
