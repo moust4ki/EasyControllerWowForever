@@ -266,7 +266,10 @@ function U:IsUpgrade(bag, slot, link)
     local byScore = scale ~= nil and self:Score(link, scale) ~= nil
     local function measure(l)
         if not l then return 0 end
-        if byScore then return self:Score(l, scale) or 0 end
+        -- An occupied slot with uncached data is not an empty slot. Keep
+        -- it pending so GET_ITEM_INFO_RECEIVED retries the comparison.
+        if not itemInfo(l) then return nil end
+        if byScore then return self:Score(l, scale) end
         return itemLevel(l)
     end
     -- The weaker of what is worn there (nothing: anything is better); a
@@ -275,10 +278,13 @@ function U:IsUpgrade(bag, slot, link)
     for _, s in ipairs(slots) do
         local equipped = GetInventoryItemLink("player", s)
         local v = measure(equipped)
+        if v == nil then return false, true end
         if not weakest or v < weakest then weakest, worn = v, equipped end
     end
     if equipLoc == "INVTYPE_2HWEAPON" and byScore then
-        weakest = weakest + measure(GetInventoryItemLink("player", 17))
+        local offHand = measure(GetInventoryItemLink("player", 17))
+        if offHand == nil then return false, true end
+        weakest = weakest + offHand
     end
     if classID == ARMOR and ARMOR_SLOTS[equipLoc] and subclassID and subclassID >= 1 and subclassID <= 4 then
         local wornType = worn and subclassOf(worn)
