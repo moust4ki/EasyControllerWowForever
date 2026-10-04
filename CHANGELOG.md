@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.2 (not released yet)
+
+- **Start and Select stay the game's** (its radial menu, the interface's focus): they can no longer
+  be changed or replaced, in any layer (reported: a spell put on RT + Start never ran). What an older
+  version saved on them is dropped. L3 and R3 stay free.
+
 ## 1.11.1
 
 - **Stealth, forms and stances**: in a stance, the game's stance bar takes the place of one of the

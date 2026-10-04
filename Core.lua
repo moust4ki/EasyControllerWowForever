@@ -79,6 +79,7 @@ local L = {
     OPT_FORGET = "Forget learned words",
     OPT_FORGET_CONFIRM = "Click again to confirm",
     LOADED = "v%s loaded. /ec for help.",
+    MAP_KEPT_SYSTEM = "Start and Select stay the game's (its radial menu, the interface's focus): they can't be changed, in any layer.",
     LBL_OPEN_FIELDS = "Open in the game's fields",
     OPT_FIELDS = "The keyboard also opens when a field of the game gets the focus: the Auction House search, the bags' search, mail, notes... What you type goes into the field; A is Enter there (the Auction House searches), B closes the keyboard and leaves the field (what you typed stays). Never for the chat (it has its own), password fields, the game's confirmation popups and settings, nor in combat.",
     FIELD_TYPING = "Text",
@@ -734,6 +735,7 @@ LOCALES.frFR = {
     OPT_FORGET = "Oublier les mots appris",
     OPT_FORGET_CONFIRM = "Cliquer pour confirmer",
     LOADED = "v%s chargé. /ec pour l'aide.",
+    MAP_KEPT_SYSTEM = "Start et Select restent au jeu (son menu radial, le focus de l'interface) : ils ne se modifient dans aucune couche.",
     LBL_OPEN_FIELDS = "Ouvrir dans les champs du jeu",
     OPT_FIELDS = "Le clavier s'ouvre aussi quand un champ du jeu prend le focus : recherche de l'Hôtel des ventes, recherche des sacs, courrier, notes... Ce que vous tapez va dans le champ ; A fait Entrée (l'Hôtel des ventes lance la recherche), B ferme le clavier et quitte le champ (le texte reste). Jamais pour le chat (il a le sien), les mots de passe, les fenêtres de confirmation et les réglages du jeu, ni en combat.",
     FIELD_TYPING = "Saisie",
@@ -1386,6 +1388,7 @@ LOCALES.deDE = {
     OPT_FORGET = "Gelernte Wörter vergessen",
     OPT_FORGET_CONFIRM = "Zum Bestätigen erneut klicken",
     LOADED = "v%s geladen. /ec für Hilfe.",
+    MAP_KEPT_SYSTEM = "Start und Select bleiben dem Spiel (sein Radialmenü, der Fokus der Oberfläche): Sie lassen sich in keiner Ebene ändern.",
     LBL_OPEN_FIELDS = "In Spielfeldern öffnen",
     OPT_FIELDS = "Die Tastatur öffnet sich auch, wenn ein Feld des Spiels den Fokus bekommt: Suche im Auktionshaus, Taschensuche, Post, Notizen... Was du tippst, landet im Feld; A ist dort Enter (das Auktionshaus sucht), B schließt die Tastatur und verlässt das Feld (der Text bleibt). Nie für den Chat (er hat seine eigene), Passwortfelder, Bestätigungsfenster und Einstellungen des Spiels, und nicht im Kampf.",
     FIELD_TYPING = "Eingabe",
@@ -2038,6 +2041,7 @@ LOCALES.esES = {
     OPT_FORGET = "Olvidar las palabras aprendidas",
     OPT_FORGET_CONFIRM = "Pulsa otra vez para confirmar",
     LOADED = "v%s cargado. /ec para la ayuda.",
+    MAP_KEPT_SYSTEM = "Start y Select se quedan para el juego (su menú radial, el foco de la interfaz): no se cambian en ninguna capa.",
     LBL_OPEN_FIELDS = "Abrir en los campos del juego",
     OPT_FIELDS = "El teclado también se abre cuando un campo del juego recibe el foco: búsqueda de la casa de subastas, búsqueda de bolsas, correo, notas... Lo que escribes va al campo; A es Intro allí (la casa de subastas busca), B cierra el teclado y deja el campo (el texto se queda). Nunca para el chat (tiene el suyo), campos de contraseña, ventanas de confirmación y ajustes del juego, ni en combate.",
     FIELD_TYPING = "Texto",
@@ -2691,6 +2695,7 @@ LOCALES.itIT = {
     OPT_FORGET = "Dimentica le parole apprese",
     OPT_FORGET_CONFIRM = "Clicca di nuovo per confermare",
     LOADED = "v%s caricato. /ec per l'aiuto.",
+    MAP_KEPT_SYSTEM = "Start e Select restano al gioco (il suo menu radiale, il focus dell'interfaccia): non si cambiano in nessun livello.",
     LBL_OPEN_FIELDS = "Apri nei campi del gioco",
     OPT_FIELDS = "La tastiera si apre anche quando un campo del gioco riceve il focus: ricerca della casa d'aste, ricerca nelle borse, posta, note... Ciò che scrivi va nel campo; A è Invio lì (la casa d'aste cerca), B chiude la tastiera e lascia il campo (il testo resta). Mai per la chat (ha la sua), campi password, finestre di conferma e impostazioni del gioco, né in combattimento.",
     FIELD_TYPING = "Testo",
@@ -3400,7 +3405,10 @@ function CK.CleanEntries(s)
     for _, name in ipairs({ "mapping", "replaced" }) do
         local t = tbl(s, name)
         for k, v in pairs(t) do
-            if type(k) ~= "string" or type(v) ~= "string" then t[k] = nil end
+            -- Start and Select stay the game's (Mapping.lua): what was put there goes
+            if type(k) ~= "string" or type(v) ~= "string" or k:find("^START:") or k:find("^SELECT:") then
+                t[k] = nil
+            end
         end
     end
     -- Supplies: { [key] = { on, low, critical } }, and the items added

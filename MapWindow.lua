@@ -71,6 +71,12 @@ function W:Cell(input, layer)
         end
         return { state = "off", name = L.LBL_HELD, why = L.MAP_KEPT_TRIGGER }
     end
+    -- Start and Select: the game's system buttons, in every layer
+    if M.SYSTEM[input.id] then
+        local name, icon = M:NativeInfo(input, "")
+        if layer ~= "" then name, icon = L.MAP_GAME, nil end
+        return { state = "off", name = name or L.MAP_GAME, icon = icon, why = L.MAP_KEPT_SYSTEM }
+    end
     -- LB / RB with a trigger: the game's class and pet actions (LT + LB,
     -- RT + RB, both triggers); LT + RB and RT + LB can be replaced
     if (input.id == "LB" or input.id == "RB") and layer ~= "" and layer ~= M.CROSSED[input.id] then

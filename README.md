@@ -183,8 +183,10 @@ from button to button, up to the layers, down to the actions under the controlle
 - **The gamepad bar's slots** (D-pad and A / B / X / Y in the four layers, but the fixed jump /
   interact / back / inspect) take a spell, an item or a macro: press A on one, pick it, and it goes
   in the game's own slot, like with its action bar editor (X empties it).
+- **Start and Select stay the game's** (its radial menu, the interface's focus), in every layer:
+  they can't be changed.
 - **The free inputs get the missing functions**: L3 / R3, trigger combinations nothing is bound to
-  (LT + Start...) and the back paddles. Press A on one and pick in the lists on the right, LB / RB
+  and the back paddles. Press A on one and pick in the lists on the right, LB / RB
   to change list:
   - **Game**: first **the game's own gamepad functions**: jump, back, interact and inspect (the
     game's fixed A / B / X / Y buttons, pressed: their own behaviour, the smart interact
@@ -198,7 +200,7 @@ from button to button, up to the layers, down to the actions under the controlle
 
 ### Replacing the game's own buttons
 
-- A, B, X, Y, the D-pad, LB / RB (alone), Start, Select and the sticks' buttons the game uses take any
+- A, B, X, Y, the D-pad, LB / RB (alone) and the sticks' buttons the game uses take any
   function from the lists too, in any layer. A slot of the gamepad bar still takes a spell, an item or a
   macro in the slot itself; anything else replaces the button, and what the slot held stays in it,
   under the picture of your function, for when you give the button back (X).
