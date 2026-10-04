@@ -235,6 +235,21 @@ it back; the mouse clicks a button then a place; the right side mirrors the left
 off), X puts a button back. Places follow the compact layout. With **Free placement** on (Home ›
 Gamepad), the buttons go anywhere: a few pixels at a time with the D-pad, or dragged with the mouse.
 
+### Triggers: press to switch
+
+Home › Gamepad › **Triggers: press to switch** (off by default): no need to hold a trigger to use its
+bar. Press LT alone (no other button while it is down): the left bar stays on, A, B, X, Y and the
+D-pad use it; press LT again: back to the top bar. Same for RT (the right bar); LT then RT: the bottom
+bar. Holding a trigger and pressing a button still works as before, the bar comes back once you let go.
+The back paddles, L3 / R3 and the extra buttons follow the bar on. The bar on is framed; with the
+game's compact action bar (one bar shown), its icons are drawn over it. **Top bar again after combat**
+(on by default) brings the top bar back when a fight ends; off, a bar stays on until you press its
+trigger again. A game window, the panel or the chat keyboard get their buttons back while open.
+
+Limits: the game's class actions (LT + LB, RT + RB) still need the trigger held; a game function put on
+a bar button used while holding a trigger counts as a press alone (the bar switches on when you let
+go); in combat, a game window opened while a bar is on doesn't get A, B, X, Y back until it closes.
+
 ### Extra buttons
 
 Up to 8 more buttons, 4 a side, for both: controllers with more buttons (Vader Pro...) and touchpads

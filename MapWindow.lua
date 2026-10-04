@@ -999,6 +999,16 @@ local function displayRows(b)
             f.rangeTint = v
             CK.Range:Apply()
         end })
+    b.check({ id = "d_toggle", label = L.LBL_TRIGGER_TOGGLE, disabled = not on, tip = L.TIP_TRIGGER_TOGGLE,
+        get = function() return f.triggerToggle == true end,
+        set = function(v)
+            f.triggerToggle = v
+            M:Apply()
+        end })
+    b.check({ id = "d_toggle_combat", label = L.LBL_TOGGLE_COMBAT, indent = true,
+        disabled = not (on and f.triggerToggle), tip = L.TIP_TOGGLE_COMBAT,
+        get = function() return f.toggleCombatRelease == true end,
+        set = function(v) f.toggleCombatRelease = v end })
     b.header(L.HDR_NEXT_TO_BAR)
     b.check({ id = "d_extra", label = L.LBL_EXTRA_BUTTONS, disabled = not on, tip = L.FEAT_EXTRA_DISPLAY,
         get = function() return f.extraDisplay end,

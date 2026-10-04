@@ -867,6 +867,16 @@ end
 -- with nothing does nothing.
 local ROUTE = [[
     if not down then return false end
+    -- The trigger toggle on (Toggle.lua): its layer, held or toggled; a
+    -- trigger held was used
+    local toggle = self:GetFrameRef("toggle")
+    if toggle then
+        if toggle:GetAttribute("ck-held-LT") then toggle:SetAttribute("ck-used-LT", true) end
+        if toggle:GetAttribute("ck-held-RT") then toggle:SetAttribute("ck-used-RT", true) end
+        local on = toggle:GetAttribute("ck-layer") or ""
+        if not self:GetAttribute("ck-has-" .. on) then return false end
+        return "ck" .. on
+    end
     local state = GetGamePadState()
     local pad = state and state.buttons
     local came = button or ""
@@ -886,6 +896,7 @@ local ROUTE = [[
 
 local header
 local routers = {}      -- paddle -> its secure button
+M.routers = routers
 
 local function router(inputId)
     local r = routers[inputId]
@@ -913,6 +924,16 @@ local function padIndex(button)
 end
 
 M.padIndex = padIndex
+
+-- What we bound on a key: ("click", button name, mouse button) or ("cmd",
+-- command); nothing when the key is not ours
+function M:BindingOf(combo)
+    local b = self.taken[combo] or self.bound[combo]
+    if not b then return nil end
+    local name, button = b:match("^CLICK ([^:]+):(.+)$")
+    if name then return "click", name, button end
+    return "cmd", b
+end
 
 -- The binding's click "button" for a key's modifiers: "km", "kmS", "kmSA"...
 local function modHint(prefix)
@@ -979,7 +1000,9 @@ end
 function M:Repair()
     if self.pending then return self:Apply() end
     for combo, want in pairs(self.bound) do
-        if GetBindingAction(combo, true) ~= want then return self:Apply() end
+        if GetBindingAction(combo, true) ~= want and not (CK.Toggle and CK.Toggle:Holds(combo)) then
+            return self:Apply()
+        end
     end
     -- The game's buttons replaced: its binding sets (menus, its own while a
     -- trigger is held) go over ours for a while; checked once none is left
@@ -987,7 +1010,9 @@ function M:Repair()
     local stack = manager and manager.bindingSetStack
     if stack and #stack > 0 then return end
     for combo, want in pairs(self.taken) do
-        if GetBindingAction(combo, true) ~= want then return self:Apply() end
+        if GetBindingAction(combo, true) ~= want and not (CK.Toggle and CK.Toggle:Holds(combo)) then
+            return self:Apply()
+        end
     end
 end
 
@@ -1006,6 +1031,7 @@ function M:Apply()
         self.pending = true
         -- A menu of the game, or our panel: its buttons back to it
         self:Release()
+        if CK.Toggle then CK.Toggle:Apply() end
         return
     end
     self.pending = false
@@ -1029,6 +1055,8 @@ function M:Apply()
         self:ApplyReplaced()
         self:BlockFallbacks()
     end
+    -- The trigger toggle's keys over ours (it reads what we bound)
+    if CK.Toggle then CK.Toggle:Apply() end
     -- The panel's shortcut held: its second button left to the game
     if self.suspended then self:Suspend(self.suspended) end
     self:UpdateMarks()
@@ -1071,6 +1099,7 @@ function M:Suspend(key)
         SetOverrideBinding(takeOwner, true, key, nil)
         self.taken[key] = nil
     end
+    if CK.Toggle then CK.Toggle:Unbind(key) end
 end
 
 function M:Resume()

@@ -485,8 +485,9 @@ local function padButtonDown(state, button)
     return index ~= nil and state.buttons[index + 1] and true or false
 end
 
--- "", "LT", "RT" or "LTRT": the triggers held
+-- "", "LT", "RT" or "LTRT": the triggers held (or toggled, Toggle.lua)
 function P.HeldLayer()
+    if CK.Toggle and CK.Toggle:On() and CK.Toggle.header then return CK.Toggle:Layer() end
     local state = padState()
     local function held(button)
         local mod = CK.Mapping:TriggerModifier(button)

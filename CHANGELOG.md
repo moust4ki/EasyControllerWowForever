@@ -10,6 +10,12 @@
 - **Spells cast by name** (issue #2): some spells (Ghost Wolf, shapeshift forms) didn't cast from a
   button or a wheel, while a macro did. Spells now cast by their name, with the rank you chose.
 - `/ec keys` shows the modifiers and triggers the game sees held with each key.
+- **Triggers: press to switch** (Home › Gamepad, off by default, issue #1): no need to hold a trigger
+  any more. LT pressed alone keeps the left bar on (A, B, X, Y and the D-pad use it), pressed again
+  back to the top bar; same for RT; LT then RT: the bottom bar. Holding a trigger with a button still
+  works as before. The paddles, L3 / R3 and the extra buttons follow the bar on; the bar on is framed,
+  and with the game's compact action bar its icons are drawn over it. Back to the top bar after
+  combat (option, on). Off, nothing changes.
 
 ## 1.8.1
 

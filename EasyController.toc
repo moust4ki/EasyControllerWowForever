@@ -30,6 +30,7 @@ QuestItems.lua
 QuestLinks.lua
 Paddles.lua
 Mapping.lua
+Toggle.lua
 Vibration.lua
 Supplies.lua
 Upgrades.lua
