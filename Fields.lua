@@ -10,9 +10,10 @@ local L = CK.L
 -- nothing sent to the chat.
 --
 -- Never: the chat's edit boxes (the chat has its own keyboard, and the addon
--- never writes in them), our own fields, password fields, a frame the game
--- forbids, its confirmation popups, settings and key bindings (the windows
--- most sensitive to an addon's code), nor in combat.
+-- never writes in them), our own fields, password fields, fields of several
+-- lines, the macro window, a frame the game forbids, its confirmation
+-- popups, settings and key bindings (the windows most sensitive to an
+-- addon's code), nor in combat.
 --
 -- Which field has the focus is asked to the game ten times a second
 -- (GetCurrentKeyBoardFocus: one cheap call, nothing created), and only
@@ -25,6 +26,7 @@ local POLL = 0.1
 
 -- Windows left alone, by the name of a frame the field is in
 local SKIPPED = { "^StaticPopup", "^SettingsPanel", "^KeyBindingFrame", "^CommunitiesFrame", "^ChatFrame",
+    "^MacroFrame", "^MacroPopup",
     "^GameMenuFrame", "^StoreFrame", "^ControllerKeyboard" }
 
 local function settings() return CK.db.settings end
@@ -42,6 +44,10 @@ function F:Accepts(eb)
     if eb.IsForbidden and eb:IsForbidden() then return false end
     if eb:GetObjectType() ~= "EditBox" or not eb:IsVisible() then return false end
     if eb.IsPassword and eb:IsPassword() then return false end
+    -- A field of several lines (the macro window's text, mail...): the
+    -- keyboard types one line, it would join them (reported: macros saved
+    -- as one line, "/startattack /cast ..." running nothing but the first)
+    if eb.IsMultiLine and eb:IsMultiLine() then return false end
     -- The chat's own, and the chat-like ones
     if eb.chatFrame or eb:GetAttribute("chatType") or eb == CK.ActiveChatWindow() then return false end
     if CK.prompt and CK.prompt.box == eb then return false end

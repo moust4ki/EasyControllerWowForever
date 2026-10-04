@@ -2,6 +2,11 @@
 
 ## 1.11.7 (not released yet)
 
+- **Macros**: the keyboard no longer opens in the macro window, nor in any field of several lines
+  (reported: macros could not be edited, and were saved on one line, "/startattack /cast ..."
+  running nothing but /startattack). Those fields are typed on a physical keyboard as before.
+- **Red when out of range**, off (the default): the game's bar buttons are no longer touched at all;
+  they are only hooked once the option is turned on.
 - **Profiles with WoW Forever's surnames** (reported: a bind removed on the warlock was gone on the
   shaman too): characters are named with a first name and a surname there ("Fraicheur Rog",
   "Fraicheur Hunt"), and the profiles were kept by the first name alone, so every character sharing

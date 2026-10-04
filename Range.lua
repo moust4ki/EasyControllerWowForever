@@ -64,8 +64,10 @@ local function hook(button)
     paint(button)
 end
 
--- Every button of the game's gamepad bar (once it is loaded)
+-- Every button of the game's gamepad bar (once it is loaded). Only with the
+-- option on: off (the default), the game's buttons are never touched.
 function R:HookBar()
+    if not on() then return end
     local P = CK.Paddles
     for _, bar in ipairs(P.BARS) do
         for _, b in ipairs(P.BUTTONS) do
