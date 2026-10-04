@@ -11,8 +11,8 @@ local _, CK = ...
 -- buttons, which keep the state on a secure header. While a bar is on (held
 -- or toggled), the header binds the keys of the bar and the other buttons
 -- (every modifier the triggers add) to what that layer runs: the game's bar
--- button, or what the player put there. A click goes through a relay that
--- "/click"s it on the press (as the game's binding does) and tells a
+-- button, or what the player put there. Clicks go directly to that button,
+-- preserving the game's press/release handling. A secure wrapper tells a
 -- trigger held that it was used: released then, it was held, not toggled.
 -- Meant for the game's compact action bar (one bar shown): the game keeps
 -- showing its top bar, so the bar on's icons are drawn over it, each on the
@@ -56,7 +56,8 @@ local TRIGGER = [[
 ]]
 
 -- A key pressed while a bar is on: the triggers held were used
-local RELAY = [[
+local USED = [[
+    if not down then return end
     if owner:GetAttribute("ck-held-LT") then owner:SetAttribute("ck-used-LT", true) end
     if owner:GetAttribute("ck-held-RT") then owner:SetAttribute("ck-used-RT", true) end
 ]]
@@ -77,7 +78,7 @@ local APPLY = [[
         local kind = self:GetAttribute("ck-" .. layer .. "-" .. slot .. "-t")
         local value = self:GetAttribute("ck-" .. layer .. "-" .. slot)
         if kind == "click" then
-            self:SetBindingClick(true, key, value)
+            self:SetBindingClick(true, key, value, self:GetAttribute("ck-" .. layer .. "-" .. slot .. "-b"))
         elseif kind == "cmd" then
             self:SetBinding(true, key, value)
         end
@@ -98,23 +99,20 @@ function T:Build()
         b:Hide()
         self.triggers[t] = b
     end
-    self.relays = {}
+    self.watched = {}
 end
 
--- A relay: "/click" the target on the press, the triggers held told
-function T:Relay(id, target, button)
-    local r = self.relays[id]
-    if not r then
-        r = CK.NewFrame("Button", "ControllerKeyboardToggleRelay" .. id, nil, "SecureActionButtonTemplate")
-        r:RegisterForClicks("AnyDown")
-        r:SetAttribute("useOnKeyDown", true)
-        r:SetAttribute("type", "macro")
-        SecureHandlerWrapScript(r, "OnClick", self.header, RELAY)
-        r:Hide()
-        self.relays[id] = r
-    end
-    r:SetAttribute("macrotext", "/click " .. target .. " " .. (button or "LeftButton") .. " true")
-    return r
+-- Watch the original button without changing its action or click phase. A
+-- macro /click intermediary would also make native macros nested macros;
+-- type=click cannot replace it because that helper drops the down argument.
+-- Targets loaded later are retried by the next mapping apply.
+function T:WatchTarget(name)
+    local target = _G[name]
+    if (type(target) ~= "table" and type(target) ~= "userdata")
+        or not target.IsObjectType or not target:IsObjectType("Button") then return end
+    if self.watched[target] then return end
+    SecureHandlerWrapScript(target, "OnClick", self.header, USED)
+    self.watched[target] = true
 end
 
 -- What a layer runs on an input: what we bound on that key, else for a bar
@@ -135,12 +133,14 @@ function T:SetTarget(slot, input, layer)
     end
     local value
     if kind == "click" then
-        value = self:Relay(layer .. input.id, name, button):GetName()
+        self:WatchTarget(name)
+        value = name
     elseif kind == "cmd" then
         value = name
     end
     h:SetAttribute("ck-" .. layer .. "-" .. slot .. "-t", value and kind or nil)
     h:SetAttribute("ck-" .. layer .. "-" .. slot, value)
+    h:SetAttribute("ck-" .. layer .. "-" .. slot .. "-b", kind == "click" and (button or "LeftButton") or nil)
 end
 
 -- Out of combat, after the mapping's bindings (it calls this): off, or a
@@ -326,28 +326,37 @@ function T:Draw()
             -- the button), else on its icon (the button also holds its glyph)
             local area = (over.CircleMask and over.CircleMask:IsShown() and over.CircleMask)
                 or (over.SquareMask and over.SquareMask:IsShown() and over.SquareMask) or over.icon or over
-            s:ClearAllPoints()
-            s:SetAllPoints(area)
+            if s.area ~= area then
+                s:ClearAllPoints()
+                s:SetAllPoints(area)
+                s.area = area
+            end
             -- Its ring, over our icon as over the game's
             local normal = over.GetNormalTexture and over:GetNormalTexture()
             local atlas = normal and normal.GetAtlas and normal:GetAtlas()
             if atlas then
-                s.frame:SetAtlas(atlas)
-                s.frame:ClearAllPoints()
-                s.frame:SetAllPoints(normal)
+                if s.ringAtlas ~= atlas then s.frame:SetAtlas(atlas) end
+                if s.normal ~= normal then
+                    s.frame:ClearAllPoints()
+                    s.frame:SetAllPoints(normal)
+                    s.normal = normal
+                end
             end
+            s.ringAtlas = atlas
             s.frame:SetShown(atlas ~= nil)
             local icon = CK.Mapping:ActionIcon(action)
-            s.icon:SetTexture(icon)
-            -- The game's crop of its icons (their dark edges cut off)
-            local ul, ur, ll, lr, a1, a2, a3, a4
-            if over.icon and over.icon.GetTexCoord then ul, ur, ll, lr, a1, a2, a3, a4 = over.icon:GetTexCoord() end
-            if type(ul) == "number" and type(a4) == "number" then
-                s.icon:SetTexCoord(ul, ur, ll, lr, a1, a2, a3, a4)
-            else
-                s.icon:SetTexCoord(ICON_CROP, 1 - ICON_CROP, ICON_CROP, 1 - ICON_CROP)
+            P.SetIcon(s.icon, icon)
+            -- Atlas and glyph descriptors keep their own texture coordinates.
+            -- Plain textures use the game's crop (their dark edges cut off).
+            if type(icon) ~= "table" then
+                local ul, ur, ll, lr, a1, a2, a3, a4
+                if over.icon and over.icon.GetTexCoord then ul, ur, ll, lr, a1, a2, a3, a4 = over.icon:GetTexCoord() end
+                if type(ul) == "number" and type(a4) == "number" then
+                    s.icon:SetTexCoord(ul, ur, ll, lr, a1, a2, a3, a4)
+                else
+                    s.icon:SetTexCoord(ICON_CROP, 1 - ICON_CROP, ICON_CROP, 1 - ICON_CROP)
+                end
             end
-            s.icon:SetShown(icon ~= nil)
             local slot = action:find("^bar:") and P:NativeSlot(action)
             local count = slot and C_ActionBar and C_ActionBar.GetActionDisplayCount and select(2, pcall(C_ActionBar.GetActionDisplayCount, slot))
             s.count:SetText(type(count) == "string" and count or "")

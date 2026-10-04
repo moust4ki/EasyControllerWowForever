@@ -16,6 +16,14 @@ ROOT = Path(__file__).resolve().parent.parent
 ADDON = "EasyController"
 EXTRA = ["Bindings.xml", "LICENSE", "README.md", "CHANGELOG.md"]
 
+# These runtime selectors build texture names from a fixed family prefix.
+TEXTURE_FAMILIES = {
+    "ck_btn": ("ck_btn_normal", "ck_btn_hover", "ck_btn_active", "ck_btn_pressed"),
+    "ck_reforged_role": ("ck_reforged_role_normal", "ck_reforged_role_hover",
+                         "ck_reforged_role_active", "ck_reforged_role_pressed"),
+    "ck_reforged_gryphon_": ("ck_reforged_gryphon_left", "ck_reforged_gryphon_right"),
+}
+
 
 def main():
     toc = (ROOT / f"{ADDON}.toc").read_text(encoding="utf-8")
@@ -33,6 +41,7 @@ def main():
     # Every texture the code references must be packaged
     code = "".join((ROOT / f).read_text(encoding="utf-8") for f in listed)
     names = set(re.findall(r'"(ck_[a-z0-9_]+)"', code))
+    names = {texture for name in names for texture in TEXTURE_FAMILIES.get(name, (name,))}
     packaged = {Path(f).stem for f in files if f.startswith("textures/")}
     absent = sorted(n for n in names if n not in packaged)
     if absent:

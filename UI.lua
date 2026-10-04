@@ -18,8 +18,6 @@ local C = {
     suggSel = { rgb("FFF0C8") },
     sugg = { rgb("C9B37E") },
     help = { rgb("D9D4CB") },
-    winTop = { rgb("19160F") }, winBottom = { rgb("0F0D0A") },
-    edge = { rgb("5A4D38") }, edgeOut = { rgb("050403") }, edgeIn = { rgb("241D15") },
     well = { rgb("080706") }, wellLine = { rgb("3D3326") },
     pill = { rgb("714E31") }, pillLine = { rgb("D8B27A") }, pillText = { rgb("FFF0C8") },
     btn = { rgb("E8D7A8") },
@@ -140,6 +138,42 @@ CK.UIKit = {
     texture = texture, place = place, text = text, nineSlice = nineSlice, solid = solid,
 }
 
+-- Shared by the keyboard controls and configuration buttons. A held mouse
+-- press and a brief logical activation are separate from persistent focus.
+function CK.UIKit.pressFeedback(b)
+    function b:CanPress()
+        return not (self.state and self.state.disabled) and self:IsEnabled()
+    end
+    function b:IsPressed()
+        return self:CanPress() and (self.mousePressed or self.pressPulse)
+    end
+    function b:ClearPress()
+        self.pressSerial = (self.pressSerial or 0) + 1
+        self.mousePressed, self.pressPulse = nil, nil
+        self:Render()
+    end
+    function b:SetPressed(down)
+        self.mousePressed = down and self:CanPress() or nil
+        self:Render()
+    end
+    function b:Pulse()
+        if not self:CanPress() then return end
+        self.pressSerial = (self.pressSerial or 0) + 1
+        local serial = self.pressSerial
+        self.pressPulse = true
+        self:Render()
+        C_Timer.After(0.12, function()
+            if self.pressSerial ~= serial then return end
+            self.pressPulse = nil
+            self:Render()
+        end)
+    end
+    b:SetScript("OnMouseDown", function(self, button) if button == "LeftButton" then self:SetPressed(true) end end)
+    b:SetScript("OnMouseUp", function(self, button) if button == "LeftButton" then self:SetPressed(false) end end)
+    b:HookScript("OnLeave", function(self) self:SetPressed(false) end)
+    b:HookScript("OnHide", function(self) self:ClearPress() end)
+end
+
 ---------------------------------------------------------------------------
 -- Input methods
 ---------------------------------------------------------------------------
@@ -185,9 +219,15 @@ local function buildButton(parent, label, onClick)
     b.label = text(b, 11)
     b.label:SetPoint("CENTER", 0, 0)
     b.label:SetText(label)
-    b:SetScript("OnClick", onClick)
+    b:SetScript("OnClick", function(self, ...)
+        self:Pulse()
+        onClick(self, ...)
+    end)
     function b:Render()
-        if self.active then
+        if self:IsPressed() then
+            self.slice:SetFile("ck_sk_key_pressed")
+            self.label:SetTextColor(unpack(C.pillText))
+        elseif self.active then
             self.slice:SetFile("ck_sk_key_active")
             self.label:SetTextColor(unpack(C.pillText))
         elseif self.hover then
@@ -204,10 +244,17 @@ local function buildButton(parent, label, onClick)
     end
     b:SetScript("OnEnter", function(s) s.hover = true; s:Render() end)
     b:SetScript("OnLeave", function(s) s.hover = false; s:Render() end)
+    CK.UIKit.pressFeedback(b)
     b:Render()
     return b
 end
 CK.UIKit.buildButton = buildButton
+
+function CK:PulseAction(method)
+    local f = self.frame
+    local b = f and f:IsShown() and f.actions and f.actions[method]
+    if b and b:IsShown() then b:Pulse() end
+end
 
 function CK:BuildUI()
     if self.frame then return end
@@ -222,32 +269,12 @@ function CK:BuildUI()
     self.frame = f
     self:MakeDragHandle(f)
 
-    -- Background: a dark vertical gradient; the edge: 1 px dark, 2 px
-    -- bronze, 1 px dark inside
-    local bg = solid(f, "BACKGROUND", C.winBottom[1], C.winBottom[2], C.winBottom[3], 0.96)
+    -- The same slate and forged frame as the configuration window.
+    local bg = texture(f, "ck_panel_bg", "BACKGROUND")
     bg:SetAllPoints()
-    if CreateColor and bg.SetGradient then
-        pcall(bg.SetColorTexture, bg, 1, 1, 1, 1)
-        local ok = pcall(bg.SetGradient, bg, "VERTICAL", CreateColor(C.winBottom[1], C.winBottom[2], C.winBottom[3], 0.96),
-            CreateColor(C.winTop[1], C.winTop[2], C.winTop[3], 0.96))
-        if not ok then bg:SetColorTexture(C.winBottom[1], C.winBottom[2], C.winBottom[3], 0.96) end
-    end
-    local function frameEdge(color, inset, size)
-        for _, e in ipairs({ { "TOPLEFT", "TOPRIGHT", nil }, { "BOTTOMLEFT", "BOTTOMRIGHT", nil },
-            { "TOPLEFT", "BOTTOMLEFT", true }, { "TOPRIGHT", "BOTTOMRIGHT", true } }) do
-            local t = solid(f, "BORDER", color[1], color[2], color[3], 1)
-            local dx = (e[1]:find("LEFT") and inset) or -inset
-            local dy = (e[1]:find("TOP") and -inset) or inset
-            local dx2 = (e[2]:find("LEFT") and inset) or -inset
-            local dy2 = (e[2]:find("TOP") and -inset) or inset
-            t:SetPoint(e[1], f, e[1], dx, dy)
-            t:SetPoint(e[2], f, e[2], dx2, dy2)
-            if e[3] then t:SetWidth(size) else t:SetHeight(size) end
-        end
-    end
-    frameEdge(C.edgeOut, 0, 1)
-    frameEdge(C.edge, 1, 2)
-    frameEdge(C.edgeIn, 3, 1)
+    bg:SetHorizTile(true)
+    bg:SetVertTile(true)
+    nineSlice(f, "ck_reforged_frame", 128, 128, 16, 12, "BORDER")
 
     -- Input bar: channel + text + blinking cursor, mode badge, move grip
     local bar = CK.NewFrame("Frame", nil, f)

@@ -64,26 +64,24 @@ function M:Help()
     }
 end
 
--- The look (Claude Design, design/daisywheel/): the radial wheel's 8
--- sections (ck_wheel_bg_8), each petal's 4 characters in a cross that always
--- stays upright (left, up, right, down: the right stick's directions), the
--- chosen section lit in copper and the others veiled, a gold pastille under
--- the aimed character, the hub showing it in large. Variant "rings": a bronze
--- ring around each group of 4 (gold on the chosen one). All sizes are the
--- 512 art's, scaled to the wheel's 304.
+-- Native Forever stone and circular chrome surround the original eight
+-- petals. Character positions and hitboxes retain the 304px input layout;
+-- only the padded artwork extends beyond it (its visible rim stays inside).
 local SIZE = 304
 local S = SIZE / 512
 local PETAL_R, CHAR_D = 160 * S, 28 * S
 local HUB_SIZE, KEY_SIZE, RING_SIZE = 120 * S, 54 * S, 108 * S
-local SECTION = { 256 * S, 143 * S }    -- the section overlays: their size, their centre's distance
+local RIM_SIZE, FACE_SIZE, HUB_RIM_SIZE, HUB_FACE_SIZE = 352, 276, 132, 103
+local PRESSED_TIME = 0.12
+local SECTION = { 256 * RIM_SIZE / 512, 143 * RIM_SIZE / 512 }    -- the section overlays: their size, their centre's distance
 local CHAR_FONT, HUB_FONT, LAYER_FONT = 16, 38, 10
 -- Character offsets in a petal (WoW axes, y up): left, up, right, down
 local CHAR_OFF = { { -CHAR_D, 0 }, { 0, CHAR_D }, { CHAR_D, 0 }, { 0, -CHAR_D } }
 local COLORS = {
-    normal = { 1, 0.82, 0 }, chosen = { 1, 0.91, 0.66 }, target = { 0, 0, 0 }, hover = { 1, 0.96, 0.85 },
+    normal = { 1, 0.82, 0 }, chosen = { 1, 0.91, 0.66 }, target = { 1, 0.96, 0.85 }, hover = { 1, 0.96, 0.85 },
     layer = { 0.79, 0.64, 0.29 },
 }
-local DIM_ALPHA = 0.4
+local DIM_ALPHA = 0.65
 local LEFT_IN, LEFT_OUT = 0.5, 0.35      -- petal selection deadzone (with hysteresis)
 
 local function sector(x, y, count)
@@ -115,25 +113,54 @@ function M:Build(area)
         if size then t:SetSize(size, size) end
         return t
     end
-    local bg = area:CreateTexture(nil, "BACKGROUND")
-    -- New texture files are only seen after restarting the game (not /reload)
-    bg:SetTexture(K.TEX .. "ck_wheel_bg_8")
-    local probe = area:CreateTexture()
-    if probe:SetTexture(K.TEX .. "ck_dw_hub") == false then
-        C_Timer.After(2, function() CK:Print(L.TEXTURES_MISSING) end)
+    local function native(parent, name, fallback, layer, sub, size, fallbackSize)
+        local t = parent:CreateTexture(nil, layer, nil, sub)
+        if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
+            t:SetAtlas(name, false)
+        elseif fallback then
+            t:SetTexture(K.TEX .. fallback)
+            size = fallbackSize or size
+        end
+        t:SetSize(size, size)
+        t:SetPoint("CENTER")
+        return t
     end
-    probe:Hide()
-    bg:SetAllPoints()
+    local function mask(parent, anchor)
+        local m = parent:CreateMaskTexture()
+        m:SetAllPoints(anchor)
+        if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("ui-hud-minimap-frame-generic-mask") then
+            m:SetAtlas("ui-hud-minimap-frame-generic-mask", false)
+        else
+            m:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+        end
+        return m
+    end
+    self.face = area:CreateTexture(nil, "BACKGROUND", nil, -3)
+    self.face:SetPoint("CENTER"); self.face:SetSize(FACE_SIZE, FACE_SIZE)
+    self.face:SetColorTexture(0.055, 0.04, 0.025, 1)
+    self.material = tex(area, "ck_panel_bg", "BACKGROUND", -2)
+    self.material:SetAllPoints(self.face)
+    self.material:SetHorizTile(true); self.material:SetVertTile(true)
+    self.material:SetVertexColor(0.72, 0.62, 0.48, 1)
+    self.faceMask = mask(area, self.face)
+    self.face:AddMaskTexture(self.faceMask); self.material:AddMaskTexture(self.faceMask)
+    local bg = tex(area, "ck_wheel_bg_8", "BACKGROUND", 0)
+    bg:SetPoint("CENTER"); bg:SetSize(RIM_SIZE, RIM_SIZE)
+    bg:SetAlpha(0.60); bg:AddMaskTexture(self.faceMask)
+    self.bg = bg
+    self.rim = native(area, "UI-HUD-Minimap-Frame-Circle", nil, "ARTWORK", 3, RIM_SIZE)
 
     -- The other sections veiled, the chosen one lit
     self.dims = {}
     for i = 1, 8 do
         local d = tex(area, "ck_dw_dim", "ARTWORK", 1, SECTION[1])
         placeSection(d, area, i)
+        d:AddMaskTexture(self.faceMask)
         d:Hide()
         self.dims[i] = d
     end
     self.section = tex(area, "ck_wheel_sel_8", "ARTWORK", 2, SECTION[1])
+    self.section:AddMaskTexture(self.faceMask)
     self.section:Hide()
 
     self.petals = {}
@@ -143,19 +170,21 @@ function M:Build(area)
         p:SetPoint("CENTER", area, "CENTER", px, py)
         p:SetSize(RING_SIZE, RING_SIZE)
         -- Variant "rings": the group's ring
-        p.ring = tex(p, "ck_dw_ring", "BORDER", 0, RING_SIZE)
-        p.ring:SetPoint("CENTER")
+        p.ring = native(p, "gamepad-actionbar-circleslot-border-normal", "ck_dw_ring", "BORDER", 0, RING_SIZE)
+        -- The selected atlas includes 8px of glow on each side of its 64px ring.
+        p.selectedRing = native(p, "gamepad-actionbar-circleslot-border-selected", "ck_dw_ring_sel", "BORDER", 1, RING_SIZE * 80 / 64, RING_SIZE)
+        p.selectedRing:Hide()
         p.keys = {}
         for j = 1, 4 do
             local k = CK.NewFrame("Button", nil, p)
             k:SetSize(KEY_SIZE * 0.8, KEY_SIZE * 0.8)
             k:SetPoint("CENTER", p, "CENTER", CHAR_OFF[j][1], CHAR_OFF[j][2])
-            k.hover = tex(k, "ck_dw_hover", "ARTWORK", 5, KEY_SIZE)
-            k.hover:SetPoint("CENTER")
+            k.hover = native(k, "gamepad-actionbar-circleslot-border-hover", "ck_reforged_slot_hover", "ARTWORK", 5, KEY_SIZE)
             k.hover:Hide()
-            k.target = tex(k, "ck_dw_target", "ARTWORK", 6, KEY_SIZE)
-            k.target:SetPoint("CENTER")
+            k.target = native(k, "gamepad-actionbar-circleslot-border-selected", "ck_reforged_slot_hover", "ARTWORK", 6, KEY_SIZE * 80 / 64, KEY_SIZE)
             k.target:Hide()
+            k.press = native(k, "gamepad-actionbar-circleslot-border-pressed", "ck_reforged_slot_pressed", "ARTWORK", 7, KEY_SIZE)
+            k.press:Hide()
             k.label = k:CreateFontString(nil, "OVERLAY")
             k.label:SetFont(CK:GetFontPath(), CHAR_FONT, "")
             k.label:SetPoint("CENTER", 0, 1)
@@ -166,7 +195,9 @@ function M:Build(area)
                 M:Update()
             end)
             k:SetScript("OnLeave", function()
-                M.hoverPetal, M.hoverChar = nil, nil
+                if M.hoverPetal == i and M.hoverChar == j then
+                    M.hoverPetal, M.hoverChar = nil, nil
+                end
                 M:Update()
             end)
             p.keys[j] = k
@@ -179,8 +210,12 @@ function M:Build(area)
     hub:SetSize(HUB_SIZE, HUB_SIZE)
     hub:SetPoint("CENTER", area, "CENTER", 0, 0)
     hub:SetFrameLevel(area:GetFrameLevel() + 20)
-    self.hubTex = tex(hub, "ck_dw_hub", "ARTWORK", 3)
-    self.hubTex:SetAllPoints()
+    self.hubFace = hub:CreateTexture(nil, "BACKGROUND")
+    self.hubFace:SetPoint("CENTER"); self.hubFace:SetSize(HUB_FACE_SIZE, HUB_FACE_SIZE)
+    self.hubFace:SetColorTexture(0.035, 0.025, 0.016, 1)
+    self.hubMask = mask(hub, self.hubFace)
+    self.hubFace:AddMaskTexture(self.hubMask)
+    self.hubTex = native(hub, "UI-HUD-Minimap-Frame-Circle", "ck_dw_hub", "ARTWORK", 3, HUB_RIM_SIZE)
     self.aimed = hub:CreateFontString(nil, "OVERLAY")
     self.aimed:SetFont(CK:GetFontPath(), HUB_FONT, "")
     self.aimed:SetPoint("CENTER", 0, 2)
@@ -192,14 +227,39 @@ function M:Build(area)
     self.layerLabel:SetPoint("CENTER", 0, -24)
     self.layerLabel:SetTextColor(unpack(COLORS.layer))
     self.layerLabel:SetText("123")
+    -- Switching input methods hides the old area without resetting it.
+    area:HookScript("OnHide", function() M:Reset() end)
 end
 
 function M:Reset()
-    self.petal = nil
+    self.petal, self.hoverPetal, self.hoverChar = nil, nil, nil
+    for _, p in ipairs(self.petals or {}) do
+        for _, k in ipairs(p.keys) do
+            k.pressSerial = (k.pressSerial or 0) + 1
+            k.activated = nil
+            k.press:Hide()
+        end
+    end
+end
+
+function M:Flash(key)
+    if not key then return end
+    key.pressSerial = (key.pressSerial or 0) + 1
+    local serial = key.pressSerial
+    key.activated = true
+    self:Update()
+    C_Timer.After(PRESSED_TIME, function()
+        if key.pressSerial ~= serial then return end
+        key.activated = nil
+        M:Update()
+    end)
 end
 
 function CK:TypeSlot(petal, slot)
-    self:TypeChar(layoutFor(self.state.layer)[petal][slot])
+    local ch = layoutFor(self.state.layer)[petal][slot]
+    if not ch then return end
+    self:TypeChar(ch)
+    M:Flash(M.petals and M.petals[petal].keys[slot])
 end
 
 function M:OnLeftStick(x, y)
@@ -239,21 +299,22 @@ function M:Update()
         local selected = chosen == i
         local dimmed = chosen ~= nil and not selected
         p.ring:SetShown(rings)
-        if rings then
-            p.ring:SetTexture(CK.UIKit.TEX .. (selected and "ck_dw_ring_sel" or "ck_dw_ring"))
-            p.ring:SetAlpha(dimmed and 0.55 or 1)
-        end
+        p.selectedRing:SetShown(rings and selected)
+        if rings then p.ring:SetAlpha(dimmed and 0.55 or 1) end
         for j, k in ipairs(p.keys) do
             local aimed = selected and state.aim == j
             local mouse = self.hoverPetal == i and self.hoverChar == j
-            k.target:SetShown(aimed)
-            k.hover:SetShown(mouse and not aimed)
+            local pressed = k.activated == true
+            k.press:SetShown(pressed)
+            k.target:SetShown(aimed and not pressed)
+            k.hover:SetShown(mouse and not aimed and not pressed)
             k.label:SetFont(font, CHAR_FONT, "")
             k.label:SetText(CK:DisplayChar(layout[i][j]))
-            local color = aimed and COLORS.target or (mouse and COLORS.hover) or (selected and COLORS.chosen) or COLORS.normal
+            k.label:SetPoint("CENTER", 0, pressed and 0 or 1)
+            local color = (pressed or aimed) and COLORS.target or (mouse and COLORS.hover) or (selected and COLORS.chosen) or COLORS.normal
             k.label:SetTextColor(unpack(color))
-            k.label:SetShadowColor(0, 0, 0, aimed and 0 or 1)
-            k:SetAlpha((dimmed and not mouse) and DIM_ALPHA or 1)
+            k.label:SetShadowColor(0, 0, 0, 1)
+            k:SetAlpha((dimmed and not mouse and not pressed) and DIM_ALPHA or 1)
         end
     end
 
@@ -261,7 +322,6 @@ function M:Update()
     local aimedChar = chosen and state.aim and layout[chosen][state.aim]
     local hoverChar = not aimedChar and self.hoverPetal and layout[self.hoverPetal][self.hoverChar]
     local shown = aimedChar or hoverChar
-    self.hubTex:SetTexture(CK.UIKit.TEX .. (aimedChar and "ck_dw_hub_lit" or "ck_dw_hub"))
     self.aimed:SetFont(font, HUB_FONT, "")
     self.aimed:SetShown(shown ~= nil)
     if shown then

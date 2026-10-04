@@ -4,3 +4,12 @@ dist/
 
 # The game's own radial art, extracted for reference only (Blizzard's)
 design/radial/gamepad-radial-menu-*.png
+
+# Local client extracts, generated art workspaces and diagnostics
+debug.log
+design/reforged/native/
+design/reforged/prepared/
+design/reforged/renders/
+design/reforged/live-config/
+design/reforged/preview/
+design/reforged/*.blend

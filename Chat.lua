@@ -271,6 +271,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         CK:InitDB()
     elseif event == "PLAYER_LOGIN" then
         local function safe(fn) xpcall(fn, geterrorhandler()) end
+        safe(function() CK.Profiles:Init() end)
         safe(function() CK.Predict:Load() end)
         safe(function() CK:HookChat() end)
         safe(function() CK:HookLinks() end)

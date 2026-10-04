@@ -75,7 +75,7 @@ end
 
 ---------------------------------------------------------------------------
 -- The pages made of sections (Home, Keyboard, Alerts...): a rail of
--- sections (150), the section's list (380), a detail panel (230) or the
+-- sections (140), the section's list (388), a detail panel (232) or the
 -- lists picker in its place. def = { key, sections = { { key, label, tip,
 -- rows = function(b) end } }, crumb = "Gamepad" (a sub-screen's parent) }
 ---------------------------------------------------------------------------
@@ -83,7 +83,7 @@ local RailPage = {}
 RailPage.__index = RailPage
 RailPage.isRail = true
 
-local RAIL_W, LIST_W, DETAIL_W, GAP, BODY_H = 150, 380, 230, 12, 424
+local RAIL_W, LIST_W, DETAIL_W, GAP, BODY_H = 140, 388, 232, 12, 420
 local BUDGET = 420
 local HEIGHT = { header = 32, check = 36, choice = 36, slider = 36, event = 36, value = 36, stat = 36, button = 42 }
 local FOCUSABLE = { check = true, choice = true, slider = true, event = true, value = true, button = true }
@@ -176,7 +176,8 @@ function RailPage:SetFocus(i)
 end
 
 function RailPage:RowHeight(row)
-    if row.kind == "info" then return row.height or 44 end
+    if row.height then return row.height end
+    if row.kind == "info" then return 44 end
     return HEIGHT[row.kind] or 36
 end
 
@@ -220,6 +221,7 @@ local function newRow(page, n)
     r.indentLine:SetPoint("TOPLEFT", 18, 0)
     r.indentLine:SetPoint("BOTTOMLEFT", 18, 0)
     r.label = K.Text(r, 16, KC.cream)
+    r.label:SetWordWrap(true)
     r.status = K.ChatText(r, 13, KC.grey)
     r.status:SetJustifyH("RIGHT")
     r.stat = K.Text(r, 16, KC.focus)
@@ -298,25 +300,28 @@ function RailPage:Build(parent)
     local rail = CK.NewFrame("Frame", nil, f)
     rail:SetPoint("TOPLEFT")
     rail:SetSize(RAIL_W, BODY_H)
-    local line = K.Solid(rail, KC.line3, 1, "BORDER")
-    line:SetPoint("TOPRIGHT")
-    line:SetPoint("BOTTOMRIGHT")
-    line:SetWidth(1)
+    local shade = K.Solid(rail, KC.black, 0.22, "BACKGROUND")
+    shade:SetAllPoints()
+    local divider = K.Solid(rail, KC.line2, 1, "BORDER")
+    divider:SetWidth(1); divider:SetPoint("TOPRIGHT"); divider:SetPoint("BOTTOMRIGHT")
     self.railEntries = {}
     for i in ipairs(self.def.sections) do
-        local e = CK.NewFrame("Button", nil, rail)
-        e:SetSize(RAIL_W - 11, 38)
-        e:SetPoint("TOPLEFT", 0, -2 - (i - 1) * 42)
-        e.sel = CK.UIKit.nineSlice(e, "ck_select", 128, 32, 10, 10, "ARTWORK")
+        local e = K.Button(rail, 13, "nav")
+        e:SetSize(RAIL_W - 16, 44)
+        e:SetPoint("TOPLEFT", 8, -8 - (i - 1) * 48)
         e.diamond = e:CreateTexture(nil, "OVERLAY")
-        e.diamond:SetTexture(K.TEX .. "ck_diamond")
+        e.diamond:SetTexture(K.TEX .. "ck_tri")
+        e.diamond:SetRotation(-math.pi / 2)
         e.diamond:SetSize(7, 7)
         e.diamond:SetPoint("LEFT", 10, 0)
         e.diamond:SetVertexColor(KC.title[1], KC.title[2], KC.title[3])
-        e.label = K.Text(e, 16, KC.rail)
-        e.label:SetPoint("LEFT", 25, 0)
-        e.label:SetWidth(RAIL_W - 11 - 29)
-        e:SetScript("OnClick", function() page:SetSection(i, "rail") end)
+        e.label:ClearAllPoints()
+        e.label:SetPoint("LEFT", 23, 0)
+        e.label:SetWidth(RAIL_W - 16 - 28)
+        e.label:SetWordWrap(true)
+        e.label:SetHeight(34)
+        e.label:SetJustifyH("LEFT")
+        e:SetScript("OnClick", function() e:Pulse(); page:SetSection(i, "rail") end)
         self.railEntries[i] = e
     end
 
@@ -424,6 +429,7 @@ function RailPage:LayoutRow(r, row, focused)
         r.btn:SetPoint("BOTTOMRIGHT", 0, 5)
         local armed = C:IsArmed(row.id)
         r.btn.label:SetText(armed and row.armedLabel or resolve(row.label))
+        r.btn.label:SetWordWrap(true)
         r.btn:SetState({ focus = focused, armed = armed, disabled = disabled })
         if armed and r.btn.armedId ~= row.id and UIFrameFadeIn then UIFrameFadeIn(r.btn, 0.15, 0.3, 1) end
         r.btn.armedId = armed and row.id or nil
@@ -481,8 +487,9 @@ function RailPage:LayoutRow(r, row, focused)
     if kind == "value" then
         parts.chip = true
         r.chip.text:SetText(resolve(row.text) or "")
-        local w = r.chip.text:GetStringWidth() + 20
+        local w = math.min(176, r.chip.text:GetStringWidth() + 20)
         r.chip:SetWidth(w)
+        r.chip.text:SetWidth(w - 20)
         r.chip:ClearAllPoints()
         r.chip:SetPoint("RIGHT", r, "LEFT", right, 0)
         controlLeft = right - w
@@ -492,7 +499,9 @@ function RailPage:LayoutRow(r, row, focused)
         r.stat:ClearAllPoints()
         r.stat:SetPoint("RIGHT", r, "LEFT", right, 0)
         r.stat:SetText(resolve(row.text) or "")
-        controlLeft = right - r.stat:GetStringWidth()
+        r.stat:SetWidth(176)
+        r.stat:SetWordWrap(true)
+        controlLeft = right - 176
     end
     local status = resolve(row.status)
     if status and kind == "check" then
@@ -500,7 +509,10 @@ function RailPage:LayoutRow(r, row, focused)
         r.status:ClearAllPoints()
         r.status:SetPoint("RIGHT", r, "LEFT", controlLeft - 10, 0)
         r.status:SetText(status)
-        controlLeft = controlLeft - 10 - r.status:GetStringWidth()
+        local statusWidth = math.min(128, r.status:GetStringWidth())
+        r.status:SetWidth(statusWidth)
+        r.status:SetWordWrap(true)
+        controlLeft = controlLeft - 10 - statusWidth
     end
     setShown(r, parts)
     local x = indent and 47 or 14
@@ -514,13 +526,13 @@ end
 
 function RailPage:Render()
     local sec = self:Section()
+    self.detail:SetHeight(BODY_H)
     -- The rail
     for i, e in ipairs(self.railEntries) do
         local active = i == self.section
         e.label:SetText(self.def.sections[i].label)
-        e.label:SetTextColor(unpack(active and KC.focus or KC.rail))
+        e:SetState({ active = active, focus = active and self.zone == "rail" })
         e.diamond:SetShown(active)
-        e.sel:SetShown(active and self.zone == "rail")
     end
     -- A section drawn its own way
     for _, other in ipairs(self.def.sections) do
@@ -538,11 +550,20 @@ function RailPage:Render()
     -- The list, windowed on the focus (the section title above it kept)
     self:Rebuild()
     local rows = self.rows
+    local probe = self.rowsUI[1] or newRow(self, 1)
     for _, row in ipairs(rows) do
         if row.kind == "info" then
-            local probe = self.rowsUI[1] or newRow(self, 1)
             probe.info:SetText(resolve(row.label))
             row.height = math.floor(probe.info:GetStringHeight() + 16 + 0.5)
+        elseif FOCUSABLE[row.kind] or row.kind == "stat" then
+            -- Measure the actual constrained font strings before pagination.
+            -- Localized labels and character names can occupy multiple lines.
+            self:LayoutRow(probe, row, false)
+            local height = row.kind == "button" and probe.btn.label:GetStringHeight() or probe.label:GetStringHeight()
+            for _, part in ipairs({ probe.status, probe.stat }) do
+                if part:IsShown() then height = math.max(height, part:GetStringHeight()) end
+            end
+            row.height = math.max(HEIGHT[row.kind] or 36, math.ceil(height + 16))
         end
     end
     local fi = self:FocusIndex()
@@ -617,8 +638,13 @@ function RailPage:Detail()
     if sec.view then return sec.view:Detail(self) end
     local row = self.rows[self:FocusIndex() or 0]
     if not row then return { title = sec.label, body = resolve(sec.tip) } end
+    local extra = resolve(row.extra)
+    local value = resolve(row.text) or (row.kind == "event" and resolve(row.pattern)) or resolve(row.status)
+    if value ~= nil and value ~= "" then
+        extra = extra and (extra .. "\n\n" .. tostring(value)) or tostring(value)
+    end
     return { title = resolve(row.title) or resolve(row.label), body = resolve(row.tip), tag = resolve(row.tag),
-        tagColor = row.tagColor, extra = resolve(row.extra) }
+        tagColor = row.tagColor, extra = extra }
 end
 
 function RailPage:Crumb()
@@ -673,6 +699,9 @@ function RailPage:Act(row, delta)
     elseif kind == "choice" then
         if row.step then row.step(1) end
     elseif kind == "button" then
+        for _, r in ipairs(self.rowsUI or {}) do
+            if r.row == row then r.btn:Pulse(); break end
+        end
         if row.danger then
             if C:IsArmed(row.id) then
                 C:Disarm()
@@ -866,41 +895,63 @@ function C:Build()
         f:SetPoint("CENTER", 0, 30)
     end
     f:Hide()
-    K.Panel(f)
+    -- Let Forever resolve its own Metal atlases, native canvas sizes and
+    -- Camelot offsets. The input-owning addon frame remains unchanged.
+    if NineSliceUtil and NineSliceUtil.ApplyLayoutByName then
+        local bg = f:CreateTexture(nil, "BACKGROUND")
+        bg:SetTexture(K.TEX .. "ck_panel_bg", "REPEAT", "REPEAT")
+        bg:SetHorizTile(true); bg:SetVertTile(true)
+        bg:SetPoint("TOPLEFT", 4, -21); bg:SetPoint("BOTTOMRIGHT", -4, 4)
+        NineSliceUtil.ApplyLayoutByName(f, "ButtonFrameTemplateNoPortrait")
+    else
+        K.Panel(f)
+    end
     self.frame = f
 
-    -- Header: the title, the close button
-    local title = K.Text(f, 20, KC.title)
-    title:SetPoint("LEFT", f, "TOPLEFT", 20, -22)
+    local title = K.Text(f, 18, KC.title)
+    title:SetPoint("TOP", 0, -5); title:SetJustifyH("CENTER")
+    title:SetSize(680, 22)
     title:SetText("Easy Controller")
-    local close = K.Button(f, 14)
-    close:SetSize(30, 26)
-    close:SetPoint("TOPRIGHT", -14, -9)
-    close.label:SetText("X")
-    close.label:SetTextColor(unpack(KC.cream))
+    f.title = title
+    f.profile = K.ChatText(f, 12, KC.cream2)
+    f.profile:SetPoint("TOP", 0, -37); f.profile:SetJustifyH("CENTER")
+    f.profile:SetSize(700, 18); f.profile:SetWordWrap(false)
+    local profileTip = CK.NewFrame("Frame", nil, f)
+    profileTip:SetAllPoints(f.profile); profileTip:EnableMouse(true)
+    profileTip:SetScript("OnEnter", function(self)
+        if GameTooltip then
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            GameTooltip:SetText(f.profile:GetText() or "")
+            GameTooltip:Show()
+        end
+    end)
+    profileTip:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+    local close = CK.NewFrame("Button", nil, f, "UIPanelCloseButtonNoScripts")
+    close:SetSize(24, 24)
+    close:SetPoint("TOPRIGHT", -2, 1)
     close:SetScript("OnClick", function() C:Close() end)
 
     -- Tabs, centered: LB, the five tabs, RB
-    local tabsW = 34 + 6 + #C.TABS * 126 + (#C.TABS - 1) * 6 + 6 + 34
+    local tabsW = 24 + 10 + #C.TABS * 126 + (#C.TABS - 1) * 6 + 10 + 24
     local x = math.floor((W - tabsW) / 2)
-    f.lbGlyph = K.Glyph(f, 34)
-    f.lbGlyph:SetPoint("TOPLEFT", x, -47)
+    f.lbGlyph = K.Glyph(f, 24)
+    f.lbGlyph:SetPoint("TOPLEFT", x, -65)
     f.tabs = {}
     for i, key in ipairs(C.TABS) do
-        local t = K.Button(f, 16)
-        t:SetSize(126, 32)
-        t:SetPoint("TOPLEFT", x + 40 + (i - 1) * 132, -48)
+        local t = K.Button(f, 14, "nav")
+        t:SetSize(126, 30)
+        t:SetPoint("TOPLEFT", x + 34 + (i - 1) * 132, -62)
         t.key = key
-        t:SetScript("OnClick", function() C:SetTab(key) end)
+        t:SetScript("OnClick", function() t:Pulse(); C:SetTab(key) end)
         f.tabs[i] = t
     end
-    f.rbGlyph = K.Glyph(f, 34)
-    f.rbGlyph:SetPoint("TOPLEFT", x + 40 + #C.TABS * 132, -47)
+    f.rbGlyph = K.Glyph(f, 24)
+    f.rbGlyph:SetPoint("TOPLEFT", x + 38 + #C.TABS * 132, -65)
 
-    -- Body: 784 x 424 inside its margins
+    -- Body: 784 x 420 inside its margins
     f.body = CK.NewFrame("Frame", nil, f)
-    f.body:SetPoint("TOPLEFT", 18, -98)
-    f.body:SetSize(784, 424)
+    f.body:SetPoint("TOPLEFT", 18, -104)
+    f.body:SetSize(784, 420)
     for _, key in ipairs(C.TABS) do
         local page = self.pages[key]
         if page then page:Build(f.body) end
@@ -908,15 +959,15 @@ function C:Build()
 
     -- Help bar: the crumb on the left, the hints on the right
     local bar = CK.NewFrame("Frame", nil, f)
-    bar:SetPoint("TOPLEFT", 2, -534)
-    bar:SetSize(W - 4, 44)
+    bar:SetPoint("TOPLEFT", 18, -536)
+    bar:SetSize(W - 36, 32)
     local line = K.Solid(bar, KC.line3, 1, "BORDER")
     line:SetPoint("TOPLEFT")
     line:SetPoint("TOPRIGHT")
     line:SetHeight(1)
     f.bar = bar
-    f.crumb = K.ChatText(bar, 13, KC.grey)
-    f.crumb:SetPoint("LEFT", 18, 0)
+    f.crumb = K.ChatText(bar, 11, KC.grey)
+    f.crumb:SetPoint("LEFT", 0, 0)
     f.crumb:SetWordWrap(false)
     f.hints = {}
 
@@ -925,6 +976,7 @@ function C:Build()
 end
 
 function C:SetTab(key, section)
+    self.readingDetail = nil
     local alias = C.ALIASES[key]
     if alias then key, section = alias[1], section or alias[2] end
     if not self.pages[key] then return end
@@ -955,12 +1007,22 @@ function C:StepTab(delta)
     for i, key in ipairs(C.TABS) do
         if key == self.tab then index = i end
     end
-    self:SetTab(C.TABS[(index - 1 + delta) % #C.TABS + 1])
+    local key = C.TABS[(index - 1 + delta) % #C.TABS + 1]
+    self:SetTab(key)
+    for _, t in ipairs(self.frame and self.frame.tabs or {}) do
+        if t.key == key then t:Pulse(); break end
+    end
 end
 
 function C:Render()
     local f = self.frame
     if not (f and f:IsShown()) then return end
+    if f.title then
+        local P = CK.Profiles
+        local name = P and P.ready and P:ActiveName()
+        f.title:SetText("Easy Controller")
+        if f.profile then f.profile:SetText(name and ("Profile: " .. name) or "") end
+    end
     f.lbGlyph:Set("LB")
     f.rbGlyph:Set("RB")
     for _, t in ipairs(f.tabs) do
@@ -969,12 +1031,20 @@ function C:Render()
     end
     local page = self:Page()
     page:Render()
+    if self.readingDetail and (not page.detail or not page.detail:IsShown()
+        or page.detail.contentKey ~= self.readingDetailKey) then self.readingDetail = nil end
     self:RenderHelp(page)
 end
 
 function C:RenderHelp(page)
     local f = self.frame
     local hints = page:Help() or {}
+    local detail = page.detail
+    if self.readingDetail then
+        hints = { K.H({ "DPAD" }, "Scroll", "DOWN"), K.H({ "B" }, L.V_BACK, "B") }
+    elseif detail and detail:IsShown() and detail.CanScroll and detail:CanScroll() then
+        hints[#hints + 1] = K.H({ "R3" }, "Read", "R3")
+    end
     local capturing = self:IsCapturingChord()
     if capturing then hints = { K.H({ "B" }, L.V_CANCEL, "B") } end
     if self.armed then hints = { K.H({ "A" }, L.V_CONFIRM, "A"), K.H({ "B" }, L.V_CANCEL, "B") } end
@@ -983,20 +1053,32 @@ function C:RenderHelp(page)
     if self.toast then crumb, color = self.toast.text, self.toast.color end
     f.crumb:SetText(crumb)
     f.crumb:SetTextColor(unpack(color))
-    local x = W - 4 - 18
-    for i = #hints, 1, -1 do
+    local total, minimum = 0, 0
+    for i = 1, #hints do
         local h = f.hints[i]
         if not h then
             h = K.Hint(f.bar)
             f.hints[i] = h
         end
         h:Set(hints[i])
+        total = total + h:GetWidth()
+        minimum = minimum + h.minWidth
+    end
+    local room = W - 36 - math.max(0, #hints - 1) * 12
+    local x = W - 36
+    for i = #hints, 1, -1 do
+        local h = f.hints[i]
+        if total > room and total > minimum then
+            local share = (h:GetWidth() - h.minWidth) / (total - minimum)
+            h:Set(hints[i], h.minWidth + math.max(0, room - minimum) * share)
+        end
         h:ClearAllPoints()
         h:SetPoint("RIGHT", f.bar, "LEFT", x, 0)
-        x = x - h:GetWidth() - 18
+        x = x - h:GetWidth() - 12
     end
     for i = #hints + 1, #f.hints do f.hints[i]:Hide() end
-    f.crumb:SetWidth(math.max(10, x - 18))
+    f.crumb:SetWidth(math.max(1, math.min(200, x)))
+    f.crumb:SetShown(x > 24)
 end
 
 ---------------------------------------------------------------------------
@@ -1006,6 +1088,7 @@ local NAV = {
     PADDUP = "UP", PADDDOWN = "DOWN", PADDLEFT = "LEFT", PADDRIGHT = "RIGHT",
     PAD1 = "A", PAD2 = "B", PAD3 = "X", PAD4 = "Y",
     PADLSHOULDER = "LB", PADRSHOULDER = "RB", ESCAPE = "B",
+    PADRSTICK = "R3",
 }
 -- Held triggers may add modifiers to the keys
 local PREFIXES = { "", "SHIFT-", "CTRL-", "ALT-", "CTRL-SHIFT-", "ALT-SHIFT-", "ALT-CTRL-", "ALT-CTRL-SHIFT-" }
@@ -1039,6 +1122,20 @@ function C:Press(name)
         if name ~= "A" then self:Disarm() end
     end
     local page = self:Page()
+    local detail = page.detail
+    if self.readingDetail then
+        if name == "UP" or name == "DOWN" then
+            detail:Scroll(name == "UP" and -1 or 1)
+            return
+        end
+        self.readingDetail = nil
+        if name == "B" or name == "R3" then self:RenderHelp(page); return end
+    elseif name == "R3" and detail and detail:IsShown() and detail.CanScroll and detail:CanScroll() then
+        self.readingDetail = true
+        self.readingDetailKey = detail.contentKey
+        self:RenderHelp(page)
+        return
+    end
     if page:Press(name) then return end
     if name == "LB" or name == "RB" then
         self:StepTab(name == "LB" and -1 or 1)
@@ -1150,6 +1247,7 @@ function C:Open(tab, section)
         if tab and self.pages[tab] then self:SetTab(tab, section) end
         return
     end
+    self.readingDetail = nil
     -- Else the tab last used (a 1.x name maps to its 2.0 tab)
     local key = tab
     if not (key and self.pages[key]) then
@@ -1181,6 +1279,7 @@ function C:DropPlacement()
 end
 
 function C:Close()
+    self.readingDetail = nil
     if not self:IsOpen() then return end
     self:DropPlacement()
     CK.Paddles:StopCapture(nil)

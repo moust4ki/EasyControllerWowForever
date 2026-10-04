@@ -32,6 +32,7 @@ K.C = {
     legendFree = hex("7A6A52"), legendGame = hex("4A463E"), legendSlot = hex("3A3020"), legendYours = hex("1C3236"),
     spell = hex("2F4A73"), item = hex("6B4A1C"), macro = hex("4F3466"), game = hex("4A463E"), bar = hex("5A4422"),
     emptyDot = hex("6B5A44"), panel = hex("120D08"),
+    inkTitle = hex("3D2515"), ink = hex("493421"), inkInfo = hex("29494D"),
 }
 local C = K.C
 
@@ -144,8 +145,8 @@ function K.Box(parent, radius, edge, layer, sub)
     return box
 end
 
--- The window look (ConfigWindow) and its small panels (placement banners):
--- the stone tile, a 2 px bronze edge, a 1 px dark line inside it
+-- The window and placement banners share a tiled slate body and a forged
+-- nine-slice frame, so narrow banners keep the same unstretched corners.
 function K.Panel(f)
     local bg = f:CreateTexture(nil, "BACKGROUND", nil, -8)
     bg:SetTexture(TEX .. "ck_panel_bg", "REPEAT", "REPEAT")
@@ -156,18 +157,7 @@ function K.Panel(f)
     under:SetAllPoints()
     under:SetDrawLayer("BACKGROUND", -8)
     bg:SetDrawLayer("BACKGROUND", -7)
-    for _, e in ipairs({ { "TOPLEFT", "TOPRIGHT", nil, 2 }, { "BOTTOMLEFT", "BOTTOMRIGHT", nil, 2 },
-        { "TOPLEFT", "BOTTOMLEFT", 2, nil }, { "TOPRIGHT", "BOTTOMRIGHT", 2, nil } }) do
-        local t = K.Solid(f, C.bronze, 1, "BORDER")
-        t:SetPoint(e[1]); t:SetPoint(e[2])
-        if e[3] then t:SetWidth(e[3]) else t:SetHeight(e[4]) end
-    end
-    for _, e in ipairs({ { "TOPLEFT", "TOPRIGHT", 0, -2, nil, 1 }, { "BOTTOMLEFT", "BOTTOMRIGHT", 0, 2, nil, 1 },
-        { "TOPLEFT", "BOTTOMLEFT", 2, 0, 1, nil }, { "TOPRIGHT", "BOTTOMRIGHT", -2, 0, 1, nil } }) do
-        local t = K.Solid(f, C.inner, 1, "BORDER", 1)
-        t:SetPoint(e[1], e[3], e[4]); t:SetPoint(e[2], e[3], e[4])
-        if e[5] then t:SetWidth(e[5]) else t:SetHeight(e[6]) end
-    end
+    CK.UIKit.nineSlice(f, "ck_reforged_frame", 128, 128, 16, 12, "BORDER")
 end
 
 ---------------------------------------------------------------------------
@@ -277,18 +267,27 @@ end
 -- A help bar hint: its glyph(s), then a short verb; a click presses its key
 function K.Hint(parent)
     local h = CK.NewFrame("Button", nil, parent)
-    h:SetHeight(30)
-    h.glyphs = K.GlyphRow(h, 30)
+    h:SetHeight(24)
+    h.glyphs = K.GlyphRow(h, 20)
     h.glyphs:SetPoint("LEFT")
-    h.verb = K.Text(h, 15, C.cream)
+    h.verb = K.Text(h, 12, C.cream)
     h:SetScript("OnClick", function(self) if self.press then CK.Config:ClickHint(self.press) end end)
-    function h:Set(hint)
+    function h:Set(hint, maxWidth)
         local w = self.glyphs:Set(hint.keys)
         self.verb:ClearAllPoints()
         self.verb:SetPoint("LEFT", w + 6, 0)
+        self.verb:SetWidth(0); self.verb:SetHeight(0)
+        self.verb:SetWordWrap(false)
         self.verb:SetText(hint.verb or "")
+        local natural = self.verb:GetStringWidth()
+        local available = maxWidth and math.max(1, maxWidth - w - 6) or natural
+        self.verb:SetWidth(math.min(natural, available))
+        self.verb:SetWordWrap(maxWidth ~= nil); self.verb:SetMaxLines(2)
+        self.verb:SetHeight(26)
         self.press = hint.press
-        self:SetWidth(w + 6 + self.verb:GetStringWidth())
+        self.minWidth = w + 7
+        self:SetWidth(w + 6 + math.min(natural, available))
+        self:SetHeight(maxWidth and natural > available and 28 or 24)
         self:Show()
     end
     return h
@@ -333,72 +332,126 @@ end
 -- the glyphs of a combination (Gamepad), a title, a state tag (a dot and a
 -- word), the help text, a cyan info line; a legend at the bottom (Gamepad)
 ---------------------------------------------------------------------------
+-- Measure after setting the width, with no previous height limiting the result.
+local function fitText(label, text, width)
+    label:SetWidth(width)
+    label:SetHeight(0)
+    label:SetText(text or "")
+    local height = math.ceil(label:GetStringHeight())
+    label:SetHeight(height)
+    return height
+end
+
 function K.Detail(parent, width, comboSize)
     local d = CK.NewFrame("Frame", nil, parent)
     d:SetWidth(width)
-    d.box = K.Box(d, 4, 1, "BACKGROUND", 1)
-    d.box:SetPoints(d)
-    d.box:SetColors(C.black, 0.72, C.line1, 1)
+    d.parchment = CK.UIKit.nineSlice(d, "ck_reforged_parchment", 256, 256, 16, 12, "BACKGROUND")
+    if hasAtlas("common-insideframe") then
+        -- The native inset rim includes transparent paper-facing shadows;
+        -- SetAtlas retains its client-provided slice margins and resolution.
+        d.rim = d:CreateTexture(nil, "BORDER")
+        d.rim:SetAllPoints()
+        d.rim:SetAtlas("common-insideframe", false)
+    end
     local inner = width - 28
-    d.combo = K.GlyphRow(d, comboSize or 34)
-    d.title = K.Text(d, 19, C.title)
-    d.title:SetWidth(inner)
-    d.title:SetWordWrap(true)
-    d.title:SetSpacing(5)
-    d.dot = d:CreateTexture(nil, "ARTWORK")
-    d.dot:SetTexture(TEX .. "ck_dot")
-    d.dot:SetSize(10, 10)
-    d.tag = K.ChatText(d, 13, C.cream)
-    d.body = K.ChatText(d, 14, C.cream2)
-    d.body:SetWidth(inner)
-    d.body:SetWordWrap(true)
-    d.body:SetSpacing(6)
-    d.extra = K.ChatText(d, 14, C.info)
-    d.extra:SetWidth(inner)
-    d.extra:SetWordWrap(true)
-    d.extra:SetSpacing(6)
-    -- content = { combo = { keys }, title, tag, tagColor, body, extra }
+    d.viewport = CK.NewFrame("ScrollFrame", nil, d)
+    d.viewport:SetPoint("TOPLEFT", 14, -14)
+    d.viewport:EnableMouseWheel(true)
+    d.scrollChild = CK.NewFrame("Frame", nil, d.viewport)
+    d.scrollChild:SetWidth(inner)
+    d.viewport:SetScrollChild(d.scrollChild)
+    local child = d.scrollChild
+    d.combo = K.GlyphRow(child, comboSize or 26)
+    d.icon = K.SquareIcon(child, 50, "ARTWORK")
+    d.title = K.Text(child, 16, C.inkTitle)
+    d.title:SetSpacing(3)
+    d.dot = child:CreateTexture(nil, "ARTWORK")
+    d.dot:SetTexture(TEX .. "ck_dot"); d.dot:SetSize(10, 10)
+    d.tag = K.ChatText(child, 13, C.ink)
+    d.body = K.ChatText(child, 13, C.ink)
+    d.body:SetSpacing(4)
+    d.extra = K.ChatText(child, 13, C.inkInfo)
+    d.extra:SetSpacing(4)
+    for _, label in ipairs({ d.title, d.tag, d.body, d.extra }) do
+        label:SetWordWrap(true); label:SetNonSpaceWrap(true); label:SetJustifyV("TOP")
+        label:SetShadowColor(0, 0, 0, 0)
+    end
+    d.scrollHint = K.ChatText(d, 11, C.ink)
+    d.scrollHint:SetShadowColor(0, 0, 0, 0)
+    d.scrollHint:SetWidth(inner); d.scrollHint:SetJustifyH("CENTER")
+    d.actionButton = K.Button(d, 14)
+    d.actionButton:SetPoint("BOTTOMLEFT", 14, 14)
+    d.actionButton:SetPoint("BOTTOMRIGHT", -14, 14)
+    d.actionButton:SetHeight(34)
+    function d:Activate()
+        local action = self.actionDef
+        if not action or action.disabled then return end
+        self.actionButton:Pulse()
+        action.func()
+    end
+    d.actionButton:SetScript("OnClick", function() d:Activate() end)
+    function d:CanScroll() return (self.maxScroll or 0) > 0 end
+    function d:Scroll(delta)
+        local offset = math.max(0, math.min(self.maxScroll or 0, self.viewport:GetVerticalScroll() + delta * 40))
+        self.viewport:SetVerticalScroll(offset)
+        self.scrollHint:SetText(self:CanScroll() and format("%d%%", math.floor(offset / self.maxScroll * 100 + 0.5)) or "")
+    end
+    d.viewport:SetScript("OnMouseWheel", function(_, delta) d:Scroll(-delta) end)
     function d:Set(content)
         content = content or {}
-        local last
-        local function place(region, gap)
+        local centered, y = content.centered, 0
+        local function place(region, height, gap, x)
+            if y > 0 then y = y + (gap or 9) end
             region:ClearAllPoints()
-            if last then
-                region:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -(gap or 10))
-            else
-                region:SetPoint("TOPLEFT", self, "TOPLEFT", 14, -14)
-            end
-            last = region
+            region:SetPoint("TOPLEFT", child, "TOPLEFT", x or (centered and (inner - region:GetWidth()) / 2 or 0), -y)
+            y = y + height
         end
+        self.title:SetJustifyH(centered and "CENTER" or "LEFT")
+        self.tag:SetJustifyH(centered and "CENTER" or "LEFT")
+        self.body:SetJustifyH(centered and "CENTER" or "LEFT")
+        self.extra:SetJustifyH(centered and "CENTER" or "LEFT")
         self.combo:SetShown(content.combo ~= nil)
-        if content.combo then
-            self.combo:Set(content.combo)
-            place(self.combo)
-        end
-        self.title:SetText(content.title or "")
-        place(self.title)
-        self.dot:SetShown(content.tag ~= nil)
+        if content.combo then self.combo:Set(content.combo) end
+        self.icon:SetShown(content.icon ~= nil)
+        if content.icon then CK.Paddles.SetIcon(self.icon, content.icon) end
+        if not centered and content.combo then place(self.combo, self.combo:GetHeight()) end
+        if content.icon then place(self.icon, self.icon:GetHeight()) end
+        place(self.title, fitText(self.title, content.title, inner))
+        if centered and content.combo then place(self.combo, self.combo:GetHeight(), 7) end
+        self.dot:SetShown(content.tag ~= nil and not centered)
         self.tag:SetShown(content.tag ~= nil)
         if content.tag then
-            place(self.dot)
-            local tc = content.tagColor or C.grey
-            self.dot:SetVertexColor(tc[1], tc[2], tc[3])
-            self.tag:ClearAllPoints()
-            self.tag:SetPoint("LEFT", self.dot, "RIGHT", 8, 0)
-            self.tag:SetText(content.tag)
+            place(self.tag, fitText(self.tag, content.tag, centered and inner or inner - 18), 7, centered and 0 or 18)
+            if not centered then
+                local tc = content.tagColor or C.grey
+                self.dot:SetVertexColor(tc[1], tc[2], tc[3])
+                self.dot:ClearAllPoints(); self.dot:SetPoint("TOPLEFT", self.tag, "TOPLEFT", -18, -2)
+            end
         end
         self.body:SetShown(content.body ~= nil and content.body ~= "")
-        if self.body:IsShown() then
-            self.body:SetText(content.body)
-            place(self.body)
+        if self.body:IsShown() then place(self.body, fitText(self.body, content.body, inner)) end
+        self.extra:SetShown(content.extra ~= nil and content.extra ~= "")
+        if self.extra:IsShown() then place(self.extra, fitText(self.extra, content.extra, inner)) end
+        self.actionDef = content.action
+        self.actionButton:SetShown(content.action ~= nil)
+        if content.action then
+            self.actionButton.label:SetText(content.action.label)
+            self.actionButton:SetState({ disabled = content.action.disabled, focus = content.action.focus })
         end
-        self.extra:SetShown(content.extra ~= nil)
-        if content.extra then
-            self.extra:SetText(content.extra)
-            place(self.extra)
-        end
-        -- A legend at the bottom (the Gamepad screen's states), set by its page
         if self.legend then self.legend:SetShown(content.legend and true or false) end
+        -- The action and existing Gamepad legend stay outside the scroll child.
+        local footer = content.action and 60 or 14
+        if self.legend and content.legend then footer = math.max(footer, self.legend:GetHeight() + 26) end
+        self.scrollHint:ClearAllPoints(); self.scrollHint:SetPoint("BOTTOMLEFT", 14, footer)
+        self.viewport:SetSize(inner, math.max(1, self:GetHeight() - 14 - footer - 18))
+        child:SetHeight(math.max(1, y))
+        self.maxScroll = math.max(0, y - self.viewport:GetHeight())
+        self.scrollHint:SetShown(self:CanScroll())
+        local key = table.concat({ content.title or "", content.tag or "", content.body or "", content.extra or "",
+            tostring(content.icon), table.concat(content.combo or {}, "+"), tostring(centered) }, "\031")
+        if self.contentKey ~= key then self.viewport:SetVerticalScroll(0) end
+        self.contentKey = key
+        self:Scroll(0)
     end
     return d
 end
@@ -411,7 +464,7 @@ end
 -- function(entry), onBack = function(), marked = function(entry) (a cyan
 -- diamond: already there), rows = 10 }
 ---------------------------------------------------------------------------
-local PICK_ROW, PICK_HEAD = 32, 28
+local PICK_ROW, PICK_HEAD = 48, 30
 
 function K.Picker(parent, width)
     local p = CK.NewFrame("Frame", nil, parent)
@@ -426,17 +479,21 @@ function K.Picker(parent, width)
     p.title = K.Text(p, 17, C.title)
     p.title:SetPoint("TOPLEFT", p.kicker, "BOTTOMLEFT", 0, -3)
     p.title:SetWidth(width - 24)
+    p.title:SetWordWrap(true); p.title:SetMaxLines(2); p.title:SetNonSpaceWrap(true)
     p.tabs = {}
     p.rows = {}
     p:SetScript("OnMouseWheel", function(self, delta) self:Move(-delta * 3) end)
+    p:SetScript("OnHide", function(self)
+        if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+    end)
     p:Hide()
 
     local function tab(i)
         local t = p.tabs[i]
         if t then return t end
-        t = CK.UIKit.buildButton(p, "", function() p:SetList(i) end)
-        t.label:SetFont(CK:GetFontPath(), 13, "")
-        t:SetHeight(28)
+        t = K.Button(p, 13, "nav")
+        t:SetScript("OnClick", function() t:Pulse(); p:SetList(i) end)
+        t:SetHeight(34)
         p.tabs[i] = t
         return t
     end
@@ -460,8 +517,13 @@ function K.Picker(parent, width)
         r.label = K.Text(r, 15, C.cream)
         r.label:SetPoint("LEFT", r.icon, "RIGHT", 8, 0)
         r.label:SetPoint("RIGHT", -6, 0)
+        r.label:SetWidth(width - 68); r.label:SetHeight(36)
+        r.label:SetWordWrap(true); r.label:SetNonSpaceWrap(true); r.label:SetMaxLines(2)
+        r.label:SetSpacing(2)
         r.head = K.Text(r, 14, C.title)
         r.head:SetPoint("BOTTOMLEFT", 4, 3)
+        r.head:SetWidth(width - 32); r.head:SetHeight(28)
+        r.head:SetWordWrap(true); r.head:SetMaxLines(2)
         r:SetScript("OnClick", function(self)
             if self.index then
                 p.index = self.index
@@ -474,6 +536,7 @@ function K.Picker(parent, width)
                 p.index = self.index
                 p:Render()
             end
+            if self.index then p:ShowEntryTooltip() end
         end)
         p.rows[i] = r
         return r
@@ -482,16 +545,42 @@ function K.Picker(parent, width)
     function p:Open(def)
         self.def = def
         self.list = def.list or 1
-        self:LoadList()
         self:Show()
+        self:LoadList()
     end
 
     function p:Close()
+        if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
         self.def = nil
         self:Hide()
     end
 
     function p:IsOpen() return self.def ~= nil end
+
+    function p:ShowEntryTooltip()
+        local e = self.index and self.entries[self.index]
+        if not GameTooltip then return end
+        if not e or e.header then
+            if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+            return
+        end
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:SetText(e.name or "", 1, 1, 1, true)
+        if e.sub then GameTooltip:AddLine(e.sub, 0.8, 0.8, 0.8, true) end
+        GameTooltip:Show()
+    end
+
+    function p:Layout()
+        local kicker, title = self.def.kicker, self.def.title
+        if type(kicker) == "function" then kicker = kicker() end
+        if type(title) == "function" then title = title() end
+        self.kicker:SetText(K.Upper(kicker or ""))
+        local titleHeight = fitText(self.title, title, width - 24)
+        self.rowTop = 12 + self.kicker:GetStringHeight() + 3 + titleHeight + 8
+        self.tabTop = self.rowTop
+        if #self.def.lists > 1 then self.rowTop = self.rowTop + 40 end
+        self.visibleRows = math.max(1, math.min(self.def.rows or 10, math.floor((self:GetHeight() - self.rowTop - 12) / PICK_ROW)))
+    end
 
     function p:LoadList()
         local list = self.def.lists[self.list]
@@ -517,7 +606,7 @@ function K.Picker(parent, width)
     -- one entry of context at the edges
     function p:Move(delta)
         local entries, i = self.entries or {}, self.index
-        if not i then return self:Render() end
+        if not i then self:Render(); self:ShowEntryTooltip(); return end
         local step = delta < 0 and -1 or 1
         for _ = 1, math.abs(delta) do
             local j = i + step
@@ -525,7 +614,8 @@ function K.Picker(parent, width)
             if entries[j] then i = j end
         end
         self.index = i
-        local max = self.def.rows or 10
+        self:Layout()
+        local max = self.visibleRows
         if i - 1 <= self.offset then self.offset = math.max(0, i - 2) end
         if self.offset > 0 and entries[self.offset] and entries[self.offset].header then
             self.offset = self.offset - 1
@@ -533,6 +623,7 @@ function K.Picker(parent, width)
         if i + 1 > self.offset + max then self.offset = math.min(#entries - max, i + 1 - max) end
         self.offset = math.max(0, self.offset)
         self:Render()
+        self:ShowEntryTooltip()
     end
 
     -- The previous / next section
@@ -541,7 +632,7 @@ function K.Picker(parent, width)
         for i, e in ipairs(entries) do
             if e.header then headers[#headers + 1] = i end
         end
-        if #headers < 2 then return self:Move(step * (self.def.rows or 10)) end
+        if #headers < 2 then return self:Move(step * (self.visibleRows or self.def.rows or 10)) end
         local current = 0
         for n, h in ipairs(headers) do
             if h < (self.index or 0) then current = n end
@@ -563,7 +654,11 @@ function K.Picker(parent, width)
         elseif name == "LEFT" or name == "RIGHT" then
             self:Jump(name == "LEFT" and -1 or 1)
         elseif name == "LB" or name == "RB" then
-            if #self.def.lists > 1 then self:SetList(self.list + (name == "LB" and -1 or 1)) end
+            if #self.def.lists > 1 then
+                self:SetList(self.list + (name == "LB" and -1 or 1))
+                local t = self.tabs[self.list]
+                if t then t:Pulse() end
+            end
         elseif name == "A" then
             self:Choose()
         elseif name == "B" then
@@ -582,11 +677,7 @@ function K.Picker(parent, width)
     function p:Render()
         local def = self.def
         if not def then return end
-        local kicker, title = def.kicker, def.title
-        if type(kicker) == "function" then kicker = kicker() end
-        if type(title) == "function" then title = title() end
-        self.kicker:SetText(K.Upper(kicker or ""))
-        self.title:SetText(title or "")
+        self:Layout()
         -- The lists' tabs share the width
         local n = #def.lists
         local tw = (width - 24 - (n - 1) * 4) / n
@@ -595,17 +686,20 @@ function K.Picker(parent, width)
             t:SetShown(n > 1 and i <= n)
             if i <= n then
                 t:SetWidth(tw)
-                -- A long name is cut, never over its neighbour
-                t.label:SetWidth(tw - 6)
-                t.label:SetWordWrap(false)
+                t.label:SetWidth(tw - 12); t.label:SetHeight(30)
+                t.label:SetWordWrap(true); t.label:SetMaxLines(2)
                 t:ClearAllPoints()
-                t:SetPoint("TOPLEFT", self, "TOPLEFT", 12 + (i - 1) * (tw + 4), -54)
+                t:SetPoint("TOPLEFT", self, "TOPLEFT", 12 + (i - 1) * (tw + 4), -self.tabTop)
                 t.label:SetText(def.lists[i].label)
-                t:SetActive(i == self.list)
+                t:SetState({ active = i == self.list })
             end
         end
-        local top = n > 1 and -88 or -54
-        local max = def.rows or 10
+        local top = -self.rowTop
+        local max = self.visibleRows
+        if self.index then
+            self.offset = math.max(0, math.min(self.offset, self.index - 1))
+            if self.index > self.offset + max then self.offset = self.index - max end
+        end
         local y = top
         local shown = 0
         for i = 1, max + 1 do
@@ -663,9 +757,27 @@ end
 -- tab), armed (a destructive one asking again: red), disabled (faded); the
 -- mouse lights it up
 ---------------------------------------------------------------------------
-function K.Button(parent, size)
+function K.Button(parent, size, skin)
     local b = CK.NewFrame("Button", nil, parent)
-    b.slice = CK.UIKit.nineSlice(b, "ck_btn_normal", 128, 32, 6, 6, "ARTWORK")
+    local role = skin == "role"
+    local prefix = role and "ck_reforged_role" or "ck_btn"
+    local native = (role or skin == "nav") and hasAtlas("common-button-list-" .. (role and "large" or "small"))
+    if native then
+        -- SetAtlas loads the client's slice metadata, including the asymmetric
+        -- selected ornament. Do not replace it with a symmetric nine-slice.
+        b.nativeBase = b:CreateTexture(nil, "ARTWORK")
+        b.nativeBase:SetAllPoints()
+        b.nativeSelected = b:CreateTexture(nil, "ARTWORK", nil, 1)
+        b.nativeSelected:SetAllPoints()
+        b.slice = { parts = { b.nativeBase, b.nativeSelected } }
+        function b.slice:SetShown(shown)
+            b.nativeBase:SetShown(shown)
+            if not shown then b.nativeSelected:Hide() end
+        end
+    else
+        b.slice = CK.UIKit.nineSlice(b, prefix .. "_normal", role and 512 or 128, role and 128 or 32,
+            role and 12 or 6, role and 8 or 6, "ARTWORK")
+    end
     b.armedBox = K.Box(b, 4, 2, "ARTWORK", 2)
     b.armedBox:SetPoints(b)
     b.armedBox:SetColors(C.dangerBg, 1, C.danger, 1)
@@ -677,7 +789,7 @@ function K.Button(parent, size)
     b.state = {}
     function b:SetState(state)
         self.state = state or {}
-        self:Render()
+        if self.state.disabled then self:ClearPress() else self:Render() end
     end
     function b:Render()
         local st = self.state
@@ -686,8 +798,25 @@ function K.Button(parent, size)
         if st.armed then
             self.label:SetTextColor(unpack(C.dangerText))
         else
-            local on = st.active or st.focus
-            self.slice:SetFile(on and "ck_btn_active" or (self.hover and not st.disabled and "ck_btn_hover" or "ck_btn_normal"))
+            local on = not st.disabled and (st.active or st.focus)
+            if native then
+                local family = "common-button-list-" .. (role and "large" or (self:GetHeight() <= 34 and "small" or "mid"))
+                local lit = not st.disabled and (self.hover or (not role and on))
+                local atlas = family .. (lit and "-hover" or "")
+                if self.nativeAtlas ~= atlas then self.nativeBase:SetAtlas(atlas, false); self.nativeAtlas = atlas end
+                self.nativeSelected:SetShown(role and on and true or false)
+                if role and self.selectedAtlas ~= family .. "-selected" then
+                    self.nativeSelected:SetAtlas(family .. "-selected", false); self.selectedAtlas = family .. "-selected"
+                end
+                -- This family has no pressed artwork: dim only while the real
+                -- mouse press or controller activation pulse is active.
+                local brightness = self:IsPressed() and 0.70 or 1
+                self.nativeBase:SetVertexColor(brightness, brightness, brightness)
+                self.nativeSelected:SetVertexColor(brightness, brightness, brightness)
+            else
+                self.slice:SetFile(self:IsPressed() and prefix .. "_pressed" or (on and prefix .. "_active"
+                    or (self.hover and not st.disabled and prefix .. "_hover" or prefix .. "_normal")))
+            end
             self.label:SetTextColor(unpack(st.disabled and C.disabled or (on and C.focus or C.tab)))
         end
         self:SetAlpha(st.disabled and 0.45 or 1)
@@ -700,6 +829,8 @@ function K.Button(parent, size)
         self.hover = false
         self:Render()
     end)
+    CK.UIKit.pressFeedback(b)
+    if native then b:HookScript("OnSizeChanged", function(self) self:Render() end) end
     b:Render()
     return b
 end

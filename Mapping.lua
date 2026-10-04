@@ -64,6 +64,21 @@ M.LAYER_BAR = { [""] = "top", LT = "left", RT = "right", LTRT = "bottom" }
 
 local function settings() return CK.db.settings end
 
+-- Profiles own saved bindings once ready; reads keep using their effective
+-- runtime tables, while iteration also includes shared utility bindings.
+local function bindingPairs(kind)
+    if CK.Profiles and CK.Profiles.ready then return CK.Profiles:BindingPairs(kind) end
+    return pairs(settings()[kind])
+end
+
+local function setBinding(kind, key, action)
+    if CK.Profiles and CK.Profiles.ready then
+        CK.Profiles:SetBinding(kind, key, action)
+    else
+        settings()[kind][key] = action
+    end
+end
+
 function M:Enabled()
     return CK.db and settings().modules.mapping
 end
@@ -350,11 +365,11 @@ end
 -- "item:5512" | "macro:Name" | "bar:bottom:a" | "wheel:consumables"
 ---------------------------------------------------------------------------
 function M:Get(inputId, layer)
-    return settings().mapping[inputId .. ":" .. layer]
+    return settings().mapping[inputId .. ":" .. layer] or nil
 end
 
 function M:Set(inputId, layer, action)
-    settings().mapping[inputId .. ":" .. layer] = action
+    setBinding("mapping", inputId .. ":" .. layer, action)
     self:Apply()
     CK.Paddles:Apply()
 end
@@ -380,14 +395,15 @@ end
 -- How many of the game's buttons are replaced
 function M:ReplacedCount()
     local n = 0
-    for _ in pairs(settings().replaced) do n = n + 1 end
+    for _ in bindingPairs("replaced") do n = n + 1 end
     return n
 end
 
 -- Every replaced button back to the game's own binding (what the player put
 -- in the game's slots, on the free buttons and paddles stays)
 function M:RestoreGameButtons()
-    wipe(settings().replaced)
+    if CK.Profiles and CK.Profiles.ready then CK.Profiles:ClearBindings("replaced")
+    else wipe(settings().replaced) end
     self:Apply()
     CK.Paddles:Apply()
 end
@@ -444,7 +460,7 @@ function M:SetReplaced(inputId, layer, action)
     -- The game's own function chosen: the button given back to it
     local input = M.BY_ID[inputId]
     if action and input and action == self:NativeAction(input, layer) then action = nil end
-    settings().replaced[inputId .. ":" .. layer] = action
+    setBinding("replaced", inputId .. ":" .. layer, action)
     if action then
         for _, t in ipairs(TRIGGERS) do
             if not self:TriggerModifier(t) then self:SetTriggerModifier(t, true) end
@@ -472,7 +488,11 @@ end
 -- What an input runs in a layer: its own action, else (a shared key) the
 -- one of the layer the key belongs to
 function M:EffectiveAction(input, layer)
-    local base = self:SharedLayers(layer)[1]
+    -- Only the first shared layer is needed: omit triggers that add no
+    -- modifier instead of constructing and comparing all four layers.
+    local base = ""
+    if layer:find("LT", 1, true) and self:TriggerModifier("PADLTRIGGER") then base = "LT" end
+    if layer:find("RT", 1, true) and self:TriggerModifier("PADRTRIGGER") then base = base .. "RT" end
     local baseAction = self:Get(input.id, base)
     if not input.paddle or (baseAction and not M.Routable(baseAction)) then return baseAction end
     local own = self:Get(input.id, layer)
@@ -1046,7 +1066,7 @@ function M:Apply()
     unbindAll(owner, self.bound, false)
     unbindAll(takeOwner, self.taken, true)
     if self:Enabled() then
-        for comboId, action in pairs(settings().mapping) do
+        for comboId, action in bindingPairs("mapping") do
             local inputId, layer = comboId:match("^(%w+):(%a*)$")
             local input = inputId and M.BY_ID[inputId]
             -- Never on an input the game uses
@@ -1181,7 +1201,7 @@ local marks = {}        -- the game's button -> our picture
 function M:UpdateMarks()
     local wanted = {}
     if self:ReplaceOn() and self:OwnKeys() then
-        for comboId, action in pairs(settings().replaced) do
+        for comboId, action in bindingPairs("replaced") do
             local inputId, layer = comboId:match("^(%w+):(%a*)$")
             local input = inputId and M.BY_ID[inputId]
             local native = input and self:Replaceable(input, layer) and self:NativeBarButton(input, layer)
@@ -1235,7 +1255,7 @@ function M:Diagnose()
         tostring(InCombatLockdown()), tostring(self:CoreActive()))
         .. format(" | pending %s, game sets %s", tostring(self.pending), stack and #stack or "?"))
     -- What is saved, and whether it can be bound
-    for comboId, action in pairs(settings().replaced) do
+    for comboId, action in bindingPairs("replaced") do
         local inputId, layer = comboId:match("^(%w+):(%a*)$")
         local input = inputId and M.BY_ID[inputId]
         DEFAULT_CHAT_FRAME:AddMessage(format("  %s = %s: %s, replaceable %s, key %s", comboId, action,
@@ -1298,7 +1318,12 @@ function M:Init()
     -- Paddle actions set before 0.5.0 lived with the paddles
     for id, cfg in pairs(settings().paddles) do
         if cfg.action then
-            settings().mapping[id .. ":"] = settings().mapping[id .. ":"] or cfg.action
+            local key = id .. ":"
+            local current = settings().mapping[key]
+            -- A profile's explicit removal must not restore an old action.
+            if not current and not (CK.Profiles and CK.Profiles.ready and current == false) then
+                setBinding("mapping", key, cfg.action)
+            end
             cfg.action, cfg.cat = nil, nil
         end
     end

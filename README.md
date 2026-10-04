@@ -62,8 +62,10 @@ Choose the input method in the options or with `/ec mode wheel|stick`.
             [q r s t]
 ```
 
-Drawn on the 8-section wheel: the petal picked lights up, the others dim, a gold pastille marks the
-aimed character and the centre shows it in large. Option **Daisywheel look**: groups circled (a ring
+Drawn on a solid stone wheel with Forever's bronze rim: the petal picked lights up,
+the others dim, a native circular highlight marks the aimed character, and the centre
+shows it in large. A brief pressed state follows each typed character. Option
+**Daisywheel look**: groups circled (a ring
 around each group of 4) or characters only.
 
 - **Left stick**: pick a petal.
@@ -120,10 +122,10 @@ suggestions. With the mouse, simply **hover** a channel (no click needed). The m
 there with A. Unavailable channels are greyed out and skipped (party / raid / guild you are not in,
 `/r` with nobody to reply to). Switching never loses the chat focus.
 
-The chosen channel also becomes the chat's own sticky channel, as if you had typed `/p` in the
-game: every following message goes there, including text typed on a physical keyboard or by a
-dictation tool, and the keyboard reopens on it. Only the channel is set, never the chat's text, and
-never in combat; this can be turned off in the options.
+With **Channel sticks** enabled, the addon keyboard remembers its selected channel for
+the next message. It keeps this choice in its own state; the game's chat text and
+channel attributes remain owned by the game. A later channel choice made in native
+chat takes precedence, and explicit whispers keep their own recipient.
 
 With `/w`, first pick the recipient: type the name (names may contain a space) and insert a
 suggestion (recent correspondents, group members, online friends, guild) or press A to confirm what
@@ -496,6 +498,60 @@ CurseForge / release package (`dist/EasyController-<version>.zip`, page descript
 ```bash
 python tools/package.py
 ```
+
+### Local character and role profiles
+
+In the local build, open `/ec config`, then **Home > Profiles**. General, Tank, Healer and
+Damage are separate layouts for each character. Selecting a profile previews it;
+**Activate** switches outside combat. The first activation of a new role copies
+the current layout. Copying another layout replaces personal bindings and custom wheels
+after confirmation; shared utility commands keep their current settings.
+
+Controller hardware, display settings and utility commands (targeting, interaction,
+menus and consumable-wheel shortcuts) are shared. Spell, item, macro and custom-wheel
+bindings belong to the active character/profile. A personal binding takes precedence
+over a shared utility; clearing one restores the game's behavior in that profile.
+The first character keeps the existing setup; subsequent characters start with shared
+utilities and empty personal layouts. The original import remains available to copy.
+Native action-bar contents and the game's own bindings are not profile snapshots.
+
+**Home > Role layout** lets you label an interrupt, defensive, movement or emergency
+heal, choose its button/layer and select a known spell. Positions are remembered across
+characters; abilities are chosen per profile. Review the preview before applying.
+Occupied buttons are protected until **Replace existing** is enabled. Disabled buttons
+and unavailable layers must be configured in Gamepad settings first. Choose abilities
+and activate profiles explicitly; specialization changes do not switch profiles automatically.
+
+Under **Wheels > Position**, **Keep custom wheel directions** preserves eight directions
+including empty slots. This is optional and applies to custom wheels, not the automatic
+consumables list. Alerts now give important vibration patterns priority over wheel ticks.
+
+### Running regression checks
+
+Run from the repository root (Python 3 and Lua 5.1):
+
+```bash
+python -m unittest discover -s tools -p 'test_*.py'
+lua tools/test_toggle.lua
+lua tools/test_upgrades.lua
+lua tools/test_predict.lua
+lua tools/test_consumable_refresh.lua
+lua tools/test_vibration.lua
+lua tools/test_refresh.lua
+lua tools/test_profiles.lua
+lua tools/test_profile_options.lua
+lua tools/test_config_layout.lua
+lua tools/test_text_layout.lua
+lua tools/test_skin.lua
+lua tools/test_consumable_skin.lua
+lua tools/test_mwheel_skin.lua
+lua tools/test_supplies.lua
+lua tools/test_message.lua
+python tools/package.py
+```
+
+The Lua checks execute addon code with narrow game-API stubs. They do not replace
+in-game testing of secure bindings, controller input, or rendering.
 
 ### Releases
 

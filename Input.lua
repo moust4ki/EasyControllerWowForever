@@ -72,8 +72,18 @@ function CK:SetRightStick(x, y)
     end
 end
 
+local function runAction(ck, action)
+    local text, target
+    if action == "Backspace" then text, target = ck:GetText(), ck:GetChatAttr("tellTarget") end
+    ck[action](ck)
+    if action == "ToggleShift" or action == "ToggleSymbols" or action == "Space"
+        or (action == "Backspace" and (text ~= ck:GetText() or target ~= ck:GetChatAttr("tellTarget"))) then
+        ck:PulseAction(action)
+    end
+end
+
 function CK:RunAction(action, button)
-    self[action](self)
+    runAction(self, action)
     if REPEATABLE[action] then
         self.repeatFn = action
         self.repeatButton = button
@@ -134,7 +144,7 @@ function CK:OnUpdate()
     end
 
     if self.repeatFn and now >= self.repeatAt then
-        self[self.repeatFn](self)
+        runAction(self, self.repeatFn)
         self.repeatAt = now + REPEAT_RATE
     end
 end

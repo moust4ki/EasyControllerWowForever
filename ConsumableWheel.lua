@@ -38,11 +38,9 @@ W.MY_MAX = 8
 local MAX = SEGMENTS * PAGES
 local AIM = 0.5     -- the stick aims past half its course
 -- The wheel's art (Claude Design, design/radial/wheel/geometry.json): 512 x
--- 512, its crown from 75 to 213 from the middle. Like the game's radial
--- menu: the icons a little inside the crown's middle, each name beside its
--- icon on the outer side (GameFontNormal, 80 x 40)
+-- 512, its crown from 75 to 213 from the middle. The native stone face
+-- stays opaque; the selected name has a wide banner below the crown.
 local WHEEL_SIZE, ICON_RADIUS, SLOT = 512, 128, 46
-local LABEL_W, LABEL_H, LABEL_GAP = 80, 40, 60
 -- The section overlays (highlight, veil) cut to their section: { width,
 -- height, x, y } with x, y their centre from the wheel's (y up), for section
 -- 1 (tools/wheel_textures.py)
@@ -57,7 +55,7 @@ local OVERLAY = {
     [8] = { 256, 256, 0, 143 },
 }
 -- The banner under the wheel, sized for its two lines
-local BANNER_W, BANNER_H = 360, 64
+local BANNER_W, BANNER_H = 360, 128
 local TEX = "Interface\\AddOns\\EasyController\\textures\\"
 -- Slot `i` of a page of `n`: clockwise from the top, its angle (radians,
 -- clockwise from 12 o'clock) and its direction (x right, y up)
@@ -284,7 +282,7 @@ function W:Scan()
         if a.cat ~= b.cat then return CATEGORY_INDEX[a.cat] < CATEGORY_INDEX[b.cat] end
         return a.rank > b.rank
     end)
-    return items
+    return items, seen
 end
 
 ---------------------------------------------------------------------------
@@ -417,9 +415,9 @@ local function keyButton(name, wheel, pre, post, ...)
     return b
 end
 
-local function atlas(texture, name, fallback)
+local function atlas(texture, name, fallback, useSize)
     if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
-        texture:SetAtlas(name, true)
+        texture:SetAtlas(name, useSize ~= false)
         return true
     end
     if fallback then fallback(texture) end
@@ -428,7 +426,7 @@ end
 function W:Build()
     if self.frame then return end
     local wheel = CK.NewFrame("Frame", "ControllerKeyboardWheel", UIParent, "SecureHandlerBaseTemplate")
-    wheel:SetSize(WHEEL_SIZE, 600)
+    wheel:SetSize(WHEEL_SIZE, 700)
     wheel:SetFrameStrata("DIALOG")
     wheel:Hide()
     wheel:SetAttribute("wheel", "c")
@@ -470,10 +468,18 @@ function W:Build()
     end
     local use = keyButton("ControllerKeyboardWheelUse", wheel, USE, DONE)
     use:SetAttribute("type", "click")
-    use:HookScript("OnClick", function(_, _, down) if down ~= false then W:Log("A") end end)
+    use:HookScript("OnClick", function(_, _, down)
+        if down ~= false then
+            W.hovered = nil
+            W:SetPressed(nil)
+            W:Track()
+            W:Log("A")
+        end
+    end)
     self.use = use
     keyButton("ControllerKeyboardWheelClose", wheel, CLOSE)
-    -- The stick direction keys: their presses and releases move the choice
+    -- Selection follows the aim stick; shoulders change pages. This wheel
+    -- does not bind the D-pad for selecting an entry.
 
     keyButton("ControllerKeyboardWheelPage", wheel, PAGE)
 
@@ -485,36 +491,115 @@ function W:Build()
     -- wheel), like the game's own wheels, so the character and the camera
     -- don't move (and food can be eaten: not while moving). Turned on each
     -- time it shows; its stick script is needed for the game to give it them.
-    view:SetScript("OnGamePadStick", function() W:Track() end)
+    view:SetScript("OnGamePadStick", function() W:Track(true) end)
+    -- An opaque circular face beneath the crown: world scenery must not
+    -- compete with item icons. The game's tiled stone and circle mask keep
+    -- the material native while the existing wedges retain their geometry.
+    local face = view:CreateTexture(nil, "BACKGROUND", nil, -3)
+    face:SetPoint("CENTER"); face:SetSize(401, 401)
+    face:SetColorTexture(0.055, 0.04, 0.025, 1)
+    view.face = face
+    local material = view:CreateTexture(nil, "BACKGROUND", nil, -2)
+    material:SetAllPoints(face)
+    material:SetTexture(TEX .. "ck_panel_bg", "REPEAT", "REPEAT")
+    material:SetHorizTile(true); material:SetVertTile(true)
+    material:SetVertexColor(0.72, 0.62, 0.48, 1)
+    view.faceArt = material
+    local mask = view:CreateMaskTexture()
+    mask:SetAllPoints(face)
+    atlas(mask, "ui-hud-minimap-frame-generic-mask", function(t)
+        t:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    end, false)
+    face:AddMaskTexture(mask); material:AddMaskTexture(mask)
+    view.faceMask = mask
     -- The wheel in as many sections as the page holds (set when drawn)
     local bg = view:CreateTexture(nil, "BACKGROUND")
     bg:SetPoint("CENTER")
     bg:SetSize(WHEEL_SIZE, WHEEL_SIZE)
     bg:SetTexture(TEX .. "ck_wheel_bg_8")
+    bg:SetAlpha(0.60)
     view.bg = bg
+    -- Keep the existing section geometry inside the native bevel. One mask
+    -- stays centered on the wheel while individual overlays move and rotate.
+    local crownMask = view:CreateMaskTexture()
+    crownMask:SetPoint("CENTER", bg, "CENTER")
+    crownMask:SetSize(401, 401)
+    atlas(crownMask, "ui-hud-minimap-frame-generic-mask", function(t)
+        t:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    end, false)
+    bg:AddMaskTexture(crownMask)
+    view.crownMask = crownMask
+    -- The current client's high-resolution minimap bevel has transparent
+    -- padding: its full 512px atlas covers the edge of the 401px face.
+    view.rim = view:CreateTexture(nil, "BORDER", nil, 1)
+    view.rim:SetPoint("CENTER", bg, "CENTER")
+    atlas(view.rim, "UI-HUD-Minimap-Frame-Circle", nil, false)
+    view.rim:SetSize(WHEEL_SIZE, WHEEL_SIZE)
+    view.hubFace = view:CreateTexture(nil, "BACKGROUND", nil, -1)
+    view.hubFace:SetPoint("CENTER", bg, "CENTER")
+    atlas(view.hubFace, "CircleMask", function(t)
+        t:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask")
+    end, false)
+    view.hubFace:SetSize(146, 146)
+    view.hubFace:SetVertexColor(0.035, 0.025, 0.016, 1)
+    view.hubRim = view:CreateTexture(nil, "ARTWORK", nil, -1)
+    view.hubRim:SetPoint("CENTER", bg, "CENTER")
+    atlas(view.hubRim, "UI-HUD-Minimap-Frame-Circle", nil, false)
+    view.hubRim:SetSize(182, 182)
     -- The aimed section
     view.highlight = view:CreateTexture(nil, "BORDER")
+    view.highlight:AddMaskTexture(crownMask)
     view.highlight:Hide()
-    -- Under the wheel, the game's banner: the aimed item (or what to do);
+    -- The center repeats the focused icon at a readable size. Names live in
+    -- the wide banner instead of eight cramped labels around the perimeter.
+    view.center = CK.Paddles:CreateSlot(view, 62)
+    view.center:SetPoint("CENTER", bg, "CENTER", 0, 12)
+    view.center:Hide()
+    view.centerHint = view:CreateTexture(nil, "ARTWORK")
+    view.centerHint:SetPoint("CENTER", bg, "CENTER", 0, 12)
+    view.centerHint:SetSize(40, 40)
+    CK:SetGlyph(view.centerHint, "LS")
+    view.wheelName = view:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    view.wheelName:SetFont(CK:GetFontPath(), 13, "")
+    view.wheelName:SetPoint("CENTER", bg, "CENTER", 0, -38)
+    -- The entire two-line rectangle fits inside the 73px-radius hub,
+    -- with a small gap below the focused icon; full names remain in the banner.
+    view.wheelName:SetSize(100, 30)
+    view.wheelName:SetWordWrap(true); view.wheelName:SetNonSpaceWrap(true); view.wheelName:SetMaxLines(2)
+    view.wheelName:SetJustifyH("CENTER")
+    -- Under the wheel, matching native stone and an inset rim: the focused
+    -- item (or what to do);
     -- below it, the pages and the help
     view.bottom = view:CreateTexture(nil, "BACKGROUND")
-    view.bottom:SetPoint("TOP", bg, "BOTTOM", 0, 8)
-    atlas(view.bottom, "gamepad-radial-menu-bottomtext", function(t)
-        t:SetColorTexture(0, 0, 0, 0.5)
-    end)
+    view.bottom:SetPoint("TOP", bg, "CENTER", 0, -220)
+    view.bottom:SetTexture(TEX .. "ck_panel_bg", "REPEAT", "REPEAT")
+    view.bottom:SetHorizTile(true); view.bottom:SetVertTile(true)
+    view.bottom:SetVertexColor(0.72, 0.62, 0.48, 1)
     view.bottom:SetSize(BANNER_W, BANNER_H)
+    view.bannerRim = view:CreateTexture(nil, "BORDER")
+    view.bannerRim:SetAllPoints(view.bottom)
+    atlas(view.bannerRim, "common-insideframe", nil, false)
+    view.bannerBack = view:CreateTexture(nil, "BACKGROUND", nil, -1)
+    view.bannerBack:SetAllPoints(view.bottom)
+    view.bannerBack:SetColorTexture(0.055, 0.04, 0.025, 1)
     view.name = view:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     view.name:SetPoint("TOP", view.bottom, "TOP", 0, -12)
     view.name:SetWidth(BANNER_W - 30)
-    view.name:SetWordWrap(false)
+    view.name:SetHeight(38)
+    view.name:SetWordWrap(true); view.name:SetNonSpaceWrap(true); view.name:SetMaxLines(2)
     view.count = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     view.count:SetPoint("TOP", view.name, "BOTTOM", 0, -4)
     view.count:SetWidth(BANNER_W - 30)
+    view.count:SetHeight(18)
     view.count:SetWordWrap(false)
     view.help = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    view.help:SetPoint("TOP", view.bottom, "BOTTOM", 0, -4)
+    view.help:SetPoint("TOP", view.bottom, "TOP", 0, -80)
+    view.help:SetWidth(BANNER_W - 30); view.help:SetHeight(16)
+    view.help:SetWordWrap(false)
     view.pages = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    view.pages:SetPoint("TOP", view.help, "BOTTOM", 0, -4)
+    view.pages:SetPoint("TOP", view.bottom, "TOP", 0, -102)
+    view.pages:SetWidth(BANNER_W - 30); view.pages:SetHeight(14)
+    view.pages:SetWordWrap(false)
     view:SetScript("OnUpdate", function() W:Track() end)
     view:SetScript("OnShow", function()
         W:TakeSticks(view, true)
@@ -524,7 +609,11 @@ function W:Build()
     end)
     -- Closed with a stick still pushed: held until it is let go, so the
     -- character doesn't walk off (or stand up from eating)
-    view:SetScript("OnHide", function() W:HoldSticks() end)
+    view:SetScript("OnHide", function()
+        W.hovered, W.focused = nil, nil
+        W:SetPressed(nil)
+        W:HoldSticks()
+    end)
     -- Closed (its keys let go in its secure code, which our binding hooks
     -- don't see): the replaced buttons it held back are bound again
     wheel:HookScript("OnHide", function()
@@ -541,17 +630,13 @@ function W:Build()
         local seg = {}
         -- The grey veil over a section that can't be used
         seg.disabled = view:CreateTexture(nil, "ARTWORK", nil, 2)
+        seg.disabled:AddMaskTexture(crownMask)
         seg.disabled:Hide()
-        -- The item: a round slot of the gamepad bar's, its name further out
-        -- (both placed for the page's count when drawn)
+        -- The item: a round slot of the gamepad bar's, positioned for
+        -- the page's actual section count.
         seg.slot = CK.Paddles:CreateSlot(view, SLOT)
         seg.slot:SetPoint("CENTER", bg, "CENTER", ix, iy)
         seg.slot:Hide()
-        seg.label = view:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        seg.label:SetSize(LABEL_W, LABEL_H)
-        seg.label:SetJustifyH("CENTER")
-        seg.label:SetJustifyV("MIDDLE")
-        seg.label:SetWordWrap(true)
         self.segments[i] = seg
         -- The slot's own secure button: clicked by a stick, A, the key ("s3"),
         -- or the mouse
@@ -565,6 +650,8 @@ function W:Build()
         b:SetScript("OnEnter", function(self)
             local entry = W:PageItems()[i]
             if not entry then return end
+            W.hovered = i
+            W:Track()
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             if entry.kind == "item" then
                 GameTooltip:SetItemByID(entry.id)
@@ -575,7 +662,16 @@ function W:Build()
             end
             GameTooltip:Show()
         end)
-        b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        b:SetScript("OnLeave", function()
+            if W.hovered == i then W.hovered = nil end
+            if W.pressed == i then W:SetPressed(nil) end
+            W:Track()
+            GameTooltip:Hide()
+        end)
+        b:SetScript("OnMouseDown", function(_, button)
+            if button == "LeftButton" then W:SetPressed(i) end
+        end)
+        b:SetScript("OnMouseUp", function() W:SetPressed(nil) end)
         SecureHandlerWrapScript(b, "OnClick", wheel, "return nil, true", DONE)
         b:HookScript("OnClick", function() W:Log("use " .. i) end)
         b:Hide()
@@ -606,7 +702,7 @@ local function store(wheel, wid, pages, unitOf)
     local total = 0
     for page = 1, PAGES do
         local list = pages[page] or {}
-        wheel:SetAttribute("ck-" .. wid .. "-" .. page .. "-n", #list)
+        wheel:SetAttribute("ck-" .. wid .. "-" .. page .. "-n", list.n or #list)
         for i = 1, SEGMENTS do
             local e = list[i]
             local key = "ck-" .. wid .. "-" .. page .. "-" .. i
@@ -656,7 +752,10 @@ function W:Fill()
     local wheel = self.frame
     self.lists = {}
     -- The consumables: by kind, 8 a page
-    local items = settings().enabled and self:Scan() or {}
+    local s = settings()
+    local items, itemIDs = {}, {}
+    if s.enabled then items, itemIDs = self:Scan() end
+    self.itemIDs = itemIDs
     local pages = {}
     for n, item in ipairs(items) do
         local page = math.floor((n - 1) / SEGMENTS) + 1
@@ -668,17 +767,22 @@ function W:Fill()
     self.lists.c = pages
     -- The player's own: one page, each slot where it was put
     for n = 1, W.MY_MAX do
-        -- Its filled slots in their order, one after the other: the wheel has
-        -- as many sections
+        -- Compact by default; fixed slots retain the editor's eight directions,
+        -- including empty slots. The secure buttons for those stay empty.
         local entries, list = CK.MyWheels and CK.MyWheels:Entries(n) or {}, {}
         for slot = 1, SEGMENTS do
-            if entries[slot] then list[#list + 1] = entries[slot] end
+            if entries[slot] then list[s.fixedSlots and slot or (#list + 1)] = entries[slot] end
         end
+        if s.fixedSlots then list.n = SEGMENTS end
         local own = { [1] = list }
-        for _, e in pairs(own[1]) do
-            if e.kind == "item" and not e.cat then
-                local ok, cat = pcall(W.Category, e.id)
-                e.cat = ok and cat or nil
+        for slot = 1, SEGMENTS do
+            local e = list[slot]
+            if e and e.kind == "item" then
+                if e.id then itemIDs[e.id] = true end
+                if not e.cat then
+                    local ok, cat = pcall(W.Category, e.id)
+                    e.cat = ok and cat or nil
+                end
             end
         end
         store(wheel, tostring(n), own, function(e) return e.cat == "bandage" and "player" or nil end)
@@ -755,32 +859,28 @@ end
 ---------------------------------------------------------------------------
 -- Drawing: the page's items (icons, names, counts, cooldowns, the veil on
 -- what can't be used now), the pages' dots, the highlight on the aimed
--- segment (a stick, or the D-pad's choice), the aimed item's name
+-- segment chosen by the aim stick, and the focused item's name
 ---------------------------------------------------------------------------
 function W:Paint()
-    if not (self.frame and self.lists) then return end
+    -- OnShow paints the current state; cooldown events need not draw a closed wheel.
+    if not (self.frame and self.lists and self.frame:IsShown()) then return end
     local combat = InCombatLockdown()
     local page = self.frame:GetAttribute("page") or 1
     self.painted, self.paintedWheel = page, self.frame:GetAttribute("wheel") or "c"
     local list = self:PageItems()
-    local n = math.max(1, math.min(SEGMENTS, #list))
+    local n = math.max(1, math.min(SEGMENTS, list.n or #list))
     self.view.bg:SetTexture(TEX .. format("ck_wheel_bg_%d", n))
     self.paintedCount = n
     for i, seg in ipairs(self.segments) do
         local item = list[i]
         seg.slot:SetShown(item ~= nil)
-        seg.label:SetShown(item ~= nil)
         if item then
             W:PlaceSection(seg, i, n)
             CK.Paddles.SetIcon(seg.slot.icon, W.EntryIcon(item))
             seg.slot.count:SetText(item.kind == "item" and (C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0) or "")
-            seg.label:SetText(W.EntryName(item) or "")
             local unusable = entryUnusable(item, combat)
             seg.slot.icon:SetDesaturated(unusable)
             seg.disabled:SetShown(unusable)
-            -- Its name in the game's colours: gold, grey when it can't be used
-            local color = unusable and DISABLED_FONT_COLOR or NORMAL_FONT_COLOR
-            if color then seg.label:SetTextColor(color:GetRGB()) end
             pcall(function()
                 local start, duration = entryCooldown(item)
                 if start and duration and duration > 0 then
@@ -805,10 +905,8 @@ function W:Paint()
     else
         self.view.pages:SetText("")
     end
-    local h = function(key) return CK:GlyphMarkup(key, 14) end
-    self.view.help:SetText(format("%s %s   %s %s   %s %s", h("LS"), L.WHEEL_AIM, h("A"), L.WHEEL_USE, h("B"), L.WHEEL_CLOSE))
     -- Not "nothing aimed" (nil): the banner is written, even the first time
-    self.aimed = false
+    self.aimed, self.focused = false, false
     self:Track()
 end
 
@@ -825,31 +923,18 @@ function W:PlaceOverlay(texture, kind, i, n)
     texture:SetRotation(-a)
 end
 
--- A section's icon and name, for a page of `n`
+-- A section's icon and unusable veil, for a page of `n`
 function W:PlaceSection(seg, i, n)
     local dx, dy = slotDir(i, n)
     seg.slot:ClearAllPoints()
     seg.slot:SetPoint("CENTER", self.view.bg, "CENTER", ICON_RADIUS * dx, ICON_RADIUS * dy)
-    -- The name beside the icon, on the outer side, as the game's menu puts
-    -- it: beside it on the sides, above / below at the top and bottom, 30
-    -- across and 45 up / down on the diagonals
-    local ox, oy
-    if math.abs(dx) > 0.8 then
-        ox, oy = (dx > 0 and 1 or -1) * (LABEL_GAP + 4), 0
-    elseif math.abs(dx) < 0.3 then
-        ox, oy = 0, (dy > 0 and 1 or -1) * LABEL_GAP
-    else
-        ox, oy = (dx > 0 and 30 or -30), (dy > 0 and 45 or -45)
-    end
-    seg.label:ClearAllPoints()
-    seg.label:SetPoint("CENTER", seg.slot, "CENTER", ox, oy)
     self:PlaceOverlay(seg.disabled, "off", i, n)
 end
 
 function W:Aimed()
     local wheel = self.frame
     local list = self:PageItems()
-    local n = math.min(SEGMENTS, #list)
+    local n = math.min(SEGMENTS, list.n or #list)
     local state = C_GamePad and C_GamePad.GetDeviceMappedState and C_GamePad.GetDeviceMappedState()
     local stick = state and state.sticks and state.sticks[wheel:GetAttribute("ck-stick") or 1]
     if n > 0 and stick and stick.len and stick.len > AIM then
@@ -859,42 +944,76 @@ function W:Aimed()
             local dot = stick.x * x + stick.y * y
             if dot > bestDot then best, bestDot = i, dot end
         end
-        return best and list[best] and best or nil
+        return best and list[best] and best or nil, stick.len
     end
+    return nil, stick and stick.len or 0
 end
 
-function W:Track()
+-- Only plain visual frames change on mouse down. The secure click/use
+-- snippets and their immediate close behavior are untouched.
+function W:SetPressed(index)
+    if index and not self:PageItems()[index] then return end
+    self.pressed = index
+    for i, seg in ipairs(self.segments or {}) do CK.Paddles.SetPressed(seg.slot, i == index) end
+    if self.view and self.view.center then CK.Paddles.SetPressed(self.view.center, index ~= nil and index == self.focused) end
+end
+
+function W:Track(fromStick)
     if not self.frame then return end
-    if not self.frame:IsShown() then self.ticked = nil end
-    -- A page turned (LB / RB, secure), another wheel's key: draw it
+    if not self.frame:IsShown() then self.ticked = nil; return end
+    -- A page turned (LB / RB, secure), another wheel's key: draw it.
     if (self.frame:GetAttribute("page") or 1) ~= self.painted
         or (self.frame:GetAttribute("wheel") or "c") ~= self.paintedWheel then
-        self.ticked = nil
+        self.ticked, self.hovered = nil, nil
+        self:SetPressed(nil)
         return self:Paint()
     end
-    local i = self:Aimed()
-    if i == self.aimed then return end
-    self.aimed = i
-    local item = i and self:PageItems()[i]
+    local i, stickLength = self:Aimed()
+    if fromStick and stickLength > AIM then
+        self.hovered = nil
+        if self.pressed then self:SetPressed(nil) end
+    end
+    local list = self:PageItems()
+    local hover = self.hovered and list[self.hovered] and self.hovered or nil
+    self.hovered = hover
+    -- The central controller cue must match secure A. A mouse-only preview
+    -- advertises a click instead; hovering never changes the secure target.
+    local focus = i or hover
+    if i == self.aimed and focus == self.focused and hover == self.paintedHover then return end
+    self.aimed, self.focused, self.paintedHover = i, focus, hover
+    local item = focus and list[focus]
     local view = self.view
+    local h = function(key) return CK:GlyphMarkup(key, 14) end
+    if hover and not i then
+        view.help:SetText(format("%s %s   %s %s", KEY_BUTTON1 or "Left click", L.WHEEL_USE, h("B"), L.WHEEL_CLOSE))
+    else
+        view.help:SetText(format("%s %s   %s %s   %s %s", h("LS"), L.WHEEL_AIM, h("A"), L.WHEEL_USE, h("B"), L.WHEEL_CLOSE))
+    end
     view.highlight:SetShown(item ~= nil)
+    for index, seg in ipairs(self.segments) do CK.Paddles.SetHover(seg.slot, index == focus or index == hover) end
     local mine = tonumber(self.paintedWheel)
-    if not item then
-        self.ticked = nil
-        -- A wheel of the player's: its name
+    view.wheelName:SetText(mine and CK.MyWheels and CK.MyWheels:Name(mine) or L.WHEEL_NAME)
+    view.center:SetShown(item ~= nil)
+    view.centerHint:SetShown(item == nil)
+    if item then
+        self:PlaceOverlay(view.highlight, "sel", focus, self.paintedCount or SEGMENTS)
+        CK.Paddles.SetIcon(view.center.icon, W.EntryIcon(item))
+        view.center.icon:SetDesaturated(entryUnusable(item, InCombatLockdown()))
+        view.name:SetText(W.EntryName(item) or "")
+        if item.kind == "item" then
+            local count = C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0
+            view.count:SetText(format("%s  -  %d", item.cat and L["WHEEL_CAT_" .. item.cat:upper()] or L.WHEEL_KIND_ITEM, count))
+        else
+            view.count:SetText(item.kind == "spell" and L.WHEEL_KIND_SPELL or L.WHEEL_KIND_MACRO)
+        end
+    else
         view.name:SetText(mine and CK.MyWheels and CK.MyWheels:Name(mine) or L.WHEEL_NOTHING)
         view.count:SetText(mine and L.MYWHEEL_NOTHING_HINT or L.WHEEL_NOTHING_HINT)
-        return
     end
-    self:PlaceOverlay(view.highlight, "sel", i, self.paintedCount or SEGMENTS)
-    view.name:SetText(W.EntryName(item) or "")
-    if item.kind == "item" then
-        local count = C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0
-        view.count:SetText(format("%s  -  %d", item.cat and L["WHEEL_CAT_" .. item.cat:upper()] or L.WHEEL_KIND_ITEM, count))
-    else
-        view.count:SetText(item.kind == "spell" and L.WHEEL_KIND_SPELL or L.WHEEL_KIND_MACRO)
-    end
-    if CK.Vibration and self.frame:IsShown() and i ~= self.ticked then
+    -- Preserve stick-only haptic feedback; mouse exploration does not tick.
+    if not i then
+        self.ticked = nil
+    elseif CK.Vibration and i ~= self.ticked then
         self.ticked = i
         CK.Vibration:Fire("wheelTick")
     end
@@ -1033,7 +1152,10 @@ function W:Init()
         pcall(f.RegisterEvent, f, event)
     end
     local queued
-    f:SetScript("OnEvent", function(_, event)
+    f:SetScript("OnEvent", function(_, event, itemID)
+        -- Bag changes already queue a fresh scan. Other cached items cannot
+        -- change these wheels, including custom items not currently carried.
+        if event == "GET_ITEM_INFO_RECEIVED" and W.itemIDs and not W.itemIDs[itemID] then return end
         if event == "PLAYER_REGEN_DISABLED" or event == "BAG_UPDATE_COOLDOWN" or event == "SPELL_UPDATE_COOLDOWN" then
             W:Paint()
             return

@@ -208,7 +208,8 @@ local function buildLegend(detail)
         local col, row = (i - 1) % 2, math.floor((i - 1) / 2)
         local sw = legendSwatch(g, item[2], item[3], item[4])
         sw:SetPoint("TOPLEFT", col * (colW + 10), -10 - row * 20)
-        local label = K.ChatText(g, 12, KC.help)
+        local label = K.ChatText(g, 12, KC.ink)
+        label:SetShadowColor(0, 0, 0, 0)
         label:SetPoint("LEFT", sw, "RIGHT", 6, 0)
         label:SetWidth(colW - 18)
         label:SetWordWrap(false)
@@ -287,7 +288,7 @@ function W:Build(parent)
     layersRow:SetSize(ZONE_W, 32)
     f.layers = {}
     for i, layer in ipairs(M.LAYERS) do
-        local b = K.Button(layersRow, 15)
+        local b = K.Button(layersRow, 15, "nav")
         b.layer = layer
         if layer == "" then
             b.label:SetText(L.MAP_ALONE)
@@ -303,6 +304,7 @@ function W:Build(parent)
             if W.wizard or P:IsCapturing() then return end
             C:Disarm()
             W.layer, W.zone = layer, "layers"
+            b:Pulse()
             C:Render()
         end)
         f.layers[i] = b
@@ -813,6 +815,10 @@ function W:WizardStep()
 end
 
 function W:Act(i)
+    if i ~= 3 or (M:ReplacedCount() > 0 and not InCombatLockdown()) then
+        local b = self.frame and self.frame.actions[i]
+        if b then b:Pulse() end
+    end
     if i == 1 then
         self:Identify()
     elseif i == 2 then
@@ -898,6 +904,7 @@ function W:Press(name)
                 if layer == self.layer then index = i end
             end
             index = math.max(1, math.min(#M.LAYERS, index + (name == "LEFT" and -1 or 1)))
+            if self.layer ~= M.LAYERS[index] then self.frame.layers[index]:Pulse() end
             self.layer = M.LAYERS[index]
         elseif name == "DOWN" or name == "A" then
             self.zone = "pad"
@@ -981,8 +988,13 @@ local function displayRows(b)
     -- buttons and what shows next to the bar (the rows it turns on are
     -- greyed while it is off)
     local yours = 0
-    for _ in pairs(s.mapping) do yours = yours + 1 end
-    for _ in pairs(s.replaced) do yours = yours + 1 end
+    if CK.Profiles and CK.Profiles.ready then
+        for _ in CK.Profiles:BindingPairs("mapping") do yours = yours + 1 end
+        for _ in CK.Profiles:BindingPairs("replaced") do yours = yours + 1 end
+    else
+        for _ in pairs(s.mapping) do yours = yours + 1 end
+        for _ in pairs(s.replaced) do yours = yours + 1 end
+    end
     b.check({ id = "m_map", label = L.LBL_GAMEPAD_EXTRAS, status = format(L.STATUS_YOURS, yours), tip = L.MOD_MAPPING,
         get = function() return s.modules.mapping end,
         set = function(v)

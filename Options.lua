@@ -481,18 +481,27 @@ local function suppliesRows(b, page)
             s.enabled = v
             S:Refresh()
         end })
+    b.check({ id = "s_bags", label = "Bag-space counter", disabled = not s.enabled,
+        tip = "Show the number of free ordinary bag slots above the controller bar. Off by default.",
+        get = function() return s.showBags == true end,
+        set = function(v) s.showBags = v == true; S:Refresh() end })
+    b.check({ id = "s_ammo", label = "Ammunition indicator", disabled = not s.enabled,
+        tip = "Show equipped ammunition and its low-stock warning. Unknown item icons stay hidden. Off by default.",
+        get = function() return s.showAmmo == true end,
+        set = function(v) s.showAmmo = v == true; S:Refresh() end })
     if not s.enabled then return end
     b.header(L.SUP_H_TRACKED)
     for _, r in ipairs(S:Resources()) do
         local cfg = r.cfg
-        b.check({ id = "s_" .. r.key, label = r.name, status = tostring(r.count),
-            tip = format(L.TIP_RESOURCE, r.count, cfg.low, cfg.critical),
-            get = function() return cfg.on end,
-            set = function(v)
-                cfg.on = v
-                S:Refresh()
-            end })
-        if cfg.on then
+        if r.kind ~= "bags" and r.kind ~= "ammo" then
+            b.check({ id = "s_" .. r.key, label = r.name, status = tostring(r.count),
+                tip = format(L.TIP_RESOURCE, r.count, cfg.low, cfg.critical),
+                get = function() return cfg.on end,
+                set = function(v) cfg.on = v; S:Refresh() end })
+        elseif S:ResourceEnabled(r) then
+            b.stat({ label = r.name, text = tostring(r.count) })
+        end
+        if S:ResourceEnabled(r) then
             local step = S.Step(r.kind)
             b.choice({ id = "s_low_" .. r.key, label = L.SUP_LOW, indent = true, tip = L.TIP_LOW,
                 text = function() return tostring(cfg.low) end,
@@ -646,6 +655,10 @@ local function wheelPositionRows(b)
     local W = CK.ConsumableWheel
     local s = settings().wheel
     b.header(L.SEC_POSITION)
+    b.check({ id = "w_fixed", label = "Keep custom wheel directions",
+        tip = "Keep all eight directions in custom wheels, including empty slots. Removing an ability will not move the others.",
+        get = function() return s.fixedSlots end,
+        set = function(v) s.fixedSlots = v; W:Fill() end })
     b.check({ id = "w_lock", label = L.OPT_LOCK, tip = L.TIP_WHEEL_LOCK,
         get = function() return s.locked end, set = function(v) s.locked = v end })
     b.button({ id = "w_move", label = L.SUP_MOVE, tip = L.WHEEL_MOVE,

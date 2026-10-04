@@ -1,5 +1,98 @@
 # Changelog
 
+## 1.8.2-local.5
+
+Repair macro-related input paths and refine the native Forever chat daisywheel.
+In-game macro, visual and controller acceptance remain pending.
+
+- Remember keyboard channels in addon-owned state. Stop writing Blizzard chat
+  attributes that can taint macro execution. Respect later native channel choices
+  and explicit whisper recipients, including draft restoration.
+- Bind trigger-toggle layers directly to their original secure buttons, preserving
+  the exact mouse button and press/release signals. Remove the intermediate
+  forwarding macros; a secure wrapper tracks held-trigger use without changing
+  native action attributes or consuming their click events.
+- Use the same native stone, circular mask and bronze rim for the chat wheel,
+  fitted around its existing character groups and unchanged stick targets.
+- Use native character hover, focus and pressed artwork with readable light text.
+  Brief activation feedback follows both a mouse click and a right-stick flick;
+  typing remains immediate, with one character per activation.
+- Clear transient feedback when the chat wheel hides and retain the newest pulse
+  when presses overlap. Keep Shift, Caps, accents and stick rearming unchanged.
+- Correct local profile instructions to use `/ec config`; `/ec` opens the keyboard.
+
+## 1.8.2-local.4
+
+Native Forever window composition, readable configuration layouts and solid radial wheels.
+In-game visual and controller acceptance remain pending.
+
+- Use the client's Metal window layout and close button, including its Camelot
+  atlas dimensions and offsets. Remove the separate title plaque and floating
+  gryphons from the configuration window.
+- Use quiet native navigation, a wider recessed parchment detail pane and compact
+  controller hints. Measure wrapped setting labels before paginating rows.
+- Keep complete setting values and long explanations in scrollable details above
+  the fixed Apply button. R3 enters reading, the D-pad scrolls,
+  and B returns; closing or changing the view clears reading mode.
+- Fit role-card text around assigned icons and both-trigger chords. Spell pickers
+  show two-line names and full-name tooltips; picker font sizes survive font changes.
+- Give consumable and custom wheels an opaque stone face, native high-resolution
+  bronze rim, center hub and readable item banner. Match the custom-wheel editor
+  to the same materials. Keep existing secure action and immediate-close behavior.
+- Preserve independent bag-space and ammunition switches and all earlier profile,
+  fixed-slot, vibration and refresh improvements.
+
+## 1.8.2-local.3
+
+Local Forever artwork and HUD-control pass; in-game acceptance is pending.
+
+- Replace the addon's configuration and keyboard textures with adapted artwork
+  from the installed Forever/Camelot client: c60 bronze gryphons, DiamondMetal
+  frames, red controls, spellbook paper, and the game's own round controller rims.
+- Keep separate static, mouseover, focus and activation textures. Source Blender
+  collections contain packed native images and editable transparent layers.
+- Home > Role layout now presents four role cards with an explicit spell picker
+  and Apply action. Empty slots are quiet instead of showing question marks.
+- Alerts > Supplies has independent Bag-space counter and Ammunition indicator
+  switches. Both are off until enabled, including existing saves with no value.
+  Existing thresholds and custom resources are preserved.
+- Reject invalid ammo IDs and unresolved/question-mark ammo textures, retrying
+  when item data arrives. Valid enabled ammunition alerts remain available.
+- Mouse and controller activation share visible pressed feedback; disabled
+  controls, armed confirmations, hidden frames and stale timers are covered.
+
+## 1.8.2-local.2
+
+Local controller gameplay pass; not an upstream release. In-game acceptance is pending.
+
+- Home > Profiles: separate General, Tank, Healer and Damage bindings/custom wheels
+  for each character, shared utility commands and controller hardware settings,
+  explicit activation, and confirmed copying from other layouts or the original import.
+  Native game action-bar contents remain owned by the game.
+- Home > Role layout: keep interrupt, defensive, movement and emergency-heal button
+  positions consistent. Pick from the current character's spellbook, preview the
+  assignment, and preserve occupied buttons unless replacement is explicitly selected.
+- Wheels > Position: optional fixed directions for custom wheels, including empty slots.
+- Important vibration alerts are no longer interrupted by wheel or keyboard feedback.
+- Prediction pruning removes only excess entries, including high-frequency dictionaries;
+  next-word fallback follows the selected language.
+- Avoid hidden wheel painting, unrelated item-data rebuilding, repeated toggle/supplies
+  geometry, repeated mapping CVar reads, and redundant paddle cooldown refreshes.
+- Focused Lua regressions cover persistence, UI actions, secure wheel snippets,
+  haptic priority, prediction and measured API-call reductions.
+
+## 1.8.2-local.1
+
+Local code-review build; not an upstream release. In-game acceptance is pending.
+
+- Toggled action bars render game-function atlas and glyph icons through the shared
+  icon helper, without applying a spell icon's crop to an atlas.
+- Inventory upgrade comparisons wait for equipped-item data instead of treating
+  an unknown score or item level as an empty slot. Item-data events retry them.
+- Release notes require the exact version heading: a stable release cannot pick
+  up the notes of a similarly named prerelease.
+- Focused Lua and Python regressions cover these fixes.
+
 ## 1.8.2
 
 - **Back paddle layers with Steam Input** (issue #3): with the paddles sent as keyboard keys (Steam

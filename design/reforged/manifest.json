@@ -1,0 +1,908 @@
+{
+  "generator": "Blender 5.1.1 / tools/blender_reforged.py; locally extracted native artwork",
+  "supersampling": 2,
+  "blend": "ClassicReforged.blend",
+  "assets": [
+    {
+      "name": "ck_btn_normal",
+      "width": 128,
+      "height": 32,
+      "nineSliceCorner": 6,
+      "state": "normal",
+      "family": "button",
+      "sourceLayers": [
+        "layers/ck_btn_normal/01_native_static.png"
+      ],
+      "nativeSources": [
+        "128RedButtonc60"
+      ],
+      "adaptation": "Forever c60 ThreeSliceButton artwork repacked into symmetric nine-slice; native Down artwork; c60 highlight adapted to hover."
+    },
+    {
+      "name": "ck_btn_hover",
+      "width": 128,
+      "height": 32,
+      "nineSliceCorner": 6,
+      "state": "hover",
+      "family": "button",
+      "sourceLayers": [
+        "layers/ck_btn_hover/01_native_static.png",
+        "layers/ck_btn_hover/02_native_mouseover.png"
+      ],
+      "nativeSources": [
+        "128RedButtonc60",
+        "redbuttons2xc60"
+      ],
+      "adaptation": "Forever c60 ThreeSliceButton artwork repacked into symmetric nine-slice; native Down artwork; c60 highlight adapted to hover."
+    },
+    {
+      "name": "ck_btn_active",
+      "width": 128,
+      "height": 32,
+      "nineSliceCorner": 6,
+      "state": "active",
+      "family": "button",
+      "sourceLayers": [
+        "layers/ck_btn_active/01_native_static.png",
+        "layers/ck_btn_active/02_native_mouseover.png",
+        "layers/ck_btn_active/03_controller_focus.png"
+      ],
+      "nativeSources": [
+        "128RedButtonc60",
+        "redbuttons2xc60",
+        "UIFrameDiamondMetal2xc60",
+        "UIFrameDiamondMetalVertical2xc60"
+      ],
+      "adaptation": "Forever c60 ThreeSliceButton artwork repacked into symmetric nine-slice; native Down artwork; c60 highlight adapted to hover."
+    },
+    {
+      "name": "ck_btn_pressed",
+      "width": 128,
+      "height": 32,
+      "nineSliceCorner": 6,
+      "state": "pressed",
+      "family": "button",
+      "sourceLayers": [
+        "layers/ck_btn_pressed/01_native_activation.png"
+      ],
+      "nativeSources": [
+        "128RedButtonc60"
+      ],
+      "adaptation": "Forever c60 ThreeSliceButton artwork repacked into symmetric nine-slice; native Down artwork; c60 highlight adapted to hover."
+    },
+    {
+      "name": "ck_sk_key_normal",
+      "width": 128,
+      "height": 64,
+      "nineSliceCorner": 12,
+      "state": "normal",
+      "family": "keyboard",
+      "sourceLayers": [
+        "layers/ck_sk_key_normal/01_native_normal.png"
+      ],
+      "nativeSources": [
+        "CommonButtonTertiary2xc60"
+      ],
+      "adaptation": "Native Forever tertiary-button normal, hover, selected and pressed states. Left/right stick targets use side-localized selected art; right keeps the existing cyan cue."
+    },
+    {
+      "name": "ck_sk_key_hover",
+      "width": 128,
+      "height": 64,
+      "nineSliceCorner": 12,
+      "state": "hover",
+      "family": "keyboard",
+      "sourceLayers": [
+        "layers/ck_sk_key_hover/01_native_hover.png"
+      ],
+      "nativeSources": [
+        "CommonButtonTertiary2xc60"
+      ],
+      "adaptation": "Native Forever tertiary-button normal, hover, selected and pressed states. Left/right stick targets use side-localized selected art; right keeps the existing cyan cue."
+    },
+    {
+      "name": "ck_sk_key_active",
+      "width": 128,
+      "height": 64,
+      "nineSliceCorner": 12,
+      "state": "active",
+      "family": "keyboard",
+      "sourceLayers": [
+        "layers/ck_sk_key_active/01_native_selected.png"
+      ],
+      "nativeSources": [
+        "CommonButtonTertiary2xc60"
+      ],
+      "adaptation": "Native Forever tertiary-button normal, hover, selected and pressed states. Left/right stick targets use side-localized selected art; right keeps the existing cyan cue."
+    },
+    {
+      "name": "ck_sk_key_pressed",
+      "width": 128,
+      "height": 64,
+      "nineSliceCorner": 12,
+      "state": "pressed",
+      "family": "keyboard",
+      "sourceLayers": [
+        "layers/ck_sk_key_pressed/01_native_pressed.png"
+      ],
+      "nativeSources": [
+        "CommonButtonTertiary2xc60"
+      ],
+      "adaptation": "Native Forever tertiary-button normal, hover, selected and pressed states. Left/right stick targets use side-localized selected art; right keeps the existing cyan cue."
+    },
+    {
+      "name": "ck_sk_key_target_l",
+      "width": 128,
+      "height": 64,
+      "nineSliceCorner": 12,
+      "state": "target_l",
+      "family": "keyboard",
+      "sourceLayers": [
+        "layers/ck_sk_key_target_l/01_native_hover.png",
+        "layers/ck_sk_key_target_l/02_target_l.png"
+      ],
+      "nativeSources": [
+        "CommonButtonTertiary2xc60"
+      ],
+      "adaptation": "Native Forever tertiary-button normal, hover, selected and pressed states. Left/right stick targets use side-localized selected art; right keeps the existing cyan cue."
+    },
+    {
+      "name": "ck_sk_key_target_r",
+      "width": 128,
+      "height": 64,
+      "nineSliceCorner": 12,
+      "state": "target_r",
+      "family": "keyboard",
+      "sourceLayers": [
+        "layers/ck_sk_key_target_r/01_native_hover.png",
+        "layers/ck_sk_key_target_r/02_target_r.png"
+      ],
+      "nativeSources": [
+        "CommonButtonTertiary2xc60"
+      ],
+      "adaptation": "Native Forever tertiary-button normal, hover, selected and pressed states. Left/right stick targets use side-localized selected art; right keeps the existing cyan cue."
+    },
+    {
+      "name": "ck_select",
+      "width": 128,
+      "height": 32,
+      "nineSliceCorner": 10,
+      "state": "selected",
+      "family": "selection",
+      "sourceLayers": [
+        "layers/ck_select/01_native_hover.png",
+        "layers/ck_select/02_native_focus.png"
+      ],
+      "nativeSources": [
+        "redbuttons2xc60",
+        "UIFrameDiamondMetal2xc60",
+        "UIFrameDiamondMetalVertical2xc60"
+      ],
+      "adaptation": "c60 native highlight and diamond frame, kept separate."
+    },
+    {
+      "name": "ck_panel_bg",
+      "width": 128,
+      "height": 128,
+      "nineSliceCorner": 0,
+      "state": "static",
+      "family": "panel",
+      "sourceLayers": [
+        "layers/ck_panel_bg/01_forever_background.png"
+      ],
+      "nativeSources": [
+        "UICommonBackgrounds"
+      ],
+      "adaptation": "Forever UICommonBackgrounds stone/leather texture at36% brightness for readable cream text."
+    },
+    {
+      "name": "ck_reforged_frame",
+      "width": 128,
+      "height": 128,
+      "nineSliceCorner": 16,
+      "state": "static",
+      "family": "frame",
+      "sourceLayers": [
+        "layers/ck_reforged_frame/01_native_diamond_frame.png"
+      ],
+      "nativeSources": [
+        "UIFrameDiamondMetal2xc60",
+        "UIFrameDiamondMetalVertical2xc60"
+      ],
+      "adaptation": "Eight exact c60 DiamondMetal DB2 atlas pieces repacked into transparent-center nine-slice; original edge orientation preserved."
+    },
+    {
+      "name": "ck_reforged_parchment",
+      "width": 256,
+      "height": 256,
+      "nineSliceCorner": 16,
+      "state": "static",
+      "family": "detail",
+      "sourceLayers": [
+        "layers/ck_reforged_parchment/01_forever_spellbook_paper.png"
+      ],
+      "nativeSources": [
+        "SpellbookBackgroundPageLeftc602x"
+      ],
+      "adaptation": "Native Forever spellbook paper, inner crop56,160,1600,1328 removes the dark book binding behind live text; then nine-slice48 to16. No legacy QuestBackground texture."
+    },
+    {
+      "name": "ck_reforged_role_normal",
+      "width": 512,
+      "height": 128,
+      "nineSliceCorner": 12,
+      "state": "normal",
+      "family": "role_card",
+      "sourceLayers": [
+        "layers/ck_reforged_role_normal/01_native_card.png"
+      ],
+      "nativeSources": [
+        "CommonButtonList2xc60"
+      ],
+      "adaptation": "Forever list-card normal/hover/selected artwork. Activation is an explicitly derived70%-brightness depression; list family has no native pressed atlas."
+    },
+    {
+      "name": "ck_reforged_role_hover",
+      "width": 512,
+      "height": 128,
+      "nineSliceCorner": 12,
+      "state": "hover",
+      "family": "role_card",
+      "sourceLayers": [
+        "layers/ck_reforged_role_hover/01_native_card.png"
+      ],
+      "nativeSources": [
+        "CommonButtonList2xc60"
+      ],
+      "adaptation": "Forever list-card normal/hover/selected artwork. Activation is an explicitly derived70%-brightness depression; list family has no native pressed atlas."
+    },
+    {
+      "name": "ck_reforged_role_active",
+      "width": 512,
+      "height": 128,
+      "nineSliceCorner": 12,
+      "state": "active",
+      "family": "role_card",
+      "sourceLayers": [
+        "layers/ck_reforged_role_active/01_native_card.png",
+        "layers/ck_reforged_role_active/02_native_selection.png",
+        "layers/ck_reforged_role_active/03_native_focus_frame.png"
+      ],
+      "nativeSources": [
+        "CommonButtonList2xc60",
+        "UIFrameDiamondMetal2xc60",
+        "UIFrameDiamondMetalVertical2xc60"
+      ],
+      "adaptation": "Forever list-card normal/hover/selected artwork. Activation is an explicitly derived70%-brightness depression; list family has no native pressed atlas."
+    },
+    {
+      "name": "ck_reforged_role_pressed",
+      "width": 512,
+      "height": 128,
+      "nineSliceCorner": 12,
+      "state": "pressed",
+      "family": "role_card",
+      "sourceLayers": [
+        "layers/ck_reforged_role_pressed/01_derived_activation.png"
+      ],
+      "nativeSources": [
+        "CommonButtonList2xc60"
+      ],
+      "adaptation": "Forever list-card normal/hover/selected artwork. Activation is an explicitly derived70%-brightness depression; list family has no native pressed atlas."
+    },
+    {
+      "name": "ck_reforged_title",
+      "width": 512,
+      "height": 128,
+      "nineSliceCorner": 0,
+      "state": "static",
+      "family": "title",
+      "sourceLayers": [
+        "layers/ck_reforged_title/01_native_c60_header.png"
+      ],
+      "nativeSources": [
+        "UIFrameDiamondMetalHeader2xc60"
+      ],
+      "adaptation": "Separate c60 DiamondMetal header caps and original tile assembled to the title contract."
+    },
+    {
+      "name": "ck_reforged_gryphon_left",
+      "width": 256,
+      "height": 256,
+      "nineSliceCorner": 0,
+      "state": "static",
+      "family": "ornament",
+      "sourceLayers": [
+        "layers/ck_reforged_gryphon_left/01_actual_forever_gryphon.png"
+      ],
+      "nativeSources": [
+        "UIActionBar2xc60"
+      ],
+      "adaptation": "Actual480x280 c60 gryphon from set1, fit proportionally with transparent bottom padding; distinct original left/right artwork, no mirroring or redrawing."
+    },
+    {
+      "name": "ck_reforged_gryphon_right",
+      "width": 256,
+      "height": 256,
+      "nineSliceCorner": 0,
+      "state": "static",
+      "family": "ornament",
+      "sourceLayers": [
+        "layers/ck_reforged_gryphon_right/01_actual_forever_gryphon.png"
+      ],
+      "nativeSources": [
+        "UIActionBar2xc60"
+      ],
+      "adaptation": "Actual480x280 c60 gryphon from set1, fit proportionally with transparent bottom padding; distinct original left/right artwork, no mirroring or redrawing."
+    },
+    {
+      "name": "ck_reforged_slot_normal",
+      "width": 128,
+      "height": 128,
+      "nineSliceCorner": 0,
+      "state": "normal",
+      "family": "hud_slot",
+      "sourceLayers": [
+        "layers/ck_reforged_slot_normal/01_native_gamepad_normal.png"
+      ],
+      "nativeSources": [
+        "GamepadActionBar"
+      ],
+      "adaptation": "Exact native Forever GamepadActionBar circular state used by the installed gamepad module; no minimap art or added decoration."
+    },
+    {
+      "name": "ck_reforged_slot_hover",
+      "width": 128,
+      "height": 128,
+      "nineSliceCorner": 0,
+      "state": "hover",
+      "family": "hud_slot",
+      "sourceLayers": [
+        "layers/ck_reforged_slot_hover/01_native_gamepad_hover.png"
+      ],
+      "nativeSources": [
+        "GamepadActionBar"
+      ],
+      "adaptation": "Exact native Forever GamepadActionBar circular state used by the installed gamepad module; no minimap art or added decoration."
+    },
+    {
+      "name": "ck_reforged_slot_pressed",
+      "width": 128,
+      "height": 128,
+      "nineSliceCorner": 0,
+      "state": "pressed",
+      "family": "hud_slot",
+      "sourceLayers": [
+        "layers/ck_reforged_slot_pressed/01_native_gamepad_pressed.png"
+      ],
+      "nativeSources": [
+        "GamepadActionBar"
+      ],
+      "adaptation": "Exact native Forever GamepadActionBar circular state used by the installed gamepad module; no minimap art or added decoration."
+    }
+  ],
+  "nativeClient": {
+    "source": "Installed World of Warcraft CASC storage",
+    "product": "wow_classic_beta",
+    "version": "1.60.1.70205",
+    "buildKey": "842b2e5d11f8d6fe257a5b73bd5cf6c6",
+    "mode": "local; CASCConsole --online omitted (False)"
+  },
+  "nativeArtwork": [
+    {
+      "fileDataId": 8063723,
+      "virtualPath": "Interface/Buttons/128RedButtonc60.BLP",
+      "sourceSha256": "17307474789072daf203c0b3324e785a55333c305e55a8e9f677a390b371b234",
+      "png": "native/128RedButtonc60.png",
+      "pngSha256": "5f698f4edfbba6aaa7be9459e0a9d1da0582ff6cab416b4870d43e4b5580546e"
+    },
+    {
+      "fileDataId": 8107305,
+      "virtualPath": "Interface/buttons/redbuttons2xc60.BLP",
+      "sourceSha256": "bfc96bf9c4fbe4a16a3d8eaf171b31f6517878dc873289a6547d3961552b768d",
+      "png": "native/redbuttons2xc60.png",
+      "pngSha256": "916b1660995d313900ebce9a09609a681ef9dbfe852340d07dd6290039eac6c8"
+    },
+    {
+      "fileDataId": 8069120,
+      "virtualPath": "Interface/FrameGeneral/UIFrameDiamondMetal2xc60.BLP",
+      "sourceSha256": "b71151ab4fbaf7898eeee2a6f0c3039fa8ce11a86feb9a73c8c842e54b8de550",
+      "png": "native/UIFrameDiamondMetal2xc60.png",
+      "pngSha256": "5e8a1ffae5cbdf2bf0907305ffb63d1bbdbda18d0dcf8cd1d956b3b737f91392"
+    },
+    {
+      "fileDataId": 8069122,
+      "virtualPath": "Interface/FrameGeneral/UIFrameDiamondMetalVertical2xc60.BLP",
+      "sourceSha256": "af9762ad82f32b926d142d1b4fe4454c6cf66af5fca718444eb797f83f7fd864",
+      "png": "native/UIFrameDiamondMetalVertical2xc60.png",
+      "pngSha256": "08d38c0cb21cd0e5c8fcee13d3830c78fce0b27f581f7bfdea04dd801ce9a9db"
+    },
+    {
+      "fileDataId": 8069106,
+      "virtualPath": "Interface/Common/CommonButtonTertiary2xc60.BLP",
+      "sourceSha256": "1991adde5243c0b273d6d97ab305ca2e412fb7e4c7a4cfdb1bcbf35eb8d5cbca",
+      "png": "native/CommonButtonTertiary2xc60.png",
+      "pngSha256": "a80d4b40f7a1f3d5659137bab9f7ba790d5366e9dc9775cac6f5e084fce20c39"
+    },
+    {
+      "fileDataId": 8198947,
+      "virtualPath": "Interface/FrameGeneral/UICommonBackgrounds.blp",
+      "sourceSha256": "ba36fd7e8b009793a84d775dd0584c90ed6b48e4b603f70ab99e29ccd34f373b",
+      "png": "native/UICommonBackgrounds.png",
+      "pngSha256": "0462e7f5db1ba24e5ba8fdcefcf049c8aaac4801212a025bc25d42815e476383"
+    },
+    {
+      "fileDataId": 8116706,
+      "virtualPath": "Interface/Spellbook/SpellbookBackgroundPageLeftc602x.blp",
+      "sourceSha256": "1d5a91264b056ef18460a1ede6390b7142377eb049745d7af08e8a34b084fdd4",
+      "png": "native/SpellbookBackgroundPageLeftc602x.png",
+      "pngSha256": "faa596a81ca7a52250b188c3c36dbdf6531097ad07d548d19d503bd52c1c591a"
+    },
+    {
+      "fileDataId": 8124219,
+      "virtualPath": "Interface/Common/CommonButtonList2xc60.blp",
+      "sourceSha256": "25bc6a8c182d24a2beeb3687b7a941f65c0dfae5af93c3aa6a07f20d1bb5fd93",
+      "png": "native/CommonButtonList2xc60.png",
+      "pngSha256": "10206153ff8a5e86c80c3cac69a45aaa9513c934a7a872163f326e6ab5662939"
+    },
+    {
+      "fileDataId": 8069124,
+      "virtualPath": "Interface/FrameGeneral/UIFrameDiamondMetalHeader2xc60.BLP",
+      "sourceSha256": "74a65b27bcb3cb6812205a4c1841cc538d185a4131fe0c06278d5a6fcbe6018d",
+      "png": "native/UIFrameDiamondMetalHeader2xc60.png",
+      "pngSha256": "4b9caa61fe7bf2da452fa746d465fc543ff6b66b83379725dda7661b2b2d0dc3"
+    },
+    {
+      "fileDataId": 7948326,
+      "virtualPath": "Interface/HUD/UIActionBar2xc60.BLP",
+      "sourceSha256": "f9caf07a318a9795b5836baab0d665698350fc7cc47e0373011453fefb6dd516",
+      "png": "native/UIActionBar2xc60.png",
+      "pngSha256": "68975608322b5d950cdceae1c94814f1a4f56ea9916f9e60c9a01862747a9be2"
+    },
+    {
+      "fileDataId": 8261942,
+      "virtualPath": "Interface/Gamepad/GamepadActionBar.blp",
+      "sourceSha256": "df7bac3e8bd4a663cb4e600a6df0ca00269a606d8e20365cab868135a9bb3e87",
+      "png": "native/GamepadActionBar.png",
+      "pngSha256": "a0ec78ad3aa5eee777e8a3dd6be22d717abb31f26c2037c3761238ffe37453ac"
+    }
+  ],
+  "atlasCrops": {
+    "128-RedButton-Left": {
+      "fileDataId": 8063723,
+      "source": "128RedButtonc60",
+      "memberID": 38515,
+      "setID": 1,
+      "memberName": "128-redbutton-left-c60",
+      "crop": [
+        391,
+        781,
+        505,
+        909
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "128-RedButton-Right": {
+      "fileDataId": 8063723,
+      "source": "128RedButtonc60",
+      "memberID": 38526,
+      "setID": 1,
+      "memberName": "128-redbutton-right-c60",
+      "crop": [
+        1,
+        391,
+        293,
+        519
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "_128-RedButton-Center": {
+      "fileDataId": 8063723,
+      "source": "128RedButtonc60",
+      "memberID": 38529,
+      "setID": 1,
+      "memberName": "_128-redbutton-center-c60",
+      "crop": [
+        0,
+        1,
+        64,
+        129
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "128-RedButton-Left-Pressed": {
+      "fileDataId": 8063723,
+      "source": "128RedButtonc60",
+      "memberID": 38517,
+      "setID": 1,
+      "memberName": "128-redbutton-left-pressed-c60",
+      "crop": [
+        391,
+        1041,
+        505,
+        1169
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "128-RedButton-Right-Pressed": {
+      "fileDataId": 8063723,
+      "source": "128RedButtonc60",
+      "memberID": 38528,
+      "setID": 1,
+      "memberName": "128-redbutton-right-pressed-c60",
+      "crop": [
+        1,
+        651,
+        293,
+        779
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "_128-RedButton-Center-Pressed": {
+      "fileDataId": 8063723,
+      "source": "128RedButtonc60",
+      "memberID": 38531,
+      "setID": 1,
+      "memberName": "_128-redbutton-center-pressed-c60",
+      "crop": [
+        0,
+        261,
+        64,
+        389
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "RedButton-Highlight": {
+      "fileDataId": 8107305,
+      "source": "redbuttons2xc60",
+      "memberID": 38926,
+      "setID": 1,
+      "memberName": "redbutton-highlight-c60-2x",
+      "crop": [
+        199,
+        1,
+        263,
+        65
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-Frame-DiamondMetal-CornerTopLeft": {
+      "fileDataId": 8069120,
+      "source": "UIFrameDiamondMetal2xc60",
+      "memberID": 38784,
+      "setID": 1,
+      "memberName": "ui-frame-diamondmetal-cornertopleft-c60-2x",
+      "crop": [
+        1,
+        521,
+        129,
+        649
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-Frame-DiamondMetal-CornerTopRight": {
+      "fileDataId": 8069120,
+      "source": "UIFrameDiamondMetal2xc60",
+      "memberID": 38785,
+      "setID": 1,
+      "memberName": "ui-frame-diamondmetal-cornertopright-c60-2x",
+      "crop": [
+        1,
+        651,
+        129,
+        779
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-Frame-DiamondMetal-CornerBottomLeft": {
+      "fileDataId": 8069120,
+      "source": "UIFrameDiamondMetal2xc60",
+      "memberID": 38782,
+      "setID": 1,
+      "memberName": "ui-frame-diamondmetal-cornerbottomleft-c60-2x",
+      "crop": [
+        1,
+        261,
+        129,
+        389
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-Frame-DiamondMetal-CornerBottomRight": {
+      "fileDataId": 8069120,
+      "source": "UIFrameDiamondMetal2xc60",
+      "memberID": 38783,
+      "setID": 1,
+      "memberName": "ui-frame-diamondmetal-cornerbottomright-c60-2x",
+      "crop": [
+        1,
+        391,
+        129,
+        519
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "_UI-Frame-DiamondMetal-EdgeTop": {
+      "fileDataId": 8069120,
+      "source": "UIFrameDiamondMetal2xc60",
+      "memberID": 38787,
+      "setID": 1,
+      "memberName": "_ui-frame-diamondmetal-edgetop-c60-2x",
+      "crop": [
+        0,
+        131,
+        128,
+        259
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "_UI-Frame-DiamondMetal-EdgeBottom": {
+      "fileDataId": 8069120,
+      "source": "UIFrameDiamondMetal2xc60",
+      "memberID": 38786,
+      "setID": 1,
+      "memberName": "_ui-frame-diamondmetal-edgebottom-c60-2x",
+      "crop": [
+        0,
+        1,
+        128,
+        129
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "!UI-Frame-DiamondMetal-EdgeLeft": {
+      "fileDataId": 8069122,
+      "source": "UIFrameDiamondMetalVertical2xc60",
+      "memberID": 38788,
+      "setID": 1,
+      "memberName": "!ui-frame-diamondmetal-edgeleft-c60-2x",
+      "crop": [
+        1,
+        0,
+        129,
+        128
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "!UI-Frame-DiamondMetal-EdgeRight": {
+      "fileDataId": 8069122,
+      "source": "UIFrameDiamondMetalVertical2xc60",
+      "memberID": 38789,
+      "setID": 1,
+      "memberName": "!ui-frame-diamondmetal-edgeright-c60-2x",
+      "crop": [
+        131,
+        0,
+        259,
+        128
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "common-button-tertiary-normal": {
+      "fileDataId": 8069106,
+      "source": "CommonButtonTertiary2xc60",
+      "memberID": 38669,
+      "setID": 1,
+      "memberName": "common-button-tertiary-normal-c60-2x",
+      "crop": [
+        1,
+        423,
+        93,
+        491
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "common-button-tertiary-hover": {
+      "fileDataId": 8069106,
+      "source": "CommonButtonTertiary2xc60",
+      "memberID": 38667,
+      "setID": 1,
+      "memberName": "common-button-tertiary-hover-c60-2x",
+      "crop": [
+        1,
+        353,
+        93,
+        421
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "common-button-tertiary-selected": {
+      "fileDataId": 8069106,
+      "source": "CommonButtonTertiary2xc60",
+      "memberID": 38675,
+      "setID": 1,
+      "memberName": "common-button-tertiary-selected-c60-2x",
+      "crop": [
+        95,
+        283,
+        187,
+        351
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "common-button-tertiary-pressed": {
+      "fileDataId": 8069106,
+      "source": "CommonButtonTertiary2xc60",
+      "memberID": 38673,
+      "setID": 1,
+      "memberName": "common-button-tertiary-pressed-c60-2x",
+      "crop": [
+        95,
+        213,
+        187,
+        281
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "spellbook-Page-Left-C60-2x": {
+      "fileDataId": 8116706,
+      "source": "SpellbookBackgroundPageLeftc602x",
+      "memberID": 38986,
+      "setID": 1,
+      "memberName": "spellbook-page-left-c60-2x",
+      "crop": [
+        1,
+        1,
+        1621,
+        1365
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "common-button-list-large": {
+      "fileDataId": 8124219,
+      "source": "CommonButtonList2xc60",
+      "memberID": 42685,
+      "setID": 1,
+      "memberName": "common-button-list-large-c60-2x",
+      "crop": [
+        1,
+        1,
+        339,
+        139
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "common-button-list-large-hover": {
+      "fileDataId": 8124219,
+      "source": "CommonButtonList2xc60",
+      "memberID": 42686,
+      "setID": 1,
+      "memberName": "common-button-list-large-hover-c60-2x",
+      "crop": [
+        341,
+        1,
+        679,
+        139
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "common-button-list-large-selected": {
+      "fileDataId": 8124219,
+      "source": "CommonButtonList2xc60",
+      "memberID": 42687,
+      "setID": 1,
+      "memberName": "common-button-list-large-selected-c60-2x",
+      "crop": [
+        681,
+        1,
+        1019,
+        139
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-Frame-DiamondMetal-Header-CornerLeft": {
+      "fileDataId": 8069124,
+      "source": "UIFrameDiamondMetalHeader2xc60",
+      "memberID": 38790,
+      "setID": 1,
+      "memberName": "ui-frame-diamondmetal-header-cornerleft-c60-2x",
+      "crop": [
+        1,
+        159,
+        129,
+        315
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-Frame-DiamondMetal-Header-CornerRight": {
+      "fileDataId": 8069124,
+      "source": "UIFrameDiamondMetalHeader2xc60",
+      "memberID": 38791,
+      "setID": 1,
+      "memberName": "ui-frame-diamondmetal-header-cornerright-c60-2x",
+      "crop": [
+        1,
+        317,
+        129,
+        473
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "_UI-Frame-DiamondMetal-Header-Tile": {
+      "fileDataId": 8069124,
+      "source": "UIFrameDiamondMetalHeader2xc60",
+      "memberID": 38792,
+      "setID": 1,
+      "memberName": "_ui-frame-diamondmetal-header-tile-c60-2x",
+      "crop": [
+        0,
+        1,
+        128,
+        157
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-HUD-ActionBar-Gryphon-Left": {
+      "fileDataId": 7948326,
+      "source": "UIActionBar2xc60",
+      "memberID": 36742,
+      "setID": 1,
+      "memberName": "ui-hud-actionbar-gryphon-left-c60-2x",
+      "crop": [
+        1,
+        1,
+        481,
+        281
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "UI-HUD-ActionBar-Gryphon-Right": {
+      "fileDataId": 7948326,
+      "source": "UIActionBar2xc60",
+      "memberID": 36743,
+      "setID": 1,
+      "memberName": "ui-hud-actionbar-gryphon-right-c60-2x",
+      "crop": [
+        483,
+        1,
+        963,
+        281
+      ],
+      "sharedCurrentGamepad": false
+    },
+    "gamepad-actionbar-circleslot-border-normal": {
+      "fileDataId": 8261942,
+      "source": "GamepadActionBar",
+      "memberID": 41759,
+      "setID": 0,
+      "memberName": "gamepad-actionbar-circleslot-border-normal",
+      "crop": [
+        1021,
+        1,
+        1085,
+        65
+      ],
+      "sharedCurrentGamepad": true
+    },
+    "gamepad-actionbar-circleslot-border-hover": {
+      "fileDataId": 8261942,
+      "source": "GamepadActionBar",
+      "memberID": 41758,
+      "setID": 0,
+      "memberName": "gamepad-actionbar-circleslot-border-hover",
+      "crop": [
+        919,
+        945,
+        983,
+        1009
+      ],
+      "sharedCurrentGamepad": true
+    },
+    "gamepad-actionbar-circleslot-border-pressed": {
+      "fileDataId": 8261942,
+      "source": "GamepadActionBar",
+      "memberID": 41760,
+      "setID": 0,
+      "memberName": "gamepad-actionbar-circleslot-border-pressed",
+      "crop": [
+        1021,
+        67,
+        1085,
+        131
+      ],
+      "sharedCurrentGamepad": true
+    }
+  },
+  "atlasMetadataSha256": "6df7c7c41a55fe08e7a845f0bd058f8452ff80e8237d9d4b80074475f5aa76b6",
+  "note": "Explicit Forever/Camelot c60 variants from installed DB2 metadata. Current gamepad-slot atlases are shared set0. Editable layers and native source images are packed by Blender."
+}

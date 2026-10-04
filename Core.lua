@@ -67,7 +67,7 @@ local L = {
     SIZE_LARGE = "Large",
     SIZE_XL = "Extra large",
     OPT_ACTIONS = "Show the mouse buttons (Shift, 123, Space, Delete, Send, X)",
-    OPT_STICKY = "The chosen channel becomes the chat's own (like typing /p in game)",
+    OPT_STICKY = "Remember the chosen channel when the addon keyboard reopens",
     OPT_LOOK = "Look",
     OPT_FONT = "Font",
     OPT_GLYPHS = "Button glyphs",
@@ -696,7 +696,7 @@ LOCALES.frFR = {
     SIZE_LARGE = "Grande",
     SIZE_XL = "Très grande",
     OPT_ACTIONS = "Afficher les boutons souris (Maj, 123, Espace, Effacer, Envoyer, X)",
-    OPT_STICKY = "Le canal choisi devient celui du chat (comme taper /p en jeu)",
+    OPT_STICKY = "Mémoriser le canal choisi à la réouverture du clavier de l'addon",
     OPT_LOOK = "Apparence",
     OPT_FONT = "Police",
     OPT_GLYPHS = "Boutons affichés",
@@ -1322,7 +1322,7 @@ LOCALES.deDE = {
     SIZE_LARGE = "Groß",
     SIZE_XL = "Sehr groß",
     OPT_ACTIONS = "Maustasten anzeigen (Umschalt, 123, Leertaste, Löschen, Senden, X)",
-    OPT_STICKY = "Der gewählte Kanal wird zum Chatkanal (wie /p im Spiel)",
+    OPT_STICKY = "Den gewählten Kanal beim erneuten Öffnen der Addon-Tastatur beibehalten",
     OPT_LOOK = "Aussehen",
     OPT_FONT = "Schriftart",
     OPT_GLYPHS = "Tastensymbole",
@@ -1948,7 +1948,7 @@ LOCALES.esES = {
     SIZE_LARGE = "Grande",
     SIZE_XL = "Muy grande",
     OPT_ACTIONS = "Mostrar los botones del ratón (Mayús, 123, Espacio, Borrar, Enviar, X)",
-    OPT_STICKY = "El canal elegido pasa a ser el del chat (como escribir /p en el juego)",
+    OPT_STICKY = "Recordar el canal elegido al volver a abrir el teclado del addon",
     OPT_LOOK = "Apariencia",
     OPT_FONT = "Fuente",
     OPT_GLYPHS = "Iconos de botones",
@@ -2575,7 +2575,7 @@ LOCALES.itIT = {
     SIZE_LARGE = "Grande",
     SIZE_XL = "Molto grande",
     OPT_ACTIONS = "Mostra i pulsanti del mouse (Maiusc, 123, Spazio, Cancella, Invia, X)",
-    OPT_STICKY = "Il canale scelto diventa quello della chat (come scrivere /p nel gioco)",
+    OPT_STICKY = "Ricorda il canale scelto quando riapri la tastiera dell'addon",
     OPT_LOOK = "Aspetto",
     OPT_FONT = "Carattere",
     OPT_GLYPHS = "Icone dei pulsanti",
@@ -3204,7 +3204,7 @@ local DEFAULTS = {
     supplies = { enabled = true, locked = true, layout = "right", size = 2, list = {}, custom = {} },
     -- Consumables wheel: its kinds, and the variants beside the best of each
     wheel = {
-        enabled = true, variants = true, locked = true,
+        enabled = true, variants = true, locked = true, fixedSlots = false,
         categories = { food = true, drink = true, healthPotion = true, manaPotion = true, healthstone = true,
             manaGem = true, bandage = true, buffFood = true, elixir = true, scroll = true },
     },
@@ -3227,7 +3227,7 @@ local DEFAULTS = {
     magnet = "medium",       -- split keyboard: none / weak / medium / strong
     showLine = true,         -- split keyboard: lines from the centers to the cursors
     showActions = true,
-    stickyChannel = true,    -- the channel row also sets the chat's own sticky channel
+    stickyChannel = true,    -- remember the chosen channel in addon state
     font = "friz",
     glyphStyle = "xbox",
     -- The gamepad UI's centre dot (Reticle.lua): "game", "color", "cycle", "hidden"

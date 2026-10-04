@@ -17,6 +17,10 @@ local SLOTS = 8
 local TABS = { "spells", "items", "macros" }
 
 local function settings() return CK.db.settings.myWheels end
+local function bindings(kind)
+    if CK.Profiles and CK.Profiles.ready then return CK.Profiles:BindingPairs(kind) end
+    return pairs(CK.db.settings[kind])
+end
 
 ---------------------------------------------------------------------------
 -- The wheels: settings.myWheels.list = { { id = 1-8, name, slots = { [1-8] = "spell:133" } } }
@@ -94,9 +98,12 @@ function MW:Delete(id)
         if w.id == id then table.remove(list, i) break end
     end
     local action = "wheel:" .. id
-    for _, assigned in ipairs({ CK.db.settings.mapping, CK.db.settings.replaced }) do
-        for key, value in pairs(assigned) do
-            if value == action then assigned[key] = nil end
+    for _, kind in ipairs({ "mapping", "replaced" }) do
+        for key, value in bindings(kind) do
+            if value == action then
+                if CK.Profiles and CK.Profiles.ready then CK.Profiles:SetBinding(kind, key, nil)
+                else CK.db.settings[kind][key] = nil end
+            end
         end
     end
     changed()
@@ -130,8 +137,8 @@ end
 -- The button a wheel is on (the first found): its input and layer
 function MW:Bound(id)
     local action = "wheel:" .. id
-    for _, assigned in ipairs({ CK.db.settings.mapping, CK.db.settings.replaced }) do
-        for key, value in pairs(assigned) do
+    for _, kind in ipairs({ "mapping", "replaced" }) do
+        for key, value in bindings(kind) do
             if value == action then
                 local input, layer = key:match("^(%w+):(%w*)$")
                 if input then return input, layer end
@@ -456,17 +463,55 @@ function E:Build(parent)
     zone:SetPoint("TOPLEFT")
     zone:SetSize(ZONE_W, WHEEL_H)
     f.zone = zone
-    local disc = zone:CreateTexture(nil, "BACKGROUND")
-    disc:SetTexture(K.TEX .. "ck_disc")
-    disc:SetSize(290, 290)
+    -- Match the live wheel's opaque native brown rock and weathered bevel,
+    -- while keeping all editor slots and labels at their existing positions.
+    local function setAtlas(texture, name, fallback)
+        if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
+            texture:SetAtlas(name, false)
+        elseif fallback then
+            texture:SetTexture(fallback)
+        end
+    end
+    local disc = zone:CreateTexture(nil, "BACKGROUND", nil, -3)
+    disc:SetColorTexture(0.055, 0.04, 0.025, 1)
+    -- Match the native minimap mask to the rim's inner face; the old soft
+    -- portrait mask exposed its square boundary when enlarged here.
+    disc:SetSize(272, 272)
     disc:SetPoint("CENTER", zone, "TOPLEFT", CX, -CY)
+    f.face = disc
+    local material = zone:CreateTexture(nil, "BACKGROUND", nil, -2)
+    material:SetAllPoints(disc)
+    material:SetTexture(K.TEX .. "ck_panel_bg", "REPEAT", "REPEAT")
+    material:SetHorizTile(true); material:SetVertTile(true)
+    material:SetVertexColor(0.72, 0.62, 0.48, 1)
+    f.faceArt = material
+    local mask = zone:CreateMaskTexture()
+    mask:SetAllPoints(disc)
+    setAtlas(mask, "ui-hud-minimap-frame-generic-mask", "Interface\\CharacterFrame\\TempPortraitAlphaMask")
+    disc:AddMaskTexture(mask); material:AddMaskTexture(mask)
+    f.faceMask = mask
+    local rim = zone:CreateTexture(nil, "BORDER")
+    rim:SetPoint("CENTER", zone, "TOPLEFT", CX, -CY)
+    setAtlas(rim, "UI-HUD-Minimap-Frame-Circle")
+    -- Native padding makes the full 347px atlas's visible rim about 290px.
+    rim:SetSize(347, 347)
+    f.rim = rim
     local hub = zone:CreateTexture(nil, "BORDER")
-    hub:SetTexture(K.TEX .. "ck_hub")
-    hub:SetSize(108, 108)
+    setAtlas(hub, "ui-hud-minimap-frame-generic-mask", "Interface\\CharacterFrame\\TempPortraitAlphaMask")
+    hub:SetVertexColor(0.035, 0.025, 0.016, 1)
+    hub:SetSize(100, 100)
     hub:SetPoint("CENTER", zone, "TOPLEFT", CX, -CY)
+    f.hub = hub
+    local hubRim = zone:CreateTexture(nil, "BORDER", nil, 1)
+    hubRim:SetPoint("CENTER", zone, "TOPLEFT", CX, -CY)
+    setAtlas(hubRim, "UI-HUD-Minimap-Frame-Circle")
+    hubRim:SetSize(128, 128)
+    f.hubRim = hubRim
     f.name = K.Text(zone, 14, KC.title)
     f.name:SetPoint("CENTER", zone, "TOPLEFT", CX, -(CY - 11))
-    f.name:SetWidth(94)
+    f.name:SetSize(86, 18)
+    f.name:SetWordWrap(true)
+    if f.name.SetNonSpaceWrap then f.name:SetNonSpaceWrap(true) end
     f.name:SetJustifyH("CENTER")
     if f.name.SetMaxLines then f.name:SetMaxLines(1) end
     f.count = K.Text(zone, 20, KC.cream)
@@ -683,6 +728,8 @@ function E:Empty()
 end
 
 function E:Button(i)
+    local b = self.frame and self.frame.buttons[i]
+    if b then b:Pulse() end
     if i == 1 then
         MW:StartRename(self.id)
     elseif i == 2 then

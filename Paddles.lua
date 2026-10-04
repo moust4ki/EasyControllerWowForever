@@ -267,6 +267,7 @@ end
 ---------------------------------------------------------------------------
 local SIZE = 38
 local PRESSED = 4       -- the game's buttons shrink by 4 px when pressed
+local SLOT_TEXTURE = "Interface\\AddOns\\EasyController\\textures\\ck_reforged_slot_"
 
 -- Each one has its own place, relative to the game's left / right bar (both
 -- on the bottom bar in the compact layout); the right side mirrors the left
@@ -370,14 +371,22 @@ function P:CreateSlot(parent, size)
     b.over = over
     b.border = over:CreateTexture(nil, "ARTWORK")
     b.border:SetAllPoints()
-    atlasOr(b.border, "gamepad-actionbar-circleslot-border-normal", "Interface\\Minimap\\MiniMap-TrackingBorder")
+    b.border:SetTexture(SLOT_TEXTURE .. "normal")
     b.pressed = over:CreateTexture(nil, "ARTWORK", nil, 1)
     b.pressed:SetAllPoints()
-    atlasOr(b.pressed, "gamepad-actionbar-circleslot-border-pressed")
+    b.pressed:SetTexture(SLOT_TEXTURE .. "pressed")
     b.pressed:Hide()
     b.count = over:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
     b.count:SetPoint("BOTTOMRIGHT", -2, 2)
     return b
+end
+
+-- Hover is deliberately a thin rim, not a large glow or a new HUD panel.
+function P.SetHover(b, hovered)
+    hovered = hovered and true or false
+    if b.isHovered == hovered then return end
+    b.isHovered = hovered
+    b.border:SetTexture(SLOT_TEXTURE .. (hovered and "hover" or "normal"))
 end
 
 -- Pressed look, like the game's buttons: a little smaller and lower, with
@@ -388,6 +397,7 @@ function P.SetPressed(b, down)
     b.visual:SetSize(down and b.size - PRESSED or b.size, down and b.size - PRESSED or b.size)
     b.visual:ClearAllPoints()
     b.visual:SetPoint("CENTER", 0, down and -PRESSED / 2 or 0)
+    b.border:SetShown(not down)
     b.pressed:SetShown(down)
 end
 
@@ -724,8 +734,9 @@ function P:BuildFrame()
         b.ring:SetVertexColor(1, 0.85, 0.3)
         b.ring:Hide()
         b:EnableMouse(true)
-        b:SetScript("OnEnter", tooltip)
-        b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        b:SetScript("OnEnter", function(self) P.SetHover(self, true); tooltip(self) end)
+        b:SetScript("OnLeave", function(self) P.SetHover(self, false); GameTooltip:Hide() end)
+        b:SetScript("OnHide", function(self) P.SetHover(self, false); P.SetPressed(self, false) end)
         b:SetScript("OnMouseDown", function(self)
             if not P.placing then return end
             P:SelectForPlacement(self.id)
@@ -734,27 +745,36 @@ function P:BuildFrame()
         b:SetScript("OnMouseUp", function() P.drag = nil end)
         f.buttons[id] = b
     end
-    local elapsed = 0
+    local elapsed, cooldownPending = 0, false
     f:SetScript("OnUpdate", function(_, dt)
         P:UpdatePressed()
         if P.drag then P:Drag() end
         elapsed = elapsed + dt
-        if elapsed < 0.1 then return end
-        elapsed = 0
-        -- Same scale and fading as the game's bar
-        local bar = GamepadMainActionBarFrame
-        if bar then
-            f:SetScale(bar:GetEffectiveScale() / UIParent:GetEffectiveScale())
-            f:SetAlpha(P.placing and 1 or bar:GetEffectiveAlpha() / math.max(0.01, UIParent:GetEffectiveAlpha()))
+        local periodic = elapsed >= 0.1
+        if not periodic and not cooldownPending then return end
+        if periodic then
+            elapsed = 0
+            -- Same scale and fading as the game's bar
+            local bar = GamepadMainActionBarFrame
+            if bar then
+                f:SetScale(bar:GetEffectiveScale() / UIParent:GetEffectiveScale())
+                f:SetAlpha(P.placing and 1 or bar:GetEffectiveAlpha() / math.max(0.01, UIParent:GetEffectiveAlpha()))
+            end
         end
-        P:Refresh(false)
+        local cooldown = cooldownPending
+        cooldownPending = false
+        P:Refresh(cooldown)
     end)
-    f:SetScript("OnShow", function() P:Refresh(true) end)
+    f:SetScript("OnShow", function()
+        cooldownPending = false
+        P:Refresh(true)
+    end)
     f:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
     f:RegisterEvent("SPELL_UPDATE_COOLDOWN")
     f:RegisterEvent("BAG_UPDATE_COOLDOWN")
     f:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
-    f:SetScript("OnEvent", function() P:Refresh(true) end)
+    -- Related cooldown events often arrive together; paint once next frame.
+    f:SetScript("OnEvent", function() cooldownPending = true end)
     f:Hide()
     self.frame = f
     self:Layout()

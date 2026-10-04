@@ -67,8 +67,23 @@ local function freeBagSlots()
 end
 
 local function ammoID()
-    local id = GetInventoryItemID and GetInventoryItemID("player", AMMO_SLOT)
-    return id
+    if not GetInventoryItemID then return end
+    local ok, id = pcall(GetInventoryItemID, "player", AMMO_SLOT)
+    if ok and type(id) == "number" and id > 0 then return id end
+end
+
+local function knownIcon(icon)
+    if type(icon) == "number" then return icon > 0 and icon ~= 134400 end
+    return type(icon) == "string" and icon ~= "" and not icon:lower():find("inv_misc_questionmark", 1, true)
+end
+
+-- The two built-in HUD counters are opt-in, including older saved settings.
+-- Their existing resource records still retain thresholds; other resources
+-- continue to use their individual tracking switches.
+function S:ResourceEnabled(resource)
+    if resource.kind == "bags" then return settings().showBags == true end
+    if resource.kind == "ammo" then return settings().showAmmo == true end
+    return resource.cfg.on
 end
 
 -- The list the bar and the Supplies tab show, in order
@@ -88,8 +103,10 @@ function S:Resources()
     local _, class = UnitClass("player")
     local ammo = ammoID()
     if ammo or class == "HUNTER" then
-        add("ammo", "ammo", ammo, ammo and itemName(ammo) or L.SUP_AMMO,
-            ammo and (GetInventoryItemTexture("player", AMMO_SLOT) or itemIcon(ammo)) or "Interface\\Icons\\INV_Ammo_Arrow_01",
+        local icon
+        if ammo then icon = GetInventoryItemTexture("player", AMMO_SLOT) or itemIcon(ammo)
+        else icon = "Interface\\Icons\\INV_Ammo_Arrow_01" end
+        add("ammo", "ammo", ammo, ammo and itemName(ammo) or L.SUP_AMMO, icon,
             ammo and (GetInventoryItemCount("player", AMMO_SLOT) or 0) or 0)
     end
     local seen = {}
@@ -329,11 +346,12 @@ function S:Refresh()
         local level = severity >= 1 and 2 or (severity > 0 and 1 or 0)
         -- Worse than before: a vibration (not when the addon starts)
         local before = self.levels[r.key]
-        if before and level > before and CK.Vibration and r.cfg.on then
+        local ready, on = knownIcon(r.icon), self:ResourceEnabled(r)
+        if ready and before and level > before and CK.Vibration and on then
             CK.Vibration:Fire(r.kind == "bags" and "lowSpace" or "lowStock")
         end
-        self.levels[r.key] = level
-        if r.cfg.on then list[#list + 1] = { r = r, severity = severity, level = level } end
+        self.levels[r.key] = ready and level or nil
+        if ready and on then list[#list + 1] = { r = r, severity = severity, level = level } end
     end
 
     local size = SIZES[s.size] or SIZES[2]
@@ -357,24 +375,29 @@ function S:Refresh()
     self:BuildBar()
     local bar = self.bar
     local d = DIRECTION[s.layout] or DIRECTION.right
-    self:HoldEdge(d.anchor)
+    local changed = layout ~= self.layout
+    if changed then self:HoldEdge(d.anchor) end
     for i, item in ipairs(list) do
         local b = self:Button(i)
-        resize(b, size)
-        local offset = (i - 1) * (size + 8)
-        for _, frame in ipairs({ b, b.click }) do
-            frame:ClearAllPoints()
-            frame:SetPoint(d.anchor, bar, d.anchor, d.x * offset, d.y * offset)
-            frame:Show()
+        if changed then
+            resize(b, size)
+            local offset = (i - 1) * (size + 8)
+            for _, frame in ipairs({ b, b.click }) do
+                frame:ClearAllPoints()
+                frame:SetPoint(d.anchor, bar, d.anchor, d.x * offset, d.y * offset)
+                frame:Show()
+            end
         end
         fill(b, item.r, item.severity, item.level)
     end
-    for i = #list + 1, #bar.buttons do
-        bar.buttons[i]:Hide()
-        bar.buttons[i].click:Hide()
+    if changed then
+        for i = #list + 1, #bar.buttons do
+            bar.buttons[i]:Hide()
+            bar.buttons[i].click:Hide()
+        end
+        local length = math.max(1, #list * (size + 8) - 8)
+        if d.x ~= 0 then bar:SetSize(length, size) else bar:SetSize(size, length) end
     end
-    local length = math.max(1, #list * (size + 8) - 8)
-    if d.x ~= 0 then bar:SetSize(length, size) else bar:SetSize(size, length) end
     bar:SetShown(#list > 0 or self.moving or false)
     self.layout = layout
 end
@@ -496,12 +519,13 @@ end
 function S:Init()
     local f = CreateFrame("Frame")
     for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "BAG_UPDATE_DELAYED", "PLAYER_EQUIPMENT_CHANGED",
-        "UNIT_INVENTORY_CHANGED", "GET_ITEM_INFO_RECEIVED", "PLAYER_REGEN_ENABLED" }) do
+        "UNIT_INVENTORY_CHANGED", "GET_ITEM_INFO_RECEIVED", "ITEM_DATA_LOAD_RESULT", "PLAYER_REGEN_ENABLED" }) do
         pcall(f.RegisterEvent, f, event)
     end
     local queued
-    f:SetScript("OnEvent", function(_, event, unit)
+    f:SetScript("OnEvent", function(_, event, unit, success)
         if event == "UNIT_INVENTORY_CHANGED" and unit ~= "player" then return end
+        if (event == "GET_ITEM_INFO_RECEIVED" or event == "ITEM_DATA_LOAD_RESULT") and success == false then return end
         -- After a fight: the layout that waited
         if event == "PLAYER_REGEN_ENABLED" and not S.pendingLayout then return end
         if queued then return end

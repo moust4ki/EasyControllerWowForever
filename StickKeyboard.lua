@@ -97,7 +97,7 @@ local REACH_X, REACH_Y = 143 - EDGE_IN, 106 - EDGE_IN
 -- Text colours by state
 local COLOR = {
     char = { 1, 0.82, 0 }, special = { 0.85, 0.79, 0.63 }, lit = { 1, 0.94, 0.78 },
-    hover = { 1, 0.96, 0.85 }, pressed = { 0, 0, 0 },
+    hover = { 1, 0.96, 0.85 }, pressed = { 1, 0.94, 0.78 },
 }
 local PRESSED_TIME = 0.12
 -- Per axis, from this tilt on the stick counts as pushed all the way: sticks
