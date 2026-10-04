@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.5 (not released yet)
+## 1.11.5
 
 - **Macros work again with the addon on** (reported: a macro with /startattack and /cast did
   nothing while the addon was on, from its buttons or the game's bar). Choosing a channel on the
