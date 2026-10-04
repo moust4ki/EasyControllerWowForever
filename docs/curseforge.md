@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **Every press shows** (1.11.14): with "Triggers: press to switch", the bar's icons are pressed in on each press and cropped like the game's; quick presses show one by one.
 - **Stances, stealth and forms** (1.11.13): a trigger layer of a button the addon handles (a wheel on D-pad up, RT + D-pad up...) now reaches the stance bar's spell.
 - **Game functions on a button alone** (1.11.12): a face or D-pad button running a game function alone shows its trigger layers locked, with how to free them.
 - **Round where the buttons are round** (1.11.11): the out-of-range red and, with "Triggers: press to switch", the icons and cooldowns follow the shape of the game's buttons.

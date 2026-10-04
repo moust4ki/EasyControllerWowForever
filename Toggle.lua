@@ -110,6 +110,9 @@ function T:Relay(id, target, button, macro, delegate)
         r = CK.NewFrame("Button", "ControllerKeyboardToggleRelay" .. id, nil, "SecureActionButtonTemplate")
         r:RegisterForClicks("AnyDown")
         r:SetAttribute("useOnKeyDown", true)
+        r:SetScript("PreClick", function(btn, _, down)
+            if down ~= false and btn.ckInput then T:Pressed(btn.ckInput) end
+        end)
         SecureHandlerWrapScript(r, "OnClick", self.header, RELAY)
         r:Hide()
         self.relays[id] = r
@@ -152,7 +155,9 @@ function T:SetTarget(slot, input, layer)
         -- doesn't run from a macro)
         value = name
     elseif kind == "click" then
-        value = self:Relay(layer .. input.id, name, button, nil, bar and M.BarRelay(bar) or nil):GetName()
+        local r = self:Relay(layer .. input.id, name, button, nil, bar and M.BarRelay(bar) or nil)
+        r.ckInput = input.id
+        value = r:GetName()
     elseif kind == "cmd" then
         value = name
     end
@@ -321,12 +326,46 @@ function T:BuildView()
     end
     local elapsed = 0
     v:SetScript("OnUpdate", function(_, dt)
+        local now = GetTime()
+        for _, s in pairs(v.slots) do
+            if s.pressedUntil then T:PaintPressed(s, now) end
+        end
         elapsed = elapsed + dt
         if elapsed < 0.05 then return end
         elapsed = 0
         T:Draw()
     end)
     self.view = v
+end
+
+-- A key of the bar on pressed (its router or its relay tells): its icon
+-- pressed in, like the game's buttons, each press shown (reported: no press
+-- shown at all with the option on)
+local PRESS_TIME, GAP = 0.15, 0.05
+function T:PaintPressed(s, now)
+    local down = now >= (s.pressAt or 0) and now < (s.pressedUntil or 0)
+    if s.isPressed == down then return end
+    s.isPressed = down
+    s.icon:ClearAllPoints()
+    if down then
+        s.icon:SetPoint("TOPLEFT", 2, -3)
+        s.icon:SetPoint("BOTTOMRIGHT", -2, 1)
+        s.icon:SetVertexColor(0.8, 0.8, 0.8)
+    else
+        s.icon:SetAllPoints()
+        s.icon:SetVertexColor(1, 1, 1)
+    end
+end
+
+function T:Pressed(inputId)
+    local v = self.view
+    local input = CK.Mapping.BY_ID[inputId]
+    local s = v and v:IsShown() and input and input.bar and v.slots[input.bar]
+    if not (s and s:IsShown()) then return end
+    local now = GetTime()
+    s.pressAt = (s.pressedUntil or 0) > now and now + GAP or now
+    s.pressedUntil = s.pressAt + PRESS_TIME
+    self:PaintPressed(s, now)
 end
 
 function T:Draw()
@@ -363,12 +402,13 @@ function T:Draw()
             local icon = CK.Mapping:ActionIcon(action)
             s.icon:SetTexture(icon)
             -- The game's crop of its icons (their dark edges cut off). The
-            -- whole icon on a square button (the game hides its edges with
-            -- its mask, ours has none: they showed, reported): cropped
+            -- whole icon (the game's is larger than its mask, which hides the
+            -- edges; ours fills the mask: they showed, reported, square and
+            -- round): cropped
             local ul, ur, ll, lr, a1, a2, a3, a4
             if over.icon and over.icon.GetTexCoord then ul, ur, ll, lr, a1, a2, a3, a4 = over.icon:GetTexCoord() end
             local whole = ul == 0 and ur == 0 and a3 == 1 and a4 == 1
-            if type(ul) == "number" and type(a4) == "number" and not (whole and not s.round) then
+            if type(ul) == "number" and type(a4) == "number" and not whole then
                 s.icon:SetTexCoord(ul, ur, ll, lr, a1, a2, a3, a4)
             else
                 s.icon:SetTexCoord(ICON_CROP, 1 - ICON_CROP, ICON_CROP, 1 - ICON_CROP)

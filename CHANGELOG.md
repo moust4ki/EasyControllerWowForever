@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.11.14
+
+- **Triggers: press to switch**: the bar's icons drawn over the top bar are pressed in on each press,
+  like the game's buttons (reported: no press shown at all), and the round ones no longer show the
+  spell picture's edge inside the circle.
+- **Quick presses**: pressing a button several times in a row shows each press on the addon's
+  buttons (reported: shown only once).
+
 ## 1.11.13
 
 - **Stances, stealth and forms with the addon on a button** (reported: a wheel on D-pad up alone,
