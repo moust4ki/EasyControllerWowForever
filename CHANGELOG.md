@@ -11,7 +11,8 @@
   its realm name late at login.
 - **Start and Select stay the game's** (its radial menu, the interface's focus): they can no longer
   be changed or replaced, in any layer (reported: a spell put on RT + Start never ran). What an older
-  version saved on them is dropped. L3 and R3 stay free.
+  version saved on them is removed, and the chat says once what was there, to put it on another
+  button. L3 and R3 stay free.
 
 ## 1.11.1
 

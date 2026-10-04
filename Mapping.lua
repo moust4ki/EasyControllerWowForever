@@ -340,6 +340,24 @@ end
 -- (reported: RT + Start took a spell that never ran)
 M.SYSTEM = { START = true, SELECT = true }
 
+-- What an older version had put on Start / Select, removed at load: said
+-- once in the chat, so the player can put it on another button
+function M:ReportSystemRemoved()
+    local removed = CK.removedSystem
+    CK.removedSystem = nil
+    if not removed then return end
+    local parts = {}
+    for _, e in pairs(removed) do
+        local id, layer = e.key:match("^(%u+):(%a*)$")
+        local button = id == "START" and "Start" or "Select"
+        local where = layer and layer ~= "" and ((layer == "LTRT" and "LT + RT" or layer) .. " + " .. button) or button
+        parts[#parts + 1] = where .. " (" .. tostring(self:ActionName(e.action) or e.action) .. ")"
+    end
+    if #parts == 0 then return end
+    table.sort(parts)
+    CK:Print(L.SYSTEM_REMOVED, table.concat(parts, ", "))
+end
+
 -- "free", "native", "slot", "locked" (layer unavailable) for an input
 function M:State(input, layer)
     if input.layer or M.SYSTEM[input.id] then return "native" end

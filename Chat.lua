@@ -295,6 +295,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         safe(function() CK:RegisterOptions() end)
         local version = (C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata)(ADDON, "Version")
         CK:Print(L.LOADED, version or "?")
+        safe(function() CK.Mapping:ReportSystemRemoved() end)
         -- The folder was ControllerKeyboard before 1.1: an old copy left
         -- there loads too, with a keyboard of its own
         local isLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
