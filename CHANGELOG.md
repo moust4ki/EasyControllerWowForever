@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.11.0
+
+- **The keyboard in the game's other fields** (requested on CurseForge): it also opens when a field of
+  the game gets the focus, like the Auction House search, the bags' search, mail or notes (Keyboard ›
+  Opening, on by default). What you type goes into the field; A is Enter there (the Auction House
+  searches), B closes the keyboard and leaves the field, what you typed kept. A field for numbers
+  opens on the numbers. Never for the chat (it keeps its own keyboard), password fields, the game's
+  confirmation popups, settings and key bindings, nor in combat.
+- **Supplies**: a character without ammo no longer gets a row named "item:0" (WoW Forever answers 0
+  for an empty ammo slot).
+
 ## 1.10.0
 
 - **Hold to show a wheel** (Wheels › Opening, off by default, requested on CurseForge): hold a

@@ -122,6 +122,32 @@ function CK:OnUpdate()
         end
     end
 
+    -- A field of the game (Fields.lua): closed when the focus goes to
+    -- another field, or the field goes away (a mouse click on the keyboard
+    -- takes the focus: typing goes on); typed on a physical keyboard, or cut
+    -- by the field (its length, numbers only): the keyboard follows it
+    local field = self.field
+    if field then
+        local focus = GetCurrentKeyBoardFocus and GetCurrentKeyBoardFocus()
+        if focus ~= field then
+            if focus == nil and (self.fieldMouse or self:IsClickingWheel()) then
+                self.fieldMouse = true
+            else
+                self:Close("field lost")
+                return
+            end
+        end
+        if not field:IsVisible() then
+            self:Close("field lost")
+            return
+        end
+        local text = field:GetText() or ""
+        if text ~= (self.buffer or "") then
+            self.buffer = text
+            self:Refresh()
+        end
+    end
+
     -- Fallback when OnGamePadStick never fires: poll the device state
     if not self.stickEvents and C_GamePad and C_GamePad.GetDeviceMappedState then
         local id = C_GamePad.GetActiveDeviceID and C_GamePad.GetActiveDeviceID()

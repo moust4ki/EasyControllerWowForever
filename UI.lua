@@ -653,6 +653,14 @@ function CK:UpdateRows()
     self:SetGlyph(f.lbGlyph, channels and "DPAD_UP" or "DPAD_LEFT")
     self:SetGlyph(f.rbGlyph, "DPAD_RIGHT")
     f.rbGlyph:SetShown(not channels)
+    -- A field of the game (Fields.lua): the channels do nothing there
+    if self.field then
+        for _, b in ipairs(f.channels) do b:SetAlpha(0.25) end
+        f.questChip:SetAlpha(0.25)
+        f.chanLeft:Hide()
+    else
+        f.chanLeft:Show()
+    end
 end
 
 function CK:UpdateChannels()
