@@ -554,7 +554,10 @@ end
 -- release is never waited for (it does not always reach us), the key is
 -- read as held from the game itself.
 local PRESS_TIME = 0.15
-local keyPressed = {}
+-- A press while the last one still shows: a short release first, so that
+-- each press shows (reported: pressed several times, shown once)
+local GAP = 0.05
+local keyPressed, keyGap = {}, {}
 local function watchKeys()
     if P.keyWatcher or InCombatLockdown() then return end
     local w = CK.NewFrame("Frame", nil, UIParent)
@@ -562,21 +565,29 @@ local function watchKeys()
     w:SetPoint("TOPLEFT")
     w:EnableKeyboard(true)
     w:SetPropagateKeyboardInput(true)
-    w:SetScript("OnKeyDown", function(_, key) keyPressed[key] = GetTime() + PRESS_TIME end)
+    w:SetScript("OnKeyDown", function(_, key)
+        local now = GetTime()
+        if (keyPressed[key] or 0) > now then keyGap[key] = now + GAP end
+        keyPressed[key] = math.max(now, keyGap[key] or 0) + PRESS_TIME
+    end)
     P.keyWatcher = w
 end
 
 local function inputDown(key, state, now)
-    if not key then return false end
+    if not key or (keyGap[key] or 0) > now then return false end
     if (keyPressed[key] or 0) > now then return true end
     if IsKeyDown and IsKeyDown(key) then return true end
     return key:find("^PAD") ~= nil and padButtonDown(state, key)
 end
 
--- Our secure buttons (spells, items, macros) tell when they are clicked
-local flashed = {}
+-- Our secure buttons (spells, items, macros) tell when they are clicked;
+-- the trigger toggle's icons show it too
+local flashed, gapUntil = {}, {}
 function P:NotifyPress(inputId)
-    flashed[inputId] = GetTime() + PRESS_TIME
+    local now = GetTime()
+    if (flashed[inputId] or 0) > now then gapUntil[inputId] = now + GAP end
+    flashed[inputId] = math.max(now, gapUntil[inputId] or 0) + PRESS_TIME
+    if CK.Toggle and CK.Toggle.Pressed then CK.Toggle:Pressed(inputId) end
 end
 
 ---------------------------------------------------------------------------
@@ -722,7 +733,8 @@ function P:UpdatePressed()
         local b = f.buttons[id]
         if b:IsShown() then
             local key = CK.Mapping:InputKey(CK.Mapping.BY_ID[id])
-            P.SetPressed(b, inputDown(key, state, now) or (flashed[id] or 0) > now)
+            local gap = (gapUntil[id] or 0) > now
+            P.SetPressed(b, not gap and (inputDown(key, state, now) or (flashed[id] or 0) > now))
         end
     end
 end
