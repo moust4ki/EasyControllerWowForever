@@ -7,6 +7,13 @@ Every feature you don't need can be turned off to save even more resources.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
+## What's new in 1.10
+- **Hold to show a wheel** (option, Wheels › Opening): hold the wheel's button, aim with the left stick, let go to use what it aims at. Let go with the stick in the middle to close it.
+- **Each trigger layer of a button runs its own**: a wheel on D-pad down no longer opens with LT or RT held (the game's bar comes back there), and a wheel on LT + a button now opens.
+- **Character and camera back right away** after closing a wheel with the stick still pushed.
+- **/ec config** typed in the chat opens the panel at once.
+- A broken saved file no longer stops the addon.
+
 ## What's new in 1.9
 - **Profiles** (new tab): each character has its own buttons and paddles, wheels and supplies, or uses the shared ones. Copy another character's or start from scratch. Every character starts from your current setup, so with one character nothing changes.
 - **LT + RB and RT + LB** can now be set from the Gamepad tab (they showed "Unavailable" in 1.8.2).
@@ -39,6 +46,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Supplies** tracker (arrows, soul shards, reagents, bag space…) that glows when you run low
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
+- **Hold to show** a wheel, let go to use (option)
 - **Wheels that fit**: as many sections as items
 - **Better items**: highlights upgrade items in your bags
 - **At merchants**: auto-sell junk and auto-repair
@@ -118,9 +126,9 @@ A key of its own (any free button, or a back paddle in any trigger layer) opens 
 the game's own radial menu, cut in as many sections as it holds (two items: two halves; five: five
 sections), up to 8 consumables a page (LB / RB for more), from your bags: food, drink, healing and
 mana potions, healthstone, mana gem, bandages, buff food, elixirs and flasks, scrolls, the best first.
-Point with the left stick and press A to use; B cancels; the mouse works too. While it is open, and
-until you let the stick go, your character doesn't move, so eating isn't cut short. It works in
-combat (food and drink greyed there).
+Point with the left stick and press A to use; B cancels; the mouse works too. Or hold its key, aim and
+let go to use (option). While it is open, and a moment after, your character doesn't move, so eating
+isn't cut short. It works in combat (food and drink greyed there).
 
 **Supplies**
 A round button per resource: free bag slots, your ammunition, your class reagents (soul shards,

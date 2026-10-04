@@ -1,7 +1,26 @@
 # Changelog
 
-## 1.9.1 (not released yet)
+## 1.10.0
 
+- **Hold to show a wheel** (Wheels › Opening, off by default, requested on CurseForge): hold a
+  wheel's button to show it, aim with the left stick, let go to use what it aims at; the stick in the
+  middle closes it without using anything. A still uses while it is held. Every wheel, on any button
+  or paddle, in combat too. With Triggers: press to switch on and a bar switched on, the wheel opens
+  on a press as before.
+- **Each layer of a button runs its own, wheels too** (reported on CurseForge): a wheel on a button
+  opened in every layer (the consumables wheel on D-pad down opened with RT held too, the game's
+  RT + D-pad down lost), and a wheel on a trigger layer (LT + D-pad down) never opened, the button's
+  own function ran instead. The key could reach the addon without the trigger's modifier. The
+  gamepad's buttons with something of yours on them (spells, items, macros, wheels, replaced
+  buttons) now read the triggers held when pressed, like the back paddles since 1.8.2: each layer
+  runs what you put there, else the game's bar button of that layer. A button with a game function
+  on one of its layers keeps working as before.
+- **The character and the camera back right after a wheel** (reported on CurseForge): closing a
+  wheel with a stick still pushed kept the sticks up to 6 seconds, while any stick read as pushed
+  (keep pushing to walk on, or a stick that never reads as let go). Now only the stick that aims the
+  wheel counts, and only for a moment (0.4 s at most), so the character doesn't walk off.
+- **/ec config typed in the chat** opens the panel at once: it waited for a game window that was
+  only shown (the gamepad on the character) to close.
 - **A saved file with broken entries** no longer stops the addon: a button, a supplies entry, an
   item added, a wheel or a wheel's slot that the addon can't read is left out at load and when a
   character's profile is put in use; the good ones are kept. Another character's broken profile is

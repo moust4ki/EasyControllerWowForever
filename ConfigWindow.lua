@@ -1221,8 +1221,13 @@ end
 function C:GameIsFree()
     if SettingsPanel and SettingsPanel:IsShown() then return false end
     if GameMenuFrame and GameMenuFrame:IsShown() then return false end
+    -- A game window with the pad's focus (one only shown, the pad driving
+    -- the character, keeps its place there: /ec config waited for it to
+    -- close)
     local manager = GamepadMode and GamepadMode.FrameControlsManager
-    if manager and manager.GetActiveFrame and manager:GetActiveFrame() then return false end
+    local focused = manager and manager.isUIFocused
+    if focused == nil then focused = true end
+    if focused and manager and manager.GetActiveFrame and manager:GetActiveFrame() then return false end
     local chat = CK.ActiveChatWindow and CK.ActiveChatWindow()
     return not (chat and chat:HasFocus())
 end
