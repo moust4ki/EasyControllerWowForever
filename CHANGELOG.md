@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.11.2
+
+- **Profiles are automatic**: each character keeps its own buttons, paddles, wheels and supplies,
+  with no option any more (no Profiles tab, no shared settings, no copy, no start from scratch).
+  Reported: start from scratch on an alt erased every character's settings. Two causes found and
+  fixed: a character on the shared settings changed the configuration new characters start from,
+  and an error at logout could save a character's settings in its place. A character left on the
+  shared settings keeps what it used, as its own. A character is also found again when the game gives
+  its realm name late at login.
+- **Start and Select stay the game's** (its radial menu, the interface's focus): they can no longer
+  be changed or replaced, in any layer (reported: a spell put on RT + Start never ran). What an older
+  version saved on them is removed, and the chat says once what was there, to put it on another
+  button. L3 and R3 stay free.
+
 ## 1.11.1
 
 - **Stealth, forms and stances**: in a stance, the game's stance bar takes the place of one of the

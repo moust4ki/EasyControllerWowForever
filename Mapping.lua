@@ -335,9 +335,32 @@ function M:ClearSlot(slot)
     ClearCursor()
 end
 
+-- Start and Select are the game's system buttons (its radial menu, the
+-- interface's focus): left to it in every layer, never bound or replaced
+-- (reported: RT + Start took a spell that never ran)
+M.SYSTEM = { START = true, SELECT = true }
+
+-- What an older version had put on Start / Select, removed at load: said
+-- once in the chat, so the player can put it on another button
+function M:ReportSystemRemoved()
+    local removed = CK.removedSystem
+    CK.removedSystem = nil
+    if not removed then return end
+    local parts = {}
+    for _, e in pairs(removed) do
+        local id, layer = e.key:match("^(%u+):(%a*)$")
+        local button = id == "START" and "Start" or "Select"
+        local where = layer and layer ~= "" and ((layer == "LTRT" and "LT + RT" or layer) .. " + " .. button) or button
+        parts[#parts + 1] = where .. " (" .. tostring(self:ActionName(e.action) or e.action) .. ")"
+    end
+    if #parts == 0 then return end
+    table.sort(parts)
+    CK:Print(L.SYSTEM_REMOVED, table.concat(parts, ", "))
+end
+
 -- "free", "native", "slot", "locked" (layer unavailable) for an input
 function M:State(input, layer)
-    if input.layer then return "native" end
+    if input.layer or M.SYSTEM[input.id] then return "native" end
     -- The bars' buttons, and LB / RB (targeting, and the game's class
     -- actions on LT + LB / RT + RB) always belong to the game, in every
     -- layer: the game switches its bars itself, triggers modifiers or not
@@ -387,6 +410,7 @@ function M:Get(inputId, layer)
 end
 
 function M:Set(inputId, layer, action)
+    if M.SYSTEM[inputId] then return end
     settings().mapping[inputId .. ":" .. layer] = action
     self:Apply()
     CK.Paddles:Apply()
@@ -434,7 +458,7 @@ local CROSSED = { LB = "RT", RB = "LT" }
 M.CROSSED = CROSSED
 
 function M:Replaceable(input, layer)
-    if not self:ReplaceOn() or input.layer or input.paddle then return false end
+    if not self:ReplaceOn() or input.layer or input.paddle or M.SYSTEM[input.id] then return false end
     if (input.id == "LB" or input.id == "RB") and layer ~= "" and layer ~= CROSSED[input.id] then return false end
     local state = self:State(input, layer)
     return state == "native" or state == "slot"
@@ -475,6 +499,7 @@ function M:NativeAction(input, layer)
 end
 
 function M:SetReplaced(inputId, layer, action)
+    if M.SYSTEM[inputId] then return end
     -- The game's own function chosen: the button given back to it
     local input = M.BY_ID[inputId]
     if action and input and action == self:NativeAction(input, layer) then action = nil end
