@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.11.1
+
+- **Stealth, forms and stances**: in a stance, the game's stance bar takes the place of one of the
+  gamepad bars (its gamepad settings, Stance bar) with slots of its own. The Gamepad tab now shows and
+  sets that bar's slots while you are in the stance (reported: in stealth it couldn't be set). And a
+  layer left to the game on a replaced button (or a game bar button chosen for a free button or a
+  paddle) pressed the hidden bar's button: RT + a button ran the spell from outside stealth. It now
+  presses the stance bar's in a stance, in combat too. Characters with no stance or form keep their
+  bindings as they were.
+
 ## 1.11.0
 
 - **The keyboard in the game's other fields** (requested on CurseForge): it also opens when a field of

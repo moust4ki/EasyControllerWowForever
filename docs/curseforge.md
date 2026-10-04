@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **Stealth, forms and stances** (1.11.1): the stance bar that takes the place of a gamepad bar in stealth or a form can now be set from the Gamepad tab, and your replaced buttons press its spells while you are in the stance.
 - **The keyboard in the game's fields**: it now opens for the Auction House search, the bags' search, mail, notes... What you type goes into the field, A is Enter (the Auction House searches), B closes it. Option in Keyboard › Opening, on by default.
 - **Supplies**: no more "item:0" row for characters without ammo.
 

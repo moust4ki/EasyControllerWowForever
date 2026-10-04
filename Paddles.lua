@@ -83,9 +83,61 @@ function P:NativeButton(action)
     return group and group["ActionButton" .. button.index]
 end
 
--- Action slot the game's button holds on the current page
+-- The game's stance bar (stealth, druid forms, warrior stances): while the
+-- player is in one, it takes the place of one of the bars of the first
+-- page, with slots of its own (the game's gamepad settings, Stance bar:
+-- GamepadStanceBarOverride). The bar it takes: "left", "right", "bottom",
+-- or nil (none, or a bar of another page).
+local STANCE_BARS = { Page1LeftBar = "left", Page1RightBar = "right", Page1BottomBar = "bottom" }
+local STANCE_VALUES = { [2] = "left", [3] = "right", [4] = "bottom" }
+
+function P:StanceBarKey()
+    local value = tonumber(GetCVar("GamepadStanceBarOverride"))
+    if not value then return nil end
+    local enum = Enum and Enum.GamepadStanceBarOverride
+    if not enum then return STANCE_VALUES[value] end
+    for key, bar in pairs(STANCE_BARS) do
+        if enum[key] == value then return bar end
+    end
+end
+
+local function stanceBar()
+    local main = GamepadMainActionBarFrame
+    local bars = main and main.PageUnit and main.PageUnit.actionBars
+    return bars and bars.stanceBar
+end
+
+-- A character that has stances or forms (the others' bars never change)
+function P:HasStances()
+    return (GetNumShapeshiftForms and GetNumShapeshiftForms() or 0) > 0
+end
+
+-- The stance bar's button in the place of a bar's button ("bar:right:a"),
+-- when the stance bar takes that bar
+function P:StanceButton(action)
+    local barKey, buttonKey = (action or ""):match("^bar:(%a+):(%a+)$")
+    local button = findBy(P.BUTTONS, buttonKey)
+    if not (barKey and button) or barKey ~= self:StanceBarKey() then return end
+    local bar = stanceBar()
+    local group = bar and bar[button.group]
+    return group and group["ActionButton" .. button.index]
+end
+
+-- The button the game shows there now: the stance bar's while the player is
+-- in a stance (stealth...) on the first page, else the bar's own
+function P:LiveButton(action)
+    local stance = self:StanceButton(action)
+    local bar = stanceBar()
+    if stance and bar and bar.isOverrideBarActive then
+        local tracker = GamepadMainActionBarFrame.PageUnit.PageTracker
+        if (tracker and tracker.currentPage or 1) == 1 then return stance end
+    end
+    return self:NativeButton(action)
+end
+
+-- Action slot the game's button shown there holds (the stance bar's in a stance)
 function P:NativeSlot(action)
-    local native = self:NativeButton(action)
+    local native = self:LiveButton(action)
     local slot = native and native.action
     if type(slot) == "number" and slot > 0 then return slot end
 end
