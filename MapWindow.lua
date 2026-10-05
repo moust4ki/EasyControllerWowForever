@@ -657,6 +657,8 @@ function W:Help()
         or (state == "slot" and not M:SlotKept(M:NativeSlot(input, layer)))
     if cell.lockedAlone then
         hints[#hints + 1] = H({ "A" }, L.V_UNLOCK, "A")
+    elseif cell.state == "off" and cell.why then
+        hints[#hints + 1] = H({ "A" }, L.V_WHY, "A")
     elseif cell.pick or (cell.state ~= "off" and input and canA) then
         hints[#hints + 1] = H({ "A" }, cell.state == "free" and L.V_ASSIGN or L.V_CHANGE, "A")
     end
@@ -777,6 +779,26 @@ function W:ExplainLocked(input, layer, cell)
     if UIFrameFadeIn then UIFrameFadeIn(self.picker, 0.15, 0, 1) end
 end
 
+-- An unavailable cell that can't be freed: why, and OK
+function W:ExplainOnly(input, layer, cell)
+    self.picker:Open({
+        kicker = L.KICK_LOCKED,
+        title = function() return K.ComboMarkup(input.id, layer, 16) .. " · " .. (cell.name or L.MAP_GAME) end,
+        text = cell.why,
+        lists = { { label = "", entries = function() return { { action = "ok", name = L.V_OK, icon = 134400 } } end } },
+        rows = 1, chooseVerb = L.V_OK,
+        onChoose = function()
+            self.picker:Close()
+            C:Render()
+        end,
+        onBack = function()
+            self.picker:Close()
+            C:Render()
+        end,
+    })
+    C:Render()
+end
+
 function W:Choose()
     local input = self:Focused()
     if not input then return end
@@ -788,7 +810,12 @@ end
 function W:ChooseIn(input, layer)
     local cell = self:Cell(input, layer)
     if cell.lockedAlone then return self:ExplainLocked(input, layer, cell) end
-    if cell.state == "off" and not cell.pick then return end
+    if cell.state == "off" and not cell.pick then
+        -- Any other unavailable cell (LT + LB, a trigger held, Start...):
+        -- why, on A too
+        if cell.why then self:ExplainOnly(input, layer, cell) end
+        return
+    end
     local state = M:State(input, layer)
     local replace = M:Replaceable(input, layer) and M:CanOwnKeys()
     local tabs, forSlot, slot

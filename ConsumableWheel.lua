@@ -627,17 +627,19 @@ end
 
 ---------------------------------------------------------------------------
 -- Staying seated while eating or drinking (Wheels > Consumables, on by
--- default), and still while bandaging (its own option): a stick still
--- pushed from aiming the wheel, or nudged, doesn't stand the character up
--- and waste the food or the bandage (reported). The game gives a frame both
--- sticks at once: they are taken only while the movement stick is off its
--- rest, caught before the game's own dead zone, so the camera turns freely
--- the rest of the time (reported: no looking around while eating). Pushed
--- far for a quarter of a second, the character gets up (half a second was
--- too long, reported). Never in combat.
+-- default), and still while bandaging (its own option): the sticks are kept
+-- for the whole meal or bandage, so a stick still pushed from aiming the
+-- wheel, or nudged, doesn't stand the character up and waste the food or
+-- the bandage (reported). Pushed far for a quarter of a second, the
+-- character gets up (half a second all the way was too long, reported).
+-- The game gives a frame the sticks all together (taking them only while
+-- the left stick moved was too late, the character moved at once: checked
+-- in game): the addon turns the camera itself from the right stick
+-- meanwhile, at the game's gamepad camera speeds (reported: no looking
+-- around while eating). Never in combat.
 ---------------------------------------------------------------------------
 local SEATED_PUSH, SEATED_TIME = 0.8, 0.25
-local SEATED_TAKE, SEATED_REST = 0.1, 0.06
+local CAMERA_REST = 0.15
 -- The auras of eating and drinking, by name: the game's own Food and
 -- Drink, and the use of each food or drink a wheel used
 local mealNames, mealBase = {}, false
@@ -702,6 +704,63 @@ local function moveLength()
     return stick and stick.len or 0
 end
 
+-- The right stick, read while the sticks are kept
+local function cameraStick()
+    local state = C_GamePad and C_GamePad.GetDeviceMappedState and C_GamePad.GetDeviceMappedState()
+    local stick = state and state.sticks and state.sticks[stickIndex("Camera", 2)]
+    if not stick then return 0, 0 end
+    return stick.x or 0, stick.y or 0
+end
+
+local function cameraSpeed(cvar)
+    local value = tonumber(GetCVar and GetCVar(cvar))
+    return (value and value > 0) and value or 1
+end
+
+-- One axis of the camera: the game's move started, its speed changed, or
+-- stopped (the game's camera functions, allowed to addons: checked in game).
+-- Both axes the other way round from the move functions' names, as the
+-- game's own camera stick does (checked in game: both were inverted)
+local AXES = {
+    yaw = { neg = "MoveViewRightStart", pos = "MoveViewLeftStart", negStop = "MoveViewRightStop",
+        posStop = "MoveViewLeftStop", cvar = "GamePadCameraYawSpeed" },
+    pitch = { neg = "MoveViewUpStart", pos = "MoveViewDownStart", negStop = "MoveViewUpStop",
+        posStop = "MoveViewDownStop", cvar = "GamePadCameraPitchSpeed" },
+}
+
+local function turn(frame, name, value)
+    local axis = AXES[name]
+    local dir = (value > CAMERA_REST and 1) or (value < -CAMERA_REST and -1) or 0
+    local speed = dir ~= 0 and math.abs(value) * cameraSpeed(axis.cvar) or 0
+    local was = frame.camera[name]
+    if was.dir == dir and math.abs(was.speed - speed) < 0.05 then return end
+    if was.dir ~= dir and was.dir ~= 0 then
+        local stop = _G[was.dir < 0 and axis.negStop or axis.posStop]
+        if stop then stop() end
+    end
+    if dir ~= 0 then
+        local start = _G[dir < 0 and axis.neg or axis.pos]
+        if start then start(speed) end
+    end
+    was.dir, was.speed = dir, speed
+end
+
+local function stopCamera(frame)
+    for name, axis in pairs(AXES) do
+        if frame.camera and frame.camera[name].dir ~= 0 then
+            for _, fn in ipairs({ axis.negStop, axis.posStop }) do
+                if _G[fn] then _G[fn]() end
+            end
+        end
+    end
+    frame.camera = { yaw = { dir = 0, speed = 0 }, pitch = { dir = 0, speed = 0 } }
+end
+W.SeatedCamera = function(frame)
+    local x, y = cameraStick()
+    turn(frame, "yaw", x)
+    turn(frame, "pitch", y)
+end
+
 function W:BuildSeated()
     if self.seated then return end
     local f = CK.NewFrame("Frame", nil, UIParent)
@@ -716,10 +775,13 @@ function W:BuildSeated()
     end
     f:SetScript("OnShow", function(frame)
         frame.pushed, frame.taken = 0, false
-        -- Still pushed (from aiming the wheel): held at once
-        if moveLength() >= SEATED_TAKE then take(frame, true) end
+        stopCamera(frame)
+        take(frame, true)
     end)
-    f:SetScript("OnHide", function(frame) take(frame, false) end)
+    f:SetScript("OnHide", function(frame)
+        stopCamera(frame)
+        take(frame, false)
+    end)
     f:SetScript("OnUpdate", function(frame, elapsed)
         local len = moveLength()
         if len >= SEATED_PUSH then frame.pushed = frame.pushed + elapsed else frame.pushed = 0 end
@@ -729,11 +791,9 @@ function W:BuildSeated()
             frame:Hide()
         elseif InCombatLockdown() or not seatedNow() then
             frame:Hide()
-        elseif len >= SEATED_TAKE then
-            take(frame, true)
-        elseif len < SEATED_REST then
-            -- The movement stick at rest: the camera is the player's
-            take(frame, false)
+        else
+            -- Looking around meanwhile
+            W.SeatedCamera(frame)
         end
     end)
     local events = CK.NewFrame("Frame")

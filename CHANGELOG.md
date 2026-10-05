@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.11.15
+
+- **Unavailable layers explain themselves** (reported: "Game function" on LT + RB / RT + LB, and no
+  way to know why): A on a layer locked by its button alone (L3's autorun, LB / RB's targeting, a
+  game function on a face button alone) shows why, and frees it on the spot: Nothing on the button
+  alone (or the button given back to the game), another action for it, or leave it. Once freed,
+  the layer's choice opens right away. The other unavailable cells (LT + LB, a trigger held, Start)
+  say why on A too.
+- **Staying seated while eating** (reported): the right stick turns the camera again while the
+  sticks are kept (the addon turns it, at the game's gamepad camera speeds), and getting up is
+  quicker: the left stick pushed far for a quarter of a second (it was half a second, all the way).
+- **Stay still while bandaging** (new, Wheels › Consumables, on by default): a nudge no longer
+  interrupts a bandage, the same way.
+- **Triggers: press to switch**: an empty slot of the bar switched on no longer shows the top bar's
+  icon through it (reported).
+
 ## 1.11.14
 
 - **Triggers: press to switch**: the bar's icons drawn over the top bar are pressed in on each press,
