@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.11.16
+
+- **Red when out of range**: on the game's buttons, their icon itself turns red, in the button's own
+  shape, like on the addon's extra buttons (reported: a red cross past the ring of the round
+  buttons). Nothing is hooked on the game's buttons: the range is checked five times a second.
+- **Staying seated while eating or bandaging**: the game's radial menu (Start), a game window with
+  the gamepad's focus (the map...), and the addon's keyboard, wheels and panel get the sticks while
+  they are open (reported: the radial menu couldn't be used while eating). Getting up isn't counted
+  meanwhile.
+- **Triggers: press to switch**: the round icons use a whole circle mask.
+
 ## 1.11.15
 
 - **Unavailable layers explain themselves** (reported: "Game function" on LT + RB / RT + LB, and no
