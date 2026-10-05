@@ -107,11 +107,9 @@ local function place(v, fallback)
     v:ClearAllPoints()
     v:SetAllPoints(area)
     if shape == "round" then
-        if hasAtlas("CircleMask") then
-            v.mask:SetAtlas("CircleMask")
-        else
-            v.mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-        end
+        -- A whole circle, black past its edge: the game's CircleMask atlas
+        -- without the game's clamp left a red cross past the ring (reported)
+        v.mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
     elseif hasAtlas("SquareMask") then
         v.mask:SetAtlas("SquareMask")
     else

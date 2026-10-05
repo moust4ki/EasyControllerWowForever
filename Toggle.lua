@@ -306,22 +306,15 @@ function T:BuildView()
         if s.round then
             local bgMask = s:CreateMaskTexture()
             bgMask:SetAllPoints(s.bg)
-            if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("CircleMask") then
-                bgMask:SetAtlas("CircleMask")
-            else
-                bgMask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-            end
+            bgMask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
             s.bg:AddMaskTexture(bgMask)
         end
         if s.round then
             local mask = s:CreateMaskTexture()
             mask:SetAllPoints(s.icon)
-            -- The game's own circle (its buttons use this mask)
-            if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("CircleMask") then
-                mask:SetAtlas("CircleMask")
-            else
-                mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-            end
+            -- A whole circle, black past its edge (the game's CircleMask atlas
+            -- needs the game's clamp, or it stretches into a cross)
+            mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
             s.icon:AddMaskTexture(mask)
         end
         -- The game's frame of the button (its ring), drawn again over ours
