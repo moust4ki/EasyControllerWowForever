@@ -116,7 +116,7 @@ function W:Cell(input, layer)
             local slotName, slotIcon = M:NativeInfo(input, layer)
             local alone = M:ActionName(M:GetReplaced(input.id, "")) or L.MAP_GAME
             return { state = "off", name = kept and M:ActionName(kept) or slotName or L.MAP_GAME,
-                icon = kept and M:ActionIcon(kept) or slotIcon, action = kept,
+                icon = kept and M:ActionIcon(kept) or slotIcon, action = kept, pick = true, lockedAlone = "command",
                 why = format(L.MAP_STICK_HELD, input.id, alone, input.id) }
         end
         -- L3 / R3 alone still the game's: its layers wait for it to be freed
@@ -124,7 +124,7 @@ function W:Cell(input, layer)
             local kept = M:Get(input.id, layer) or M:GetReplaced(input.id, layer)
             local native = M:NativeInfo(input, "") or L.MAP_GAME
             return { state = "off", name = kept and M:ActionName(kept) or L.MAP_GAME, icon = kept and M:ActionIcon(kept),
-                action = kept, why = format(L.MAP_STICK_HELD, input.id, native, input.id) }
+                action = kept, pick = true, lockedAlone = "held", why = format(L.MAP_STICK_HELD, input.id, native, input.id) }
         end
         return { state = "off", name = L.MAP_GAME, why = L.MAP_LOCKED }
     end
@@ -655,7 +655,11 @@ function W:Help()
     local replace = input and M:Replaceable(input, layer) and M:CanOwnKeys()
     local canA = state == "free" or replace
         or (state == "slot" and not M:SlotKept(M:NativeSlot(input, layer)))
-    if cell.pick or (cell.state ~= "off" and input and canA) then
+    if cell.lockedAlone then
+        hints[#hints + 1] = H({ "A" }, L.V_UNLOCK, "A")
+    elseif cell.state == "off" and cell.why then
+        hints[#hints + 1] = H({ "A" }, L.V_WHY, "A")
+    elseif cell.pick or (cell.state ~= "off" and input and canA) then
         hints[#hints + 1] = H({ "A" }, cell.state == "free" and L.V_ASSIGN or L.V_CHANGE, "A")
     end
     if cell.replaced then
@@ -728,12 +732,90 @@ function W:Put(input, layer, action)
     return false
 end
 
+-- A layer locked by its button alone (L3's autorun, LB's targeting, a game
+-- function the player put on X alone): A says why, and frees it on the spot
+-- (reported: players saw "Game function" there and didn't know why)
+function W:ExplainLocked(input, layer, cell)
+    local held = cell.lockedAlone == "held"
+    local entries = {
+        { action = "free", icon = M:ActionIcon(M.NOTHING),
+            name = format(held and L.MAP_FREE_NOTHING or L.MAP_FREE_GIVE_BACK, input.id) },
+        { action = "choose", icon = 134400, name = format(L.MAP_FREE_CHOOSE, input.id) },
+        { action = "keep", icon = "Interface\\Buttons\\UI-GroupLoot-Pass-Up", name = L.MAP_FREE_KEEP },
+    }
+    self.picker:Open({
+        kicker = L.KICK_LOCKED,
+        title = function() return K.ComboMarkup(input.id, layer, 16) .. " · " .. (cell.name or L.MAP_GAME) end,
+        text = cell.why,
+        lists = { { label = "", entries = function() return entries end } },
+        rows = 3, chooseVerb = L.V_CHOOSE,
+        onChoose = function(e)
+            self.picker:Close()
+            if e.action == "free" then
+                local done
+                if held then
+                    done = self:Put(input, "", M.NOTHING)
+                else
+                    M:SetReplaced(input.id, "", nil)
+                    done = true
+                end
+                if done then
+                    C:Toast(format(L.TOAST_FREED, input.id))
+                    -- The layer, free now: its choice right away
+                    return self:ChooseIn(input, layer)
+                end
+                if UIErrorsFrame then UIErrorsFrame:AddMessage(L.MAP_REPLACE_NO_MOD, 1, 0.1, 0.1) end
+            elseif e.action == "choose" then
+                return self:ChooseIn(input, "")
+            end
+            C:Render()
+        end,
+        onBack = function()
+            self.picker:Close()
+            C:Render()
+        end,
+    })
+    C:Render()
+    if UIFrameFadeIn then UIFrameFadeIn(self.picker, 0.15, 0, 1) end
+end
+
+-- An unavailable cell that can't be freed: why, and OK
+function W:ExplainOnly(input, layer, cell)
+    self.picker:Open({
+        kicker = L.KICK_LOCKED,
+        title = function() return K.ComboMarkup(input.id, layer, 16) .. " · " .. (cell.name or L.MAP_GAME) end,
+        text = cell.why,
+        lists = { { label = "", entries = function() return { { action = "ok", name = L.V_OK, icon = 134400 } } end } },
+        rows = 1, chooseVerb = L.V_OK,
+        onChoose = function()
+            self.picker:Close()
+            C:Render()
+        end,
+        onBack = function()
+            self.picker:Close()
+            C:Render()
+        end,
+    })
+    C:Render()
+end
+
 function W:Choose()
     local input = self:Focused()
     if not input then return end
-    local layer = self:ViewLayer()
+    return self:ChooseIn(input, self:ViewLayer())
+end
+
+-- The picker for a button in a layer (the one in view, or the button alone
+-- when freeing a layer)
+function W:ChooseIn(input, layer)
     local cell = self:Cell(input, layer)
-    if cell.state == "off" and not cell.pick then return end
+    if cell.lockedAlone then return self:ExplainLocked(input, layer, cell) end
+    if cell.state == "off" and not cell.pick then
+        -- Any other unavailable cell (LT + LB, a trigger held, Start...):
+        -- why, on A too
+        if cell.why then self:ExplainOnly(input, layer, cell) end
+        return
+    end
     local state = M:State(input, layer)
     local replace = M:Replaceable(input, layer) and M:CanOwnKeys()
     local tabs, forSlot, slot

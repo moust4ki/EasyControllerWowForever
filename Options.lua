@@ -638,6 +638,12 @@ local function consumableRows(b)
             s.staySeated = v
             if not v and W.seated then W.seated:Hide() end
         end })
+    b.check({ id = "cw_bandage", label = L.LBL_STILL_BANDAGING, tip = L.TIP_STILL_BANDAGING,
+        get = function() return s.stillBandaging end,
+        set = function(v)
+            s.stillBandaging = v
+            if not v and W.seated then W.seated:Hide() end
+        end })
     b.header(L.WHEEL_H_CATEGORIES)
     for _, cat in ipairs(W.CATEGORIES) do
         b.check({ id = "cat_" .. cat, label = L["WHEEL_CAT_" .. cat:upper()], disabled = not s.enabled,

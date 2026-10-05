@@ -409,7 +409,8 @@ end
 -- sections. def = { kicker, title, lists = { { label, entries = function()
 -- return { { header } or { action, name, icon, sub } } end } }, onChoose =
 -- function(entry), onBack = function(), marked = function(entry) (a cyan
--- diamond: already there), rows = 10 }
+-- diamond: already there), rows = 10, text = "..." (a notice under the
+-- title, the entries below it) }
 ---------------------------------------------------------------------------
 local PICK_ROW, PICK_HEAD = 32, 28
 
@@ -426,6 +427,11 @@ function K.Picker(parent, width)
     p.title = K.Text(p, 17, C.title)
     p.title:SetPoint("TOPLEFT", p.kicker, "BOTTOMLEFT", 0, -3)
     p.title:SetWidth(width - 24)
+    p.text = K.Text(p, 14, C.cream)
+    p.text:SetWidth(width - 24)
+    p.text:SetJustifyH("LEFT")
+    p.text:SetWordWrap(true)
+    p.text:Hide()
     p.tabs = {}
     p.rows = {}
     p:SetScript("OnMouseWheel", function(self, delta) self:Move(-delta * 3) end)
@@ -605,6 +611,15 @@ function K.Picker(parent, width)
             end
         end
         local top = n > 1 and -88 or -54
+        local text = def.text
+        if type(text) == "function" then text = text() end
+        self.text:SetShown(text ~= nil)
+        if text then
+            self.text:ClearAllPoints()
+            self.text:SetPoint("TOPLEFT", self, "TOPLEFT", 12, top)
+            self.text:SetText(text)
+            top = top - self.text:GetStringHeight() - 12
+        end
         local max = def.rows or 10
         local y = top
         local shown = 0

@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **Clearer Gamepad tab, comfier meals** (1.11.15): A on an unavailable layer says why and frees it on the spot; the camera turns while eating, getting up takes a quarter of a second, and bandages are protected too (new option).
 - **Every press shows** (1.11.14): with "Triggers: press to switch", the bar's icons are pressed in on each press and cropped like the game's; quick presses show one by one.
 - **Stances, stealth and forms** (1.11.13): a trigger layer of a button the addon handles (a wheel on D-pad up, RT + D-pad up...) now reaches the stance bar's spell.
 - **Game functions on a button alone** (1.11.12): a face or D-pad button running a game function alone shows its trigger layers locked, with how to free them.
