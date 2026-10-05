@@ -8,6 +8,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.11
+- **New characters start clean** (1.11.17): a new character no longer gets another character's spells on its buttons and wheels.
 - **Rounder red, menus while eating** (1.11.16): out of range, the game's own icon turns red in its shape; the radial menu and the map work while you eat.
 - **Clearer Gamepad tab, comfier meals** (1.11.15): A on an unavailable layer says why and frees it on the spot; the camera turns while eating, getting up takes a quarter of a second, and bandages are protected too (new option).
 - **Every press shows** (1.11.14): with "Triggers: press to switch", the bar's icons are pressed in on each press and cropped like the game's; quick presses show one by one.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.11.17
+
+- **A new character no longer gets another's spells** (reported: a new druid had the rogue's
+  Stealth and Stoneform on its back paddles). A character's first setup is a copy, of the old
+  profile of its first name (up to 1.11.6, every "Fraicheur ..." shared one) or of the account's
+  configuration: the spells in it the character doesn't have are now left out, from its buttons,
+  replaced buttons and wheels, once its spell book is read. Only once: a spell lost later (talents...)
+  keeps its button. The consumables wheel, items and game functions stay.
+
 ## 1.11.16
 
 - **Red when out of range**: on the game's buttons, their icon itself turns red, in the button's own
