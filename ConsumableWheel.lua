@@ -761,6 +761,20 @@ W.SeatedCamera = function(frame)
     turn(frame, "pitch", y)
 end
 
+-- A menu or window that needs the sticks: the game's radial menu (Start),
+-- a game window with the gamepad's focus (the map...), the addon's own
+-- keyboard, wheels or panel. The sticks are left to it meanwhile (reported:
+-- the radial menu couldn't be used while eating), taken back after.
+local function sticksWanted()
+    if GamepadRadial and GamepadRadial:IsShown() then return true end
+    local manager = GamepadMode and GamepadMode.FrameControlsManager
+    if manager and manager.GetActiveFrame and manager:GetActiveFrame() then return true end
+    if CK.IsOpen and CK:IsOpen() then return true end
+    if ControllerKeyboardWheel and ControllerKeyboardWheel:IsShown() then return true end
+    return CK.Config and CK.Config.IsOpen and CK.Config:IsOpen() or false
+end
+W.SticksWanted = sticksWanted
+
 function W:BuildSeated()
     if self.seated then return end
     local f = CK.NewFrame("Frame", nil, UIParent)
@@ -783,13 +797,23 @@ function W:BuildSeated()
         take(frame, false)
     end)
     f:SetScript("OnUpdate", function(frame, elapsed)
+        if InCombatLockdown() or not seatedNow() then
+            frame:Hide()
+            return
+        end
+        -- A menu open: the sticks are its own, nothing counted
+        if sticksWanted() then
+            stopCamera(frame)
+            take(frame, false)
+            frame.pushed = 0
+            return
+        end
+        take(frame, true)
         local len = moveLength()
         if len >= SEATED_PUSH then frame.pushed = frame.pushed + elapsed else frame.pushed = 0 end
         if frame.pushed >= SEATED_TIME then
             -- Pushed on purpose: up, and not held again for this meal
             frame.released = true
-            frame:Hide()
-        elseif InCombatLockdown() or not seatedNow() then
             frame:Hide()
         else
             -- Looking around meanwhile
