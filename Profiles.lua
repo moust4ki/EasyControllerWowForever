@@ -13,7 +13,9 @@ local _, CK = ...
 -- every module keeps reading settings as it always did. On its first load
 -- a character starts from a copy of the account's configuration, the one
 -- from before profiles (nothing is lost on an update); nothing changes it
--- any more, so a character started later never gets another's.
+-- any more, so a character started later never gets another's. The spells
+-- of such a copy this character doesn't have are left out (a new druid got
+-- the rogue's: see DropForeignSpells).
 local Pr = {}
 CK.Profiles = Pr
 
@@ -136,7 +138,7 @@ function Pr:Init()
         -- it, what it had kept, its own from now on
         local data = {}
         for _, f in ipairs(FIELDS) do data[f[1]] = copy(legacy.data[f[1]]) end
-        p = { data = data }
+        p = { data = data, copied = true }
         db.profiles[key] = p
         legacy.firstNameOnly = true
     end
@@ -144,12 +146,13 @@ function Pr:Init()
         -- First load with profiles: a copy of the account's configuration
         local data = {}
         for i, f in ipairs(FIELDS) do data[f[1]] = copy(self.shared[i]) end
-        p = { data = data }
+        p = { data = data, copied = true }
         db.profiles[key] = p
     elseif p.mode == "shared" then
         -- On the shared settings (1.9 to 1.11.1): its own from now on, a copy
         -- of what it used
         for i, f in ipairs(FIELDS) do p.data[f[1]] = copy(self.shared[i]) end
+        p.copied = true
     end
     p.mode = "character"
     p.firstNameOnly = nil
@@ -157,6 +160,86 @@ function Pr:Init()
     p.realm = (GetRealmName and GetRealmName()) or ""
     p.class = select(2, UnitClass("player"))
     self:Activate()
+    -- The modules start after: they read the settings as they are then
+    self:DropForeignSpells(false)
+end
+
+-- Everything that reads the character's settings, read again
+local function reread()
+    CK.Mapping:Apply()
+    CK.Paddles:Apply()
+    if CK.MyWheels and CK.MyWheels.UpdateBindingNames then CK.MyWheels:UpdateBindingNames() end
+    if CK.ConsumableWheel then CK.ConsumableWheel:Fill() end
+    if CK.Supplies then CK.Supplies:Refresh() end
+end
+
+-- The names of the spells in the character's spell book (by name: a lower
+-- rank still counts); nil while the book is not read yet
+local function knownSpells()
+    local SB = C_SpellBook
+    if not (SB and SB.GetNumSpellBookSkillLines and SB.GetSpellBookSkillLineInfo and SB.GetSpellBookItemInfo) then
+        return nil
+    end
+    local bank = Enum and Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player or 0
+    local names, any = {}, false
+    for line = 1, SB.GetNumSpellBookSkillLines() or 0 do
+        local info = SB.GetSpellBookSkillLineInfo(line)
+        if info and info.itemIndexOffset and info.numSpellBookItems then
+            for i = info.itemIndexOffset + 1, info.itemIndexOffset + info.numSpellBookItems do
+                local item = SB.GetSpellBookItemInfo(i, bank)
+                if item and item.name then
+                    names[item.name] = true
+                    any = true
+                end
+            end
+        end
+    end
+    return any and names or nil
+end
+
+-- A spell this character doesn't have (one whose name the game doesn't
+-- give is kept: nothing to tell)
+local function foreign(action, names)
+    local id = type(action) == "string" and tonumber(action:match("^spell:(%d+)$"))
+    local name = id and C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+    return type(name) == "string" and not names[name]
+end
+
+-- A profile started from a copy (the old profile of the first name, the
+-- account's configuration): the spells in it this character doesn't have
+-- left out, once its spell book is read (reported: a new druid, Fraicheur
+-- Drood, got Stealth and Stoneform on its paddles, from the old profile of
+-- every "Fraicheur ...", the rogue's). Only once: a spell the character
+-- loses later (talents...) keeps its button.
+function Pr:DropForeignSpells(reload)
+    local p = self:Profile()
+    if not (p and p.copied) then return end
+    local names = knownSpells()
+    if not names then return end
+    p.copied = nil
+    local s, dropped = CK.db.settings, 0
+    for _, assigned in ipairs({ s.mapping, s.replaced }) do
+        if type(assigned) == "table" then
+            for k, action in pairs(assigned) do
+                if foreign(action, names) then
+                    assigned[k] = nil
+                    dropped = dropped + 1
+                end
+            end
+        end
+    end
+    local wheels = type(s.myWheels) == "table" and s.myWheels.list
+    for _, w in ipairs(type(wheels) == "table" and wheels or {}) do
+        if type(w) == "table" and type(w.slots) == "table" then
+            for i, action in pairs(w.slots) do
+                if foreign(action, names) then
+                    w.slots[i] = nil
+                    dropped = dropped + 1
+                end
+            end
+        end
+    end
+    if dropped > 0 and reload then reread() end
 end
 
 -- The character not known at login (its name or realm not given yet): its
@@ -165,17 +248,17 @@ function Pr:Retry()
     if self.key or not CK.db then return end
     self:Init()
     if not self.key then return end
-    CK.Mapping:Apply()
-    CK.Paddles:Apply()
-    if CK.MyWheels and CK.MyWheels.UpdateBindingNames then CK.MyWheels:UpdateBindingNames() end
-    if CK.ConsumableWheel then CK.ConsumableWheel:Fill() end
-    if CK.Supplies then CK.Supplies:Refresh() end
+    reread()
 end
 
 do
     local f = CreateFrame("Frame")
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
-    f:SetScript("OnEvent", function() Pr:Retry() end)
+    f:RegisterEvent("SPELLS_CHANGED")
+    f:SetScript("OnEvent", function()
+        Pr:Retry()
+        Pr:DropForeignSpells(true)
+    end)
 end
 
 -- /ec profile: the character recognised, whether its settings are its own,
