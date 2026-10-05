@@ -298,6 +298,21 @@ function T:BuildView()
         s.icon = s:CreateTexture(nil, "ARTWORK")
         s.icon:SetAllPoints()
         s.round = not SQUARE[key]
+        -- Under the icon, a dark slot: an empty one of the bar on never shows
+        -- the top bar's icon below it (reported: seen "through")
+        s.bg = s:CreateTexture(nil, "BACKGROUND")
+        s.bg:SetAllPoints()
+        s.bg:SetColorTexture(0.03, 0.03, 0.03, 1)
+        if s.round then
+            local bgMask = s:CreateMaskTexture()
+            bgMask:SetAllPoints(s.bg)
+            if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("CircleMask") then
+                bgMask:SetAtlas("CircleMask")
+            else
+                bgMask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+            end
+            s.bg:AddMaskTexture(bgMask)
+        end
         if s.round then
             local mask = s:CreateMaskTexture()
             mask:SetAllPoints(s.icon)

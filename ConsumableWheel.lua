@@ -626,23 +626,28 @@ local function stickIndex(name, default)
 end
 
 ---------------------------------------------------------------------------
--- Staying seated while eating (Wheels > Consumables, on by default): while
--- the player eats or drinks, the sticks are kept, so a stick still pushed
--- from aiming the wheel, or nudged, doesn't stand the character up and
--- waste the food (reported). The left stick pushed all the way for half a
--- second lets the character go. Never in combat. The camera stays still
--- too: the game gives a frame the sticks all together.
+-- Staying seated while eating or drinking (Wheels > Consumables, on by
+-- default), and still while bandaging (its own option): a stick still
+-- pushed from aiming the wheel, or nudged, doesn't stand the character up
+-- and waste the food or the bandage (reported). The game gives a frame both
+-- sticks at once: they are taken only while the movement stick is off its
+-- rest, caught before the game's own dead zone, so the camera turns freely
+-- the rest of the time (reported: no looking around while eating). Pushed
+-- far for a quarter of a second, the character gets up (half a second was
+-- too long, reported). Never in combat.
 ---------------------------------------------------------------------------
-local SEATED_PUSH, SEATED_TIME = 0.9, 0.5
+local SEATED_PUSH, SEATED_TIME = 0.8, 0.25
+local SEATED_TAKE, SEATED_REST = 0.1, 0.06
 -- The auras of eating and drinking, by name: the game's own Food and
 -- Drink, and the use of each food or drink a wheel used
-local mealNames = {}
+local mealNames, mealBase = {}, false
+local spellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
 
 local function eating()
-    if not next(mealNames) then
-        local get = C_Spell and C_Spell.GetSpellName or GetSpellInfo
+    if not mealBase then
+        mealBase = true
         for _, id in ipairs({ 433, 430 }) do
-            local name = get and get(id)
+            local name = spellName and spellName(id)
             if name then mealNames[name] = true end
         end
     end
@@ -658,14 +663,37 @@ local function eating()
 end
 W.Eating = eating
 
--- A food or drink used from a wheel: its aura's name (the item's use)
+-- Bandaging: the First Aid channel, by name (the game's, and the use of each
+-- bandage a wheel used)
+local bandageNames, bandageBase = {}, false
+local function bandaging()
+    if not bandageBase then
+        bandageBase = true
+        local name = spellName and spellName(746)
+        if name then bandageNames[name] = true end
+    end
+    local channel = UnitChannelInfo and UnitChannelInfo("player")
+    return channel ~= nil and bandageNames[channel] == true
+end
+W.Bandaging = bandaging
+
+-- Held now, as the options say
+local function seatedNow()
+    local s = settings()
+    return (s.staySeated and eating()) or (s.stillBandaging and bandaging()) or false
+end
+W.SeatedNow = seatedNow
+
+-- A food, drink or bandage used from a wheel: its use's name
 function W:NoteMeal(slot)
     local entry = self:PageItems()[slot]
     if not (entry and entry.kind == "item" and entry.id) then return end
     local cat = entry.cat or W.Category(entry.id)
-    if cat ~= "food" and cat ~= "drink" and cat ~= "buffFood" then return end
+    local names = (cat == "food" or cat == "drink" or cat == "buffFood") and mealNames
+        or (cat == "bandage" and bandageNames) or nil
+    if not names then return end
     local name = C_Item and C_Item.GetItemSpell and C_Item.GetItemSpell(entry.id)
-    if type(name) == "string" and name ~= "" then mealNames[name] = true end
+    if type(name) == "string" and name ~= "" then names[name] = true end
 end
 
 local function moveLength()
@@ -681,26 +709,40 @@ function W:BuildSeated()
     f:Hide()
     f.pushed = 0
     f:SetScript("OnGamePadStick", function() end)
+    local function take(frame, on)
+        if frame.taken == on then return end
+        frame.taken = on
+        W:TakeSticks(frame, on)
+    end
     f:SetScript("OnShow", function(frame)
-        frame.pushed = 0
-        W:TakeSticks(frame, true)
+        frame.pushed, frame.taken = 0, false
+        -- Still pushed (from aiming the wheel): held at once
+        if moveLength() >= SEATED_TAKE then take(frame, true) end
     end)
-    f:SetScript("OnHide", function(frame) W:TakeSticks(frame, false) end)
+    f:SetScript("OnHide", function(frame) take(frame, false) end)
     f:SetScript("OnUpdate", function(frame, elapsed)
-        if moveLength() >= SEATED_PUSH then frame.pushed = frame.pushed + elapsed else frame.pushed = 0 end
+        local len = moveLength()
+        if len >= SEATED_PUSH then frame.pushed = frame.pushed + elapsed else frame.pushed = 0 end
         if frame.pushed >= SEATED_TIME then
             -- Pushed on purpose: up, and not held again for this meal
             frame.released = true
             frame:Hide()
-        elseif InCombatLockdown() or not eating() then
+        elseif InCombatLockdown() or not seatedNow() then
             frame:Hide()
+        elseif len >= SEATED_TAKE then
+            take(frame, true)
+        elseif len < SEATED_REST then
+            -- The movement stick at rest: the camera is the player's
+            take(frame, false)
         end
     end)
     local events = CK.NewFrame("Frame")
-    if events.RegisterUnitEvent then
-        events:RegisterUnitEvent("UNIT_AURA", "player")
-    else
-        events:RegisterEvent("UNIT_AURA")
+    for _, event in ipairs({ "UNIT_AURA", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_STOP" }) do
+        if events.RegisterUnitEvent then
+            events:RegisterUnitEvent(event, "player")
+        else
+            events:RegisterEvent(event)
+        end
     end
     events:RegisterEvent("PLAYER_REGEN_DISABLED")
     events:SetScript("OnEvent", function(_, event, unit)
@@ -709,11 +751,11 @@ function W:BuildSeated()
             return
         end
         if unit and unit ~= "player" then return end
-        if not eating() then
+        if not seatedNow() then
             f.released = nil
             return
         end
-        if settings().staySeated and not f.released and not f:IsShown() and not InCombatLockdown() then f:Show() end
+        if not f.released and not f:IsShown() and not InCombatLockdown() then f:Show() end
     end)
     self.seated, self.seatedEvents = f, events
 end
