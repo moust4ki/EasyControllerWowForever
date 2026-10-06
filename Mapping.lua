@@ -824,20 +824,6 @@ function M:Catalog(tab, forSlot, noBound)
             end
         end
     elseif tab == "items" and C_Container then
-        -- Ours first: the consumables wheel (not for the game's bar slots)
-        if not forSlot and CK.ConsumableWheel then
-            list[#list + 1] = { header = L.HDR_WHEELS }
-            list[#list + 1] = { action = "wheel:consumables", name = L.WHEEL_NAME, icon = M.WHEEL_ICON }
-            -- The quick phrases window (Phrases.lua), opened like a wheel
-            if CK.Phrases then
-                list[#list + 1] = { action = "wheel:phrases", name = L.PHRASES_NAME, icon = CK.Phrases.ICON }
-            end
-            -- The player's own wheels
-            for _, w in ipairs(CK.MyWheels and CK.MyWheels:List() or {}) do
-                list[#list + 1] = { action = "wheel:" .. w.id, name = w.name, icon = CK.MyWheels:Icon(w.id) }
-            end
-            list[#list + 1] = { header = L.MAP_TAB_ITEMS }
-        end
         local seen = {}
         for bag = 0, NUM_BAG_SLOTS or 4 do
             for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
@@ -850,6 +836,21 @@ function M:Catalog(tab, forSlot, noBound)
             end
         end
     elseif tab == "macros" and GetNumMacros then
+        -- Ours first, among what runs something (asked: in Items they were
+        -- hard to find): the consumables wheel, the quick phrases, the
+        -- player's wheels. Not for the game's bar slots or a wheel's slots
+        if not forSlot and CK.ConsumableWheel then
+            list[#list + 1] = { header = L.HDR_OURS }
+            list[#list + 1] = { action = "wheel:consumables", name = L.WHEEL_NAME, icon = M.WHEEL_ICON }
+            -- The quick phrases window (Phrases.lua), opened like a wheel
+            if CK.Phrases then
+                list[#list + 1] = { action = "wheel:phrases", name = L.PHRASES_NAME, icon = CK.Phrases.ICON }
+            end
+            for _, w in ipairs(CK.MyWheels and CK.MyWheels:List() or {}) do
+                list[#list + 1] = { action = "wheel:" .. w.id, name = w.name, icon = CK.MyWheels:Icon(w.id) }
+            end
+            list[#list + 1] = { header = L.MAP_TAB_MACROS }
+        end
         local account, character = GetNumMacros()
         local perAccount = MAX_ACCOUNT_MACROS or 120
         for i = 1, account do

@@ -198,7 +198,8 @@ from button to button, up to the layers, down to the actions under the controlle
     included), the Start menu, interface focus, ping, ally and enemy targeting (held); then run /
     walk, autorun, game menu, map, bags, character, spellbook, quest log, open the keyboard... and
     every key binding of the game, by its own categories;
-  - **Spells**, **Items** (your wheels first, then the usable items in your bags), **Macros**;
+  - **Spells**, **Items** (the usable items in your bags), **Macros** (the addon's own first: the
+    consumables wheel, the quick phrases, your wheels; then your macros);
   - **Bar**: press a button of the gamepad action bar ("LT + RT A"...).
 - X gives a button back to the game, empties a slot or removes yours; B closes the lists. Everything
   is clickable with the mouse too.
@@ -347,7 +348,7 @@ drink, healing and mana potions, healthstone, mana gem, bandages (used on yourse
 elixirs and flasks, scrolls. The best of each kind comes first, then the other variants you carry (an option); each
 kind can be left out (Wheels › Consumables).
 
-- Give it a key in the Gamepad tab (Items list: any free button, or a back paddle in any layer) or
+- Give it a key in the Gamepad tab (Macros list: any free button, or a back paddle in any layer) or
   in *Escape > Key Bindings > AddOns*.
 - Open: **point at an item with the left stick and press A** to use it (the stick back in the middle
   points at nothing); **B** cancels; LB / RB turn the pages; the wheel's key closes it too. The right
@@ -377,7 +378,7 @@ over the wheel, with the addon's keyboard (A confirms, B cancels) or a physical 
 **Assign a button** takes you to the Gamepad tab, where the button you pick gets the wheel;
 **Delete** asks twice. Each wheel shows and works like the consumables wheel (left stick, A, B; in
 combat too) with its name in the banner, and gets a key of its own: Assign a button, the Gamepad
-tab's Items list (any free button or paddle), or the game's Key Bindings (under AddOns). What a wheel
+tab's Macros list (any free button or paddle), or the game's Key Bindings (under AddOns). What a wheel
 holds changes out of combat only.
 - It sits in the middle of the screen (unlocked, drag the open wheel with the mouse, or move it with
   the D-pad: Wheels › Position).
