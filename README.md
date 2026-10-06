@@ -234,6 +234,10 @@ from button to button, up to the layers, down to the actions under the controlle
   class and pet actions read them directly), and so do LT / RT.
 - Each layer needs a key of its own, so LT and RT become modifiers (the game's gamepad setting, like
   LT already sending Shift); the other layers of a replaced button keep what the game does there.
+- **LB / RB held with a face button or the D-pad stay the game's**: its targeting bars (a party
+  member on the D-pad, yourself on A...) still get them on a replaced button, never what you put on
+  the button alone. Limit: RB adds no modifier, so a button whose other layer holds a game function
+  of yours (bound directly, not through its router) still runs yours with RB held.
 - **Restore (N)**, under the controller (A, then A again to confirm),
   gives every replaced button back to the game, as the game sets it. Only those: what you put in the
   game's slots, on the free buttons, on the paddles and in your wheels stays.

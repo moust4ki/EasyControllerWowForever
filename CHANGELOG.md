@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.12.2
+
+- **LB / RB with a replaced button stay the game's** (reported: with the quick phrases on D-pad
+  down, LB + D-pad down opened them instead of targeting party member 3). LB + a face button or the
+  D-pad, and RB too, now reach the game's targeting bar shown (a party member on the D-pad, yourself
+  on A, the enemy actions with RB), never what you put on the button alone. Only the buttons holding
+  something of the addon change; the LT / RT layers, the paddles and the other buttons are as they
+  were.
+
 ## 1.12.1
 
 - **Triggers: press to switch**: the bar on now shows its trigger, LT, RT or LT + RT, where the game
