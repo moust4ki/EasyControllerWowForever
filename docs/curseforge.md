@@ -11,59 +11,9 @@ Every feature you don't need can be turned off to save even more resources.
 - **Quick phrases**: ready-made phrases sent in one press, five a row by theme (social, status, combat, moving, emotes, your own). LB / RB picks the channel, A sends, X rewrites any phrase (with the controller or a physical keyboard), Y opens the keyboard with it. Open them from the bubble at the end of the keyboard's suggestions, or put them on any button.
 - **Gamepad tab**: the consumables wheel, the quick phrases and your wheels are now at the top of the Macros list.
 
-## What's new in 1.11
-- **New characters start clean** (1.11.17): a new character no longer gets another character's spells on its buttons and wheels.
-- **Rounder red, menus while eating** (1.11.16): out of range, the game's own icon turns red in its shape; the radial menu and the map work while you eat.
-- **Clearer Gamepad tab, comfier meals** (1.11.15): A on an unavailable layer says why and frees it on the spot; the camera turns while eating, getting up takes a quarter of a second, and bandages are protected too (new option).
-- **Every press shows** (1.11.14): with "Triggers: press to switch", the bar's icons are pressed in on each press and cropped like the game's; quick presses show one by one.
-- **Stances, stealth and forms** (1.11.13): a trigger layer of a button the addon handles (a wheel on D-pad up, RT + D-pad up...) now reaches the stance bar's spell.
-- **Game functions on a button alone** (1.11.12): a face or D-pad button running a game function alone shows its trigger layers locked, with how to free them.
-- **Round where the buttons are round** (1.11.11): the out-of-range red and, with "Triggers: press to switch", the icons and cooldowns follow the shape of the game's buttons.
-- **Macros in the game's bar slots** (1.11.10): a macro on a trigger layer (RT + A...) now runs when the addon handles that button, with "Triggers: press to switch" too.
-- **Fixes from a contributor** (1.11.9): learned words no longer lost past the limit, next-word suggestions in your language, no more wrong upgrade arrows while items load, important vibrations no longer cut by small ones.
-- **Red when out of range** (1.11.8): now drawn over the game's bar without touching its buttons (fixes a Lua error in ActionButton.lua).
-- **Characters sharing a first name** (1.11.7): WoW Forever's surnames are now part of the profile, so "Fraicheur Rog" and "Fraicheur Hunt" each keep their own settings. Each one starts from the settings they shared, nothing lost.
-- **Macro window** (1.11.7): the controller keyboard no longer opens in the macro window or in fields of several lines (a mail's text); type them on a keyboard as before.
-- **/ec profile** (1.11.6): shows whether this character has its own settings, and what each character holds.
-- **Macros work again with the addon on** (1.11.5): choosing a channel on the chat keyboard no longer touches the game's chat box, which blocked the /cast of your macros.
-- **Stay seated while eating** (1.11.4, Wheels › Consumables, on by default): a stick still pushed from the wheel, or nudged, no longer stands you up and wastes the meal. Push the left stick all the way for half a second to get up.
-- **Supplies buttons** (1.11.4): their tooltip says they are Easy Controller's and where to set or hide them.
-- **L3 / R3 and LT + RB / RT + LB layers** (1.11.3): while the button alone keeps the game's function (autorun, ping, targeting), the game takes its trigger layers too, so the Gamepad tab now says so. Put a spell, a wheel or the new **Nothing** on the button alone, and its trigger layers work.
-- **Profiles are automatic** (1.11.2): each character keeps its own buttons, wheels and supplies, with nothing to set, and nothing done on one character changes another's. The Profiles tab is gone.
-- **Start and Select stay the game's** (1.11.2): they can't be changed any more; what was on them is removed and the chat tells you once.
-- **Stealth, forms and stances** (1.11.1): the stance bar that takes the place of a gamepad bar in stealth or a form can now be set from the Gamepad tab, and your replaced buttons press its spells while you are in the stance.
-- **The keyboard in the game's fields**: it now opens for the Auction House search, the bags' search, mail, notes... What you type goes into the field, A is Enter (the Auction House searches), B closes it. Option in Keyboard › Opening, on by default.
-- **Supplies**: no more "item:0" row for characters without ammo.
-
-## What's new in 1.10
-- **Hold to show a wheel** (option, Wheels › Opening): hold the wheel's button, aim with the left stick, let go to use what it aims at. Let go with the stick in the middle to close it.
-- **Each trigger layer of a button runs its own**: a wheel on D-pad down no longer opens with LT or RT held (the game's bar comes back there), and a wheel on LT + a button now opens.
-- **Character and camera back right away** after closing a wheel with the stick still pushed.
-- **/ec config** typed in the chat opens the panel at once.
-- A broken saved file no longer stops the addon.
-
-## What's new in 1.9
-- **Profiles**: each character has its own buttons and paddles, wheels and supplies, automatically. Every character starts from your current setup, so with one character nothing changes.
-- **LT + RB and RT + LB** can now be set from the Gamepad tab (they showed "Unavailable" in 1.8.2).
-
-## Also since 1.8 (1.8.1 and 1.8.2)
-- **Triggers: press to switch** (option): press LT alone and the left bar stays on, press it again to come back; same for RT, LT then RT for the bottom bar. Holding still works as before. Made for the game's compact action bar.
-- **Back paddles on Steam Deck / Steam Controller**: each trigger layer now works, even when Steam Input sends the paddles as plain keys.
-- **Trigger layers kept apart**: an action set on one layer of a button no longer runs on its other layers.
-- **Spells like Ghost Wolf** now cast from paddles, buttons and wheels (cast by name, with the rank you chose).
-- **LT + RB and RT + LB** can take a spell, an item, a macro or a wheel.
-- **Aggro lost vibration** for tanks.
-- **RB + D-pad down** opens the configuration panel only, not what you put on D-pad down too.
-
-## What's new in 1.8
-- **Extra buttons**: up to 8 more buttons, for controllers with more buttons (Vader Pro…) or touchpads set as buttons (Steam Deck, Steam Controller), working like the back paddles.
-- **Red when out of range**: the whole spell turns red on the gamepad bar, not just the small dot (too far, or too close for a hunter).
-- **Free placement** of the extra buttons next to the gamepad bar.
-- **Gamepad options in Home › Gamepad**, under the Gamepad extras switch.
-- **Keyboard suggestions** always show whole words.
-
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
+- **Every free combination usable**: L3 / R3, LT + RB / RT + LB, unused trigger layers, the game's own buttons replaced if you want
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
 - **Triggers: press to switch** instead of holding them (option), every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
@@ -83,9 +33,10 @@ Every feature you don't need can be turned off to save even more resources.
 - **At merchants**: auto-sell junk and auto-repair
 - **OLED burn-in prevention** for the centre dot
 - **Xbox / PlayStation (DualSense) / Nintendo Switch** button icons
+- **Configuration panel** driven entirely with the gamepad (RB + D-pad down)
 
-Everything is driven with the gamepad (RB + D-pad down opens the configuration panel), every function
-can be turned off, and the look matches WoW Forever's gamepad UI. The details of each part follow.
+Every function can be turned off, and the look matches WoW Forever's gamepad UI. The details of each
+part follow.
 
 ## Chat keyboard
 
