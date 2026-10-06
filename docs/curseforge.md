@@ -14,6 +14,7 @@ Every feature you don't need can be turned off to save even more resources.
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
 ## What's new in 1.12
+- **LB / RB stay the game's** (1.12.2): with something of the addon on a face button or the D-pad, LB / RB + that button still target your party members (or enemies), as the game does.
 - **Which bar is on** (1.12.1): with "Triggers: press to switch", the bar on shows its trigger (LT, RT or LT + RT), like the game does when you hold one.
 - **Quick phrases**: ready-made phrases sent in one press, five a row by theme (social, status, combat, moving, emotes, your own). LB / RB picks the channel, A sends, X rewrites any phrase (with the controller or a physical keyboard), Y opens the keyboard with it. Open them from the bubble at the end of the keyboard's suggestions, or put them on any button.
 - **Gamepad tab**: the consumables wheel, the quick phrases and your wheels are now at the top of the Macros list.
