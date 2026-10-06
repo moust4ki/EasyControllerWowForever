@@ -1003,6 +1003,16 @@ local ROUTE = [[
     end
     self:SetAttribute("useOnKeyDown", true)
     self:SetAttribute("ck-pressed", nil)
+    -- LB / RB held with a button of the game's pad: the game's (its
+    -- targeting bars), never ours (reported: LB + D-pad down opened the quick
+    -- phrases put on D-pad down). The pad's own keys are the same with a
+    -- shoulder that adds no modifier (RB): read from the pad
+    local lb, rb = self:GetAttribute("ck-lb"), self:GetAttribute("ck-rb")
+    if lb or rb then
+        local held = GetGamePadState()
+        local hb = held and held.buttons
+        if hb and ((lb and hb[lb]) or (rb and hb[rb])) then return false end
+    end
     -- The trigger toggle on (Toggle.lua): its layer, held or toggled; a
     -- trigger held was used
     local toggle = self:GetFrameRef("toggle")
@@ -1099,6 +1109,8 @@ end
 local function routeKeys(input, key, taken)
     local r = router(input.id)
     r.ckInput = input.id
+    r:SetAttribute("ck-lb", nil)
+    r:SetAttribute("ck-rb", nil)
     r:SetAttribute("ck-lt", padIndex("PADLTRIGGER"))
     r:SetAttribute("ck-rt", padIndex("PADRTRIGGER"))
     r:SetAttribute("ck-lt-mod", M:TriggerModifier("PADLTRIGGER"))
@@ -1307,6 +1319,9 @@ function M:ApplyPad(input, targets, replaced)
     local key = self:InputKey(input)
     local r = router(input.id)
     r.ckInput = input.id
+    -- The face buttons and the D-pad: LB / RB held leave them to the game
+    r:SetAttribute("ck-lb", input.bar and padIndex("PADLSHOULDER") or nil)
+    r:SetAttribute("ck-rb", input.bar and padIndex("PADRSHOULDER") or nil)
     r:SetAttribute("ck-lt", padIndex("PADLTRIGGER"))
     r:SetAttribute("ck-rt", padIndex("PADRTRIGGER"))
     r:SetAttribute("ck-lt-mod", M:TriggerModifier("PADLTRIGGER"))
@@ -1416,6 +1431,7 @@ function M:Apply()
         end
         self:ApplyReplaced()
         self:BlockFallbacks()
+        self:KeepShoulders()
     end
     -- The trigger toggle's keys over ours (it reads what we bound)
     if CK.Toggle then CK.Toggle:Apply() end
@@ -1440,6 +1456,61 @@ function M:BlockFallbacks()
                 if combo and not (self.bound[combo] or self.taken[combo]) and not self:NativeBinding(combo) then
                     SetOverrideBinding(owner, false, combo, NOOP)
                     self.bound[combo] = NOOP
+                end
+            end
+        end
+    end
+end
+
+-- LB / RB with a button of the game's pad belong to the game (its targeting
+-- bars: a party member on the D-pad, yourself on A...). A shoulder the game
+-- makes a modifier (LB is Ctrl by default) sends keys of its own
+-- ("CTRL-PADDDOWN"), with no binding: they fell back to the key alone, ours
+-- (reported: LB + D-pad down opened the quick phrases put on D-pad down).
+-- On the face buttons and the D-pad that hold something of ours, those keys
+-- get what the game does there without us (its command for the key, or
+-- nothing). Keys with nothing of ours are left as they are.
+function M:ShoulderMods()
+    local mods = {}
+    for _, e in ipairs(EMULATE) do
+        local button = GetCVar(e[2])
+        if button == "PADLSHOULDER" or button == "PADRSHOULDER" then mods[e[1]] = true end
+    end
+    return mods
+end
+
+function M:KeepShoulders()
+    local shoulder = self:ShoulderMods()
+    if not next(shoulder) or not takeOwner then return end
+    for _, input in ipairs(M.INPUTS) do
+        local key = input.bar and not input.paddle and self:InputKey(input)
+        local ours = false
+        if key then
+            for _, layer in ipairs(M.LAYERS) do
+                local combo = self:ArrivalPrefix(layer) .. key
+                if self.bound[combo] or self.taken[combo] then ours = true end
+            end
+        end
+        if ours then
+            for _, layer in ipairs(M.LAYERS) do
+                -- The layer's modifiers, and the shoulder's
+                local mods = {}
+                for mod in self:ArrivalPrefix(layer):gmatch("(%u+)%-") do mods[mod] = true end
+                for mod in pairs(shoulder) do mods[mod] = true end
+                local prefix = ""
+                for _, e in ipairs(EMULATE) do
+                    if mods[e[1]] then prefix = prefix .. e[1] .. "-" end
+                end
+                local combo = prefix .. key
+                if not (self.bound[combo] or self.taken[combo]) then
+                    local command = self:NativeBinding(combo) or self:NativeBinding(key)
+                    if command then
+                        bindCommand(takeOwner, true, combo, command)
+                        self.taken[combo] = command
+                    else
+                        SetOverrideBinding(takeOwner, true, combo, NOOP)
+                        self.taken[combo] = NOOP
+                    end
                 end
             end
         end
