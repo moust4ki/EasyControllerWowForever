@@ -693,10 +693,10 @@ local L = {
     -- The quick phrases' defaults: { row name, { five phrases } } (@WAVE...:
     -- the game's own emote command, Phrases.lua)
     PHRASE_ROWS = {
-        { "Social", { "gg", "Nice one!", "Thanks!", "My bad, sorry!", "lol" } },
-        { "Status", { "Hi!", "brb", "afk a sec", "Ready to go", "One more run?" } },
-        { "Combat", { "Incoming!", "Need heals!", "Need mana", "CC that!", "Don't pull yet" } },
-        { "Moving", { "Let's go!", "Follow me", "Wait here", "On my way!", "Back off, let me pull" } },
+        { "Social", { "gg", "Nice one", "Thanks", "My bad, sorry", "lol" } },
+        { "Status", { "Hi", "brb", "afk a sec", "Ready to go", "One more run?" } },
+        { "Combat", { "Incoming", "Need heals", "Need mana", "CC that", "Don't pull yet" } },
+        { "Moving", { "Let's go", "Follow me", "Wait here", "On my way", "Back off, let me pull" } },
         { "Emotes", { "@WAVE", "@THANK", "@CHEER", "@DANCE", "@ROLL" } },
         { "Your own", {  } },
     },
@@ -1391,10 +1391,10 @@ LOCALES.frFR = {
     -- The quick phrases' defaults: { row name, { five phrases } } (@WAVE...:
     -- the game's own emote command, Phrases.lua)
     PHRASE_ROWS = {
-        { "Social", { "gg", "Bien joué !", "Merci !", "Désolé, ma faute !", "mdr" } },
-        { "Statut", { "Salut !", "brb", "afk 2 min", "Prêt !", "On en refait un ?" } },
-        { "Combat", { "Ils arrivent !", "Besoin de soins !", "Plus de mana", "Contrôlez-le !", "Ne pullez pas encore" } },
-        { "Déplacement", { "C'est parti !", "Suivez-moi", "Attendez ici", "J'arrive !", "Reculez, je pull" } },
+        { "Social", { "gg", "Bien joué", "Merci", "Désolé, ma faute", "mdr" } },
+        { "Statut", { "Salut", "brb", "afk 2 min", "Prêt", "On en refait un ?" } },
+        { "Combat", { "Ils arrivent", "Besoin de soins", "Plus de mana", "Contrôlez-le", "Ne pullez pas encore" } },
+        { "Déplacement", { "C'est parti", "Suivez-moi", "Attendez ici", "J'arrive", "Reculez, je pull" } },
         { "Émotes", { "@WAVE", "@THANK", "@CHEER", "@DANCE", "@ROLL" } },
         { "Vos phrases", {  } },
     },
@@ -2086,10 +2086,10 @@ LOCALES.deDE = {
     -- The quick phrases' defaults: { row name, { five phrases } } (@WAVE...:
     -- the game's own emote command, Phrases.lua)
     PHRASE_ROWS = {
-        { "Sozial", { "gg", "Gut gemacht!", "Danke!", "Sorry, mein Fehler!", "lol" } },
-        { "Status", { "Hi!", "brb", "kurz afk", "Bereit!", "Noch eine Runde?" } },
-        { "Kampf", { "Achtung, Gegner!", "Brauche Heilung!", "Brauche Mana", "CC das!", "Noch nicht pullen" } },
-        { "Bewegung", { "Los geht's!", "Folgt mir", "Wartet hier", "Bin unterwegs!", "Zurück, ich pulle" } },
+        { "Sozial", { "gg", "Gut gemacht", "Danke", "Sorry, mein Fehler", "lol" } },
+        { "Status", { "Hi", "brb", "kurz afk", "Bereit", "Noch eine Runde?" } },
+        { "Kampf", { "Achtung, Gegner", "Brauche Heilung", "Brauche Mana", "CC das", "Noch nicht pullen" } },
+        { "Bewegung", { "Los geht's", "Folgt mir", "Wartet hier", "Bin unterwegs", "Zurück, ich pulle" } },
         { "Emotes", { "@WAVE", "@THANK", "@CHEER", "@DANCE", "@ROLL" } },
         { "Eigene", {  } },
     },
@@ -2781,10 +2781,10 @@ LOCALES.esES = {
     -- The quick phrases' defaults: { row name, { five phrases } } (@WAVE...:
     -- the game's own emote command, Phrases.lua)
     PHRASE_ROWS = {
-        { "Social", { "gg", "¡Bien hecho!", "¡Gracias!", "¡Perdón, culpa mía!", "jaja" } },
-        { "Estado", { "¡Hola!", "brb", "afk un momento", "¡Listo!", "¿Otra ronda?" } },
-        { "Combate", { "¡Que vienen!", "¡Necesito curación!", "Necesito maná", "¡Controla ese!", "No tiréis aún" } },
-        { "Movimiento", { "¡Vamos!", "Seguidme", "Esperad aquí", "¡Voy para allá!", "Atrás, tiro yo" } },
+        { "Social", { "gg", "Bien hecho", "Gracias", "Perdón, culpa mía", "jaja" } },
+        { "Estado", { "Hola", "brb", "afk un momento", "Listo", "¿Otra ronda?" } },
+        { "Combate", { "Que vienen", "Necesito curación", "Necesito maná", "Controla ese", "No tiréis aún" } },
+        { "Movimiento", { "Vamos", "Seguidme", "Esperad aquí", "Voy para allá", "Atrás, tiro yo" } },
         { "Emotes", { "@WAVE", "@THANK", "@CHEER", "@DANCE", "@ROLL" } },
         { "Tus frases", {  } },
     },
@@ -3477,10 +3477,10 @@ LOCALES.itIT = {
     -- The quick phrases' defaults: { row name, { five phrases } } (@WAVE...:
     -- the game's own emote command, Phrases.lua)
     PHRASE_ROWS = {
-        { "Social", { "gg", "Ben fatto!", "Grazie!", "Scusa, colpa mia!", "lol" } },
-        { "Stato", { "Ciao!", "brb", "afk un attimo", "Pronto!", "Un altro giro?" } },
-        { "Combattimento", { "Arrivano!", "Servono cure!", "Mi serve mana", "Controllalo!", "Non pullate ancora" } },
-        { "Movimento", { "Andiamo!", "Seguitemi", "Aspettate qui", "Arrivo!", "Indietro, pullo io" } },
+        { "Social", { "gg", "Ben fatto", "Grazie", "Scusa, colpa mia", "lol" } },
+        { "Stato", { "Ciao", "brb", "afk un attimo", "Pronto", "Un altro giro?" } },
+        { "Combattimento", { "Arrivano", "Servono cure", "Mi serve mana", "Controllalo", "Non pullate ancora" } },
+        { "Movimento", { "Andiamo", "Seguitemi", "Aspettate qui", "Arrivo", "Indietro, pullo io" } },
         { "Emote", { "@WAVE", "@THANK", "@CHEER", "@DANCE", "@ROLL" } },
         { "Le tue frasi", {  } },
     },
