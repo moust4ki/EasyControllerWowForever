@@ -4,6 +4,12 @@
 Every feature you don't need can be turned off to save even more resources.
 
 > **To open the settings: hold RB and press D-pad down** (or type `/ec config` in the chat).
+>
+> **For the best results, set the game's gamepad action bar to compact** (the game's gamepad options):
+> the game then shows one bar, which "Triggers: press to switch" and the extra buttons are made for.
+>
+> **To set the stance bar (stealth, a form, a stance), be in that stance first**: the Gamepad tab
+> shows the stance bar's slots only while you are in it.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
@@ -169,7 +175,8 @@ or **Nothing**.
 **Stealth, forms and stances**
 In stealth, a form or a stance, the game shows the stance bar in place of a gamepad bar: set it from
 the Gamepad tab, and your replaced buttons, paddles and trigger layers press its spells (macros
-included) while you are in the stance.
+included) while you are in the stance. **Enter the stance first**: the Gamepad tab shows the stance
+bar's slots only while you are in it (stealth for a rogue's, cat form for a druid's...).
 
 **Profiles**
 Each character (by its full name, surname included) keeps its own buttons, paddles, wheels and
