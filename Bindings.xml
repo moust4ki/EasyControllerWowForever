@@ -17,6 +17,7 @@
     <Binding name="CLICK ControllerKeyboardMyWheel6:LeftButton" category="ADDONS"/>
     <Binding name="CLICK ControllerKeyboardMyWheel7:LeftButton" category="ADDONS"/>
     <Binding name="CLICK ControllerKeyboardMyWheel8:LeftButton" category="ADDONS"/>
+    <Binding name="CLICK ControllerKeyboardPhrasesToggle:LeftButton" category="ADDONS"/>
     <Binding name="CONTROLLERKEYBOARD_NOOP" category="ADDONS" hidden="true">
         -- Does nothing: a key bound to it lets go of the game's gamepad command it had
     </Binding>

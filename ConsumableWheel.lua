@@ -1258,6 +1258,8 @@ end
 -- The action the Gamepad tab puts on an input ("wheel:consumables",
 -- "wheel:3"): its key opens that wheel
 function W:Toggle(which)
+    -- The quick phrases window, given like a wheel (Phrases.lua)
+    if which == "phrases" and CK.Phrases then return CK.Phrases:ToggleButton() end
     self:Build()
     local n = tonumber(which)
     return n and self.myToggles[n] or self.toggle

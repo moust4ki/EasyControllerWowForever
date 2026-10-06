@@ -184,7 +184,10 @@ function CK:Refresh()
         local ctx = CK.Predict:Context(text:sub(1, #text - #prefix))
         self.state.suggestions = CK.Predict:Query(prefix, ctx, n)
     end
-    if not self:InQuestList() then self.state.selected = 1 end
+    if not self:InQuestList() then
+        self.state.selected = 1
+        self.state.phrasesChip = false
+    end
     self:UpdateSuggestions()
     self:UpdateChannels()
     self:UpdateRows()
@@ -251,7 +254,18 @@ function CK:DeleteWord()
     self:SetText(text)
 end
 
+-- The quick phrases' bubble at the end of the suggestions (Phrases.lua):
+-- not in a prompt (a name for a wheel) or a field of the game (no channel)
+function CK:PhrasesChipShown()
+    return self.db.settings.phrasesChip ~= false and CK.Phrases ~= nil and not self.prompt and not self.field
+        and not (self.InQuestList and self:InQuestList())
+end
+
 function CK:AcceptSuggestion(index)
+    if not index and self.state.phrasesChip and self:PhrasesChipShown() then
+        CK.Phrases:OpenFromKeyboard()
+        return true
+    end
     if self:InQuestList() then
         -- index is a position in the visible window
         local first = self.state.questIndex - self.state.selected + 1
@@ -278,10 +292,17 @@ function CK:AcceptSuggestion(index)
     return true
 end
 
+-- The quick phrases' bubble is one more stop after the suggestions
 function CK:SelectSuggestion(delta)
-    local n = #self.state.suggestions
-    if n == 0 then return end
-    self.state.selected = (self.state.selected - 1 + delta) % n + 1
+    local state = self.state
+    local n = #state.suggestions
+    local chip = self:PhrasesChipShown()
+    local count = n + (chip and 1 or 0)
+    if count == 0 then return end
+    local at = (chip and state.phrasesChip) and n + 1 or math.min(state.selected or 1, math.max(n, 1))
+    at = (at - 1 + delta) % count + 1
+    state.phrasesChip = chip and at == n + 1 or false
+    if not state.phrasesChip then state.selected = at end
     self:UpdateSuggestions()
 end
 
@@ -794,6 +815,7 @@ function CK:Close(reason)
     self.state.aim = nil
     self.state.questList = nil
     self.state.questChip = false
+    self.state.phrasesChip = false
     self:GetMethod():Reset()
     self.repeatFn = nil
     if prompt then prompt.onDone(nil) end

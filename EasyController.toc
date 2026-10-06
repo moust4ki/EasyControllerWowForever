@@ -38,6 +38,7 @@ Upgrades.lua
 Automation.lua
 ConsumableWheel.lua
 ConfigKit.lua
+Phrases.lua
 ConfigWindow.lua
 MyWheels.lua
 MapWindow.lua

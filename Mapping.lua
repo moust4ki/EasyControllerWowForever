@@ -444,7 +444,8 @@ end
 
 ---------------------------------------------------------------------------
 -- Assignments: settings.mapping["L3:LT"] = "cmd:TOGGLERUN" | "spell:133" |
--- "item:5512" | "macro:Name" | "bar:bottom:a" | "wheel:consumables"
+-- "item:5512" | "macro:Name" | "bar:bottom:a" | "wheel:consumables" |
+-- "wheel:phrases" (the quick phrases window)
 ---------------------------------------------------------------------------
 function M:Get(inputId, layer)
     return settings().mapping[inputId .. ":" .. layer]
@@ -717,6 +718,7 @@ function M:ActionName(action)
         return CK.Paddles:ActionLabel(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
+        if value == "phrases" then return L.PHRASES_NAME end
         if not n then return L.WHEEL_NAME end
         return CK.MyWheels and CK.MyWheels:Name(n) or L.MYWHEEL_GONE
     end
@@ -742,6 +744,7 @@ function M:ActionIcon(action)
         return CK.Paddles:ActionIcon(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
+        if value == "phrases" then return CK.Phrases and CK.Phrases.ICON end
         return n and CK.MyWheels and CK.MyWheels:Icon(n) or M.WHEEL_ICON
     end
 end
@@ -825,6 +828,10 @@ function M:Catalog(tab, forSlot, noBound)
         if not forSlot and CK.ConsumableWheel then
             list[#list + 1] = { header = L.HDR_WHEELS }
             list[#list + 1] = { action = "wheel:consumables", name = L.WHEEL_NAME, icon = M.WHEEL_ICON }
+            -- The quick phrases window (Phrases.lua), opened like a wheel
+            if CK.Phrases then
+                list[#list + 1] = { action = "wheel:phrases", name = L.PHRASES_NAME, icon = CK.Phrases.ICON }
+            end
             -- The player's own wheels
             for _, w in ipairs(CK.MyWheels and CK.MyWheels:List() or {}) do
                 list[#list + 1] = { action = "wheel:" .. w.id, name = w.name, icon = CK.MyWheels:Icon(w.id) }
