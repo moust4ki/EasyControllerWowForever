@@ -149,6 +149,25 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
   holds "LFM [quest]". B empties it as usual; a draft is dropped after 10 minutes.
 - Backspace deletes a link as a whole.
 
+## Quick phrases
+
+- A window of ready-made phrases, five a row by theme: social, status, combat, moving, emotes (the
+  game's own commands) and a row of your own, in the game's language.
+- Open it with the **bubble** at the end of the keyboard's suggestions (D-pad right up to it, then
+  the right stick's click), from any button or layer (Gamepad tab › Macros › Quick phrases), a key
+  binding (Escape > Key Bindings > AddOns) or `/ec phrases`.
+- D-pad to pick, **LB / RB** the channel (say, party, raid, guild, yell, reply: the ones not there are
+  skipped; opened from the keyboard, its channel; else raid, party or say), **A** sends and closes.
+  From the keyboard on the chat, the chat closes too (the send presses the game's own B); **B**
+  brings the keyboard back with what it held.
+- A phrase starting with `/` is a command, run as typed (`/wave`, `/roll`...).
+- **X** rewrites a phrase (the default ones too) or a row's name: the window stays, the cell shows
+  what is typed, with the controller's keyboard or a physical one (Enter confirms, Escape cancels).
+  An empty name deletes the row (asked first when it holds phrases); **+ Add a row** at the bottom,
+  up to 8. **Y** opens the keyboard with the phrase, to add to it.
+- The phrases are the account's, the same for every character. Keyboard › Quick phrases: the bubble
+  on or off, and back to the default phrases. Out of combat only.
+
 ## Configuration panel
 
 **RB + D-pad down** opens the addon's own panel (only watched, never bound: the game's own buttons stay as they are;
@@ -476,6 +495,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec fish` | list the game's events for a minute, to find which one comes when a fish bites |
 | `/ec vibe [pattern]` | test the controller vibration |
 | `/ec wheel` | what the consumables wheel holds, and why an item is not in it |
+| `/ec phrases` | the quick phrases window |
 | `/ec binds` | the game's buttons replaced, and what each key runs now |
 | `/ec glyphs` | list the game's gamepad button icons |
 | `/ec debug` | print received buttons and sticks |

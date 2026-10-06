@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.12.0
+
+- **Quick phrases** (asked by a player, like Controller Forever's Quick Chat): a window of ready-made
+  phrases, five a row by theme (social, status, combat, moving, emotes, your own), in the game's
+  language. A sends the one picked on the channel picked with LB / RB (say, party, raid, guild,
+  yell, reply; the ones not there are skipped) and closes; a phrase starting with / is a command
+  (the emotes row uses the game's own commands). X rewrites any phrase, the default ones too, or a
+  row's name (an empty name deletes the row, asked first when it holds phrases); rows can be added,
+  up to 8. While one is written the window stays, the cell shows what is typed, and a physical
+  keyboard types in it too (Enter / Escape). Y opens the keyboard with the phrase to add to it. The
+  phrases are the account's; Keyboard › Quick phrases puts the default ones back.
+- Opened with the bubble at the end of the keyboard's suggestions (D-pad right up to it, then the
+  right stick's click): sending closes the chat too (the game's own B, run by the send), B brings
+  the keyboard back with what it held. Or put on any button or layer from the Gamepad tab, a key
+  binding (Escape > Key Bindings > AddOns) or `/ec phrases`. Out of combat only.
+- **Gamepad tab**: the addon's own actions (the consumables wheel, the quick phrases, your wheels)
+  are now at the top of the **Macros** list, under "Easy Controller", instead of among the items.
+
 ## 1.11.17
 
 - **A new character no longer gets another's spells** (reported: a new druid had the rogue's
