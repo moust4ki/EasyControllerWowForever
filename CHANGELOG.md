@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.12.1
+
+- **Triggers: press to switch**: the bar on now shows its trigger, LT, RT or LT + RT, where the game
+  shows its own icon when a trigger is held (reported: nothing said which bar was on). In the button
+  style picked (Xbox, PlayStation, Switch).
+
 ## 1.12.0
 
 - **Quick phrases** (asked by a player, like Controller Forever's Quick Chat): a window of ready-made
