@@ -31,6 +31,7 @@ P.ICON = "Interface\\Icons\\UI_Chat"
 P.CHIP_ICON = "Interface\\ChatFrame\\UI-ChatIcon-Chat-Up"
 
 local SEND_BUTTON = "ControllerKeyboardPhrasesSend"
+local EDIT_BUTTON = "ControllerKeyboardPhrasesEdit"
 local TOGGLE_BUTTON = "ControllerKeyboardPhrasesToggle"
 
 -- The channels LB / RB go through (the keyboard's CHANNEL_LIST keys), and
@@ -384,6 +385,35 @@ function P:Build()
     f.preview.text:SetPoint("RIGHT", -10, 0)
     f.preview.text:SetWordWrap(false)
 
+    -- While a phrase or a name is written: the field a physical keyboard
+    -- types in (reported: only the controller could write), over the
+    -- preview. The keyboard's prompt follows it, and it follows the prompt.
+    local edit = CK.NewFrame("EditBox", nil, f.preview)
+    edit:SetAllPoints()
+    edit:SetFont(CK:GetFontPath(), 14, "")
+    edit:SetTextColor(C.focusText[1], C.focusText[2], C.focusText[3])
+    edit:SetTextInsets(10, 10, 0, 0)
+    edit:SetAutoFocus(false)
+    edit:SetMaxLetters(MAX_LEN)
+    edit:SetScript("OnEnterPressed", function(self)
+        if CK.prompt and CK.prompt.box == self then CK:FinishPrompt(true) end
+    end)
+    edit:SetScript("OnEscapePressed", function(self)
+        if CK.prompt and CK.prompt.box == self then CK:FinishPrompt(false) end
+    end)
+    edit:SetScript("OnTextChanged", function(self, userInput)
+        if userInput and P.prompting and CK.prompt and CK.prompt.box == self then
+            CK.buffer = self:GetText()
+            CK:Refresh()
+        end
+    end)
+    edit:Hide()
+    f.edit = edit
+    -- What the controller types shows in the cell as it is typed
+    hooksecurefunc(CK, "Refresh", function()
+        if P.prompting and P.active then P:Render() end
+    end)
+
     -- A question (deleting a row with its phrases): A yes, B no
     f.ask = CK.NewFrame("Frame", nil, f)
     f.ask:SetFrameLevel(f:GetFrameLevel() + 20)
@@ -512,7 +542,7 @@ function P:Render()
     f.rb:Set("RB")
 
     local kind, _, focusedText = self:Focused()
-    local typing = self.prompting and self.editText
+    local typing = self.prompting and CK.prompt and CK:GetText()
     -- What is typed, with a cursor
     local function typed()
         return (typing ~= "" and typing or "") .. "|cffffd24a_|r"
@@ -548,9 +578,7 @@ function P:Render()
 
     -- What A does, written out
     local preview = ""
-    if typing then
-        preview = typed()
-    elseif kind == "tile" and focusedText ~= "" then
+    if kind == "tile" and focusedText ~= "" and not typing then
         if isCommand(focusedText) then
             preview = format("|cffff9a40%s|r  |cff9d917a(%s)|r", focusedText, L.PH_COMMAND)
         else
@@ -560,6 +588,8 @@ function P:Render()
         end
     end
     f.preview.text:SetText(preview)
+    -- The field shows it while writing
+    f.preview.text:SetShown(not typing)
 
     f.ask:SetShown(self.ask ~= nil)
     if self.ask then f.ask.text:SetText(self.ask.text) end
@@ -629,6 +659,18 @@ function P:CreateInput()
     s:SetScript("PostClick", function(_, _, down) P:AfterSend(down) end)
     s:Hide()
     self.sendButton = s
+
+    -- X: writes; on the chat, its macro closes the chat first (see SendText)
+    local e = CK.NewFrame("Button", EDIT_BUTTON, nil, "SecureActionButtonTemplate")
+    e:SetSize(1, 1)
+    e:SetAttribute("type", "macro")
+    e:SetAttribute("macrotext", "")
+    e:RegisterForClicks("AnyDown", "AnyUp")
+    e:SetScript("PreClick", function() P:PrepareWrite() end)
+    e:SetScript("PostClick", function(_, _, down)
+        if down ~= true and P.active then P:AfterChatClosed("X") end
+    end)
+    self.editButton = e
 end
 
 local function bindKey(owner, key, button)
@@ -640,7 +682,9 @@ local function bindKey(owner, key, button)
 end
 
 local function buttonFor(key)
-    return key == "PAD1" and SEND_BUTTON or padButton(key)
+    if key == "PAD1" then return SEND_BUTTON end
+    if key == "PAD3" then return EDIT_BUTTON end
+    return padButton(key)
 end
 
 -- A key still held (the one that opened the window) is bound once let go:
@@ -715,16 +759,57 @@ end
 -- keyboard on the chat, the chat closes after it (asked: sending closes
 -- everything): its last line clicks the game's own B, which closes the
 -- chat (the addon must never close it itself, the gamepad UI forbids it)
+--
+-- A that writes (an empty phrase, a row's name, a new row) and X close the
+-- chat the same way first: a physical keyboard then types in the window's
+-- field (taking the focus from the chat would close it from addon code)
 function P:SendText()
     if self.ask then return "" end
-    local kind, _, text = self:Focused()
-    if kind ~= "tile" then return "" end
-    local macro = self:MacroText(text)
-    local eb = self.from and self.from.editBox
-    if macro ~= "" and self.chatBack and eb and eb.HasFocus and eb:HasFocus() then
-        macro = macro .. "\n/click " .. self.chatBack .. " LeftButton 1"
+    if self:WillSend() then
+        local close = self:CloseChatLine()
+        local _, _, text = self:Focused()
+        local macro = self:MacroText(text)
+        return close ~= "" and (macro .. "\n" .. close) or macro
     end
-    return macro
+    return self:CloseChatLine()
+end
+
+-- A on a phrase: sent
+function P:WillSend()
+    if self.ask then return false end
+    local kind, _, text = self:Focused()
+    return kind == "tile" and text ~= ""
+end
+
+-- The game's chat still open (the window opened from the keyboard on it)
+function P:ChatOpen()
+    local eb = self.from and self.from.editBox
+    return (eb and eb.HasFocus and eb:HasFocus()) and true or false
+end
+
+function P:CloseChatLine()
+    if self.chatBack and self:ChatOpen() then return "/click " .. self.chatBack .. " LeftButton 1" end
+    return ""
+end
+
+-- X: its macro closes the chat when it is open (nothing to write on a
+-- question)
+function P:PrepareWrite()
+    if InCombatLockdown() then return end
+    local line = self.ask and "" or self:CloseChatLine()
+    if line ~= "" then self.closedChat = true end
+    self.editButton:SetAttribute("macrotext", line)
+end
+
+-- Once the chat closed, the game sets its own keys again: the writing
+-- starts a moment later, the keyboard's over them
+function P:AfterChatClosed(name)
+    if self.closedChat then
+        self.closedChat = nil
+        C_Timer.After(0.15, function() P:Press(name) end)
+    else
+        self:Press(name)
+    end
 end
 
 -- The game's B while its chat is open (its gamepad UI's own button, bound
@@ -737,7 +822,9 @@ end
 
 function P:PrepareSend()
     if InCombatLockdown() then return end
-    self.sendButton:SetAttribute("macrotext", self:SendText())
+    local text = self:SendText()
+    if not self:WillSend() and text ~= "" then self.closedChat = true end
+    self.sendButton:SetAttribute("macrotext", text)
 end
 
 -- After the secure click, on the release (the macro runs on the press or
@@ -746,11 +833,11 @@ end
 function P:AfterSend(down)
     if down == true then return end
     if not self.active then return end
-    if self:SendText() ~= "" then
+    if self:WillSend() then
         self:Close("sent")
         return
     end
-    self:Press("A")
+    self:AfterChatClosed("A")
 end
 
 ---------------------------------------------------------------------------
@@ -804,28 +891,26 @@ function P:Prompt(title, text, onDone)
     end
     self:Unbind()
     self.prompting = true
-    self.editText = text or ""
-    -- The keyboard's prompt writes what is typed in its field: this one
-    local field = {
-        GetText = function() return P.editText end,
-        SetText = function(_, value)
-            P.editText = value or ""
-            P:Render()
-        end,
-    }
+    local edit = self.frame.edit
+    edit:SetText(text or "")
     local opened = CK:OpenPrompt(title, text, function(value)
         self.prompting = false
-        self.editText = nil
+        edit:ClearFocus()
+        edit:Hide()
         if not self.active then return end
         if value ~= nil then onDone(P.Clean(value)) end
         self:Resume()
-    end, field)
+    end, edit)
     if not opened then
         self.prompting = false
-        self.editText = nil
         self:Resume()
         return
     end
+    -- A physical keyboard types in it; never while the game's chat has the
+    -- focus (taking it would close the chat from addon code)
+    edit:Show()
+    local chat = CK.ActiveChatWindow and CK.ActiveChatWindow()
+    if not (self:ChatOpen() or (chat and chat.HasFocus and chat:HasFocus())) then edit:SetFocus() end
     self:Render()
     if CK.frame then CK.frame:Raise() end
 end
@@ -942,9 +1027,9 @@ function P:RestoreKeyboard(from, text, attrs)
     local eb = from and from.editBox
     if eb then
         if not (eb.HasFocus and eb:HasFocus()) then
-            -- The game closed the chat meanwhile: the keyboard on its own
-            -- only for a message to type (Y)
-            if text == nil then return end
+            -- The chat closed meanwhile (writing a phrase closes it): the
+            -- keyboard on its own, only for a message (Y, or what it held)
+            if text == nil and not (from.buffer and from.buffer:find("%S")) then return end
             CK:OpenStandalone()
         else
             CK:Open(eb)
@@ -983,6 +1068,7 @@ function P:Close(reason)
     if not self.active then return end
     self.active = false
     self.ask = nil
+    self.closedChat = nil
     self:Unbind()
     if self.frame then self.frame:Hide() end
     local from = self.from
