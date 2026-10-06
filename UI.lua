@@ -306,6 +306,24 @@ function CK:BuildUI()
     f.suggMeasure:SetWordWrap(false)
     f.suggMeasure:SetAlpha(0)
 
+    -- The quick phrases' bubble, after the suggestions (Phrases.lua): one
+    -- more stop for D-pad right, the right stick's click opens it
+    local pchip = CK.NewFrame("Button", nil, f)
+    pchip:SetFrameLevel(sbar:GetFrameLevel() + 2)
+    pchip.select = pill(pchip)
+    pchip.icon = texture(pchip, nil, "OVERLAY")
+    pchip.icon:SetTexture(CK.Phrases.CHIP_ICON)
+    pchip.icon:SetSize(20, 20)
+    pchip.icon:SetPoint("CENTER")
+    pchip:SetScript("OnEnter", function(s)
+        GameTooltip:SetOwner(s, "ANCHOR_TOP")
+        GameTooltip:SetText(L.PHRASES_TIP, 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    pchip:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    pchip:SetScript("OnClick", function() CK.Phrases:OpenFromKeyboard() end)
+    f.phrasesChip = pchip
+
     -- Input methods, each in its own area (only the active one is shown)
     for _, method in pairs(CK.Methods) do
         method.area = CK.NewFrame("Frame", nil, f)
@@ -450,7 +468,9 @@ function CK:Layout()
     place(f.sbar, f, 8, 58, w - 16, 28)
     place(f.lbGlyph, f, 12, 61, 22, 22)
     place(f.rbGlyph, f, w - 34, 61, 22, 22)
-    f.suggWidth = w - 76
+    local chip = self.db.settings.phrasesChip ~= false
+    place(f.phrasesChip, f, w - 66, 59, 28, 26)
+    f.suggWidth = w - 76 - (chip and 32 or 0)
     self:LayoutSuggestions()
 
     for _, m in pairs(CK.Methods) do m.area:SetShown(m == method) end
@@ -650,6 +670,7 @@ function CK:UpdateRows()
     local sg = channels and off or on
     f.sbarSlice:SetVertexColor(sg, sg, sg)
     for _, b in ipairs(f.sugg) do b:SetAlpha(channels and 0.6 or 1) end
+    f.phrasesChip:SetAlpha(channels and 0.6 or 1)
     self:SetGlyph(f.lbGlyph, channels and "DPAD_UP" or "DPAD_LEFT")
     self:SetGlyph(f.rbGlyph, "DPAD_RIGHT")
     f.rbGlyph:SetShown(not channels)
@@ -716,10 +737,14 @@ function CK:UpdateSuggestions()
     local f = self.frame
     self:LayoutSuggestions()
     local list = self.state.suggestions
+    local chip = self:PhrasesChipShown()
+    if not chip then self.state.phrasesChip = false end
+    f.phrasesChip:SetShown(chip)
+    f.phrasesChip.select:SetShown(self.state.phrasesChip and true or false)
     for i, b in ipairs(f.sugg) do
         local word = list[i]
         if word then
-            local selected = i == self.state.selected
+            local selected = i == self.state.selected and not self.state.phrasesChip
             b.label:SetText(word)
             b.select:SetShown(selected)
             b.label:SetTextColor(unpack(selected and C.suggSel or C.sugg))

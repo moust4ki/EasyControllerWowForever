@@ -444,7 +444,8 @@ end
 
 ---------------------------------------------------------------------------
 -- Assignments: settings.mapping["L3:LT"] = "cmd:TOGGLERUN" | "spell:133" |
--- "item:5512" | "macro:Name" | "bar:bottom:a" | "wheel:consumables"
+-- "item:5512" | "macro:Name" | "bar:bottom:a" | "wheel:consumables" |
+-- "wheel:phrases" (the quick phrases window)
 ---------------------------------------------------------------------------
 function M:Get(inputId, layer)
     return settings().mapping[inputId .. ":" .. layer]
@@ -717,6 +718,7 @@ function M:ActionName(action)
         return CK.Paddles:ActionLabel(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
+        if value == "phrases" then return L.PHRASES_NAME end
         if not n then return L.WHEEL_NAME end
         return CK.MyWheels and CK.MyWheels:Name(n) or L.MYWHEEL_GONE
     end
@@ -742,6 +744,7 @@ function M:ActionIcon(action)
         return CK.Paddles:ActionIcon(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
+        if value == "phrases" then return CK.Phrases and CK.Phrases.ICON end
         return n and CK.MyWheels and CK.MyWheels:Icon(n) or M.WHEEL_ICON
     end
 end
@@ -821,16 +824,6 @@ function M:Catalog(tab, forSlot, noBound)
             end
         end
     elseif tab == "items" and C_Container then
-        -- Ours first: the consumables wheel (not for the game's bar slots)
-        if not forSlot and CK.ConsumableWheel then
-            list[#list + 1] = { header = L.HDR_WHEELS }
-            list[#list + 1] = { action = "wheel:consumables", name = L.WHEEL_NAME, icon = M.WHEEL_ICON }
-            -- The player's own wheels
-            for _, w in ipairs(CK.MyWheels and CK.MyWheels:List() or {}) do
-                list[#list + 1] = { action = "wheel:" .. w.id, name = w.name, icon = CK.MyWheels:Icon(w.id) }
-            end
-            list[#list + 1] = { header = L.MAP_TAB_ITEMS }
-        end
         local seen = {}
         for bag = 0, NUM_BAG_SLOTS or 4 do
             for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
@@ -843,6 +836,21 @@ function M:Catalog(tab, forSlot, noBound)
             end
         end
     elseif tab == "macros" and GetNumMacros then
+        -- Ours first, among what runs something (asked: in Items they were
+        -- hard to find): the consumables wheel, the quick phrases, the
+        -- player's wheels. Not for the game's bar slots or a wheel's slots
+        if not forSlot and CK.ConsumableWheel then
+            list[#list + 1] = { header = L.HDR_OURS }
+            list[#list + 1] = { action = "wheel:consumables", name = L.WHEEL_NAME, icon = M.WHEEL_ICON }
+            -- The quick phrases window (Phrases.lua), opened like a wheel
+            if CK.Phrases then
+                list[#list + 1] = { action = "wheel:phrases", name = L.PHRASES_NAME, icon = CK.Phrases.ICON }
+            end
+            for _, w in ipairs(CK.MyWheels and CK.MyWheels:List() or {}) do
+                list[#list + 1] = { action = "wheel:" .. w.id, name = w.name, icon = CK.MyWheels:Icon(w.id) }
+            end
+            list[#list + 1] = { header = L.MAP_TAB_MACROS }
+        end
         local account, character = GetNumMacros()
         local perAccount = MAX_ACCOUNT_MACROS or 120
         for i = 1, account do
@@ -1361,8 +1369,11 @@ end
 function M:CoreActive()
     local manager = GamepadMode and GamepadMode.FrameControlsManager
     if manager and manager.GetActiveFrame and manager:GetActiveFrame() then return false end
-    -- The chat keyboard or a wheel open: their keys stay theirs
+    -- The chat keyboard, the quick phrases or a wheel open: their keys stay
+    -- theirs (reported: D-pad down given the phrases closed them instead of
+    -- moving in them, ours set again over theirs)
     if CK.IsOpen and CK:IsOpen() then return false end
+    if CK.Phrases and CK.Phrases:IsOpen() then return false end
     if ControllerKeyboardWheel and ControllerKeyboardWheel:IsShown() then return false end
     return not (CK.Config and CK.Config:IsOpen())
 end

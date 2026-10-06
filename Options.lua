@@ -388,6 +388,29 @@ local function predictionRows(b)
         end })
 end
 
+-- The quick phrases (Phrases.lua): written in their window itself (X)
+local function phrasesRows(b)
+    if keyboardOff(b) then return end
+    local s = settings()
+    b.header(L.SEC_PHRASES)
+    b.check({ id = "k_phchip", label = L.LBL_PHRASES_CHIP, tip = L.TIP_PHRASES_CHIP,
+        get = function() return s.phrasesChip ~= false end,
+        set = function(v)
+            s.phrasesChip = v
+            if CK.frame then
+                CK:Layout()
+                CK:UpdateSuggestions()
+            end
+        end })
+    -- Two presses (no confirmation popup)
+    b.button({ id = "k_phreset", label = L.LBL_PHRASES_RESET, danger = true, armedLabel = L.LBL_PHRASES_RESET_ARMED,
+        disabled = s.phrases == nil, tip = L.TIP_PHRASES_RESET,
+        func = function()
+            CK.Phrases:Reset()
+            Config:Toast(L.TOAST_PHRASES_RESET)
+        end })
+end
+
 local function keyboardPositionRows(b)
     if keyboardOff(b) then return end
     local s = settings()
@@ -420,6 +443,7 @@ Config.pages.keyboard = Config.NewRailPage({
         { key = "sticks", label = L.SEC_STICKS, tip = L.TIP_SEC_STICKS, rows = sticksRows },
         { key = "prediction", label = L.SEC_PREDICTION, tip = L.TIP_SEC_PREDICTION, rows = predictionRows },
         { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_KBPOS, rows = keyboardPositionRows },
+        { key = "phrases", label = L.SEC_PHRASES, tip = L.TIP_SEC_PHRASES, rows = phrasesRows },
     },
 })
 

@@ -4,7 +4,7 @@
 ## Notes: Gamepad play made easy on WoW Forever: chat keyboard with word prediction, gamepad mapping and back paddles, wheels, quest items, better items.
 ## Notes-frFR: Le jeu à la manette simplifié sur WoW Forever : clavier de chat avec prédiction, mappage manette et palettes arrière, roues, objets de quête, meilleurs objets.
 ## Author: moust4ki
-## Version: 1.11.17
+## Version: 1.12.0
 ## SavedVariables: ControllerKeyboardDB
 ## X-Website: https://github.com/moust4ki/EasyControllerWowForever
 ## X-Curse-Project-ID: 1712492
@@ -38,6 +38,7 @@ Upgrades.lua
 Automation.lua
 ConsumableWheel.lua
 ConfigKit.lua
+Phrases.lua
 ConfigWindow.lua
 MyWheels.lua
 MapWindow.lua
