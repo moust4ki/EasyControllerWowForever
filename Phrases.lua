@@ -410,7 +410,7 @@ function P:Build()
 end
 
 function P:Hover(row, col)
-    if self.ask then return end
+    if self.ask or self.prompting then return end
     if self.row == row and self.col == col then return end
     self.row, self.col = row, col
     self:Render()
@@ -466,6 +466,12 @@ function P:Hints()
         add({ "B" }, L.PH_V_CANCEL, "B")
         return list
     end
+    -- Written with the keyboard: its own keys
+    if self.prompting then
+        add({ "A" }, L.V_OK)
+        add({ "B" }, L.PH_V_CANCEL)
+        return list
+    end
     if kind == "tile" then
         if text == "" then
             add({ "A" }, L.PH_V_ADD, "A")
@@ -506,20 +512,25 @@ function P:Render()
     f.rb:Set("RB")
 
     local kind, _, focusedText = self:Focused()
+    local typing = self.prompting and self.editText
+    -- What is typed, with a cursor
+    local function typed()
+        return (typing ~= "" and typing or "") .. "|cffffd24a_|r"
+    end
     for r = 1, MAX_ROWS do
         local row = grid.rows[r]
         if row then
             local color = ROW_COLORS[(r - 1) % #ROW_COLORS + 1]
             local lb = f.labels[r]
             local focus = self.row == r and self.col == 0 and not self.ask
-            lb.label:SetText(row.name ~= "" and row.name or "?")
+            lb.label:SetText((typing and focus) and typed() or (row.name ~= "" and row.name or "?"))
             lb.label:SetTextColor(color[1], color[2], color[3])
             lb.box:SetColors(focus and C.pressed or nil, 1, focus and C.focus or nil, 1)
             for c = 1, COLS do
                 local t = f.tiles[r][c]
                 local text = row.tiles[c] or ""
                 local on = self.row == r and self.col == c and not self.ask
-                t.label:SetText(tileText(text))
+                t.label:SetText((typing and on) and typed() or tileText(text))
                 if isCommand(text) then
                     t.label:SetTextColor(COMMAND_COLOR[1], COMMAND_COLOR[2], COMMAND_COLOR[3])
                 else
@@ -533,10 +544,13 @@ function P:Render()
     local addOn = kind == "add" and not self.ask
     f.add.box:SetColors(addOn and C.pressed or C.boxBg, addOn and 1 or 0.6, addOn and C.focus or C.line2, 1)
     f.add.label:SetTextColor(unpack(addOn and C.focusText or C.grey))
+    f.add.label:SetText((typing and addOn) and typed() or L.PH_ADD_ROW)
 
     -- What A does, written out
     local preview = ""
-    if kind == "tile" and focusedText ~= "" then
+    if typing then
+        preview = typed()
+    elseif kind == "tile" and focusedText ~= "" then
         if isCommand(focusedText) then
             preview = format("|cffff9a40%s|r  |cff9d917a(%s)|r", focusedText, L.PH_COMMAND)
         else
@@ -743,7 +757,8 @@ end
 -- Presses
 ---------------------------------------------------------------------------
 function P:Press(name)
-    if not self.active then return end
+    -- Written with the keyboard meanwhile: its keys, not ours (a click here)
+    if not self.active or self.prompting then return end
     if self.ask then
         local ask = self.ask
         if name == "A" then
@@ -779,24 +794,40 @@ end
 ---------------------------------------------------------------------------
 -- Changes, typed with the keyboard (its prompt): the window waits hidden
 ---------------------------------------------------------------------------
+-- The window stays, its keys the keyboard's meanwhile: the cell being
+-- written shows what is typed (reported: the window went away, nothing to
+-- type in), the keyboard above it
 function P:Prompt(title, text, onDone)
     if not settings().modules.keyboard then
         CK:Print(L.KEYBOARD_OFF)
         return
     end
-    self.frame:Hide()
     self:Unbind()
     self.prompting = true
+    self.editText = text or ""
+    -- The keyboard's prompt writes what is typed in its field: this one
+    local field = {
+        GetText = function() return P.editText end,
+        SetText = function(_, value)
+            P.editText = value or ""
+            P:Render()
+        end,
+    }
     local opened = CK:OpenPrompt(title, text, function(value)
         self.prompting = false
+        self.editText = nil
         if not self.active then return end
         if value ~= nil then onDone(P.Clean(value)) end
         self:Resume()
-    end)
+    end, field)
     if not opened then
         self.prompting = false
+        self.editText = nil
         self:Resume()
+        return
     end
+    self:Render()
+    if CK.frame then CK.frame:Raise() end
 end
 
 function P:Resume()
