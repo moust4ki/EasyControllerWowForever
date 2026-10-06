@@ -287,6 +287,12 @@ local function barFrame(bar)
     return bars and bars[bar .. "Bar"]
 end
 
+-- The game's trigger icon under the bar of a trigger held (LT, RT, LT + RT),
+-- where ours goes: the game never sees the triggers held while ours take
+-- them, so it shows none (reported: nothing said which bar was on)
+local GAME_TRIGGER_ICON = { LT = "LeftIcon", RT = "RightIcon", LTRT = "CenteredIcons" }
+local TRIGGER_SIZE, PLUS_GAP = 24, 4
+
 function T:BuildView()
     local v = CK.NewFrame("Frame", nil, UIParent)
     v:SetFrameStrata("HIGH")
@@ -332,6 +338,18 @@ function T:BuildView()
         s.key = key
         v.slots[key] = s
     end
+    -- The trigger of the bar on: LT, RT or LT + RT, in the button style
+    -- picked (Home > Look)
+    local t = CK.NewFrame("Frame", nil, v)
+    t:SetSize(TRIGGER_SIZE, TRIGGER_SIZE)
+    t.first = t:CreateTexture(nil, "ARTWORK")
+    t.first:SetSize(TRIGGER_SIZE, TRIGGER_SIZE)
+    t.plus = t:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    t.plus:SetText("+")
+    t.second = t:CreateTexture(nil, "ARTWORK")
+    t.second:SetSize(TRIGGER_SIZE, TRIGGER_SIZE)
+    t:Hide()
+    v.trigger = t
     local elapsed = 0
     v:SetScript("OnUpdate", function(_, dt)
         local now = GetTime()
@@ -384,8 +402,10 @@ function T:Draw()
     local compact = GetCVarBool and GetCVarBool("GamepadUseCompactActionBar")
     if not (frame and compact) then
         for _, s in pairs(v.slots) do s:Hide() end
+        v.trigger:Hide()
         return
     end
+    self:DrawTrigger(layer)
     local P = CK.Paddles
     for key, s in pairs(v.slots) do
         local over = P:NativeButton("bar:top:" .. key)
@@ -431,6 +451,54 @@ function T:Draw()
             s:Hide()
         end
     end
+end
+
+-- Where the game puts its trigger icon for that bar (its own, hidden with
+-- the bar), else under the top bar it is drawn over
+function T:DrawTrigger(layer)
+    local t = self.view.trigger
+    local unit = GamepadMainActionBarFrame and GamepadMainActionBarFrame.PageUnit
+    local game = unit and unit[GAME_TRIGGER_ICON[layer] or ""]
+    local top = barFrame("top")
+    local anchor, y = nil, 0
+    if game and game.GetCenter and game:GetCenter() then
+        anchor = game
+    elseif top and top.GetCenter and top:GetCenter() then
+        anchor, y = top, -35
+    end
+    if not anchor then
+        t:Hide()
+        return
+    end
+    local scale = anchor.GetEffectiveScale and anchor:GetEffectiveScale()
+    local mine = self.view:GetEffectiveScale()
+    if scale and mine and mine > 0 then t:SetScale(scale / mine) end
+    t:ClearAllPoints()
+    t:SetPoint("CENTER", anchor, "CENTER", 0, y)
+    t:Show()
+    -- The glyphs set again only when the bar or the button style changes
+    local st = CK.db.settings
+    local key = layer .. "|" .. tostring(st.glyphStyle) .. "|" .. tostring(st.gameGlyphs)
+    if t.drawn == key then return end
+    t.drawn = key
+    local both = layer == "LTRT"
+    CK:SetGlyph(t.first, layer == "RT" and "RT" or "LT")
+    t.first:ClearAllPoints()
+    t.second:ClearAllPoints()
+    t.plus:ClearAllPoints()
+    if both then
+        local width = TRIGGER_SIZE * 2 + PLUS_GAP * 2 + 8
+        t:SetWidth(width)
+        t.first:SetPoint("LEFT")
+        t.plus:SetPoint("LEFT", t.first, "RIGHT", PLUS_GAP, 0)
+        t.second:SetPoint("LEFT", t.plus, "RIGHT", PLUS_GAP, 0)
+        CK:SetGlyph(t.second, "RT")
+    else
+        t:SetWidth(TRIGGER_SIZE)
+        t.first:SetPoint("CENTER")
+    end
+    t.plus:SetShown(both)
+    t.second:SetShown(both)
 end
 
 ---------------------------------------------------------------------------
