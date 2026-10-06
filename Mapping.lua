@@ -1003,15 +1003,25 @@ local ROUTE = [[
     end
     self:SetAttribute("useOnKeyDown", true)
     self:SetAttribute("ck-pressed", nil)
-    -- LB / RB held with a button of the game's pad: the game's (its
-    -- targeting bars), never ours (reported: LB + D-pad down opened the quick
-    -- phrases put on D-pad down). The pad's own keys are the same with a
-    -- shoulder that adds no modifier (RB): read from the pad
+    -- LB / RB held with a button of the game's pad: the game's, never ours
+    -- (reported: LB + D-pad down opened the quick phrases put on D-pad down,
+    -- party member 3 never targeted). Read from the pad (RB adds no
+    -- modifier; LB's Ctrl key falls back here). The game's targeting bar on
+    -- (ally, enemy, its shortcuts) gets the press, through a relay on its
+    -- button here, as the game's own binding gives it to the bar on
     local lb, rb = self:GetAttribute("ck-lb"), self:GetAttribute("ck-rb")
     if lb or rb then
         local held = GetGamePadState()
         local hb = held and held.buttons
-        if hb and ((lb and hb[lb]) or (rb and hb[rb])) then return false end
+        if hb and ((lb and hb[lb]) or (rb and hb[rb])) then
+            for i = 1, 3 do
+                local game = self:GetFrameRef("ck-sh" .. i)
+                if game and self:GetAttribute("ck-sh-on" .. i) and game:IsVisible() then
+                    return "cksh" .. i
+                end
+            end
+            return false
+        end
     end
     -- The trigger toggle on (Toggle.lua): its layer, held or toggled; a
     -- trigger held was used
@@ -1111,6 +1121,7 @@ local function routeKeys(input, key, taken)
     r.ckInput = input.id
     r:SetAttribute("ck-lb", nil)
     r:SetAttribute("ck-rb", nil)
+    M:SetShoulderRefs(r, input)
     r:SetAttribute("ck-lt", padIndex("PADLTRIGGER"))
     r:SetAttribute("ck-rt", padIndex("PADRTRIGGER"))
     r:SetAttribute("ck-lt-mod", M:TriggerModifier("PADLTRIGGER"))
@@ -1263,6 +1274,48 @@ function M.KeyRelay(barAction, macro)
     return newRelay(barAction, macro, true)
 end
 
+-- The game's bars a shoulder held puts on (its gamepad bar's override bars):
+-- ally targeting (a party member on the D-pad, yourself on A...), enemy
+-- targeting, its shortcuts
+M.SHOULDER_BARS = { "friendlyTargeting", "hostileTargeting", "shortcuts" }
+local shoulderRelays = {}
+
+-- A relay "/click"ing one of their buttons, pressed then released as the
+-- game's binding does (its targeting acts on the press, its group
+-- navigation stops on the release)
+local function shoulderRelay(name)
+    local r = shoulderRelays[name]
+    if not r then
+        local n = 0
+        for _ in pairs(shoulderRelays) do n = n + 1 end
+        r = CK.NewFrame("Button", "ControllerKeyboardShoulderRelay" .. (n + 1), nil, "SecureActionButtonTemplate")
+        r:RegisterForClicks("AnyDown", "AnyUp")
+        r:SetAttribute("useOnKeyDown", false)
+        r:SetAttribute("type", "macro")
+        r:SetAttribute("macrotext", "/click " .. name .. " LeftButton true\n/click " .. name .. " LeftButton false")
+        r:Hide()
+        shoulderRelays[name] = r
+    end
+    return r
+end
+
+-- A pad router's refs to those bars' buttons in its place
+function M:SetShoulderRefs(r, input)
+    for i, bar in ipairs(M.SHOULDER_BARS) do
+        local game = input.bar and CK.Paddles:NativeButton("bar:" .. bar .. ":" .. input.bar)
+        local name = game and game.GetName and game:GetName()
+        if name then
+            SecureHandlerSetFrameRef(r, "ck-sh" .. i, game)
+            r:SetAttribute("*clickbutton-cksh" .. i, shoulderRelay(name))
+            r:SetAttribute("ck-sh-on" .. i, true)
+        else
+            r:SetAttribute("frameref-ck-sh" .. i, nil)
+            r:SetAttribute("*clickbutton-cksh" .. i, nil)
+            r:SetAttribute("ck-sh-on" .. i, nil)
+        end
+    end
+end
+
 -- What each layer of a pad button runs through its router: { action } or
 -- { native = the game's button }, nothing for a layer left empty. Nil when
 -- the button has nothing of ours, or a layer only a key binding runs.
@@ -1322,6 +1375,7 @@ function M:ApplyPad(input, targets, replaced)
     -- The face buttons and the D-pad: LB / RB held leave them to the game
     r:SetAttribute("ck-lb", input.bar and padIndex("PADLSHOULDER") or nil)
     r:SetAttribute("ck-rb", input.bar and padIndex("PADRSHOULDER") or nil)
+    self:SetShoulderRefs(r, input)
     r:SetAttribute("ck-lt", padIndex("PADLTRIGGER"))
     r:SetAttribute("ck-rt", padIndex("PADRTRIGGER"))
     r:SetAttribute("ck-lt-mod", M:TriggerModifier("PADLTRIGGER"))
@@ -1467,9 +1521,11 @@ end
 -- makes a modifier (LB is Ctrl by default) sends keys of its own
 -- ("CTRL-PADDDOWN"), with no binding: they fell back to the key alone, ours
 -- (reported: LB + D-pad down opened the quick phrases put on D-pad down).
--- On the face buttons and the D-pad that hold something of ours, those keys
--- get what the game does there without us (its command for the key, or
--- nothing). Keys with nothing of ours are left as they are.
+-- A button through its router: that key falls back to the router, which
+-- reads the shoulders held. A button bound straight (a game function of
+-- ours on one of its layers): those keys get what the game does there
+-- without us (its command for the key, or nothing). Keys with nothing of
+-- ours are left as they are.
 function M:ShoulderMods()
     local mods = {}
     for _, e in ipairs(EMULATE) do
@@ -1483,7 +1539,7 @@ function M:KeepShoulders()
     local shoulder = self:ShoulderMods()
     if not next(shoulder) or not takeOwner then return end
     for _, input in ipairs(M.INPUTS) do
-        local key = input.bar and not input.paddle and self:InputKey(input)
+        local key = input.bar and not input.paddle and not self.padRouted[input.id] and self:InputKey(input)
         local ours = false
         if key then
             for _, layer in ipairs(M.LAYERS) do
