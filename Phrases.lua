@@ -697,12 +697,28 @@ function P:PlaceSendButton()
 end
 
 -- The macro A runs now: a phrase only (a question, a name, an empty one:
--- nothing, A does something else after the click)
+-- nothing, A does something else after the click). Opened from the
+-- keyboard on the chat, the chat closes after it (asked: sending closes
+-- everything): its last line clicks the game's own B, which closes the
+-- chat (the addon must never close it itself, the gamepad UI forbids it)
 function P:SendText()
     if self.ask then return "" end
     local kind, _, text = self:Focused()
     if kind ~= "tile" then return "" end
-    return self:MacroText(text)
+    local macro = self:MacroText(text)
+    local eb = self.from and self.from.editBox
+    if macro ~= "" and self.chatBack and eb and eb.HasFocus and eb:HasFocus() then
+        macro = macro .. "\n/click " .. self.chatBack .. " LeftButton 1"
+    end
+    return macro
+end
+
+-- The game's B while its chat is open (its gamepad UI's own button, bound
+-- with its binding sets): read before ours go over it
+local function gameBack()
+    local action = GetBindingAction and GetBindingAction("PAD2", true)
+    local name = type(action) == "string" and action:match("^CLICK (InputFunctionBindingButton_[^:]+):")
+    return name and _G[name] and name or nil
 end
 
 function P:PrepareSend()
@@ -863,6 +879,10 @@ function P:Open(from)
     self.ask = nil
     self.channel = self:StartChannel(from)
     self.row, self.col = self.row or 1, self.col or 1
+    self.chatBack = from and from.editBox and gameBack() or nil
+    -- The buttons the Gamepad tab replaced (a wheel, these phrases on D-pad
+    -- down...) let go meanwhile, as for the game's windows
+    if CK.Mapping and CK.Mapping.Release then CK.Mapping:Release() end
     self.frame:Show()
     self.frame:Raise()
     self:Bind()
@@ -939,7 +959,18 @@ function P:Close(reason)
     -- A prompt still open (combat): it closes on its own
     if self.prompting and CK.prompt then CK:Close("phrases closed") end
     self.prompting = false
-    if from and reason ~= "combat" and reason ~= "type" then self:RestoreKeyboard(from) end
+    if reason == "sent" then
+        -- Sent: everything closes. On the chat, the game's B closed it (the
+        -- macro's last line); still open, the keyboard comes back on it
+        local eb = from and from.editBox
+        if eb then
+            C_Timer.After(0.3, function()
+                if not P.active and not CK:IsOpen() and eb.HasFocus and eb:HasFocus() then P:RestoreKeyboard(from) end
+            end)
+        end
+    elseif from and reason ~= "combat" and reason ~= "type" then
+        self:RestoreKeyboard(from)
+    end
 end
 
 function P:IsOpen()

@@ -1368,8 +1368,11 @@ end
 function M:CoreActive()
     local manager = GamepadMode and GamepadMode.FrameControlsManager
     if manager and manager.GetActiveFrame and manager:GetActiveFrame() then return false end
-    -- The chat keyboard or a wheel open: their keys stay theirs
+    -- The chat keyboard, the quick phrases or a wheel open: their keys stay
+    -- theirs (reported: D-pad down given the phrases closed them instead of
+    -- moving in them, ours set again over theirs)
     if CK.IsOpen and CK:IsOpen() then return false end
+    if CK.Phrases and CK.Phrases:IsOpen() then return false end
     if ControllerKeyboardWheel and ControllerKeyboardWheel:IsShown() then return false end
     return not (CK.Config and CK.Config:IsOpen())
 end
