@@ -3,6 +3,13 @@
 **Built to be as light as possible, for handhelds and the Steam Deck: about 0.1 % CPU and 5 MB of memory.**
 Every feature you don't need can be turned off to save even more resources.
 
+> **For everything to work at its best, launch Battle.net through Steam with Steam Input on**:
+> in Steam, *Add a Game › Add a Non-Steam Game* and pick Battle.net; in that shortcut's
+> *Properties › Controller*, choose *Enable Steam Input*; then always start Battle.net (and WoW
+> Forever from it) from Steam. Steam Input hands your controller to the game as a standard one
+> (Xbox layout: A, B, X, Y where the game expects them), and it is where the back paddles,
+> touchpads and extra buttons are set up.
+>
 > **To open the settings: hold RB and press D-pad down** (or type `/ec config` in the chat).
 >
 > **For the best results, set the game's gamepad action bar to compact** (the game's gamepad options):
