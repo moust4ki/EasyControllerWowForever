@@ -502,8 +502,9 @@ function CK:Layout()
     place(f.questChip, f, 38 + cstep * #f.channels, cy + 1, cstep - 1, 24)
     f.questChip:SetShown(withChip)
 
-    -- Mouse buttons row is optional: when hidden, the help band moves up
-    local show = self.db.settings.showActions
+    -- Mouse buttons row is optional (never under the daisywheel): when
+    -- hidden, the help band moves up
+    local show = self.db.settings.showActions and not method.noMouseRow
     local ay = cy + 30
     local sx = (w - 16) / 324
     for _, a in ipairs(ACTIONS) do

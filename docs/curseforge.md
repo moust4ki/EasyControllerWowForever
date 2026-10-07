@@ -16,6 +16,8 @@ Every feature you don't need can be turned off to save even more resources.
 ## What's new in 1.14
 - **Profiles**: up to 5 sets of a character's buttons, wheels and game bar slots (the spells on the D-pad and the face buttons, the stance and form bars), in a Profiles tab. Pick one from a list or with `/ec profile <name>`, or let your talents pick (primary / secondary). Only that character's, never another's.
 - **ConsolePort keyboard**: a third input method, ConsolePort's own keyboard. 8 groups of 4 around the left stick typed with A / B / X / Y, LT / LB / RT for capitals, numbers, commands and accents, its word suggestions on our dictionaries, and the channel on the D-pad. Thanks to Sebastian Lindfors for ConsolePort.
+- **Our prediction in the ConsolePort keyboard** (1.14.1): the next word, the completions in context and the commands first, ConsolePort's typo-tolerant matches after.
+- **Daisywheel** (1.14.1): no more mouse buttons row under the wheel (its keys stay clickable).
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
@@ -68,9 +70,10 @@ response with an optional gentle or fast curve.
 **ConsolePort**
 ConsolePort's own keyboard: a ring of 8 groups of 4 characters. The left stick picks a group, A / B /
 X / Y type its characters; LT for capitals, LB for numbers and symbols, LT + LB for commands (`/p`,
-`/g`, `/w`…) and raid markers, RT for the accents of your language. Its suggestions beside the ring
-(D-pad up / down, RB to put one in), the channel above the text (D-pad left / right), and the ring
-floats where you want it (right stick, with no group chosen).
+`/g`, `/w`…) and raid markers, RT for the accents of your language. Its suggestions beside the ring,
+our prediction first then ConsolePort's typo-tolerant matches (D-pad up / down, RB to put one in), the
+channel above the text (D-pad left / right), and the ring floats where you want it (right stick, with
+no group chosen).
 
 The daisywheel and the split keyboard have a numbers / accents / symbols layer whose accents follow
 the language (é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù). The method can be switched at any

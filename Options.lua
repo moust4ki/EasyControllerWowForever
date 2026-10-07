@@ -518,7 +518,8 @@ local function keyboardPositionRows(b)
             s.locked = v
             CK:UpdateLock()
         end })
-    b.check({ id = "k_mouse", label = L.LBL_MOUSE_BUTTONS, tip = L.OPT_ACTIONS,
+    -- The split keyboard's only (the daisywheel has none)
+    b.check({ id = "k_mouse", label = L.LBL_MOUSE_BUTTONS, tip = L.OPT_ACTIONS, disabled = s.inputMethod ~= "stick",
         get = function() return s.showActions end,
         set = function(v)
             s.showActions = v

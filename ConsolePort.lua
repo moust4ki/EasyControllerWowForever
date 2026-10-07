@@ -26,6 +26,9 @@ local _, CK = ...
 -- * a channel line above the text (asked): D-pad left / right change the
 --   channel (the addon's list), LB + left / right move the cursor; a whisper
 --   to no one yet: the known names suggested, RB picks one
+-- * the addon's prediction first (asked): the next word from the context
+--   when nothing is typed, the word's completions in its context, a
+--   command's; ConsolePort's matches (typos forgiven) after them
 -- * frames built in Lua (no XML templates); the layout is not editable
 ---------------------------------------------------------------------------
 CK.Methods = CK.Methods or {}
@@ -656,25 +659,44 @@ local function OnSuggestionsUpdatedCallback(result, iterator)
 end
 
 local SuggesterMixin = {}
+local OnSearchDone -- below
 
-function SuggesterMixin:OnWordChanged(word)
+-- ours: the addon's predictions for this word, shown first
+function SuggesterMixin:OnWordChanged(word, ours)
     ReleaseAllWidgets()
-    M:GetAutoCorrectSuggestions(word, OnSuggestionsUpdatedCallback, MAX_DISPLAY_ENTRIES)
+    self.ours = ours
+    M:GetAutoCorrectSuggestions(word, OnSearchDone, MAX_DISPLAY_ENTRIES)
 end
 
--- Words given as they are (the names to whisper), in their order
+local function IterateWords(list)
+    local i = 0
+    return function()
+        i = i + 1
+        return list[i]
+    end
+end
+
+-- Words given as they are (the names to whisper, the commands), in their order
 function SuggesterMixin:ShowWords(list)
     ReleaseAllWidgets()
-    local results = {}
-    for i, word in ipairs(list) do results[i] = { word = word, score = i } end
     M.Scheduler:Hide()
-    OnSuggestionsUpdatedCallback(results, function(r)
-        local i = 0
-        return function()
-            i = i + 1
-            if r[i] then return r[i].word, r[i].score end
+    OnSuggestionsUpdatedCallback(list, IterateWords)
+end
+
+-- ConsolePort's matches found: the addon's predictions first (asked), then
+-- theirs, each word once
+function OnSearchDone(result, iterator)
+    local merged, seen = {}, {}
+    local function add(word)
+        local key = CK.Lower(word)
+        if #merged < MAX_DISPLAY_ENTRIES and not seen[key] then
+            seen[key] = true
+            merged[#merged + 1] = word
         end
-    end)
+    end
+    for _, word in ipairs(Suggester.ours or {}) do add(word) end
+    for word in iterator(result) do add(word) end
+    OnSuggestionsUpdatedCallback(merged, IterateWords)
 end
 
 function SuggesterMixin:OnSuggestionsChanged()
@@ -1091,6 +1113,10 @@ function Keyboard:AutoCorrect()
     if word and CK:WhisperNameMode() then
         return CK:ConfirmWhisperTarget(word)
     end
+    -- A command: the whole of it, ready for its argument
+    if word and Suggester.commandMode then
+        return Box:SetText(word .. " ")
+    end
     if word then
         local text = Box:GetText()
         local _, startPos, endPos = utf8.getword(text, Box:GetUTF8CursorPosition())
@@ -1186,14 +1212,23 @@ end
 -- and its cursor, looked at every frame)
 ---------------------------------------------------------------------------
 function Keyboard:OnTextChanged(text, pos)
+    local S, P = self.WordSuggester, CK.Predict
+    S.commandMode = false
     if CK:WhisperNameMode() then
         -- A whisper to no one yet: the text is the name, the known ones offered
-        self.WordSuggester:ShowWords(CK:QueryNames(text, MAX_DISPLAY_ENTRIES))
+        S:ShowWords(CK:QueryNames(text, MAX_DISPLAY_ENTRIES))
+    elseif text:match("^/[^ \t\r\n]*$") then
+        -- A command being typed: the addon's completion ("/re": /reload)
+        S.commandMode = true
+        S:ShowWords(P:QueryCommands(text, MAX_DISPLAY_ENTRIES))
     else
-        local word = utf8.getword(text, pos)
-        self.WordSuggester:OnWordChanged(word)
+        -- The addon's prediction (asked): the word's completions in its
+        -- context, or the next word when nothing is typed; ConsolePort's after
+        local word, startPos = utf8.getword(text, pos)
+        local ctx = P:Context(text:sub(1, (startPos or 1) - 1))
+        S:OnWordChanged(word, P:Query(word, ctx, MAX_DISPLAY_ENTRIES))
     end
-    self.WordSuggester.Mime:Refresh()
+    S.Mime:Refresh()
 end
 
 ---------------------------------------------------------------------------
