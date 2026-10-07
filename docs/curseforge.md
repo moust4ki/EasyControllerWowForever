@@ -13,11 +13,9 @@ Every feature you don't need can be turned off to save even more resources.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
-## What's new in 1.12
-- **LB / RB stay the game's** (1.12.2): with something of the addon on a face button or the D-pad, LB / RB + that button still target your party members (or enemies), as the game does.
-- **Which bar is on** (1.12.1): with "Triggers: press to switch", the bar on shows its trigger (LT, RT or LT + RT), like the game does when you hold one.
-- **Quick phrases**: ready-made phrases sent in one press, five a row by theme (social, status, combat, moving, emotes, your own). LB / RB picks the channel, A sends, X rewrites any phrase (with the controller or a physical keyboard), Y opens the keyboard with it. Open them from the bubble at the end of the keyboard's suggestions, or put them on any button.
-- **Gamepad tab**: the consumables wheel, the quick phrases and your wheels are now at the top of the Macros list.
+## What's new in 1.14
+- **Profiles**: up to 5 sets of a character's buttons, wheels and game bar slots (the spells on the D-pad and the face buttons, the stance and form bars), in a Profiles tab. Pick one from a list or with `/ec profile <name>`, or let your talents pick (primary / secondary). Only that character's, never another's.
+- **ConsolePort keyboard**: a third input method, ConsolePort's own keyboard. 8 groups of 4 around the left stick typed with A / B / X / Y, LT / LB / RT for capitals, numbers, commands and accents, its word suggestions on our dictionaries, and the channel on the D-pad. Thanks to Sebastian Lindfors for ConsolePort.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
@@ -25,8 +23,8 @@ Every feature you don't need can be turned off to save even more resources.
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
 - **Triggers: press to switch** instead of holding them (option), every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
-- **Profiles**: each character its own buttons, wheels and supplies, automatically
-- **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...)
+- **Profiles**: each character its own buttons, wheels and supplies, automatically, and up to 5 sets of them, picked by hand or by your talents
+- **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel, split keyboard or ConsolePort's keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
 - **Your own wheels** of spells, items and macros
@@ -53,7 +51,7 @@ prediction finish your words and sentences, choose the channel, and send with A.
 clickable with the mouse or the Steam Controller trackpad. It also opens in the game's own fields
 (the Auction House search, the bags' search, mail...): what you type goes into the field, A is Enter.
 
-## Two input methods
+## Three input methods
 
 **Daisywheel**
 A wheel of 8 petals with 4 characters each, drawn like the game's radial menu. The left stick picks a
@@ -67,8 +65,16 @@ position, released = center. LT types the left key, RT the right one. Large keys
 a copper (left) and amber (right) target, a magnet so the highlight never flickers, and a linear stick
 response with an optional gentle or fast curve.
 
-Both methods have a numbers / accents / symbols layer whose accents follow the language
-(é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù), and can be switched at any time in the options.
+**ConsolePort**
+ConsolePort's own keyboard: a ring of 8 groups of 4 characters. The left stick picks a group, A / B /
+X / Y type its characters; LT for capitals, LB for numbers and symbols, LT + LB for commands (`/p`,
+`/g`, `/w`…) and raid markers, RT for the accents of your language. Its suggestions beside the ring
+(D-pad up / down, RB to put one in), the channel above the text (D-pad left / right), and the ring
+floats where you want it (right stick, with no group chosen).
+
+The daisywheel and the split keyboard have a numbers / accents / symbols layer whose accents follow
+the language (é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù). The method can be switched at any
+time in the options.
 
 ## Keyboard features
 
@@ -118,8 +124,8 @@ binding or `/ec phrases`.
 **Configuration panel**
 RB + D-pad down (or `/ec config`) opens the addon's own panel, driven with the gamepad or the mouse:
 Home (every module and its state, the panel's shortcut, the look, the gamepad bar and extra buttons,
-automation at merchants), Gamepad (your controller drawn button by button), Wheels, Keyboard and
-Alerts (vibrations, supplies, quest items, better items). Sections on the left, settings in the
+automation at merchants), Gamepad (your controller drawn button by button), Wheels, Keyboard, Alerts
+(vibrations, supplies, quest items, better items) and Profiles. Sections on the left, settings in the
 middle, what the selected one does on the right, and a help bar showing only the buttons that work
 there.
 
@@ -185,6 +191,13 @@ Each character (by its full name, surname included) keeps its own buttons, paddl
 supplies, with nothing to set; nothing done on one changes another. A new character starts from your
 setup, without the spells it doesn't have. `/ec profile` shows what each character holds.
 
+A character can have up to 5 profiles (a druid's healing and feral, a warrior's tank and damage...):
+each holds its buttons, replaced buttons, wheels and the game's bar slots (the spells on the D-pad
+and the face buttons alone, and the stance and form bars once you've been in them). In the Profiles
+tab, pick the one in use from a list, add one (it starts empty), rename or delete them, or let the
+talents pick: primary talents one profile, secondary another. Also `/ec profile <name>`. Out of
+combat (in combat, once the fight ends).
+
 **Back paddles (L4 / R4 / L5 / R5)**
 Steam Deck and other controllers: set each paddle to a keyboard key in Steam Input (F13 to F16 for
 example), then "Identify paddles" asks for each one in turn. Each paddle has the four trigger layers
@@ -246,7 +259,7 @@ keyboard holds "LFM [quest]".
 
 ## Gamepad controls
 
-**Common to both methods**
+**Daisywheel and split keyboard**
 
 | Button | Action |
 |---|---|
@@ -277,6 +290,18 @@ X, Y, Start and Select stay with the game's gamepad UI.
 | LB / RB | delete / space |
 | Left stick click | numbers, accents, symbols |
 
+**ConsolePort**
+
+| Button | Action |
+|---|---|
+| Left stick | pick a group |
+| A / B / X / Y | type the group's character (bottom / right / left / top) |
+| A / B / X / Y, no group | space / send / erase / close the chat |
+| LT / LB / LT + LB / RT | capitals / numbers and symbols / commands and markers / accents |
+| D-pad ↑ ↓, RB | pick a suggestion, put it in |
+| D-pad ← → | channel (LB + ← →: the cursor in the text) |
+| Right stick, no group | move the keyboard |
+
 **Quick phrases**
 
 | Button | Action |
@@ -302,7 +327,7 @@ Install with the CurseForge app, or extract the zip into
 ## Commands
 
 - `/ec`: open the keyboard
-- `/ec mode wheel|stick`: daisywheel or split keyboard
+- `/ec mode wheel|stick|consoleport`: daisywheel, split keyboard or ConsolePort
 - `/ec layout azerty|qwerty|qwertz|es|it`: split keyboard layout
 - `/ec lang fr|en|de|es|it|both`: suggestion and accent language
 - `/ec lock`: lock / unlock the position (unlocking shows the keyboard to move it)
@@ -314,6 +339,7 @@ Install with the CurseForge app, or extract the zip into
 - `/ec wheel`: what the consumables wheel holds, and why an item is not in it
 - `/ec phrases`: the quick phrases window
 - `/ec profile`: this character's settings, and what each character holds
+- `/ec profile <name>`: put that profile of this character in use
 - `/ec help`: all commands
 - Options: RB + D-pad down, `/ec config`, or *Escape > Options > AddOns > Easy Controller - Forever*
 
@@ -326,4 +352,4 @@ is still open.
 Source code and issues: [GitHub](https://github.com/moust4ki/EasyControllerWowForever) - Roadmap:
 [ROADMAP.md](https://github.com/moust4ki/EasyControllerWowForever/blob/main/ROADMAP.md)
 
-*Dictionaries derived from FrequencyWords by Hermit Dave (CC-BY-SA-4.0). Code under the MIT license.*
+*Dictionaries derived from FrequencyWords by Hermit Dave (CC-BY-SA-4.0). The ConsolePort keyboard is ConsolePort's own, by Sebastian Lindfors ([ConsolePort](https://github.com/seblindfors/ConsolePort), Artistic License 2.0). Code under the MIT license.*

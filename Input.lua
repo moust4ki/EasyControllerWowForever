@@ -82,6 +82,9 @@ function CK:RunAction(action, button)
 end
 
 function CK:ButtonAction(button)
+    -- A method that takes the face buttons itself (ConsolePort.lua)
+    local method = self:GetMethod()
+    if method.ownButtons then return method.buttons[button] end
     if button == "PAD2" then
         return self.standalone and STANDALONE_ACTIONS.PAD2 or "CancelMessage"
     end
@@ -248,16 +251,19 @@ function CK:CreateButtons()
     end
     s:SetScript("OnEnter", function() hover(true) end)
     s:SetScript("OnLeave", function() hover(false) end)
-    s:SetScript("PreClick", function() CK:PrepareSend() end)
+    s:SetScript("PreClick", function(_, _, down) CK:PrepareSend(down) end)
     s:SetScript("PostClick", function(_, _, down) CK:FinishSend(down) end)
     s:Hide()
     self.sendButton = s
 end
 
 -- Runs before the secure click: put the current message in the macro
-function CK:PrepareSend()
+-- (a method with its own Enter decides itself: ConsolePort.lua)
+function CK:PrepareSend(down)
     self.justSent = false
     if InCombatLockdown() then return end
+    local method = self:GetMethod()
+    if method.SendPress and method:SendPress(down) then return end
     self.sendButton:SetAttribute("macrotext", self:BuildMacroText() or "")
     self:SendWhisper()
 end
@@ -297,6 +303,8 @@ end
 -- Runs after the secure click: once the game sent the message, clear it
 -- (the chat stays open for the next message; B closes it)
 function CK:FinishSend(down)
+    local method = self:GetMethod()
+    if method.SendDone and method:SendDone(down) then return end
     local text = self:GetText()
     -- /w without a recipient yet: A confirms the typed name (a command typed
     -- there is run, not taken for a name)
@@ -338,6 +346,17 @@ function CK:EnableButtons()
     if InCombatLockdown() then return end
     ClearOverrideBindings(f)
     self.cancelBound = false
+    -- A method that binds its own keys (ConsolePort.lua: A, B, X, Y...)
+    local method = self:GetMethod()
+    if method.ownButtons then
+        self.bindingsActive = true
+        method:Bind(f, bind, bindingButtonName, SEND_BUTTON)
+        if not self.prompt then
+            self:PositionSendButton()
+            self.sendButton:Show()
+        end
+        return
+    end
     for key in pairs(COMMON_ACTIONS) do bind(f, key, bindingButtonName(key)) end
     for key in pairs(self:GetMethod().buttons) do bind(f, key, bindingButtonName(key)) end
     if self.standalone then bind(f, "PAD2", bindingButtonName("PAD2")) end
@@ -359,6 +378,7 @@ end
 -- release so the game never sees the second half of the same press.
 function CK:UpdateCancelBinding()
     if not self.bindingsActive or self.standalone or InCombatLockdown() then return end
+    if self:GetMethod().ownButtons then return end
     if self.padDown and self.padDown.PAD2 then return end
     local want = self:GetText() ~= "" or self:InQuestList()
     if want == self.cancelBound then return end

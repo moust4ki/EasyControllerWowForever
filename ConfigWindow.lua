@@ -17,7 +17,7 @@ local K = CK.ConfigKit
 local KC = K.C
 local W, H = 820, 580
 
-C.TABS = { "home", "gamepad", "wheels", "keyboard", "alerts" }
+C.TABS = { "home", "gamepad", "wheels", "keyboard", "alerts", "profiles" }
 -- Earlier tab names (slash commands, other modules): a tab and a section
 C.ALIASES = {
     general = { "home" }, map = { "gamepad" }, wheel = { "wheels" },
@@ -1025,6 +1025,12 @@ end
 function C:Press(name)
     -- Learning the shortcut: the presses are for it
     if self:IsCapturingChord() then return end
+    -- A name being typed (no addon keyboard: the panel's A / B for it)
+    if self.ask and self.ask.def then
+        if name == "A" then self:FinishAsk(self.ask.edit:GetText()) end
+        if name == "B" then self:FinishAsk(nil) end
+        return
+    end
     -- Placing something on the HUD (extra buttons, supplies)
     if self.placing then
         self.placer:PlacementPress(name)
@@ -1357,6 +1363,102 @@ end
 -- A panel button pressed while a capture frame had the pad (a paddle's key
 -- being learned: B cancels, X skips one): pressed here, as the game may keep
 -- it from the panel's keys
+---------------------------------------------------------------------------
+-- A name typed (a profile's): a box over the panel, with a field a physical
+-- keyboard types in, and the addon's keyboard (A confirms, B cancels).
+-- def = { kicker, title, text, help, maxLetters, onDone(text) }
+---------------------------------------------------------------------------
+function C:BuildAsk()
+    if self.ask then return self.ask end
+    local KC = K.C
+    local veil = CK.NewFrame("Frame", nil, self.frame)
+    veil:SetAllPoints()
+    veil:SetFrameLevel(self.frame:GetFrameLevel() + 40)
+    veil:EnableMouse(true)
+    K.Solid(veil, { 0.04, 0.03, 0.02 }, 0.72, "BACKGROUND"):SetAllPoints()
+    veil:Hide()
+    local box = CK.NewFrame("Frame", nil, veil)
+    box:SetSize(380, 140)
+    box:SetPoint("CENTER", 0, 40)
+    box.bg = K.Box(box, 4, 2, "BACKGROUND")
+    box.bg:SetPoints(box)
+    box.bg:SetColors(KC.panel, 1, KC.focus, 1)
+    veil.kicker = K.ChatText(box, 12, KC.grey)
+    veil.kicker:SetPoint("TOPLEFT", 14, -14)
+    local field = CK.NewFrame("Frame", nil, box)
+    field:SetPoint("TOPLEFT", veil.kicker, "BOTTOMLEFT", 0, -8)
+    field:SetSize(380 - 28, 36)
+    field.box = K.Box(field, 3, 2, "ARTWORK")
+    field.box:SetPoints(field)
+    field.box:SetColors(KC.boxBg, 1, KC.control, 1)
+    local edit = CK.NewFrame("EditBox", nil, field)
+    edit:SetAllPoints()
+    edit:SetFont(CK:GetFontPath(), 18, "")
+    edit:SetTextColor(KC.focusText[1], KC.focusText[2], KC.focusText[3])
+    edit:SetTextInsets(10, 10, 0, 0)
+    edit:SetAutoFocus(false)
+    edit:SetScript("OnEnterPressed", function(e) C:FinishAsk(e:GetText()) end)
+    edit:SetScript("OnEscapePressed", function() C:FinishAsk(nil) end)
+    -- Typed on a physical keyboard: the addon's keyboard follows
+    edit:SetScript("OnTextChanged", function(e, userInput)
+        if userInput and CK.prompt and CK.prompt.box == e then
+            CK.buffer = e:GetText()
+            CK:Refresh()
+        end
+    end)
+    veil.edit = edit
+    veil.help = K.ChatText(box, 13, KC.help)
+    veil.help:SetPoint("TOPLEFT", field, "BOTTOMLEFT", 0, -8)
+    veil.help:SetWidth(380 - 28)
+    veil.help:SetWordWrap(true)
+    -- The panel closed (B, combat) while typing: cancelled
+    hooksecurefunc(C, "Close", function() if C.ask and C.ask.def then C:FinishAsk(nil) end end)
+    self.ask = veil
+    return veil
+end
+
+function C:AskText(def)
+    if not self.frame or CK:BlockedByCombat() then return end
+    -- The chat being typed in: our field would take its focus, closing it
+    -- from addon code (never done)
+    local chat = CK.ActiveChatWindow and CK.ActiveChatWindow()
+    if chat and chat:HasFocus() then
+        self:Toast(L.TOAST_CLOSE_CHAT, true)
+        return
+    end
+    local ask = self:BuildAsk()
+    ask.def = def
+    ask.kicker:SetText(K.Upper(def.kicker or ""))
+    ask.help:SetText(def.help or L.MYWHEEL_NAME_HELP)
+    ask.edit:SetMaxLetters(def.maxLetters or 40)
+    ask.edit:SetText(def.text or "")
+    ask:Show()
+    ask.edit:SetFocus()
+    ask.edit:HighlightText()
+    -- The addon's keyboard takes the pad (the panel lets it go meanwhile)
+    if CK.db.settings.modules.keyboard then
+        self:UnbindPad()
+        CK:OpenPrompt(def.title or def.kicker or "", def.text or "", function(text) C:FinishAsk(text) end, ask.edit)
+    end
+    self:Render()
+end
+
+function C:FinishAsk(text)
+    local ask = self.ask
+    local def = ask and ask.def
+    if not def then return end
+    ask.def = nil
+    ask.edit:ClearFocus()
+    ask:Hide()
+    -- Confirmed with the field (Enter, A on the panel): the keyboard closes
+    if CK.prompt then CK:FinishPrompt(false) end
+    if text and def.onDone then def.onDone(text) end
+    if self:IsOpen() then
+        self:BindPad()
+        self:Render()
+    end
+end
+
 function C:PressFromCapture(key)
     local name = NAV[key]
     if not name then return end

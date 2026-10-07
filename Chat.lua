@@ -180,10 +180,11 @@ local function slash(msg)
         s.invertY = not s.invertY
         CK:Print("invert: %s", onOff(s.invertY))
     elseif cmd == "mode" then
-        local key = ({ wheel = "wheel", roue = "wheel", stick = "stick", clavier = "stick" })[arg]
+        local key = ({ wheel = "wheel", roue = "wheel", stick = "stick", clavier = "stick",
+            consoleport = "consoleport", cp = "consoleport" })[arg]
         if key then CK:SetInputMethod(key) end
         local m = CK.db.settings.inputMethod
-        CK:Print(L.MODE_SET, m == "stick" and L.METHOD_STICK or L.METHOD_WHEEL)
+        CK:Print(L.MODE_SET, ({ stick = L.METHOD_STICK, consoleport = L.METHOD_CONSOLEPORT })[m] or L.METHOD_WHEEL)
     elseif cmd == "layout" then
         local key = ({ azerty = "azerty", qwerty = "qwerty", qwertz = "qwertz",
             es = "qwerty_es", it = "qwerty_it" })[arg]
@@ -220,7 +221,21 @@ local function slash(msg)
         -- The chat edit box is still sending this command: open once it is done
         C_Timer.After(0.1, function() CK.Phrases:Open(nil) end)
     elseif cmd == "profile" or cmd == "profil" then
-        CK.Profiles:Diagnose()
+        -- "/ec profile Heal": that profile of the character in use (its name,
+        -- any case); alone: what each profile and character holds
+        if arg ~= "" then
+            local found
+            for _, set in ipairs(CK.Profiles:Sets()) do
+                if set.name:lower() == arg then found = set end
+            end
+            if found then
+                CK.Profiles:SetActive(found.id)
+            else
+                CK:Print(L.PROFILE_UNKNOWN, arg)
+            end
+        else
+            CK.Profiles:Diagnose()
+        end
     elseif cmd == "keys" then
         CK:DetectKeys()
     elseif cmd == "glyphs" then
