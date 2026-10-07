@@ -214,7 +214,7 @@ local function automationRows(b)
 end
 
 ---------------------------------------------------------------------------
--- Profiles (Profiles.lua), a tab of its own (asked): the character's sets
+-- Profiles (Profiles.lua), the last tab (asked): the character's sets
 -- of buttons, replaced buttons and wheels; the one in use picked in a
 -- list, by hand or with the talents (primary, secondary)
 ---------------------------------------------------------------------------
