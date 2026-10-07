@@ -23,6 +23,9 @@ local _, CK = ...
 -- * the accents of the language on the Alt layer (RT), empty in ConsolePort
 -- * the keyboard opens where it was left; with no group chosen the right
 --   stick moves it (ConsolePort moves the mouse cursor, the keyboard follows)
+-- * a channel line above the text (asked): D-pad left / right change the
+--   channel (the addon's list), LB + left / right move the cursor; a whisper
+--   to no one yet: the known names suggested, RB picks one
 -- * frames built in Lua (no XML templates); the layout is not editable
 ---------------------------------------------------------------------------
 CK.Methods = CK.Methods or {}
@@ -641,8 +644,8 @@ local function OnSuggestionsUpdatedCallback(result, iterator)
         end
     end
 
-    local mimeHeight = self.Mime:GetHeight()
-    self:SetHeight(Clamp((#suggestions + 1) * WIDGET_HEIGHT + mimeHeight, 100, 200))
+    local mimeHeight = self.Mime:GetHeight() + self.Channel:GetHeight()
+    self:SetHeight(Clamp((#suggestions + 1) * WIDGET_HEIGHT + mimeHeight, 100, 200 + self.Channel:GetHeight()))
     local prev = self.Mime
     for row, widget in ipairs(suggestions) do
         widget:SetPoint("TOP", prev, "BOTTOM", 0, row == 1 and -8 or 0)
@@ -657,6 +660,21 @@ local SuggesterMixin = {}
 function SuggesterMixin:OnWordChanged(word)
     ReleaseAllWidgets()
     M:GetAutoCorrectSuggestions(word, OnSuggestionsUpdatedCallback, MAX_DISPLAY_ENTRIES)
+end
+
+-- Words given as they are (the names to whisper), in their order
+function SuggesterMixin:ShowWords(list)
+    ReleaseAllWidgets()
+    local results = {}
+    for i, word in ipairs(list) do results[i] = { word = word, score = i } end
+    M.Scheduler:Hide()
+    OnSuggestionsUpdatedCallback(results, function(r)
+        local i = 0
+        return function()
+            i = i + 1
+            if r[i] then return r[i].word, r[i].score end
+        end
+    end)
 end
 
 function SuggesterMixin:OnSuggestionsChanged()
@@ -1024,6 +1042,11 @@ end
 
 function Keyboard:Erase(button)
     if self:Stroke(button) then return end
+    -- Nothing left in a whisper: back to its name (CK:Backspace)
+    if CK:GetText() == "" and CK:GetChatAttr("chatType") == "WHISPER" and not CK:GetChatAttr("reply")
+        and CK:GetChatAttr("tellTarget") then
+        return CK:Backspace()
+    end
     if IsControlKeyDown() then
         vibrate()
         return Box:SetText("")
@@ -1064,6 +1087,10 @@ end
 
 function Keyboard:AutoCorrect()
     local word = Suggester:GetSuggestion()
+    -- A whisper to no one yet: the name picked
+    if word and CK:WhisperNameMode() then
+        return CK:ConfirmWhisperTarget(word)
+    end
     if word then
         local text = Box:GetText()
         local _, startPos, endPos = utf8.getword(text, Box:GetUTF8CursorPosition())
@@ -1159,9 +1186,61 @@ end
 -- and its cursor, looked at every frame)
 ---------------------------------------------------------------------------
 function Keyboard:OnTextChanged(text, pos)
-    local word = utf8.getword(text, pos)
-    self.WordSuggester:OnWordChanged(word)
+    if CK:WhisperNameMode() then
+        -- A whisper to no one yet: the text is the name, the known ones offered
+        self.WordSuggester:ShowWords(CK:QueryNames(text, MAX_DISPLAY_ENTRIES))
+    else
+        local word = utf8.getword(text, pos)
+        self.WordSuggester:OnWordChanged(word)
+    end
     self.WordSuggester.Mime:Refresh()
+end
+
+---------------------------------------------------------------------------
+-- The channel line: the chat's channel (colored) and the D-pad left / right
+-- that change it; a prompt's title (nothing to change there)
+---------------------------------------------------------------------------
+function M:ChannelLabel()
+    local label
+    if CK:WhisperNameMode() and not CK.prompt then
+        local info = ChatTypeInfo and ChatTypeInfo.WHISPER
+        label = CK.L.CP_WHISPER_NAME
+        if info then label = format("|cff%02x%02x%02x%s|r", info.r * 255, info.g * 255, info.b * 255, label) end
+    else
+        label = CK:GetChannelLabel()
+    end
+    -- "Say: " -> "Say"
+    label = label:gsub("[ \t]+$", "")
+    return (label:gsub("[ :]+|r$", "|r"):gsub("[ :]+$", ""))
+end
+
+-- The channel can be changed: the chat (not a prompt, a field of the game)
+function M:CanChangeChannel()
+    return not CK.prompt and (CK.standalone or CK.editBox) and true or false
+end
+
+function Keyboard:UpdateChannel(label)
+    local channel = self.WordSuggester.Channel
+    channel.Text:SetText(label)
+    local canChange = M:CanChangeChannel()
+    channel.Glyph:SetShown(canChange)
+    if canChange and CK.SetGlyph then CK:SetGlyph(channel.Glyph, "DPAD_LR") end
+    channel.Text:ClearAllPoints()
+    channel.Text:SetPoint("CENTER", canChange and 9 or 0, 0)
+end
+
+-- The next channel available (the addon's list, as on its channel row)
+function M:CycleChannel(delta)
+    local list = CK.CHANNEL_LIST
+    local n = #list
+    local index = CK:CurrentChannelIndex() or (delta > 0 and 0 or n + 1)
+    for step = 1, n do
+        local i = (index - 1 + step * delta) % n + 1
+        if CK:ChannelAvailable(i) then
+            CK:SetChannel(i)
+            return
+        end
+    end
 end
 
 function Keyboard:Observe(elapsed)
@@ -1182,6 +1261,15 @@ function Keyboard:Observe(elapsed)
     if focus ~= self.focusFrame then
         self.focusFrame = focus
         self:UpdateSpline()
+    end
+    -- The channel changed (here, a whisper's name picked, the chat's own):
+    -- its line, and the suggestions (words or names)
+    local label = M:ChannelLabel()
+    if label ~= self.channelLabel then
+        local wasNames = self.channelNames
+        self.channelLabel, self.channelNames = label, CK:WhisperNameMode()
+        self:UpdateChannel(label)
+        if wasNames ~= self.channelNames then self:OnTextChanged(text, pos) end
     end
     self:Move(elapsed or 0)
 end
@@ -1231,10 +1319,23 @@ local function BuildSuggester(K)
     S.FillMask:SetPoint("TOPLEFT", K, "TOPLEFT", -70, 70)
     S.FillMask:SetPoint("BOTTOMRIGHT", K, "BOTTOMRIGHT", 70, -70)
 
+    -- The channel (asked): D-pad left / right change it
+    local channel = CK.NewFrame("Frame", nil, S)
+    channel:SetHeight(18)
+    channel:SetPoint("TOPLEFT", 16, -6)
+    channel:SetPoint("TOPRIGHT", -16, -6)
+    channel.Text = channel:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
+    channel.Text:SetPoint("CENTER", 9, 0)
+    channel.Text:SetWordWrap(false)
+    channel.Glyph = channel:CreateTexture(nil, "ARTWORK")
+    channel.Glyph:SetSize(16, 16)
+    channel.Glyph:SetPoint("RIGHT", channel.Text, "LEFT", -3, 0)
+    S.Channel = channel
+
     local mime = CK.NewFrame("Frame", nil, S)
     mime:SetHeight(20)
-    mime:SetPoint("TOPLEFT", 16, -6)
-    mime:SetPoint("TOPRIGHT", -16, -6)
+    mime:SetPoint("TOPLEFT", channel, "BOTTOMLEFT", 0, -2)
+    mime:SetPoint("TOPRIGHT", channel, "BOTTOMRIGHT", 0, -2)
     if mime.SetClipsChildren then mime:SetClipsChildren(true) end
     mime.Cursor = mime:CreateTexture(nil, "ARTWORK")
     mime.Cursor:SetPoint("CENTER")
@@ -1266,7 +1367,7 @@ local function BuildSuggester(K)
 
     local bg = CK.NewFrame("Frame", nil, S)
     if bg.SetUseParentLevel then bg:SetUseParentLevel(true) end
-    bg:SetPoint("TOPLEFT", mime, "TOPLEFT", -12, 2)
+    bg:SetPoint("TOPLEFT", channel, "TOPLEFT", -12, 2)
     bg:SetPoint("BOTTOMRIGHT", mime, "BOTTOMRIGHT", 12, -2)
     bg.Box = bg:CreateTexture(nil, "BACKGROUND")
     local atlas = C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("glues-gamemode-bg")
@@ -1416,8 +1517,8 @@ end
 -- The method (UI.lua, Input.lua)
 ---------------------------------------------------------------------------
 -- Every pad button the keyboard takes while open: A space, B enter, X erase,
--- Y escape (with a group chosen: its characters), the D-pad the cursor and
--- the suggestions, RB the suggestion. LB / LT / RT stay the game's
+-- Y escape (with a group chosen: its characters), the D-pad the channel
+-- (LB + left / right the cursor) and the suggestions, RB the suggestion. LB / LT / RT stay the game's
 -- modifiers (Ctrl, Shift, Alt): the layers.
 M.buttons = {
     PAD1 = "CPSpace", PAD2 = "CPEnter", PAD3 = "CPErase", PAD4 = "CPEscape",
@@ -1440,7 +1541,7 @@ function M:Reset()
         K.focusSet:SetHighlight(false)
     end
     K.focusSet, K.inputLock, K.moveX, K.moveY, K.moving = nil, false, 0, 0, false
-    K.focusText, K.focusPos = nil, nil
+    K.focusText, K.focusPos, K.channelLabel, K.channelNames = nil, nil, nil, nil
     K:ReflectStickPosition(0, 0, 0, false)
     K.Controls:SetHighlight(true)
     K:OnLayoutChanged()
@@ -1560,8 +1661,17 @@ end
 ---------------------------------------------------------------------------
 function CK:CPSpace() M.frame:Space("PAD1") end
 function CK:CPErase() M.frame:Erase("PAD3") end
-function CK:CPMoveLeft() M.frame:MoveLeft() end
-function CK:CPMoveRight() M.frame:MoveRight() end
+-- D-pad left / right: the channel (asked); with LB held, or where there is
+-- no channel (a prompt), the cursor as in ConsolePort
+function CK:CPMoveLeft()
+    if M:CanChangeChannel() and not IsControlKeyDown() then return M:CycleChannel(-1) end
+    M.frame:MoveLeft()
+end
+
+function CK:CPMoveRight()
+    if M:CanChangeChannel() and not IsControlKeyDown() then return M:CycleChannel(1) end
+    M.frame:MoveRight()
+end
 function CK:CPPrevWord() M.frame:PrevWord() end
 function CK:CPNextWord() M.frame:NextWord() end
 function CK:CPAutoCorrect() M.frame:AutoCorrect() end

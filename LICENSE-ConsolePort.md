@@ -49,6 +49,10 @@ prevent installing or running ConsolePort (the Standard Version).
   moves the keyboard itself (ConsolePort hands the mouse cursor to the right
   stick and the keyboard follows it). Dragging follows the addon's lock.
 - The layout can't be edited; the keyboard's scale is the addon's.
+- A channel line above the text: D-pad left / right change the channel (the
+  addon's list of channels); LB + left / right move the cursor (ConsolePort:
+  left / right alone). A whisper to no one yet offers the known names, RB
+  picks one.
 - The line to the field takes the field's scale into account.
 
 ---
