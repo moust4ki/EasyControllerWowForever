@@ -18,13 +18,14 @@ local _, CK = ...
 -- the rogue's: see DropForeignSpells).
 --
 -- A character's profiles (asked: a druid's healing and its feral buttons):
--- up to 5 sets of its buttons, its replaced buttons and its wheels, one in
--- use; its supplies and consumables wheel categories are the same for all
--- of them. Kept in its own entry only, never offered to another character.
--- The one in use lives in p.data (as before profiles had sets); the others
--- in p.sets[i].data. A new one starts empty. Switched by hand (Home ›
--- Profiles, /ec profile <name>) or with the talents (primary / secondary,
--- an option), out of combat only (in combat: once it ends).
+-- up to 5 sets of its buttons, its replaced buttons, its wheels and what
+-- the game's gamepad bar slots hold (see Slots), one in use; its supplies
+-- and consumables wheel categories are the same for all of them. Kept in its
+-- own entry only, never offered to another character. The one in use lives
+-- in p.data (as before profiles had sets); the others in p.sets[i].data. A
+-- new one starts empty. Switched by hand (the Profiles tab, /ec profile
+-- <name>) or with the talents (primary / secondary, an option), out of
+-- combat only (in combat: once it ends).
 local Pr = {}
 CK.Profiles = Pr
 Pr.MAX_SETS = 5
@@ -115,9 +116,11 @@ end
 ---------------------------------------------------------------------------
 -- The sets of a character
 ---------------------------------------------------------------------------
-local SET_FIELDS = { "mapping", "replaced", "myWheels" }
+-- slots: the game's gamepad bar slots, kept by the profile (see Slots)
+local SET_FIELDS = { "mapping", "replaced", "myWheels", "slots" }
 
 local function setField(f, v)
+    if f == "slots" then return type(v) == "table" and v or nil end
     if type(v) ~= "table" then v = {} end
     if f == "myWheels" and type(v.list) ~= "table" then v.list = {} end
     return v
@@ -338,6 +341,216 @@ function Pr:DropForeignSpells(reload)
     if dropped > 0 and reload then reread() end
 end
 
+---------------------------------------------------------------------------
+-- The game's slots in a profile (reported: the spells put on the face
+-- buttons and the D-pad alone are in the game's own bar slots, the same for
+-- every profile; cleared in one, they were gone from all). A profile keeps
+-- what its slots hold: the gamepad bars' 3 pages (the top bar's A / B / X / Y
+-- stay the game's) and the stance bars (forms, stealth, stances), each
+-- learned the first time the character is in it. The profile in use follows
+-- the slots as they change; another put in use: its actions placed again, out
+-- of combat. An action that can't be placed now (a spell of other talents, a
+-- macro deleted) empties its slot and is kept for later, never lost.
+-- A slot: false (empty) or { t = "spell" | "item" | "macro" | "other", ... }
+---------------------------------------------------------------------------
+local Slots = {}
+Pr.Slots = Slots
+Slots.PAGES, Slots.PAGE_SLOTS, Slots.STANCE_SLOTS = 3, 32, 8
+
+-- The slots a profile keeps (known once the game's gamepad bars are)
+function Slots:List()
+    if self.cache then return self.cache end
+    local list, seen = {}, {}
+    local function add(slot)
+        if type(slot) == "number" and slot > 0 and not seen[slot] then
+            seen[slot] = true
+            list[#list + 1] = slot
+        end
+    end
+    local util = GamepadActionBarBindingUtil
+    local get = util and util.GetGamepadStorageSlotIndexFromPageAndPageUnitSlotID
+    if get then
+        for page = 1, Slots.PAGES do
+            for id = 1, Slots.PAGE_SLOTS do
+                local ok, slot = pcall(get, page, id)
+                if ok then add(slot) end
+            end
+        end
+    else
+        -- The bars as the Gamepad tab shows them
+        local P = CK.Paddles
+        for _, bar in ipairs(P.BARS or {}) do
+            for _, b in ipairs(P.BUTTONS or {}) do add(P:NativeSlot("bar:" .. bar.key .. ":" .. b.key)) end
+        end
+    end
+    for base in pairs(type(CK.db.stanceSlots) == "table" and CK.db.stanceSlots or {}) do
+        if type(base) == "number" then
+            for i = 0, Slots.STANCE_SLOTS - 1 do add(base + i) end
+        end
+    end
+    table.sort(list)
+    if get then self.cache = list end
+    return list
+end
+
+-- What a slot holds
+function Slots.Content(slot)
+    local kind, id = GetActionInfo(slot)
+    if not kind then return false end
+    if kind == "spell" or kind == "item" then return { t = kind, id = id } end
+    if kind == "macro" then
+        local name = GetMacroInfo(id)
+        if name then return { t = "macro", name = name } end
+    end
+    return { t = "other" }
+end
+
+local function same(a, b)
+    if not a or not b then return not a and not b end
+    return a.t == b.t and a.id == b.id and a.name == b.name
+end
+Slots.Same = same
+
+-- The game won't let some actions go (its own): left alone
+local function kept(slot)
+    return CK.Mapping and CK.Mapping.SlotKept and CK.Mapping:SlotKept(slot) ~= nil
+end
+
+-- An action put in a slot; false: not placeable now (the slot emptied)
+local function place(slot, want)
+    ClearCursor()
+    if want == false then
+        PickupAction(slot)
+        ClearCursor()
+        return true
+    end
+    if want.t == "other" then return true end
+    if want.t == "spell" then
+        local pickup = C_Spell and C_Spell.PickupSpell or PickupSpell
+        pcall(pickup, want.id)
+    elseif want.t == "item" then
+        local pickup = C_Item and C_Item.PickupItem or PickupItem
+        pcall(pickup, want.id)
+    elseif want.t == "macro" and GetMacroIndexByName and (GetMacroIndexByName(want.name) or 0) > 0 then
+        PickupMacro(want.name)
+    end
+    if not GetCursorInfo() then
+        PickupAction(slot)
+        ClearCursor()
+        return false
+    end
+    PlaceAction(slot)
+    ClearCursor()
+    return true
+end
+
+-- What the slots hold now, into a profile's record (an action kept for
+-- later stays while its slot is empty)
+function Slots:Snapshot(record)
+    for _, slot in ipairs(self:List()) do
+        local now = Slots.Content(slot)
+        local had = record[slot]
+        if now or not (type(had) == "table" and had.pending) then record[slot] = now end
+    end
+end
+
+-- A profile's actions placed again (out of combat); what its record doesn't
+-- know is left as it is
+function Slots:Restore(record)
+    if InCombatLockdown() or type(record) ~= "table" then return end
+    self.expect = {}
+    self.expectUntil = GetTime() + 3
+    for _, slot in ipairs(self:List()) do
+        local want = record[slot]
+        if want ~= nil and not same(Slots.Content(slot), want) and not kept(slot) then
+            self.expect[slot] = want
+            local ok = place(slot, want)
+            if type(want) == "table" then want.pending = (not ok) or nil end
+        end
+    end
+end
+
+-- A slot changed: the profile in use follows it (not our own placing, nor
+-- the game changing its bars with the talents, nor the bars loading before
+-- the world: Login takes them as they are then)
+function Slots:Changed(slot)
+    if not self.started then return end
+    local p = Pr:Profile()
+    local record = p and p.data and p.data.slots
+    if not record or GetTime() < (self.quietUntil or 0) then return end
+    if slot == 0 or slot == nil then
+        self:Snapshot(record)
+        return
+    end
+    local list = self:List()
+    if self.listedFrom ~= list then
+        self.listed, self.listedFrom = {}, list
+        for _, s in ipairs(list) do self.listed[s] = true end
+    end
+    if not self.listed[slot] then return end
+    local now = Slots.Content(slot)
+    local expected = self.expect and self.expect[slot]
+    if expected ~= nil and GetTime() < (self.expectUntil or 0) then
+        if same(now, expected) or not now then
+            self.expect[slot] = nil
+            return
+        end
+    end
+    local had = record[slot]
+    if now or not (type(had) == "table" and had.pending) then record[slot] = now end
+end
+
+-- Every profile of the character: a slot its record doesn't know yet holds,
+-- for it, what the bars hold now (the same for all of them until then: a
+-- stance bar just learned, one learned by another character, profiles from
+-- before the slots). Not left unknown: a profile switched to would take what
+-- the one left had put there
+function Slots:Seed(p)
+    if type(p.data.slots) ~= "table" then p.data.slots = {} end
+    local records = { p.data.slots }
+    for _, set in ipairs(p.sets or {}) do
+        if set.id ~= p.active then
+            if type(set.data) ~= "table" then set.data = {} end
+            if type(set.data.slots) ~= "table" then set.data.slots = {} end
+            records[#records + 1] = set.data.slots
+        end
+    end
+    for _, slot in ipairs(self:List()) do
+        for _, record in ipairs(records) do
+            if record[slot] == nil then record[slot] = Slots.Content(slot) end
+        end
+    end
+end
+
+-- A stance bar the character is in: its slots learned (the account's: the
+-- same for every character), and kept by every profile from now on
+function Slots:LearnStance()
+    -- Not while the bars load (empty for a moment): Login learns it then
+    if not self.started then return end
+    local G = C_GamepadUI
+    local get = G and G.GetFirstGamepadActionBarStorageSlotIndexForActiveStance
+    local offset = GetBonusBarOffset and GetBonusBarOffset() or 0
+    if not get or offset <= 0 then return end
+    local ok, base = pcall(get)
+    if not (ok and type(base) == "number") then return end
+    if type(CK.db.stanceSlots) ~= "table" then CK.db.stanceSlots = {} end
+    if CK.db.stanceSlots[base] then return end
+    CK.db.stanceSlots[base] = true
+    self.cache = nil
+    local p = Pr:Profile()
+    if p and p.data and p.sets then self:Seed(p) end
+end
+
+-- The world loaded: the profile in use's slots (every record started from
+-- what the bars hold the first time)
+function Slots:Login()
+    local p = Pr:Profile()
+    if not (p and p.data) then return end
+    self:LearnStance()
+    self:Seed(p)
+    self:Restore(p.data.slots)
+end
+
 -- The character's sets: { id, name, active, primary, secondary }
 function Pr:Sets()
     local p = self:Profile()
@@ -384,8 +597,18 @@ function Pr:SetActive(id, quiet)
     end
     self.pending = nil
     self:Collect()
+    -- What the slots hold, into the profile left (not while the game changes
+    -- its bars with the talents)
+    if type(p.data.slots) == "table" and GetTime() >= (Slots.quietUntil or 0) then Slots:Snapshot(p.data.slots) end
     swap(p, id)
     self:Activate()
+    if type(p.data.slots) == "table" then
+        Slots:Restore(p.data.slots)
+    else
+        -- A profile from before the slots: what they hold now
+        p.data.slots = {}
+        Slots:Snapshot(p.data.slots)
+    end
     afterSwitch()
     if not quiet then
         local name = findSet(p, id).name
@@ -406,6 +629,9 @@ function Pr:CreateSet()
     p.nextSet = id + 1
     local data = {}
     for _, f in ipairs(SET_FIELDS) do data[f] = setField(f, nil) end
+    -- From nothing: the game's slots too
+    data.slots = {}
+    for _, slot in ipairs(Slots:List()) do data.slots[slot] = false end
     p.sets[#p.sets + 1] = { id = id, name = newName(p), data = data }
     self:SetActive(id)
     return id
@@ -470,6 +696,24 @@ function Pr:FollowTalents()
     if want then self:SetActive(want) end
 end
 
+-- The talents changed: the game may change its own bars meanwhile. The
+-- slots aren't followed for a moment; then the profile of these talents
+-- (its slots placed over the game's), or, with none, the profile in use
+-- keeps what the bars hold now
+function Pr:TalentsChanged()
+    Slots.quietUntil = GetTime() + 2
+    C_Timer.After(2.1, function()
+        local p = Pr:Profile()
+        if not p then return end
+        local want = p.auto and p.specSets[Pr:SpecGroup() or 0]
+        if want and want ~= p.active then
+            Pr:SetActive(want)
+        elseif type(p.data.slots) == "table" then
+            Slots:Snapshot(p.data.slots)
+        end
+    end)
+end
+
 -- The character not known at login (its name or realm not given yet): its
 -- profile once the world is loaded, and everything that reads it again
 function Pr:Retry()
@@ -485,17 +729,36 @@ do
     f:RegisterEvent("SPELLS_CHANGED")
     f:RegisterEvent("PLAYER_REGEN_ENABLED")
     pcall(f.RegisterEvent, f, "ACTIVE_TALENT_GROUP_CHANGED")
-    f:SetScript("OnEvent", function(_, event)
+    f:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
+    f:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
+    f:SetScript("OnEvent", function(_, event, slot)
         if event == "ACTIVE_TALENT_GROUP_CHANGED" then
-            Pr:FollowTalents()
+            Pr:TalentsChanged()
             return
         end
         if event == "PLAYER_REGEN_ENABLED" then
+            -- Logged in during a fight: the slots once it ends
+            if not Slots.started and Pr:Profile() then
+                Slots.started = true
+                Slots:Login()
+            end
             if Pr.pending then Pr:SetActive(Pr.pending) end
+            return
+        end
+        if event == "ACTIONBAR_SLOT_CHANGED" then
+            Slots:Changed(slot)
+            return
+        end
+        if event == "UPDATE_BONUS_ACTIONBAR" then
+            Slots:LearnStance()
             return
         end
         Pr:Retry()
         Pr:DropForeignSpells(true)
+        if event == "PLAYER_ENTERING_WORLD" and not Slots.started and Pr:Profile() and not InCombatLockdown() then
+            Slots.started = true
+            Slots:Login()
+        end
     end)
 end
 
@@ -520,6 +783,15 @@ function Pr:Diagnose()
     else
         local s = CK.db.settings
         CK:Print(L.PROFILE_DIAG_ON, self.key, summary({ mapping = s.mapping, replaced = s.replaced, myWheels = s.myWheels }))
+        local record, kept, waiting = p.data.slots or {}, 0, 0
+        for _, slot in ipairs(Slots:List()) do
+            local v = record[slot]
+            if v then kept = kept + 1 end
+            if type(v) == "table" and v.pending then waiting = waiting + 1 end
+        end
+        local stances = 0
+        for _ in pairs(type(CK.db.stanceSlots) == "table" and CK.db.stanceSlots or {}) do stances = stances + 1 end
+        DEFAULT_CHAT_FRAME:AddMessage("  " .. format(L.PROFILE_DIAG_SLOTS, #Slots:List(), kept, waiting, stances))
         for _, set in ipairs(p.sets or {}) do
             local data = set.id == p.active and { mapping = s.mapping, replaced = s.replaced, myWheels = s.myWheels } or set.data or {}
             DEFAULT_CHAT_FRAME:AddMessage(format("  %s %s: %s", set.id == p.active and ">" or "-", set.name, summary(data)))
