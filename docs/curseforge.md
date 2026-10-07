@@ -10,7 +10,7 @@ Every feature you don't need can be turned off to save even more resources.
 > (Xbox layout: A, B, X, Y where the game expects them), and it is where the back paddles,
 > touchpads and extra buttons are set up.
 >
-> **To open the settings: hold RB and press D-pad down** (or type `/ec config` in the chat).
+> **To open the settings: hold RB and press D-pad down** (or type `/ec` in the chat).
 >
 > **For the best results, set the game's gamepad action bar to compact** (the game's gamepad options):
 > the game then shows one bar, which "Triggers: press to switch" and the extra buttons are made for.
@@ -27,6 +27,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Daisywheel** (1.14.1): no more mouse buttons row under the wheel (its keys stay clickable).
 - **A sends again** (1.14.2): for players whose A did nothing or opened the game's chat menu, the keyboard now keeps its buttons while it is open.
 - **ConsolePort keyboard** (1.14.2): a space after the suggestion put in.
+- **`/ec` opens the options** (1.14.3), even typed in the chat; the keyboard is `/ec keyboard`.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
@@ -338,7 +339,8 @@ Install with the CurseForge app, or extract the zip into
 
 ## Commands
 
-- `/ec`: open the keyboard
+- `/ec`: the options (also RB + D-pad down)
+- `/ec keyboard`: open the keyboard
 - `/ec mode wheel|stick|consoleport`: daisywheel, split keyboard or ConsolePort
 - `/ec layout azerty|qwerty|qwertz|es|it`: split keyboard layout
 - `/ec lang fr|en|de|es|it|both`: suggestion and accent language

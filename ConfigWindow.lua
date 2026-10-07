@@ -1125,8 +1125,32 @@ function C:UnbindPad()
     if self.frame and not InCombatLockdown() then ClearOverrideBindings(self.frame) end
 end
 
+-- Over the chat, the game sets its chat's own buttons (A send, B close...)
+-- again whenever its focus is refreshed: the panel's taken back, a few times
+-- in a row at most (as the chat keyboard's, Input.lua)
+local KEPT = { PAD1 = true, PAD2 = true, PADDUP = true, PADDDOWN = true }
+function C:KeepPadOverChat()
+    if InCombatLockdown() or self.placing or CK.prompt or not GetBindingAction or not self:IsChatWindow() then return end
+    local now = GetTime()
+    if now < (self.nextPadCheck or 0) then return end
+    self.nextPadCheck = now + 0.25
+    for key in pairs(KEPT) do
+        if not (self.heldKeys and self.heldKeys[key])
+            and GetBindingAction(key, true) ~= "CLICK ControllerKeyboardConfigPad" .. key .. ":LeftButton" then
+            local recent = self.padRestores or {}
+            while recent[1] and recent[1] < now - 3 do table.remove(recent, 1) end
+            self.padRestores = recent
+            if #recent >= 5 then return end
+            recent[#recent + 1] = now
+            self:BindPad()
+            return
+        end
+    end
+end
+
 function C:OnUpdate(elapsed)
     self:BindReleasedKeys()
+    self:KeepPadOverChat()
     if self.swallow and IsKeyDown then
         for key in pairs(self.swallow) do
             if not IsKeyDown(key) then self.swallow[key] = nil end
@@ -1166,6 +1190,9 @@ function C:Open(tab, section)
         if old then key, section = old[1], section or old[2] end
     end
     if not self.pages[key or ""] then key = "home" end
+    -- The chat keyboard open (the options over the chat): the pad is the
+    -- panel's, what was typed kept as a draft
+    if CK:IsOpen() and not CK.prompt then CK:Close("options") end
     self.tab = key
     settings().configTab = key
     self:Disarm()
@@ -1224,7 +1251,16 @@ end
 
 -- Nothing of the game's has the pad: no settings, game menu, chat or other
 -- gamepad window
-function C:GameIsFree()
+-- The chat with the pad's focus is the active game window (its frame holds
+-- the focused edit box)
+function C:IsChatWindow(active)
+    local chat = CK.ActiveChatWindow and CK.ActiveChatWindow()
+    return chat ~= nil and chat:HasFocus() and (active == nil or active.editBox == chat)
+end
+
+-- overChat: /ec typed in the chat (asked: the options waited for Escape),
+-- the chat still open doesn't stop the panel; another window does
+function C:GameIsFree(overChat)
     if SettingsPanel and SettingsPanel:IsShown() then return false end
     if GameMenuFrame and GameMenuFrame:IsShown() then return false end
     -- A game window with the pad's focus (one only shown, the pad driving
@@ -1233,7 +1269,9 @@ function C:GameIsFree()
     local manager = GamepadMode and GamepadMode.FrameControlsManager
     local focused = manager and manager.isUIFocused
     if focused == nil then focused = true end
-    if focused and manager and manager.GetActiveFrame and manager:GetActiveFrame() then return false end
+    local active = focused and manager and manager.GetActiveFrame and manager:GetActiveFrame()
+    if overChat and self:IsChatWindow(active or nil) then return true end
+    if active then return false end
     local chat = CK.ActiveChatWindow and CK.ActiveChatWindow()
     return not (chat and chat:HasFocus())
 end
@@ -1241,9 +1279,18 @@ end
 -- From the game's options or the chat: those have the pad, and closing the
 -- options brings back the game menu, whose B would close the panel too.
 -- Open once the player is back in the game.
-function C:OpenWhenFree(tab)
+function C:OpenWhenFree(tab, overChat)
     if self:GameIsFree() then
         self:Open(tab)
+        return
+    end
+    -- Typed in the chat: over it, once the game is done with the send (it
+    -- would set its chat's buttons again after ours)
+    if overChat and self:GameIsFree(true) then
+        C_Timer.After(0.15, function()
+            if InCombatLockdown() or self:IsOpen() then return end
+            if self:GameIsFree(true) then self:Open(tab) else self:OpenWhenFree(tab) end
+        end)
         return
     end
     self.openLater = tab or true
@@ -1287,7 +1334,7 @@ function C:Init()
             C_Timer.After(0, function()
                 local manager = GamepadMode and GamepadMode.FrameControlsManager
                 local focused = manager and manager.GetActiveFrame and manager:GetActiveFrame()
-                if C:IsOpen() and not focused and not InCombatLockdown() then C:BindPad() end
+                if C:IsOpen() and (not focused or C:IsChatWindow(focused)) and not InCombatLockdown() then C:BindPad() end
             end)
         end, C)
     end

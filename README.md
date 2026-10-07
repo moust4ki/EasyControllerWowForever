@@ -521,7 +521,8 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 
 | Command | Effect |
 |---|---|
-| `/ec` | open the keyboard |
+| `/ec` | the options (configuration panel), like `/ec config` |
+| `/ec keyboard` | open the keyboard (also `/ec clavier`, `/ec kb`) |
 | `/ec lock` | lock / unlock the position (unlocking shows the keyboard to place it) |
 | `/ec mode wheel\|stick\|consoleport` | daisywheel, split keyboard or ConsolePort |
 | `/ec layout azerty\|qwerty\|qwertz\|es\|it` | split keyboard layout |
