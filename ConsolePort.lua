@@ -1121,7 +1121,14 @@ function Keyboard:AutoCorrect()
         local text = Box:GetText()
         local _, startPos, endPos = utf8.getword(text, Box:GetUTF8CursorPosition())
         if text and word and startPos and endPos then
-            Box:SetText(text:sub(0, startPos - 1) .. word .. text:sub(endPos + 1))
+            -- A space after it, as the addon's other methods (reported: none,
+            -- a bug): not after an elision ("j'"), nor when one follows
+            -- already; the cursor after it, ready for the next word
+            local before, after = text:sub(0, startPos - 1), text:sub(endPos + 1)
+            local spaced = after:match("^[ \t]") ~= nil
+            local sep = (word:sub(-1) == "'" or spaced) and "" or " "
+            Box:SetText(before .. word .. sep .. after)
+            Box:SetCursorPosition(#before + #word + (spaced and 1 or #sep))
         end
     end
 end
