@@ -9,7 +9,8 @@ keyboard** with word prediction, a **gamepad mapping** (the gamepad bar's slots,
 the free buttons and back paddles), and **quest** helpers. RB + D-pad down opens the configuration.
 
 The **gamepad keyboard** types in **WoW Forever**'s chat, with **smartphone-style word prediction**
-that learns the way you write. Two input methods: a **daisywheel** and a **split keyboard** (one half per stick).
+that learns the way you write. Three input methods: a **daisywheel**, a **split keyboard** (one half per
+stick) and **ConsolePort**'s own keyboard.
 Everything is also clickable with the mouse, so it works with the Steam Controller trackpad too.
 
 The look follows WoW Forever's gamepad UI: bronze and gold rims, Friz Quadrata font, the game's own
@@ -38,9 +39,9 @@ QWERTZ and the German dictionary.
 The keyboard opens by itself with the chat. It is disabled in combat (the game blocks too many
 actions there, "Not possible in combat") and comes back after combat if the chat is still open.
 
-Choose the input method in the options or with `/ec mode wheel|stick`.
+Choose the input method in the options or with `/ec mode wheel|stick|consoleport`.
 
-### Common to both methods
+### Common to the daisywheel and the split keyboard
 
 | Button | Action |
 |---|---|
@@ -104,6 +105,35 @@ and channels are driven with the D-pad.
 
 Options: layout, stick dead zone, stick response (linear, gentle, fast), magnet strength, cursor
 lines. Pick a larger window size in the options if the keys feel small.
+
+### ConsolePort
+
+ConsolePort's own keyboard (`ConsolePort.lua`: code and art from
+[ConsolePort](https://github.com/seblindfors/ConsolePort) 3.3.9 by Sebastian Lindfors, Artistic
+License 2.0; `LICENSE-ConsolePort.md` lists what differs). A ring of 8 groups of 4 characters
+floats on its own (the addon's window stays off screen meanwhile); its suggestions on the side with
+room, the text and its cursor above them, the channel above the text, a line to the field typed in.
+
+| Button | Action |
+|---|---|
+| Left stick | pick a group (top first, clockwise) |
+| Y / B / A / X | type the group's top / right / bottom / left character |
+| A, no group | space |
+| B, no group | send (secure macro), then the game's own B closes the chat, like Enter; empty: closes it |
+| X, no group | erase before the cursor; LB + X: everything |
+| Y, no group | escape: the text dropped, the game's own B closes the chat |
+| LT / LB / LT + LB | capitals / numbers and symbols / commands (`/s`, `/p`, `/w`…) and raid markers |
+| RT / LT + RT | the language's accents / in capitals |
+| Right stick, group chosen | aim a character, push to type it |
+| Right stick, no group | move the keyboard (kept for the next time) |
+| D-pad ↑ ↓ | pick a suggestion |
+| RB | put it in place of the word at the cursor (a whisper to no one yet: the name) |
+| D-pad ← → | previous / next channel; LB + ← →: move the cursor in the text |
+
+The layers follow the game's emulated modifiers (LT Shift, LB Ctrl, RT Alt). The suggestions use
+ConsolePort's ranking (edit distance, words containing what is typed, frequency) on the addon's
+dictionaries and learned words, compared without accents. In a prompt or a field of the game, B
+confirms, Y cancels and ← → move the cursor.
 
 ## Mouse / Steam Controller
 
@@ -174,7 +204,7 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
 Home › Shortcut learns any other pair: press A on it, then hold a button and press a second one;
 also `/ec config`, a key binding, or *Options > AddOns > Easy Controller - Forever*).
 
-Five tabs, LB / RB to go from one to the next. In each, its sections on the left, their settings in
+Six tabs, LB / RB to go from one to the next. In each, its sections on the left, their settings in
 the middle, and on the right what the selected one does. The help bar at the bottom shows where you
 are and the buttons that work there (click them with the mouse too). The D-pad moves and changes
 values, A checks or chooses, B goes back to the sections, then closes. The panel reopens where you
@@ -188,6 +218,7 @@ second A.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
 - **Alerts**: the vibrations, the supplies buttons, the quest items and the better items below.
+- **Profiles**: this character's profiles and the talents' ones (see Profiles).
 
 ## Gamepad mapping
 
@@ -298,6 +329,14 @@ supplies and consumables wheel categories, automatically: nothing to set, and no
 character ever changes another's. On its first load, a character starts from a copy of the
 configuration you had before profiles (1.9), if any: nothing is lost on an update. The paddles' keys,
 the look, the keyboard and the vibrations are the same for all.
+
+A character can have up to 5 profiles (1.14), each with its buttons, replaced buttons, wheels and the
+game's gamepad bar slots: the spells on the D-pad and the face buttons alone, and each stance or form
+bar once the character has been in it. The Profiles tab picks the one in use from a list, adds one
+(empty), renames or deletes them; with the talents option, the primary talents put one in use and the
+secondary another. `/ec profile <name>` too. Switching happens out of combat (in combat: once it
+ends); an action that can't be placed now is kept for later. They're the character's only; its
+supplies and consumables wheel categories are shared by its profiles.
 
 ### Triggers: press to switch
 
@@ -463,7 +502,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 
 - every module on or off (Home › Modules; Gamepad extras at the top of Home › Gamepad), each one's
   settings in its own tab;
-- input method (daisywheel / split keyboard), daisywheel look (groups circled / characters only),
+- input method (daisywheel / split keyboard / ConsolePort), daisywheel look (groups circled / characters only),
   keyboard layout (AZERTY, QWERTY, QWERTZ, Spanish, Italian), stick dead zone, stick response
   (linear, gentle, fast), magnet, cursor lines;
 - lock position, open automatically, only when the gamepad is active;
@@ -482,7 +521,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 |---|---|
 | `/ec` | open the keyboard |
 | `/ec lock` | lock / unlock the position (unlocking shows the keyboard to place it) |
-| `/ec mode wheel\|stick` | daisywheel or split keyboard |
+| `/ec mode wheel\|stick\|consoleport` | daisywheel, split keyboard or ConsolePort |
 | `/ec layout azerty\|qwerty\|qwertz\|es\|it` | split keyboard layout |
 | `/ec auto` | open automatically with the chat |
 | `/ec pad` | only open automatically when the gamepad is active |
@@ -500,6 +539,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec vibe [pattern]` | test the controller vibration |
 | `/ec wheel` | what the consumables wheel holds, and why an item is not in it |
 | `/ec phrases` | the quick phrases window |
+| `/ec profile [name]` | this character's settings and the others'; with a name, put that profile in use |
 | `/ec binds` | the game's buttons replaced, and what each key runs now |
 | `/ec glyphs` | list the game's gamepad button icons |
 | `/ec debug` | print received buttons and sticks |
@@ -529,7 +569,7 @@ are also available in *Escape > Key Bindings > AddOns*.
 - B is bound only while the message holds text; the binding is removed when B is released, so with an
   empty message B goes back to the game, which closes the chat.
 - Code layout: `Message.lua` is the common core (message, prediction, channels, sending),
-  `Wheel.lua` and `StickKeyboard.lua` are the input methods, `UI.lua` the common panel, `Input.lua`
+  `Wheel.lua`, `StickKeyboard.lua` and `ConsolePort.lua` are the input methods, `UI.lua` the common panel, `Input.lua`
   the pad buttons and sticks; `ConfigWindow.lua` the configuration panel (`ConfigKit.lua` its parts,
   `Options.lua` the Home, Wheels, Keyboard and Alerts tabs, `MapWindow.lua` the Gamepad tab,
   `MyWheels.lua` the wheels' cards and editor); `Mapping.lua` / `Paddles.lua`,
@@ -585,7 +625,9 @@ changes.
 
 Code under the MIT license (see `LICENSE`). The `Dict_*.lua` word lists (French, English, German,
 Spanish, Italian) are derived from FrequencyWords (Hermit Dave) and remain under the
-[CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) license.
+[CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) license. `ConsolePort.lua` and
+`textures/consoleport/` come from [ConsolePort](https://github.com/seblindfors/ConsolePort) by
+Sebastian Lindfors, modified, under the Artistic License 2.0 (`LICENSE-ConsolePort.md`).
 
 ## AI disclosure
 

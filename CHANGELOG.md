@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.14.0
+
+- **Profiles** (asked: a druid healing and feral, a warrior's stances...): up to 5 sets of a
+  character's buttons, replaced buttons, wheels and the game's bar slots, in a tab of their own
+  (Profiles, the last one). Pick the one in use from a list, or with `/ec profile <name>`; rename,
+  delete, add one (it starts from nothing). Only that character's: never offered to another one. Its
+  supplies and consumables wheel categories are the same for all its profiles.
+- **The game's bar slots follow the profile** (reported: spells taken off the D-pad in one profile
+  were gone from all): the spells on the D-pad and the face buttons alone, and the stance / form bars
+  once you've been in them, are each profile's own; switching puts them back. Out of combat (in
+  combat: once the fight ends). An action that can't be placed now (a spell of the other talents) is
+  kept for later.
+- **With the talents** (option): the primary talents put one profile in use, the secondary another.
+- **ConsolePort keyboard**, a third input method (asked): ConsolePort's own keyboard, its code and art
+  (ConsolePort by Sebastian Lindfors, Artistic License 2.0, see LICENSE-ConsolePort.md), its layout and
+  its word ranking, on the addon's dictionaries. 8 groups of 4 around the left stick, typed with
+  Y / B / A / X; without a group: A space, B send (then the chat closes, like Enter), X erase (LB + X:
+  everything), Y escape. LT capitals, LB numbers and symbols, LT + LB commands and raid markers, RT
+  the language's accents. D-pad up / down picks a suggestion, RB puts it in; D-pad left / right
+  changes the channel (shown above the text), LB + left / right moves the cursor in the text. A
+  whisper to no one yet suggests the known names. The ring floats: with no group chosen the right
+  stick moves it, the suggestions on the side with room. Keyboard › Input, or
+  `/ec mode consoleport`.
+
 ## 1.12.2
 
 - **LB / RB with a replaced button stay the game's** (reported: with the quick phrases on D-pad
