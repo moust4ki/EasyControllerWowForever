@@ -226,7 +226,15 @@ function S:Button(i)
     if b then return b end
     b = CK.Paddles:CreateSlot(bar, SIZES[2])
     b.count:ClearAllPoints()
-    b.count:SetPoint("BOTTOM", 0, 1)
+    b.count:SetPoint("BOTTOM", 0, 3)
+    -- The count on a pill (reported: orange or red on the brown bag, hard to
+    -- read): dark, orange then red with the level, a dark edge; above the
+    -- rim, under the count. Its width follows the count (see fill)
+    b.badgeArea = CK.NewFrame("Frame", nil, b.over)
+    b.badgeArea:SetSize(18, 17)
+    b.badgeArea:SetPoint("CENTER", b.count, "CENTER", 0, 0)
+    b.badge = CK.ConfigKit.Box(b.over, 4, 1, "ARTWORK", 3)
+    b.badge:SetPoints(b.badgeArea)
     local click = CK.NewFrame("Button", "ControllerKeyboardSupplyButton" .. i, bar, "SecureActionButtonTemplate")
     click:SetSize(b.size, b.size)
     click:SetFrameLevel(b:GetFrameLevel() + 10)
@@ -313,12 +321,28 @@ function S:Enabled()
     return CK.db and settings().enabled
 end
 
+-- The count's pill by level: above "low" (dark, white count), "low"
+-- (orange, dark count), "critical" (red, white count)
+local BADGE = {
+    [0] = { fill = { 0.05, 0.04, 0.03 }, alpha = 0.8, text = { 1, 1, 1 } },
+    [1] = { fill = { 0.94, 0.54, 0.11 }, alpha = 1, text = { 0.1, 0.05, 0 } },
+    [2] = { fill = { 0.83, 0.16, 0.12 }, alpha = 1, text = { 1, 1, 1 } },
+}
+local BADGE_EDGE = { 0, 0, 0 }
+
 -- What a slot shows: icon, count, glow
 local function fill(b, r, severity, level)
     b.resource = r
     CK.Paddles.SetIcon(b.icon, r.icon)
     b.count:SetText(r.count)
-    b.count:SetTextColor(1, level == 2 and 0.25 or (level == 1 and 0.65 or 1), level > 0 and 0.2 or 1)
+    local look = BADGE[level] or BADGE[0]
+    b.count:SetTextColor(look.text[1], look.text[2], look.text[3])
+    if b.badge then
+        b.badge:SetColors(look.fill, look.alpha, BADGE_EDGE, 1)
+        b.badgeArea:SetWidth(math.max(18, (b.count:GetStringWidth() or 0) + 8))
+        -- Lower on the small buttons (32 px), not to hide the icon
+        b.badgeArea:SetHeight((b.size or 40) < 40 and 15 or 17)
+    end
     setGlow(b, severity)
 end
 
