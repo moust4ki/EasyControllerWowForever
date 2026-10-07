@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.14.4
+
+- **Supplies: a readable count** (reported: orange or red on the brown bag, hard to read): the count
+  now sits on a small pill with a dark edge, dark with a white count above the low threshold, orange
+  with a dark count at low, red with a white count at critical. Its width follows the count, and it is
+  lower on the small buttons. The glow around the button is unchanged.
+
 ## 1.14.3
 
 - **`/ec` opens the options** (asked), like `/ec config`; the keyboard is now `/ec keyboard` (or

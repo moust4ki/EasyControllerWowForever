@@ -396,8 +396,9 @@ One round button per resource, in the gamepad bar's style (Alerts › Supplies):
 - **free bag slots** (quivers, ammo pouches and soul bags apart), the **equipped ammunition**, the
   **class reagents** (soul shards, infernal stones, arcane powder, runes, candles, symbols, seeds,
   ankhs, poisons, powders...) once you carry them, and **any item** added from your bags;
-- the count, and under the **low threshold** a glow that grows stronger, faster and redder down to
-  the **critical threshold**; each resource can be turned off, its thresholds set with the D-pad;
+- the count on a pill (dark, orange under the **low threshold**, red at the **critical threshold**),
+  and under the low threshold a glow that grows stronger, faster and redder down to the critical
+  one; each resource can be turned off, its thresholds set with the D-pad;
 - the bar is **placed freely**: dragged with the mouse while unlocked, or moved with the D-pad
   ("Move with the D-pad"), growing right, left, down or up, in 3 sizes; a click opens the bags
   (through the game's own backpack button);
