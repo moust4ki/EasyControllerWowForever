@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.14.3
+
+- **`/ec` opens the options** (asked), like `/ec config`; the keyboard is now `/ec keyboard` (or
+  `/ec clavier`, `/ec kb`). Typed in the chat, the options open at once: with the gamepad keyboard
+  the send closes the chat too, and typed on a physical keyboard (the game keeps its chat open after
+  a command) they open over the chat, B closing them (reported: Escape was needed). The chat
+  keyboard closes meanwhile, a message being typed kept as a draft. Another game window with the pad
+  still makes them wait.
+
 ## 1.14.2
 
 - **A sends again** (reported by two players: A did nothing, or opened the game's own chat menu): the
