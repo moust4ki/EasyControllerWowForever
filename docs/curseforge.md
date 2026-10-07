@@ -28,6 +28,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **A sends again** (1.14.2): for players whose A did nothing or opened the game's chat menu, the keyboard now keeps its buttons while it is open.
 - **ConsolePort keyboard** (1.14.2): a space after the suggestion put in.
 - **`/ec` opens the options** (1.14.3), even typed in the chat; the keyboard is `/ec keyboard`.
+- **Supplies** (1.14.4): the count on a pill (dark, orange at low, red at critical), readable on any icon.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
@@ -167,7 +168,8 @@ and the addon's windows get the sticks while they are open.
 A round button per resource: free bag slots, your ammunition, your class reagents (soul shards,
 powders, candles, symbols, seeds, poisons…) and any item you add from your bags. Under its low
 threshold it glows, stronger and redder down to the critical one; thresholds are yours to set.
-Place the bar anywhere (mouse or D-pad), lock it; a click opens your bags.
+Place the bar anywhere (mouse or D-pad), lock it; a click opens your bags. The count sits on a pill:
+dark above the low threshold, orange at low, red at critical.
 
 **Vibrations**
 The controller vibrates on the game events you choose: combat (death, interrupted, loss of control,
