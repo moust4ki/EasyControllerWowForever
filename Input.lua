@@ -237,6 +237,25 @@ local function bind(f, key, button)
 end
 
 local SEND_BUTTON = "ControllerKeyboardSendButton"
+
+-- The game's B while its chat is open (its gamepad UI's own button), read
+-- while none of ours is on it (see Phrases.lua)
+local function gameBackButton()
+    local action = GetBindingAction and GetBindingAction("PAD2", true)
+    local name = type(action) == "string" and action:match("^CLICK (InputFunctionBindingButton_[^:]+):")
+    return name and _G[name] and name or nil
+end
+
+-- A command that opens the addon's panel (/ec, /ec config, /ec map...): the
+-- panel waits for the chat to be closed, so the send closes it too (the
+-- game's own B in the macro), or nothing would show until B
+local PANEL_COMMANDS = { [""] = true, config = true, options = true, map = true }
+local function opensPanel(text)
+    local rest = text:lower():match("^/ec(.*)$")
+    if not rest or (rest ~= "" and not rest:match("^[ \t]")) then return false end
+    local cmd, arg = rest:match("^[ \t]*(%a*)[ \t]*(.-)[ \t]*$")
+    return cmd ~= nil and arg == "" and PANEL_COMMANDS[cmd] or false
+end
 -- A in a prompt (a name for one of ours): confirms, nothing is sent
 local PROMPT_BUTTON = "ControllerKeyboardPromptButton"
 
@@ -299,7 +318,14 @@ function CK:PrepareSend(down)
     if InCombatLockdown() then return end
     local method = self:GetMethod()
     if method.SendPress and method:SendPress(down) then return end
-    self.sendButton:SetAttribute("macrotext", self:BuildMacroText() or "")
+    local macro = self:BuildMacroText() or ""
+    local eb = self.editBox
+    if opensPanel(self:GetText()) and self.gameBack and eb and eb:HasFocus() then
+        macro = macro .. "\n/click " .. self.gameBack .. " LeftButton 1"
+        -- The chat closed by it: no draft of the command
+        self.closingForPanel = true
+    end
+    self.sendButton:SetAttribute("macrotext", macro)
     self:SendWhisper()
 end
 
@@ -382,6 +408,7 @@ function CK:EnableButtons()
     ClearOverrideBindings(f)
     self.cancelBound = false
     self.keyboardBinds = {}
+    self.gameBack = gameBackButton()
     -- A method that binds its own keys (ConsolePort.lua: A, B, X, Y...)
     local method = self:GetMethod()
     if method.ownButtons then

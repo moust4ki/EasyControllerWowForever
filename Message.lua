@@ -805,7 +805,9 @@ function CK:Close(reason)
         self:DisableButtons()
     end
     self.closing = false
-    if not prompt and KEEP_DRAFT[reason] and self.db.settings.features.drafts
+    local forPanel = self.closingForPanel
+    self.closingForPanel = nil
+    if not prompt and not forPanel and KEEP_DRAFT[reason] and self.db.settings.features.drafts
         and self.buffer and self.buffer:find("[^ \t\r\n]") then
         self.draft = { text = self.buffer, time = GetTime(),
             chatType = self:GetChatAttr("chatType"), target = self:GetChatAttr("tellTarget") }

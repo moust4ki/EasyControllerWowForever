@@ -135,6 +135,9 @@ local function slash(msg)
     local cmd, arg = (msg or ""):lower():match("^[ \t\r\n]*([^ \t\r\n]*)[ \t\r\n]*(.-)[ \t\r\n]*$")
 
     if cmd == "" then
+        -- Alone: the options (asked), like /ec config
+        CK.Config:OpenWhenFree(nil)
+    elseif cmd == "keyboard" or cmd == "clavier" or cmd == "kb" then
         if not s.modules.keyboard then
             CK:Print(L.KEYBOARD_OFF)
             return
