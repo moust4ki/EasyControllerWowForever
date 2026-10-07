@@ -16,8 +16,18 @@ local _, CK = ...
 -- any more, so a character started later never gets another's. The spells
 -- of such a copy this character doesn't have are left out (a new druid got
 -- the rogue's: see DropForeignSpells).
+--
+-- A character's profiles (asked: a druid's healing and its feral buttons):
+-- up to 5 sets of its buttons, its replaced buttons and its wheels, one in
+-- use; its supplies and consumables wheel categories are the same for all
+-- of them. Kept in its own entry only, never offered to another character.
+-- The one in use lives in p.data (as before profiles had sets); the others
+-- in p.sets[i].data. A new one starts empty. Switched by hand (Home ›
+-- Profiles, /ec profile <name>) or with the talents (primary / secondary,
+-- an option), out of combat only (in combat: once it ends).
 local Pr = {}
 CK.Profiles = Pr
+Pr.MAX_SETS = 5
 
 -- What follows the character: { name, path in settings }
 local FIELDS = {
@@ -102,6 +112,88 @@ function Pr:Activate()
     CK.CleanEntries(CK.db.settings)
 end
 
+---------------------------------------------------------------------------
+-- The sets of a character
+---------------------------------------------------------------------------
+local SET_FIELDS = { "mapping", "replaced", "myWheels" }
+
+local function setField(f, v)
+    if type(v) ~= "table" then v = {} end
+    if f == "myWheels" and type(v.list) ~= "table" then v.list = {} end
+    return v
+end
+
+local function findSet(p, id)
+    for i, set in ipairs(p.sets or {}) do
+        if set.id == id then return set, i end
+    end
+end
+
+-- The fields in use put away in the set in use, the other set's taken
+local function swap(p, id)
+    local current, target = findSet(p, p.active), findSet(p, id)
+    if not target then return false end
+    if current then
+        local data = {}
+        for _, f in ipairs(SET_FIELDS) do data[f] = p.data[f] end
+        current.data = data
+    end
+    local data = target.data or {}
+    for _, f in ipairs(SET_FIELDS) do p.data[f] = setField(f, data[f]) end
+    target.data = nil
+    p.active = id
+    return true
+end
+
+local function newName(p)
+    local used = {}
+    for _, set in ipairs(p.sets) do used[set.name] = true end
+    local n = #p.sets + 1
+    while used[format(CK.L.PROFILE_NAME_N, n)] do n = n + 1 end
+    return format(CK.L.PROFILE_NAME_N, n)
+end
+
+-- A character's sets as they should be (the first load: what it has is
+-- its first one; a broken file: nothing it uses is lost)
+function Pr:InitSets(p)
+    local list, seen, maxId = {}, {}, 0
+    for _, set in ipairs(type(p.sets) == "table" and p.sets or {}) do
+        if type(set) == "table" and type(set.id) == "number" and not seen[set.id] and #list < Pr.MAX_SETS then
+            seen[set.id] = true
+            if type(set.name) ~= "string" or set.name == "" then set.name = format(CK.L.PROFILE_NAME_N, #list + 1) end
+            if set.data ~= nil and type(set.data) ~= "table" then set.data = nil end
+            list[#list + 1] = set
+            if set.id > maxId then maxId = set.id end
+        end
+    end
+    p.sets = list
+    if not seen[p.active] then
+        -- What it uses: a profile of its own (never one dropped for it)
+        maxId = maxId + 1
+        table.insert(list, 1, { id = maxId, name = newName(p) })
+        seen[maxId] = true
+        p.active = maxId
+    end
+    -- The one in use lives in p.data
+    findSet(p, p.active).data = nil
+    p.nextSet = math.max(tonumber(p.nextSet) or 0, maxId + 1)
+    if type(p.specSets) ~= "table" then p.specSets = {} end
+    for group, id in pairs(p.specSets) do
+        if not seen[id] then p.specSets[group] = nil end
+    end
+    p.auto = p.auto == true
+end
+
+-- The talents in use: 1 (primary), 2 (secondary), nil when not known
+function Pr:SpecGroup()
+    local info = C_SpecializationInfo
+    local get = info and info.GetActiveSpecGroup
+    local ok, group = false, nil
+    if get then ok, group = pcall(get) end
+    if not (ok and type(group) == "number") and GetActiveTalentGroup then ok, group = pcall(GetActiveTalentGroup) end
+    return ok and type(group) == "number" and group or nil
+end
+
 -- At login, before the modules start
 function Pr:Init()
     local db = CK.db
@@ -159,6 +251,10 @@ function Pr:Init()
     p.name = name
     p.realm = (GetRealmName and GetRealmName()) or ""
     p.class = select(2, UnitClass("player"))
+    self:InitSets(p)
+    -- With the talents (option): the one of the talents in use
+    local want = p.auto and p.specSets[self:SpecGroup() or 0]
+    if want and want ~= p.active then swap(p, want) end
     self:Activate()
     -- The modules start after: they read the settings as they are then
     self:DropForeignSpells(false)
@@ -242,6 +338,138 @@ function Pr:DropForeignSpells(reload)
     if dropped > 0 and reload then reread() end
 end
 
+-- The character's sets: { id, name, active, primary, secondary }
+function Pr:Sets()
+    local p = self:Profile()
+    local out = {}
+    if not (p and p.sets) then return out end
+    for _, set in ipairs(p.sets) do
+        out[#out + 1] = { id = set.id, name = set.name, active = set.id == p.active,
+            primary = p.specSets[1] == set.id, secondary = p.specSets[2] == set.id }
+    end
+    return out
+end
+
+function Pr:ActiveSet()
+    local p = self:Profile()
+    local set = p and p.sets and findSet(p, p.active)
+    return set and set.id, set and set.name
+end
+
+function Pr:SetName(id)
+    local p = self:Profile()
+    local set = p and p.sets and findSet(p, id)
+    return set and set.name
+end
+
+-- Everything open on the old one: shown again from the new one
+local function afterSwitch()
+    reread()
+    if CK.MyWheels and CK.MyWheels.open and CK.MyWheels.CloseEditor then CK.MyWheels:CloseEditor() end
+    if CK.Config and CK.Config.IsOpen and CK.Config:IsOpen() then CK.Config:Render() end
+end
+
+-- Another set in use. In combat (its buttons are secure): once it ends
+function Pr:SetActive(id, quiet)
+    local p = self:Profile()
+    if not (p and self.shared and p.sets and findSet(p, id)) then return false end
+    if id == p.active then
+        self.pending = nil
+        return true
+    end
+    if InCombatLockdown() then
+        self.pending = id
+        CK:Print(CK.L.PROFILE_AFTER_COMBAT, findSet(p, id).name)
+        return false
+    end
+    self.pending = nil
+    self:Collect()
+    swap(p, id)
+    self:Activate()
+    afterSwitch()
+    if not quiet then
+        local name = findSet(p, id).name
+        if CK.Config and CK.Config.IsOpen and CK.Config:IsOpen() then
+            CK.Config:Toast(format(CK.L.PROFILE_ON, name))
+        else
+            CK:Print(CK.L.PROFILE_ON, name)
+        end
+    end
+    return true
+end
+
+-- A new set, empty (asked: from nothing), put in use
+function Pr:CreateSet()
+    local p = self:Profile()
+    if not (p and p.sets) or #p.sets >= Pr.MAX_SETS or InCombatLockdown() then return nil end
+    local id = p.nextSet
+    p.nextSet = id + 1
+    local data = {}
+    for _, f in ipairs(SET_FIELDS) do data[f] = setField(f, nil) end
+    p.sets[#p.sets + 1] = { id = id, name = newName(p), data = data }
+    self:SetActive(id)
+    return id
+end
+
+function Pr:RenameSet(id, name)
+    local p = self:Profile()
+    local set = p and p.sets and findSet(p, id)
+    name = type(name) == "string" and name:gsub("^%s+", ""):gsub("%s+$", "") or ""
+    if not set or name == "" then return false end
+    set.name = name:sub(1, 40)
+    return true
+end
+
+-- A set deleted (never the last one); the one in use: another in its place
+function Pr:DeleteSet(id)
+    local p = self:Profile()
+    if not (p and p.sets) or #p.sets <= 1 or InCombatLockdown() then return false end
+    local set, index = findSet(p, id)
+    if not set then return false end
+    if id == p.active then
+        local other = p.sets[index == 1 and 2 or 1]
+        if not self:SetActive(other.id, true) then return false end
+        set, index = findSet(p, id)
+    end
+    table.remove(p.sets, index)
+    for group, setId in pairs(p.specSets) do
+        if setId == id then p.specSets[group] = nil end
+    end
+    return true
+end
+
+-- With the talents: on, and the set of each talent group
+function Pr:Auto()
+    local p = self:Profile()
+    return p and p.auto or false
+end
+
+function Pr:SetAuto(on)
+    local p = self:Profile()
+    if not p then return end
+    p.auto = on and true or false
+    if p.auto then self:FollowTalents() end
+end
+
+function Pr:SpecSet(group)
+    local p = self:Profile()
+    return p and p.specSets and p.specSets[group]
+end
+
+function Pr:SetSpecSet(group, id)
+    local p = self:Profile()
+    if not (p and p.specSets) then return end
+    p.specSets[group] = id and findSet(p, id) and id or nil
+    if p.auto and group == self:SpecGroup() then self:FollowTalents() end
+end
+
+-- The set of the talents in use (option on)
+function Pr:FollowTalents()
+    local p = self:Profile()
+    local want = p and p.auto and p.specSets[self:SpecGroup() or 0]
+    if want then self:SetActive(want) end
+end
+
 -- The character not known at login (its name or realm not given yet): its
 -- profile once the world is loaded, and everything that reads it again
 function Pr:Retry()
@@ -255,7 +483,17 @@ do
     local f = CreateFrame("Frame")
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
     f:RegisterEvent("SPELLS_CHANGED")
-    f:SetScript("OnEvent", function()
+    f:RegisterEvent("PLAYER_REGEN_ENABLED")
+    pcall(f.RegisterEvent, f, "ACTIVE_TALENT_GROUP_CHANGED")
+    f:SetScript("OnEvent", function(_, event)
+        if event == "ACTIVE_TALENT_GROUP_CHANGED" then
+            Pr:FollowTalents()
+            return
+        end
+        if event == "PLAYER_REGEN_ENABLED" then
+            if Pr.pending then Pr:SetActive(Pr.pending) end
+            return
+        end
         Pr:Retry()
         Pr:DropForeignSpells(true)
     end)
@@ -282,6 +520,10 @@ function Pr:Diagnose()
     else
         local s = CK.db.settings
         CK:Print(L.PROFILE_DIAG_ON, self.key, summary({ mapping = s.mapping, replaced = s.replaced, myWheels = s.myWheels }))
+        for _, set in ipairs(p.sets or {}) do
+            local data = set.id == p.active and { mapping = s.mapping, replaced = s.replaced, myWheels = s.myWheels } or set.data or {}
+            DEFAULT_CHAT_FRAME:AddMessage(format("  %s %s: %s", set.id == p.active and ">" or "-", set.name, summary(data)))
+        end
     end
     local others = {}
     for key, other in pairs(CK.db.profiles or {}) do

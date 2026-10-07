@@ -213,6 +213,82 @@ local function automationRows(b)
         get = function() return s.automation.guildRepair end, set = function(v) s.automation.guildRepair = v end })
 end
 
+---------------------------------------------------------------------------
+-- Profiles (Profiles.lua): the character's sets of buttons, replaced
+-- buttons and wheels; the one in use picked in a list, by hand or with the
+-- talents (primary, secondary)
+---------------------------------------------------------------------------
+local function profileRows(b, page)
+    local Pr = CK.Profiles
+    b.header(L.SEC_PROFILES)
+    local sets = Pr:Sets()
+    if #sets == 0 then
+        b.info(L.PROFILE_DIAG_OFF)
+        return
+    end
+    local activeId, activeName = Pr:ActiveSet()
+    -- The list of the character's profiles; withNone: "none" first
+    local function pick(title, current, onChoose, withNone)
+        page:OpenPicker({
+            kicker = L.SEC_PROFILES, title = title, rows = 8, current = current,
+            lists = { { label = L.SEC_PROFILES, entries = function()
+                local entries = {}
+                if withNone then entries[#entries + 1] = { action = 0, name = L.PROFILE_NO_SET } end
+                for _, set in ipairs(Pr:Sets()) do
+                    local tags = {}
+                    if set.active then tags[#tags + 1] = L.PROFILE_TAG_ACTIVE end
+                    if set.primary then tags[#tags + 1] = L.LBL_PROFILE_PRIMARY end
+                    if set.secondary then tags[#tags + 1] = L.LBL_PROFILE_SECONDARY end
+                    entries[#entries + 1] = { action = set.id, name = set.name,
+                        sub = #tags > 0 and table.concat(tags, ", ") or nil }
+                end
+                return entries
+            end } },
+            onChoose = function(e)
+                page.picker:Close()
+                onChoose(e.action)
+                Config:Render()
+            end,
+        })
+    end
+    local function rename()
+        Config:AskText({ kicker = L.SEC_PROFILES, title = L.PROFILE_NAME_PROMPT, text = activeName,
+            onDone = function(text)
+                if Pr:RenameSet(activeId, text) then Config:Toast(format(L.TOAST_PROFILE_RENAMED, text)) end
+            end })
+    end
+    b.value({ id = "pr_active", label = L.LBL_PROFILE_ACTIVE, verb = L.V_CHANGE, tip = L.TIP_PROFILE_ACTIVE,
+        text = function() return select(2, Pr:ActiveSet()) or "" end,
+        onA = function()
+            pick(L.LBL_PROFILE_ACTIVE, Pr:ActiveSet(), function(id) Pr:SetActive(id) end)
+        end,
+        onX = rename, xVerb = L.V_RENAME })
+    b.button({ id = "pr_new", label = L.LBL_PROFILE_NEW, tip = L.TIP_PROFILE_NEW, verb = L.V_CREATE,
+        disabled = #sets >= Pr.MAX_SETS, func = function() Pr:CreateSet() end })
+    b.button({ id = "pr_rename", label = L.LBL_PROFILE_RENAME, tip = L.TIP_PROFILE_RENAME, verb = L.V_RENAME,
+        func = rename })
+    -- Two presses (no confirmation popup); never the last one
+    b.button({ id = "pr_delete", label = format(L.LBL_PROFILE_DELETE, activeName or ""), danger = true,
+        armedLabel = L.LBL_PROFILE_DELETE_ARMED, disabled = #sets <= 1, tip = L.TIP_PROFILE_DELETE,
+        func = function()
+            if Pr:DeleteSet(activeId) then Config:Toast(format(L.TOAST_PROFILE_DELETED, activeName or "")) end
+        end })
+    b.header(L.HDR_PROFILE_TALENTS)
+    b.check({ id = "pr_auto", label = L.LBL_PROFILE_AUTO, tip = L.TIP_PROFILE_AUTO,
+        get = function() return Pr:Auto() end, set = function(v) Pr:SetAuto(v) end })
+    for group, key in ipairs({ "PRIMARY", "SECONDARY" }) do
+        local label = L["LBL_PROFILE_" .. key]
+        b.value({ id = "pr_spec" .. group, label = label, indent = true, disabled = not Pr:Auto(),
+            verb = L.V_CHANGE, tip = L.TIP_PROFILE_SPEC,
+            text = function() return Pr:SetName(Pr:SpecSet(group)) or L.PROFILE_NO_SET end,
+            onA = function()
+                pick(label, Pr:SpecSet(group) or 0, function(id)
+                    Pr:SetSpecSet(group, id ~= 0 and id or nil)
+                end, true)
+            end })
+    end
+end
+
 Config.pages.home = Config.NewRailPage({
     key = "home",
     sections = {
@@ -221,6 +297,7 @@ Config.pages.home = Config.NewRailPage({
         { key = "look", label = L.SEC_LOOK, tip = L.TIP_SEC_LOOK, rows = lookRows },
         { key = "gamepad", label = L.TAB_GAMEPAD, tip = L.TIP_SEC_DISPLAY, rows = function(b) CK.MapPage.DisplayRows(b) end },
         { key = "automation", label = L.SEC_AUTOMATION, tip = L.TIP_SEC_AUTOMATION, rows = automationRows },
+        { key = "profiles", label = L.SEC_PROFILES, tip = L.TIP_SEC_PROFILES, rows = profileRows },
     },
 })
 

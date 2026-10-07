@@ -629,7 +629,9 @@ function W:Crumb()
     local layer = self:ViewLayer()
     local name = layer == "" and L.MAP_ALONE
         or format(L.CRUMB_LAYER, (K.ComboMarkup("", layer, 14):gsub(" %+ $", "")))
-    return L.TAB_GAMEPAD .. " › " .. name
+    -- The character's profile being set, when it has more than one
+    local profile = #CK.Profiles:Sets() > 1 and select(2, CK.Profiles:ActiveSet())
+    return L.TAB_GAMEPAD .. (profile and (" › " .. profile) or "") .. " › " .. name
 end
 
 function W:Help()
