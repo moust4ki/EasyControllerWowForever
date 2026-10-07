@@ -6,6 +6,9 @@ local L = CK.L
 CK.Methods = CK.Methods or {}
 local M = { key = "wheel", width = 340, areaWidth = 304, height = 304 }
 CK.Methods.wheel = M
+-- No mouse buttons row under the wheel (asked: removed from the
+-- daisywheel; the wheel's keys stay clickable)
+M.noMouseRow = true
 
 local LAYOUTS = {
     letters = {
