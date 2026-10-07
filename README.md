@@ -130,16 +130,18 @@ room, the text and its cursor above them, the channel above the text, a line to 
 | RB | put it in place of the word at the cursor (a whisper to no one yet: the name) |
 | D-pad ← → | previous / next channel; LB + ← →: move the cursor in the text |
 
-The layers follow the game's emulated modifiers (LT Shift, LB Ctrl, RT Alt). The suggestions use
-ConsolePort's ranking (edit distance, words containing what is typed, frequency) on the addon's
-dictionaries and learned words, compared without accents. In a prompt or a field of the game, B
+The layers follow the game's emulated modifiers (LT Shift, LB Ctrl, RT Alt). The suggestions start
+with the addon's prediction (the next word when nothing is typed, the word's completions in its
+context, a command's), then ConsolePort's ranking (edit distance, words containing what is typed,
+frequency) on the addon's dictionaries and learned words, compared without accents. In a prompt or a field of the game, B
 confirms, Y cancels and ← → move the cursor.
 
 ## Mouse / Steam Controller
 
-Every letter, suggestion and action (Shift, 123, Space, Delete, Send, X) is clickable. The game's
-gamepad UI closes the chat on the first click: the keyboard then stays open and keeps the message,
-"Send" sends it to the chat channel and "X" closes the keyboard.
+Every letter and suggestion is clickable, and under the split keyboard the actions too (Shift, 123,
+Space, Delete, Send, X; the daisywheel has no such row). The game's gamepad UI closes the chat on the
+first click: the keyboard then stays open and keeps the message, "Send" sends it to the chat channel
+and "X" closes the keyboard.
 
 ## Chat channels
 
@@ -507,7 +509,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
   (linear, gentle, fast), magnet, cursor lines;
 - lock position, open automatically, only when the gamepad is active;
 - keyboard size: small (80 %), normal, large (125 %), extra large (150 %) — `/ec scale` for any
-  other value; invert the sticks vertical axis, show / hide the mouse buttons row;
+  other value; invert the sticks vertical axis, show / hide the mouse buttons row (split keyboard);
 - font (Blizzard fonts: Friz Quadrata, Morpheus, Skurri, Arial Narrow, or the chat font);
 - button style (Xbox / PlayStation / Nintendo Switch) and the game's button icons;
 - the gamepad UI's centre dot, for OLED screens: the game's, a colour, a colour changing every 5

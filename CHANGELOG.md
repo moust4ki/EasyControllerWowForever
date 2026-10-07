@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.14.1
+
+- **ConsolePort keyboard: our prediction too** (asked): its suggestions now start with the addon's,
+  the next word from what you wrote when nothing is typed ("je" -> suis, vais...), the word's
+  completions in its context ("je s" -> suis), a command's while it is typed ("/rel" -> /reload, RB
+  puts it in with a space). ConsolePort's own matches follow, typos forgiven ("bonjuor" -> bonjour).
+- **Daisywheel: no mouse buttons row** (asked): the row of mouse buttons (Shift, 123, Space,
+  Delete, Send, X) is gone from under the wheel; the wheel's keys stay clickable. The split keyboard
+  keeps it (Keyboard › Mouse buttons, now for the split keyboard only).
+
 ## 1.14.0
 
 - **Profiles** (asked: a druid healing and feral, a warrior's stances...): up to 5 sets of a
