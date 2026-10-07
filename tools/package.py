@@ -1,8 +1,8 @@
 """Build the CurseForge / release zip: dist/EasyController-<version>.zip
 
 The zip holds a single EasyController/ folder with what the game loads:
-the TOC and its files, Bindings.xml, the TGA textures, LICENSE, README and
-CHANGELOG. Design sources and tools are left out.
+the TOC and its files, Bindings.xml, the TGA textures (and ConsolePort's, in
+textures/consoleport), LICENSE (and ConsolePort's), README and CHANGELOG. Design sources and tools are left out.
 
 Usage:
     python tools/package.py
@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ADDON = "EasyController"
-EXTRA = ["Bindings.xml", "LICENSE", "README.md", "CHANGELOG.md"]
+EXTRA = ["Bindings.xml", "LICENSE", "LICENSE-ConsolePort.md", "README.md", "CHANGELOG.md"]
 
 
 def main():
@@ -25,6 +25,9 @@ def main():
 
     files = [f"{ADDON}.toc"] + listed + EXTRA
     files += sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "textures").glob("*.tga"))
+    # ConsolePort's keyboard (ConsolePort.lua): its own textures, BLP and TGA
+    files += sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "textures" / "consoleport").glob("*")
+                    if p.suffix.lower() in (".tga", ".blp"))
 
     missing = [f for f in files if not (ROOT / f).is_file()]
     if missing:

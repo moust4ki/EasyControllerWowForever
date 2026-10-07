@@ -65,7 +65,10 @@ end
 -- True while a mouse button is held over the keyboard (not just hovering:
 -- sending with A while the cursor rests on the wheel must still close it)
 function CK:IsClickingWheel()
-    return self.frame and self.frame:IsMouseOver()
+    -- A floating method: its own frame (the panel is off screen)
+    local method = self.frame and self:GetMethod()
+    local f = method and method.floating and method.frame or self.frame
+    return f and f:IsMouseOver()
         and (IsMouseButtonDown("LeftButton") or IsMouseButtonDown("RightButton"))
 end
 

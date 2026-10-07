@@ -60,7 +60,7 @@ local function settings() return CK.db.settings end
 local function moduleRows(b)
     local s = settings()
     local mods, f = s.modules, s.features
-    local method = s.inputMethod == "stick" and L.METHOD_STICK or L.METHOD_WHEEL
+    local method = ({ stick = L.METHOD_STICK, consoleport = L.METHOD_CONSOLEPORT })[s.inputMethod] or L.METHOD_WHEEL
     b.header(L.SEC_MODULES)
     b.check({ id = "m_kb", label = L.LBL_CHAT_KEYBOARD, status = method, tip = L.OPT_SUBTITLE,
         get = function() return mods.keyboard end,
@@ -341,7 +341,8 @@ local MAGNETS = {
     { key = "none", name = L.MAGNET_NONE }, { key = "weak", name = L.MAGNET_WEAK },
     { key = "medium", name = L.MAGNET_MEDIUM }, { key = "strong", name = L.MAGNET_STRONG },
 }
-local METHODS = { { key = "wheel", name = L.METHOD_WHEEL }, { key = "stick", name = L.METHOD_STICK } }
+local METHODS = { { key = "wheel", name = L.METHOD_WHEEL }, { key = "stick", name = L.METHOD_STICK },
+    { key = "consoleport", name = L.METHOD_CONSOLEPORT } }
 
 -- The module off: only its box
 local function keyboardOff(b)

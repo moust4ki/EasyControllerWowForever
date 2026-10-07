@@ -25,6 +25,7 @@ Message.lua
 UI.lua
 Wheel.lua
 StickKeyboard.lua
+ConsolePort.lua
 Input.lua
 Fields.lua
 QuestItems.lua

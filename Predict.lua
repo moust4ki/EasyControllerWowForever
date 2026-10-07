@@ -108,6 +108,19 @@ function P:NumEntries()
     return numEntries
 end
 
+-- Every word known, lowercase, with its weight (the dictionary's, plus the
+-- player's use): ConsolePort's keyboard ranks them its own way
+function P:EachWord(fn)
+    local words = CK.db.words
+    local seen = {}
+    for word, e in pairs(entries) do
+        local lower = CK.Lower(word)
+        local weight = e.dict + USER_WEIGHT * (words[word] or 0)
+        if not seen[lower] or seen[lower] < weight then seen[lower] = weight end
+    end
+    for word, weight in pairs(seen) do fn(word, weight) end
+end
+
 ---------------------------------------------------------------------------
 -- Tokens and context
 ---------------------------------------------------------------------------

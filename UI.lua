@@ -144,7 +144,10 @@ CK.UIKit = {
 -- Input methods
 ---------------------------------------------------------------------------
 function CK:GetMethod()
-    return CK.Methods[self.db and self.db.settings.inputMethod] or CK.Methods.wheel
+    local method = CK.Methods[self.db and self.db.settings.inputMethod]
+    -- One that couldn't be built (ConsolePort.lua): the daisywheel
+    if not method or method.broken then return CK.Methods.wheel end
+    return method
 end
 
 -- Redraw the active input method and the Shift / 123 state
@@ -154,13 +157,15 @@ function CK:UpdateMethod()
     self:UpdateBadge()
 end
 
--- Switch between the daisywheel and the split keyboard, even while open
+-- Switch between the input methods, even while open
 function CK:SetInputMethod(key)
     if not CK.Methods[key] then return end
     self.db.settings.inputMethod = key
     if not self.frame then return end
     self:GetMethod():Reset()
     self:Layout()
+    -- A floating method's own place, or the panel's back
+    self:RestorePosition()
     self:UpdateHelp()
     self:UpdateMethod()
     if self.bindingsActive then self:EnableButtons() end
@@ -458,6 +463,15 @@ function CK:Layout()
     if not f then return end
     local method = self:GetMethod()
     local w, mh = method.width, method.height
+    -- A floating method (ConsolePort.lua): only its area, which places its
+    -- own frame on screen; the panel stays open off screen (its bindings,
+    -- sticks and updates), nothing of it changed (see RestorePosition)
+    if method.floating then
+        for _, m in pairs(CK.Methods) do m.area:SetShown(m == method) end
+        f:SetSize(w, mh)
+        place(method.area, f, 0, 0, method.areaWidth, mh)
+        return
+    end
     f:SetWidth(w)
 
     place(f.bar, f, 8, 8, w - 16, 44)
@@ -586,6 +600,17 @@ end
 
 function CK:RestorePosition()
     local f = self.frame
+    local method = self:GetMethod()
+    if method.floating then
+        f:SetClampedToScreen(false)
+        f:ClearAllPoints()
+        f:SetPoint("TOPRIGHT", UIParent, "BOTTOMLEFT", -2000, -2000)
+        f:SetScale(self.db.settings.scale)
+        method:RestorePosition()
+        self:PositionSendButton()
+        return
+    end
+    f:SetClampedToScreen(true)
     f:ClearAllPoints()
     local pos = self.db.pos
     if pos then
