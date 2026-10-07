@@ -558,7 +558,10 @@ are also available in *Escape > Key Bindings > AddOns*.
   (`SetPreferredGamepadInteractTarget` error, which can freeze the client). The addon never closes the
   chat itself, creates its frames outside the gamepad UI's watch, and sends with the mouse through a
   secure macro button.
-- Gamepad buttons are bound (override bindings) only while typing, and released before combat.
+- Gamepad buttons are bound (override bindings) only while typing, and released before combat. The
+  game binds its chat's own buttons (A send, X channels, Y tab settings) again whenever its gamepad
+  focus is refreshed: while open, the keyboard checks its keys and sets them back when one was taken
+  (a few times in a row at most; `/ec binds` tells what took it).
 - The gamepad mapping never changes WoW Forever's gamepad UI. An input is "free" only when no game
   binding uses it (checked with ours removed); our bindings are plain override bindings of the
   addon's own frame, set out of combat while none of the game's gamepad windows has the focus, below

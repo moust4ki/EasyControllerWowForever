@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.14.2
+
+- **A sends again** (reported by two players: A did nothing, or opened the game's own chat menu): the
+  game binds its chat's own buttons (A send, X channels, Y tab settings) again whenever its gamepad
+  focus is refreshed, and could take them back from the keyboard. While it is open, the keyboard now
+  keeps its buttons: one taken is set back at once. B stays the game's on an empty message (it closes
+  the chat). `/ec binds` tells what took a button.
+- **ConsolePort keyboard: a space after a suggestion** (reported): RB puts the word in with a space
+  after it, the cursor after the space, like the other methods; none after an elision ("j'") or when a
+  space follows already.
+
 ## 1.14.1
 
 - **ConsolePort keyboard: our prediction too** (asked): its suggestions now start with the addon's,
