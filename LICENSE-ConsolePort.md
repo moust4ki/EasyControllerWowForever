@@ -42,6 +42,9 @@ prevent installing or running ConsolePort (the Standard Version).
   their accents ("tres" finds "très"); the word put in keeps its accents.
   The dictionary isn't generated from the game's strings and can't be wiped
   or regenerated from the keyboard.
+- The addon's own prediction comes first in the suggestions: the next word
+  from the context when nothing is typed, the word's completions in its
+  context, a command's completions; ConsolePort's matches follow.
 - The Alt layer (Alt, Shift+Alt), empty in ConsolePort, holds the accents of
   the language chosen in the addon.
 - The pipe character is typed as "||" (escaped for the chat).
