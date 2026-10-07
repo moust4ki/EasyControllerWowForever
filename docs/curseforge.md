@@ -18,6 +18,8 @@ Every feature you don't need can be turned off to save even more resources.
 - **ConsolePort keyboard**: a third input method, ConsolePort's own keyboard. 8 groups of 4 around the left stick typed with A / B / X / Y, LT / LB / RT for capitals, numbers, commands and accents, its word suggestions on our dictionaries, and the channel on the D-pad. Thanks to Sebastian Lindfors for ConsolePort.
 - **Our prediction in the ConsolePort keyboard** (1.14.1): the next word, the completions in context and the commands first, ConsolePort's typo-tolerant matches after.
 - **Daisywheel** (1.14.1): no more mouse buttons row under the wheel (its keys stay clickable).
+- **A sends again** (1.14.2): for players whose A did nothing or opened the game's chat menu, the keyboard now keeps its buttons while it is open.
+- **ConsolePort keyboard** (1.14.2): a space after the suggestion put in.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained

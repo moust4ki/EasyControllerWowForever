@@ -1730,6 +1730,12 @@ function M:Diagnose()
     if self.lastRelease then
         DEFAULT_CHAT_FRAME:AddMessage("  released " .. self.lastRelease)
     end
+    -- The chat keyboard's keys taken by something else while it was open
+    local taken = CK.lastTaken
+    if taken then
+        DEFAULT_CHAT_FRAME:AddMessage(format("  keyboard: %s taken by %s %.0f s ago, set again", taken.key,
+            tostring(taken.by), GetTime() - taken.time))
+    end
     -- Each key bound: ours, what runs now, the game's own (its gamepad context)
     local keys = {}
     for combo in pairs(self.taken) do keys[#keys + 1] = combo end

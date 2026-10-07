@@ -44,7 +44,8 @@ prevent installing or running ConsolePort (the Standard Version).
   or regenerated from the keyboard.
 - The addon's own prediction comes first in the suggestions: the next word
   from the context when nothing is typed, the word's completions in its
-  context, a command's completions; ConsolePort's matches follow.
+  context, a command's completions; ConsolePort's matches follow. A word put
+  in is followed by a space (not after an elision), the cursor after it.
 - The Alt layer (Alt, Shift+Alt), empty in ConsolePort, holds the accents of
   the language chosen in the addon.
 - The pipe character is typed as "||" (escaped for the chat).
