@@ -722,7 +722,7 @@ end
 -- "LFM [quest]". B empties it as usual.
 local DRAFT_TIME = 600
 local KEEP_DRAFT = {
-    ["chat deactivated"] = true, ["focus lost (OnUpdate)"] = true, combat = true, toggle = true,
+    ["chat deactivated"] = true, ["focus lost (OnUpdate)"] = true, combat = true, toggle = true, options = true,
 }
 
 -- attrs: the channel the keyboard opens on (the one kept), else the chat's

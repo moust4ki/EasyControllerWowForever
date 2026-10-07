@@ -135,8 +135,9 @@ local function slash(msg)
     local cmd, arg = (msg or ""):lower():match("^[ \t\r\n]*([^ \t\r\n]*)[ \t\r\n]*(.-)[ \t\r\n]*$")
 
     if cmd == "" then
-        -- Alone: the options (asked), like /ec config
-        CK.Config:OpenWhenFree(nil)
+        -- Alone: the options (asked), like /ec config; over the chat it was
+        -- typed in (asked: it waited for Escape)
+        CK.Config:OpenWhenFree(nil, true)
     elseif cmd == "keyboard" or cmd == "clavier" or cmd == "kb" then
         if not s.modules.keyboard then
             CK:Print(L.KEYBOARD_OFF)
@@ -219,7 +220,7 @@ local function slash(msg)
         end
     elseif cmd == "map" or cmd == "config" or cmd == "options" then
         -- The chat edit box is still sending this command: open once it is closed
-        CK.Config:OpenWhenFree(cmd == "map" and "gamepad" or nil)
+        CK.Config:OpenWhenFree(cmd == "map" and "gamepad" or nil, true)
     elseif cmd == "phrases" then
         -- The chat edit box is still sending this command: open once it is done
         C_Timer.After(0.1, function() CK.Phrases:Open(nil) end)
