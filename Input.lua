@@ -162,9 +162,42 @@ function CK:OnUpdate()
         end
     end
 
+    self:CheckBindings(now)
+
     if self.repeatFn and now >= self.repeatAt then
         self[self.repeatFn](self)
         self.repeatAt = now + REPEAT_RATE
+    end
+end
+
+-- The keyboard's keys kept while it is open (reported: A did nothing, or
+-- opened the game's chat menu). The game binds its chat's own footer on the
+-- same keys (A send, X channels, Y tab settings) whenever its gamepad focus
+-- is refreshed, and the latest override binding on a key wins: ours, set
+-- once at opening, could end up under the game's. Looked at five times a
+-- second; ours set again when another took one, never more than a few times
+-- in a row (no endless back and forth with whoever wants the key).
+local CHECK_EVERY, RESTORE_WINDOW, MAX_RESTORES = 0.2, 3, 5
+
+function CK:CheckBindings(now)
+    if not (self.bindingsActive and self.keyboardBinds) or InCombatLockdown() or not GetBindingAction then return end
+    if now < (self.nextBindCheck or 0) then return end
+    self.nextBindCheck = now + CHECK_EVERY
+    for key, action in pairs(self.keyboardBinds) do
+        local current = GetBindingAction(key, true)
+        if current ~= action then
+            local restores = self.bindRestores or {}
+            while restores[1] and restores[1] < now - RESTORE_WINDOW do table.remove(restores, 1) end
+            self.bindRestores = restores
+            self.lastTaken = { key = key, by = current, time = now }
+            if #restores >= MAX_RESTORES then return end
+            restores[#restores + 1] = now
+            if self.db.settings.debug then
+                self:Print("%s taken by %s: the keyboard's set again", key, tostring(current))
+            end
+            self:EnableButtons()
+            return
+        end
     end
 end
 
@@ -199,6 +232,8 @@ end
 local PREFIXES = { "", "SHIFT-", "CTRL-", "ALT-", "CTRL-SHIFT-", "ALT-SHIFT-", "ALT-CTRL-", "ALT-CTRL-SHIFT-" }
 local function bind(f, key, button)
     for _, prefix in ipairs(PREFIXES) do SetOverrideBindingClick(f, true, prefix .. key, button) end
+    -- What the key must run while the keyboard is open (see CK:CheckBindings)
+    if CK.keyboardBinds then CK.keyboardBinds[key] = "CLICK " .. button .. ":LeftButton" end
 end
 
 local SEND_BUTTON = "ControllerKeyboardSendButton"
@@ -346,6 +381,7 @@ function CK:EnableButtons()
     if InCombatLockdown() then return end
     ClearOverrideBindings(f)
     self.cancelBound = false
+    self.keyboardBinds = {}
     -- A method that binds its own keys (ConsolePort.lua: A, B, X, Y...)
     local method = self:GetMethod()
     if method.ownButtons then
@@ -386,12 +422,14 @@ function CK:UpdateCancelBinding()
         bind(self.frame, "PAD2", bindingButtonName("PAD2"))
     else
         for _, prefix in ipairs(PREFIXES) do SetOverrideBinding(self.frame, true, prefix .. "PAD2", nil) end
+        if self.keyboardBinds then self.keyboardBinds.PAD2 = nil end
     end
     self.cancelBound = want
 end
 
 function CK:DisableButtons()
     self.padDown = nil
+    self.keyboardBinds = nil
     if not self.bindingsActive or InCombatLockdown() then return end
     ClearOverrideBindings(self.frame)
     self.cancelBound = false
