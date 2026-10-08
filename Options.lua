@@ -341,8 +341,9 @@ local MAGNETS = {
     { key = "none", name = L.MAGNET_NONE }, { key = "weak", name = L.MAGNET_WEAK },
     { key = "medium", name = L.MAGNET_MEDIUM }, { key = "strong", name = L.MAGNET_STRONG },
 }
-local METHODS = { { key = "wheel", name = L.METHOD_WHEEL }, { key = "stick", name = L.METHOD_STICK },
-    { key = "consoleport", name = L.METHOD_CONSOLEPORT } }
+-- (ConsolePort's keyboard, ConsolePort.lua, no longer offered: kept in the
+-- files, a choice of the past put back on the daisywheel by CK.CleanEntries)
+local METHODS = { { key = "wheel", name = L.METHOD_WHEEL }, { key = "stick", name = L.METHOD_STICK } }
 
 -- The module off: only its box
 local function keyboardOff(b)

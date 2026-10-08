@@ -9,8 +9,8 @@ keyboard** with word prediction, a **gamepad mapping** (the gamepad bar's slots,
 the free buttons and back paddles), and **quest** helpers. RB + D-pad down opens the configuration.
 
 The **gamepad keyboard** types in **WoW Forever**'s chat, with **smartphone-style word prediction**
-that learns the way you write. Three input methods: a **daisywheel**, a **split keyboard** (one half per
-stick) and **ConsolePort**'s own keyboard.
+that learns the way you write. Two input methods: a **daisywheel** and a **split keyboard** (one half per
+stick).
 Everything is also clickable with the mouse, so it works with the Steam Controller trackpad too.
 
 The look follows WoW Forever's gamepad UI: bronze and gold rims, Friz Quadrata font, the game's own
@@ -39,7 +39,7 @@ QWERTZ and the German dictionary.
 The keyboard opens by itself with the chat. It is disabled in combat (the game blocks too many
 actions there, "Not possible in combat") and comes back after combat if the chat is still open.
 
-Choose the input method in the options or with `/ec mode wheel|stick|consoleport`.
+Choose the input method in the options or with `/ec mode wheel|stick`.
 
 ### Common to the daisywheel and the split keyboard
 
@@ -105,36 +105,6 @@ and channels are driven with the D-pad.
 
 Options: layout, stick dead zone, stick response (linear, gentle, fast), magnet strength, cursor
 lines. Pick a larger window size in the options if the keys feel small.
-
-### ConsolePort
-
-ConsolePort's own keyboard (`ConsolePort.lua`: code and art from
-[ConsolePort](https://github.com/seblindfors/ConsolePort) 3.3.9 by Sebastian Lindfors, Artistic
-License 2.0; `LICENSE-ConsolePort.md` lists what differs). A ring of 8 groups of 4 characters
-floats on its own (the addon's window stays off screen meanwhile); its suggestions on the side with
-room, the text and its cursor above them, the channel above the text, a line to the field typed in.
-
-| Button | Action |
-|---|---|
-| Left stick | pick a group (top first, clockwise) |
-| Y / B / A / X | type the group's top / right / bottom / left character |
-| A, no group | space |
-| B, no group | send (secure macro), then the game's own B closes the chat, like Enter; empty: closes it |
-| X, no group | erase before the cursor; LB + X: everything |
-| Y, no group | escape: the text dropped, the game's own B closes the chat |
-| LT / LB / LT + LB | capitals / numbers and symbols / commands (`/s`, `/p`, `/w`…) and raid markers |
-| RT / LT + RT | the language's accents / in capitals |
-| Right stick, group chosen | aim a character, push to type it |
-| Right stick, no group | move the keyboard (kept for the next time) |
-| D-pad ↑ ↓ | pick a suggestion |
-| RB | put it in place of the word at the cursor (a whisper to no one yet: the name) |
-| D-pad ← → | previous / next channel; LB + ← →: move the cursor in the text |
-
-The layers follow the game's emulated modifiers (LT Shift, LB Ctrl, RT Alt). The suggestions start
-with the addon's prediction (the next word when nothing is typed, the word's completions in its
-context, a command's), then ConsolePort's ranking (edit distance, words containing what is typed,
-frequency) on the addon's dictionaries and learned words, compared without accents. In a prompt or a field of the game, B
-confirms, Y cancels and ← → move the cursor.
 
 ## Mouse / Steam Controller
 
@@ -552,7 +522,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 
 - every module on or off (Home › Modules; Gamepad extras at the top of Home › Gamepad), each one's
   settings in its own tab;
-- input method (daisywheel / split keyboard / ConsolePort), daisywheel look (groups circled / characters only),
+- input method (daisywheel / split keyboard), daisywheel look (groups circled / characters only),
   keyboard layout (AZERTY, QWERTY, QWERTZ, Spanish, Italian), stick dead zone, stick response
   (linear, gentle, fast), magnet, cursor lines;
 - lock position, open automatically, only when the gamepad is active;
@@ -572,7 +542,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec` | the options (configuration panel), like `/ec config` |
 | `/ec keyboard` | open the keyboard (also `/ec clavier`, `/ec kb`) |
 | `/ec lock` | lock / unlock the position (unlocking shows the keyboard to place it) |
-| `/ec mode wheel\|stick\|consoleport` | daisywheel, split keyboard or ConsolePort |
+| `/ec mode wheel\|stick` | daisywheel or split keyboard |
 | `/ec layout azerty\|qwerty\|qwertz\|es\|it` | split keyboard layout |
 | `/ec auto` | open automatically with the chat |
 | `/ec pad` | only open automatically when the gamepad is active |
@@ -623,7 +593,8 @@ are also available in *Escape > Key Bindings > AddOns*.
 - B is bound only while the message holds text; the binding is removed when B is released, so with an
   empty message B goes back to the game, which closes the chat.
 - Code layout: `Message.lua` is the common core (message, prediction, channels, sending),
-  `Wheel.lua`, `StickKeyboard.lua` and `ConsolePort.lua` are the input methods, `UI.lua` the common panel, `Input.lua`
+  `Wheel.lua` and `StickKeyboard.lua` are the input methods (`ConsolePort.lua`, ConsolePort's keyboard,
+  no longer offered), `UI.lua` the common panel, `Input.lua`
   the pad buttons and sticks; `ConfigWindow.lua` the configuration panel (`ConfigKit.lua` its parts,
   `Options.lua` the Home, Wheels, Keyboard and Alerts tabs, `MapWindow.lua` the Gamepad tab,
   `MyWheels.lua` the wheels' cards and editor); `Mapping.lua` / `Paddles.lua`,

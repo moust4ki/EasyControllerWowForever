@@ -22,22 +22,25 @@ Every feature you don't need can be turned off to save even more resources.
 
 ## Demo
 
-[![Easy Controller - Forever: the demo (YouTube)](https://img.youtube.com/vi/BUiO3YtK4Cg/hqdefault.jpg)](https://www.youtube.com/watch?v=BUiO3YtK4Cg)
+### Full demo of the Addon
 
-[Watch the demo on YouTube](https://www.youtube.com/watch?v=BUiO3YtK4Cg)
+[![Full demo of the Addon (YouTube)](https://img.youtube.com/vi/BUiO3YtK4Cg/hqdefault.jpg)](https://www.youtube.com/watch?v=BUiO3YtK4Cg)
 
-**Party spells (healing) demo**
+**[▶ Watch "Full demo of the Addon" on YouTube](https://www.youtube.com/watch?v=BUiO3YtK4Cg)**
 
-[![Easy Controller - Forever: party spells, the healing demo (YouTube)](https://img.youtube.com/vi/JXDERP1FTDg/hqdefault.jpg)](https://www.youtube.com/watch?v=JXDERP1FTDg)
+### Healer Mode Demo
 
-[Watch the party spells demo on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)
+[![Healer Mode Demo (YouTube)](https://img.youtube.com/vi/JXDERP1FTDg/hqdefault.jpg)](https://www.youtube.com/watch?v=JXDERP1FTDg)
+
+**[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.15
-- **Party spells**: put a heal or a buff on a button from the new **Party/Healer** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
+- **Healer/Buff mode**: put a heal or a buff on a button from the new **Party/Healer** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the Healer Mode Demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
 - **Bind list**: its tabs on two rows, wider and easier to read.
 - **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
-- **Party/Healer wheel** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
-- **Party/Healer wheel** (1.15.4): no longer opens in the middle of the screen after a fight begun with LB or RB held; it stays on its button.
+- **Healer/Buff mode** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
+- **Chat keyboard** (1.15.5): two input methods, the daisywheel and the split keyboard; ConsolePort's keyboard is no longer offered (if you used it: the daisywheel).
+- **Healer/Buff mode** (1.15.4): the wheel no longer opens in the middle of the screen after a fight begun with LB or RB held; it stays on its button.
 - **Back paddles** (1.15.3): Nothing alone no longer blocks an action on a trigger layer of the same paddle.
 - **The size of the gamepad buttons** (1.15.2): the whole gamepad bar from 70 % to 150 %, every layer at once, the addon's buttons and pictures following (Home › Gamepad, or Move / size on the Gamepad tab: LB / RB with the bar picked up). Placing is clearer: a thin frame round the bar's buttons and a tag saying what is selected.
 
@@ -49,10 +52,10 @@ Every feature you don't need can be turned off to save even more resources.
 - **Triggers: press to switch** instead of holding them (option), every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
 - **Profiles**: each character its own buttons, wheels and supplies, automatically, and up to 5 sets of them, picked by hand or by your talents
-- **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel, split keyboard or ConsolePort's keyboard
+- **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
-- **Party spells**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept
+- **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
 - **Hold to show** a wheel, let go to use (option)
@@ -77,7 +80,7 @@ prediction finish your words and sentences, choose the channel, and send with A.
 clickable with the mouse or the Steam Controller trackpad. It also opens in the game's own fields
 (the Auction House search, the bags' search, mail...): what you type goes into the field, A is Enter.
 
-## Three input methods
+## Two input methods
 
 **Daisywheel**
 A wheel of 8 petals with 4 characters each, drawn like the game's radial menu. The left stick picks a
@@ -90,14 +93,6 @@ cursor on the left half, the right stick on the right half: each stick's tilt is
 position, released = center. LT types the left key, RT the right one. Large keys with aligned columns,
 a copper (left) and amber (right) target, a magnet so the highlight never flickers, and a linear stick
 response with an optional gentle or fast curve.
-
-**ConsolePort**
-ConsolePort's own keyboard: a ring of 8 groups of 4 characters. The left stick picks a group, A / B /
-X / Y type its characters; LT for capitals, LB for numbers and symbols, LT + LB for commands (`/p`,
-`/g`, `/w`…) and raid markers, RT for the accents of your language. Its suggestions beside the ring,
-our prediction first then ConsolePort's typo-tolerant matches (D-pad up / down, RB to put one in), the
-channel above the text (D-pad left / right), and the ring floats where you want it (right stick, with
-no group chosen).
 
 The daisywheel and the split keyboard have a numbers / accents / symbols layer whose accents follow
 the language (é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù). The method can be switched at any
@@ -163,7 +158,7 @@ a choice fills the slot and goes on to the next one. Name it with the gamepad ke
 button straight from the editor ("Assign a button") or from the Gamepad tab's Macros list. Each wheel
 shows its filled slots only, in as many sections, and works like the consumables wheel, in combat too.
 
-**Party spells**
+**Healer/Buff mode**
 The Gamepad tab's **Party/Healer** list holds your spells for allies (heals, buffs). Put one on a button and
 that button opens a small wheel like the game's own flyouts, centred on it with the spell in the
 middle: the members of your party who are there, each always in the same place (you at the bottom,
@@ -171,10 +166,10 @@ member 1 on the left, then clockwise), with their portrait and name. Push the ri
 someone and let it go: the spell is cast on them, your target kept. Or hold the button, aim, and let
 the button go. A short press leaves it open; B closes it. A member too far for the spell has a red
 portrait, a dead one is greyed (still there for a resurrection). It works in combat, in every trigger
-layer, on paddles too; in a raid, with your subgroup. While a party spell is on a button, the game's
+layer, on paddles too; in a raid, with your subgroup. While a Healer/Buff mode spell is on a button, the game's
 stick direction keys are on (the stick's release needs them): the addon keeps them from the game's
 own flyouts (aspects, pet) and gives your setting back when none is left and at logout.
-[See it in the party spells demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
+[See it in the Healer Mode Demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
 
 **Consumables wheel**
 A key of its own (any free button, or a back paddle in any trigger layer) opens a wheel drawn like
@@ -212,7 +207,7 @@ unused trigger combinations (LT + Start…) and the back paddles can run a game 
 autorun, game menu, map, bags, any key binding of the game), one of the game's own gamepad functions
 (jump, back, interact, inspect, Start menu, ping, targeting…), a spell, an item, a macro, or press a
 button of the gamepad action bar. The addon's own (the consumables wheel, the quick phrases, your
-wheels) head the Macros list; your party spells have their own list (Party/Healer). The game's own buttons (A, B, X, Y, D-pad, LB / RB) can be replaced too,
+wheels) head the Macros list; the Healer/Buff mode's spells have their own list (Party/Healer). The game's own buttons (A, B, X, Y, D-pad, LB / RB) can be replaced too,
 its menus keeping their buttons; one button gives them all back, and LT + RB / RT + LB (which the game
 leaves to its targeting) can take an action too. Start and Select stay the game's. Each trigger layer
 keeps its own function: what you put on L3 alone stays on L3 alone.
@@ -339,18 +334,6 @@ X, Y, Start and Select stay with the game's gamepad UI.
 | LB / RB | delete / space |
 | Left stick click | numbers, accents, symbols |
 
-**ConsolePort**
-
-| Button | Action |
-|---|---|
-| Left stick | pick a group |
-| A / B / X / Y | type the group's character (bottom / right / left / top) |
-| A / B / X / Y, no group | space / send / erase / close the chat |
-| LT / LB / LT + LB / RT | capitals / numbers and symbols / commands and markers / accents |
-| D-pad ↑ ↓, RB | pick a suggestion, put it in |
-| D-pad ← → | channel (LB + ← →: the cursor in the text) |
-| Right stick, no group | move the keyboard |
-
 **Quick phrases**
 
 | Button | Action |
@@ -377,7 +360,7 @@ Install with the CurseForge app, or extract the zip into
 
 - `/ec`: the options (also RB + D-pad down)
 - `/ec keyboard`: open the keyboard
-- `/ec mode wheel|stick|consoleport`: daisywheel, split keyboard or ConsolePort
+- `/ec mode wheel|stick`: daisywheel or split keyboard
 - `/ec layout azerty|qwerty|qwertz|es|it`: split keyboard layout
 - `/ec lang fr|en|de|es|it|both`: suggestion and accent language
 - `/ec lock`: lock / unlock the position (unlocking shows the keyboard to move it)
@@ -402,4 +385,4 @@ is still open.
 Source code and issues: [GitHub](https://github.com/moust4ki/EasyControllerWowForever) - Roadmap:
 [ROADMAP.md](https://github.com/moust4ki/EasyControllerWowForever/blob/main/ROADMAP.md)
 
-*Dictionaries derived from FrequencyWords by Hermit Dave (CC-BY-SA-4.0). The ConsolePort keyboard is ConsolePort's own, by Sebastian Lindfors ([ConsolePort](https://github.com/seblindfors/ConsolePort), Artistic License 2.0). Code under the MIT license.*
+*Dictionaries derived from FrequencyWords by Hermit Dave (CC-BY-SA-4.0). Includes code and art from [ConsolePort](https://github.com/seblindfors/ConsolePort) by Sebastian Lindfors (Artistic License 2.0). Code under the MIT license.*
