@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.15.2
+
+- **The size of the gamepad buttons** (asked): the game's whole gamepad bar bigger or smaller, from
+  70 % to 150 % in steps of 5, all at once: its four bars (no trigger, LT, RT, LT + RT), the targeting
+  bars (LB / RB), the class actions. It grows from its bottom middle, where the game anchors it, so it
+  keeps its place. What the addon adds follows it: the extra buttons and their places, the pictures on
+  the game's buttons replaced, the trigger toggle's bar, and each party wheel opens on its button
+  where it is now. Set in Home › Gamepad (**Size of the buttons**, D-pad left / right) or while
+  placing: **Move / size** on the Gamepad tab (was Move buttons), the bar picked up, LB / RB its size,
+  X the game's place and size, B both back. Out of combat (in combat: once it ends).
+- **Placing made clearer** (reported: a big green rectangle, no telling what it moved): a thin frame
+  around the bar's buttons only (the game's frame is much larger than them), and a tag over what is
+  selected with its name (the bar: its size too), gold chosen, green picked up.
+
 ## 1.15.1
 
 - **Party/Healer wheel: letting the stick go casts reliably** (reported: a buff never went to the

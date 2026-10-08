@@ -310,15 +310,27 @@ you put on them. Spells are listed with their rank.
 
 The extra buttons that do something (back paddles, L3, R3) appear around the gamepad action bar, in
 its round slot style: the action's icon, count, cooldown and usability, the held trigger layer's
-action, and the game's pressed look when you press them. **Move buttons** moves the game's gamepad bar by steps with the D-pad (only its
-place on the screen changes, out of combat; X puts it back; the extra buttons follow it), and puts each
-extra button
+action, and the game's pressed look when you press them. **Move / size** moves the game's gamepad bar by steps with the D-pad (only its
+place on the screen changes, out of combat; X puts it back; the extra buttons follow it), resizes it
+with LB / RB once picked up (X then gives back the game's place and size, B both as they were), and
+puts each extra button
 on one of the fixed places around the bar's controls (two columns on the outer side, two rows above and
 two below): the D-pad chooses the bar or a button (LB / RB too), A picks it up, then the D-pad moves it
 (a button goes from place to place, onto a taken place the two buttons swap), A puts it down and B puts
 it back; the mouse clicks a button then a place; the right side mirrors the left (Y turns it
 off), X puts a button back. Places follow the compact layout. With **Free placement** on (Home ›
 Gamepad), the buttons go anywhere: a few pixels at a time with the D-pad, or dragged with the mouse.
+While placing, a thin frame goes round the bar's buttons (the game's frame is much larger than them)
+and a tag over what is selected says its name (the bar: its size), gold chosen, green picked up.
+
+**Size of the buttons** (Home › Gamepad, D-pad left / right): the game's whole gamepad bar from 70 %
+to 150 % in steps of 5. Its scale takes all of it at once: its four bars (no trigger, LT, RT, LT + RT),
+the targeting bars (LB / RB), the class actions are its children. It grows from its bottom middle,
+where the game anchors it (its offsets divided by its scale to keep its place). What the addon adds
+follows it: the extra buttons hang on its anchors at its scale, the pictures on replaced buttons are
+on its buttons, the trigger toggle's bar takes its scale, and each party wheel opens on its button
+where it is now (recomputed with each change). Out of combat (the bar is protected; in combat: once
+it ends).
 
 ### LT + RB and RT + LB
 
