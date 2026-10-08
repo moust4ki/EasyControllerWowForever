@@ -589,17 +589,18 @@ function M:Inactive(input, layer)
     return action and not M.Routable(action) and layer ~= self:SharedLayers(layer)[1] or false
 end
 
--- The lists the mapping window offers for a paddle in a layer
+-- The lists the mapping window offers for a paddle in a layer (a shared
+-- key: what its router runs, spells, party spells, items and macros)
 function M:PaddleTabs(input, layer)
     local shared = self:SharedLayers(layer)
     if #shared == 1 then return M.TABS end
     if layer == shared[1] then
         for i = 2, #shared do
-            if self:Get(input.id, shared[i]) then return M.SLOT_TABS end
+            if self:Get(input.id, shared[i]) then return M.SHARED_TABS end
         end
         return M.TABS
     end
-    return M.SLOT_TABS
+    return M.SHARED_TABS
 end
 
 ---------------------------------------------------------------------------
@@ -695,6 +696,21 @@ function M.SpellCast(id)
     return name
 end
 
+-- A spell for the party's wheel: one the game says helps (heals, buffs),
+-- with a range (not one on yourself only). The game not telling: kept
+function M.ForAllies(id)
+    local helpful = C_Spell and C_Spell.IsSpellHelpful and C_Spell.IsSpellHelpful(id)
+    if helpful == false then return false end
+    local info = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(id)
+    if type(info) == "table" and info.maxRange == 0 then return false end
+    return true
+end
+
+-- A party spell's action ("wheel:party:<spell ID>"): its spell's ID
+function M.PartySpell(action)
+    return type(action) == "string" and tonumber(action:match("^wheel:party:(%d+)$")) or nil
+end
+
 function M:ActionName(action)
     if not action then return nil end
     if action == M.NOTHING then return L.MAP_NO_ACTION end
@@ -719,6 +735,8 @@ function M:ActionName(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
         if value == "phrases" then return L.PHRASES_NAME end
+        local spell = M.PartySpell(action)
+        if spell then return format(L.PARTY_ACTION, M.SpellName(spell) or tostring(spell)) end
         if not n then return L.WHEEL_NAME end
         return CK.MyWheels and CK.MyWheels:Name(n) or L.MYWHEEL_GONE
     end
@@ -745,6 +763,8 @@ function M:ActionIcon(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
         if value == "phrases" then return CK.Phrases and CK.Phrases.ICON end
+        local spell = M.PartySpell(action)
+        if spell then return C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spell) end
         return n and CK.MyWheels and CK.MyWheels:Icon(n) or M.WHEEL_ICON
     end
 end
@@ -753,9 +773,13 @@ end
 -- Catalogue for the mapping window: { header = "..." } or
 -- { action = "...", name = "...", icon = ... }
 ---------------------------------------------------------------------------
-M.TABS = { "game", "spells", "items", "macros", "bar" }
+-- "party": a spell whose key opens the party's wheel (ConsumableWheel.lua),
+-- "wheel:party:<spell ID>"
+M.TABS = { "game", "spells", "party", "items", "macros", "bar" }
 -- The game's slots only take spells, items and macros
 M.SLOT_TABS = { "spells", "items", "macros" }
+-- A paddle's key shared by layers: what a router runs
+M.SHARED_TABS = { "spells", "party", "items", "macros" }
 
 local function commandEntry(command)
     return { action = "cmd:" .. command, name = CK.Paddles:CommandName(command),
@@ -802,7 +826,10 @@ function M:Catalog(tab, forSlot, noBound)
             list[#list + 1] = { header = cat.name }
             for _, command in ipairs(cat.commands) do list[#list + 1] = commandEntry(command) end
         end
-    elseif tab == "spells" and C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then
+    elseif (tab == "spells" or tab == "party") and C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then
+        -- Party: the spells cast on an ally, their key opening the party's
+        -- wheel (you and your party's members) instead of casting at once
+        local party = tab == "party"
         local bank = Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player or 0
         local spellType = Enum.SpellBookItemType and Enum.SpellBookItemType.Spell
         for line = 1, C_SpellBook.GetNumSpellBookSkillLines() do
@@ -812,12 +839,13 @@ function M:Catalog(tab, forSlot, noBound)
                 for i = info.itemIndexOffset + 1, info.itemIndexOffset + info.numSpellBookItems do
                     local item = C_SpellBook.GetSpellBookItemInfo(i, bank)
                     if item and item.spellID and not item.isPassive and not item.isOffSpec
-                        and (not spellType or item.itemType == spellType) then
+                        and (not spellType or item.itemType == spellType)
+                        and (not party or M.ForAllies(item.spellID)) then
                         if first then
                             list[#list + 1] = { header = info.name }
                             first = false
                         end
-                        list[#list + 1] = { action = "spell:" .. item.spellID, icon = item.iconID,
+                        list[#list + 1] = { action = (party and "wheel:party:" or "spell:") .. item.spellID, icon = item.iconID,
                             name = M.SpellName(item.spellID, item.subName) or item.name }
                     end
                 end
@@ -965,7 +993,7 @@ local function bindAction(combo, comboId, action, replace)
         click = stance and M.KeyRelay(action, stance):GetName() or (native and native:GetName())
     elseif kind == "wheel" then
         -- Its key opens that wheel
-        click = CK.ConsumableWheel:Toggle(value):GetName()
+        click = CK.ConsumableWheel:Toggle(value, comboId):GetName()
     elseif M.Routable(action) then
         local b = actionButton(comboId, action)
         -- Pressed by its key: acts on the press
@@ -1132,7 +1160,7 @@ local function routeKeys(input, key, taken)
         local action = M:Get(input.id, layer)
         local b
         if M.Routable(action) and not taken[M:ArrivalPrefix(layer)] then
-            b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"))
+            b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"), input.id .. ":" .. layer)
                 or actionButton(input.id .. ":" .. layer, action)
             -- Clicked by the key's button, once per press
             b:SetAttribute("useOnKeyDown", false)
@@ -1385,7 +1413,7 @@ function M:ApplyPad(input, targets, replaced)
         r:SetAttribute("*clickbutton-ck" .. layer, nil)
         local t, b = targets[layer], nil
         if t and t.action then
-            b = t.action:find("^wheel:") and CK.ConsumableWheel:Toggle(t.action:match("^wheel:(.+)$"))
+            b = t.action:find("^wheel:") and CK.ConsumableWheel:Toggle(t.action:match("^wheel:(.+)$"), input.id .. ":" .. layer)
                 or actionButton(input.id .. ":" .. layer, t.action)
             -- Clicked by the key's button, once per press
             b:SetAttribute("useOnKeyDown", false)
