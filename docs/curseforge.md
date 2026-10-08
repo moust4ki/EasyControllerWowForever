@@ -20,6 +20,12 @@ Every feature you don't need can be turned off to save even more resources.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
+## Demo
+
+[![Easy Controller - Forever: the demo (YouTube)](https://img.youtube.com/vi/BUiO3YtK4Cg/hqdefault.jpg)](https://www.youtube.com/watch?v=BUiO3YtK4Cg)
+
+[Watch the demo on YouTube](https://www.youtube.com/watch?v=BUiO3YtK4Cg)
+
 ## What's new in 1.15
 - **Party spells**: put a heal or a buff on a button from the new **Party** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far.
 - **Bind list**: its tabs on two rows, wider and easier to read.
