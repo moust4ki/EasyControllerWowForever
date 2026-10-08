@@ -49,7 +49,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Triggers: press to switch** instead of holding them (option), every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
 - **Profiles**: each character its own buttons, wheels and supplies, automatically, and up to 5 sets of them, picked by hand or by your talents
-- **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel, split keyboard or ConsolePort's keyboard
+- **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
 - **Party spells**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept
@@ -90,14 +90,6 @@ cursor on the left half, the right stick on the right half: each stick's tilt is
 position, released = center. LT types the left key, RT the right one. Large keys with aligned columns,
 a copper (left) and amber (right) target, a magnet so the highlight never flickers, and a linear stick
 response with an optional gentle or fast curve.
-
-**ConsolePort**
-ConsolePort's own keyboard: a ring of 8 groups of 4 characters. The left stick picks a group, A / B /
-X / Y type its characters; LT for capitals, LB for numbers and symbols, LT + LB for commands (`/p`,
-`/g`, `/w`…) and raid markers, RT for the accents of your language. Its suggestions beside the ring,
-our prediction first then ConsolePort's typo-tolerant matches (D-pad up / down, RB to put one in), the
-channel above the text (D-pad left / right), and the ring floats where you want it (right stick, with
-no group chosen).
 
 The daisywheel and the split keyboard have a numbers / accents / symbols layer whose accents follow
 the language (é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù). The method can be switched at any
@@ -339,18 +331,6 @@ X, Y, Start and Select stay with the game's gamepad UI.
 | LB / RB | delete / space |
 | Left stick click | numbers, accents, symbols |
 
-**ConsolePort**
-
-| Button | Action |
-|---|---|
-| Left stick | pick a group |
-| A / B / X / Y | type the group's character (bottom / right / left / top) |
-| A / B / X / Y, no group | space / send / erase / close the chat |
-| LT / LB / LT + LB / RT | capitals / numbers and symbols / commands and markers / accents |
-| D-pad ↑ ↓, RB | pick a suggestion, put it in |
-| D-pad ← → | channel (LB + ← →: the cursor in the text) |
-| Right stick, no group | move the keyboard |
-
 **Quick phrases**
 
 | Button | Action |
@@ -377,7 +357,7 @@ Install with the CurseForge app, or extract the zip into
 
 - `/ec`: the options (also RB + D-pad down)
 - `/ec keyboard`: open the keyboard
-- `/ec mode wheel|stick|consoleport`: daisywheel, split keyboard or ConsolePort
+- `/ec mode wheel|stick`: daisywheel or split keyboard
 - `/ec layout azerty|qwerty|qwertz|es|it`: split keyboard layout
 - `/ec lang fr|en|de|es|it|both`: suggestion and accent language
 - `/ec lock`: lock / unlock the position (unlocking shows the keyboard to move it)

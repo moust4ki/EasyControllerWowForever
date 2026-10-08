@@ -184,8 +184,7 @@ local function slash(msg)
         s.invertY = not s.invertY
         CK:Print("invert: %s", onOff(s.invertY))
     elseif cmd == "mode" then
-        local key = ({ wheel = "wheel", roue = "wheel", stick = "stick", clavier = "stick",
-            consoleport = "consoleport", cp = "consoleport" })[arg]
+        local key = ({ wheel = "wheel", roue = "wheel", stick = "stick", clavier = "stick" })[arg]
         if key then CK:SetInputMethod(key) end
         local m = CK.db.settings.inputMethod
         CK:Print(L.MODE_SET, ({ stick = L.METHOD_STICK, consoleport = L.METHOD_CONSOLEPORT })[m] or L.METHOD_WHEEL)
