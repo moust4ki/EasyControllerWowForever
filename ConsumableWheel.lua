@@ -82,6 +82,13 @@ end
 W.PARTY_DIRS = PARTY_DIRS
 local function isParty(wid) return type(wid) == "string" and wid:sub(1, 1) == "p" end
 W.isParty = isParty
+-- The right stick's direction keys (sent with the game's
+-- GamePadStickAxisButtons setting): letting the stick go casts
+local PARTY_STICK_KEYS = "PADRSTICKUP,PADRSTICKDOWN,PADRSTICKLEFT,PADRSTICKRIGHT,"
+local STICK_DIR_KEYS = {}
+for _, side in ipairs({ "L", "R" }) do
+    for _, dir in ipairs({ "UP", "DOWN", "LEFT", "RIGHT" }) do STICK_DIR_KEYS["PAD" .. side .. "STICK" .. dir] = true end
+end
 local TEX = "Interface\\AddOns\\EasyController\\textures\\"
 -- Slot `i` of a page of `n`: clockwise from the top, its angle (radians,
 -- clockwise from 12 o'clock) and its direction (x right, y up)
@@ -415,6 +422,16 @@ local SHOW = [[
         owner:SetBindingClick(true, prefix .. "PADRSHOULDER", "ControllerKeyboardWheelPage", "RB")
     end
     owner:SetBindingClick(true, "ESCAPE", "ControllerKeyboardWheelClose")
+    -- A party spell's wheel: the right stick's direction keys, to see it let go
+    if strsub(owner:GetAttribute("wheel") or "c", 1, 1) == "p" then
+        owner:SetAttribute("ck-aim", 0)
+        for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
+            owner:SetAttribute("ck-held-" .. key, 0)
+            for prefix in gmatch(owner:GetAttribute("ck-prefixes"), "([^,]*),") do
+                owner:SetBindingClick(true, prefix .. key, "ControllerKeyboardWheelLetGo", key)
+            end
+        end
+    end
 ]]
 
 local HIDE = [[
@@ -492,6 +509,44 @@ local USE = [[
     return "s" .. slot, true
 ]]
 
+-- A party spell's wheel: the right stick's direction keys (their name comes
+-- as the click's button). A press aims (the stick a little out: the nearest
+-- member there); a release aims again, then, once no direction is held any
+-- more (the stick let go), casts on the member aimed, like the game's
+-- flyouts. Rolling round the rim keeps a direction held: nothing is cast.
+local LET_GO = [[
+    local wid = owner:GetAttribute("wheel") or "c"
+    if not (owner:IsShown() and strsub(wid, 1, 1) == "p" and owner:GetAttribute("ck-held-" .. button)) then
+        return false
+    end
+    local state = GetGamePadState()
+    local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-pstick") or 2]
+    local len = stick and stick.len or 0
+    if len > 0.2 then
+        local best, bestDot = nil, -2
+        for i = 1, 5 do
+            if owner:GetFrameRef("slot" .. i):IsShown() then
+                local dot = stick.x * owner:GetAttribute("ck-pdx-" .. i) + stick.y * owner:GetAttribute("ck-pdy-" .. i)
+                if dot > bestDot then best, bestDot = i, dot end
+            end
+        end
+        if best then owner:SetAttribute("ck-aim", best) end
+    end
+    if down then
+        owner:SetAttribute("ck-held-" .. button, 1)
+        return false
+    end
+    owner:SetAttribute("ck-held-" .. button, 0)
+    for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
+        if owner:GetAttribute("ck-held-" .. key) == 1 then return false end
+    end
+    -- Still out at the rim (between two directions): not let go
+    if len >= 0.9 then return false end
+    local slot = owner:GetAttribute("ck-aim") or 0
+    if slot < 1 or not owner:GetFrameRef("slot" .. slot):IsShown() then return false end
+    return "s" .. slot, true
+]]
+
 -- After a use (A, or a click on a slot): the wheel closes
 local DONE = HIDE
 
@@ -551,6 +606,7 @@ function W:Build()
         wheel:SetAttribute("ck-pdx-" .. i, d[1])
         wheel:SetAttribute("ck-pdy-" .. i, d[2])
     end
+    wheel:SetAttribute("ck-pstickkeys", PARTY_STICK_KEYS)
     wheel:SetAttribute("ck-home-w", WHEEL_SIZE)
     wheel:SetAttribute("ck-home-h", 600)
     self.frame = wheel
@@ -580,6 +636,12 @@ function W:Build()
     -- The stick direction keys: their presses and releases move the choice
 
     keyButton("ControllerKeyboardWheelPage", wheel, PAGE)
+    -- A party spell's wheel: the right stick let go (its direction keys'
+    -- presses and releases; the cast on a release)
+    local letGo = keyButton("ControllerKeyboardWheelLetGo", wheel, LET_GO, DONE, "AnyDown", "AnyUp")
+    letGo:SetAttribute("type", "click")
+    letGo:SetAttribute("useOnKeyDown", false)
+    self.letGo = letGo
 
     -- What is drawn: the game's radial menu art, under the slots' buttons
     local view = CK.NewFrame("Frame", nil, wheel)
@@ -634,8 +696,12 @@ function W:Build()
     wheel:HookScript("OnHide", function()
         C_Timer.After(0, function()
             if not InCombatLockdown() and CK.Mapping then CK.Mapping:Repair() end
-            -- A party spell's wheel closed: the frame back where the wheels go
-            if not wheel:IsShown() then W:Unmove() end
+            -- A party spell's wheel closed: the frame back where the wheels
+            -- go, the stick's direction keys given back
+            if not wheel:IsShown() then
+                W:Unmove()
+                if not InCombatLockdown() then W:StickKeys(false) end
+            end
         end)
     end)
     self:BuildHold()
@@ -692,6 +758,7 @@ function W:Build()
         b:Hide()
         SecureHandlerSetFrameRef(wheel, "slot" .. i, b)
         use:SetAttribute("*clickbutton-s" .. i, b)
+        letGo:SetAttribute("*clickbutton-s" .. i, b)
         self.toggle:SetAttribute("*clickbutton-s" .. i, b)
         for _, t in ipairs(self.myToggles) do t:SetAttribute("*clickbutton-s" .. i, b) end
 
@@ -1433,10 +1500,13 @@ function W:PaintParty()
     if not pv then return end
     self.view:SetAlpha(0)
     pv:Show()
-    -- Out of combat, right on its button (it may have moved since it was set)
+    -- Drawn on events too while closed: only open does it move or take the
+    -- stick's keys. Out of combat, right on its button (it may have moved
+    -- since it was set)
+    local open = self.frame:IsShown()
     local opener = self.frame:GetAttribute("ck-opener")
     local t = opener and _G[opener]
-    if t and not InCombatLockdown() then
+    if open and t and not InCombatLockdown() then
         self:PlaceParty(t)
         local x, y = t:GetAttribute("ck-ax"), t:GetAttribute("ck-ay")
         if x and y then
@@ -1444,6 +1514,8 @@ function W:PaintParty()
             self.frame:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
         end
     end
+    -- Its stick let go casts: the stick's direction keys on
+    if open then self:StickKeys(true) end
     local list = self:PageItems()
     local spell = list[1]
     CK.Paddles.SetIcon(pv.center.icon, spell and W.EntryIcon(spell))
@@ -1633,10 +1705,80 @@ local function setCVar(name, value)
     return pcall(set, name, value)
 end
 
+-- A party spell's wheel open now
+function W:PartyOpen()
+    local wheel = self.frame
+    return wheel and wheel:IsShown() and isParty(wheel:GetAttribute("wheel")) or false
+end
+
+-- The game's stick direction keys (GamePadStickAxisButtons), for a party
+-- spell's wheel (letting the stick go casts): on while one is open, and for
+-- a whole fight when a party spell is on a button (the game refuses the
+-- setting in combat: turned on as the fight starts); the player's own
+-- value given back after. Kept on, they close the game's own flyouts as
+-- soon as their stick moves: the shield below keeps them away meanwhile.
+function W:StickKeys(on)
+    if InCombatLockdown() then return end
+    local s = settings()
+    local get = C_CVar and C_CVar.GetCVar or GetCVar
+    local ok, current = pcall(get, "GamePadStickAxisButtons")
+    if not ok or current == nil then return end
+    if on then
+        if tostring(current) ~= "1" then
+            if s.stickButtonsWas == nil then s.stickButtonsWas = tostring(current) end
+            setCVar("GamePadStickAxisButtons", "1")
+        end
+    elseif s.stickButtonsWas ~= nil then
+        setCVar("GamePadStickAxisButtons", s.stickButtonsWas)
+        s.stickButtonsWas = nil
+    end
+    self:UpdateShield()
+end
+
+-- The game's flyouts (spells such as the hunter's aspects, the pet's): they
+-- close on any button, the stick's direction keys too. While those keys are
+-- on by us and one of them is open, a frame of ours, above them, keeps the
+-- direction keys from them (and lets every other button through)
+local FLYOUTS = { "GamepadSpellFlyout", "GamepadPetActionFlyout", "GamepadPetSpellFlyout" }
+
+function W:FlyoutOpen()
+    for _, name in ipairs(FLYOUTS) do
+        local f = _G[name]
+        if f and f.IsShown and f:IsShown() then return true end
+    end
+    return false
+end
+
+function W:UpdateShield()
+    local shield = self.shield
+    if not shield then
+        shield = CK.NewFrame("Frame", nil, UIParent)
+        shield:SetFrameStrata("FULLSCREEN_DIALOG")
+        shield:SetSize(1, 1)
+        shield:SetPoint("CENTER")
+        shield:Hide()
+        shield:SetScript("OnGamePadButtonDown", function(_, key) return not STICK_DIR_KEYS[key] end)
+        shield:SetScript("OnShow", function(f) if f.EnableGamePadButton then pcall(f.EnableGamePadButton, f, true) end end)
+        shield:SetScript("OnHide", function(f) if f.EnableGamePadButton then pcall(f.EnableGamePadButton, f, false) end end)
+        self.shield = shield
+    end
+    for _, name in ipairs(FLYOUTS) do
+        local f = _G[name]
+        if f and f.HookScript and not (self.hookedFlyouts or {})[name] then
+            self.hookedFlyouts = self.hookedFlyouts or {}
+            self.hookedFlyouts[name] = true
+            f:HookScript("OnShow", function() W:UpdateShield() end)
+            f:HookScript("OnHide", function() W:UpdateShield() end)
+        end
+    end
+    shield:SetShown(settings().stickButtonsWas ~= nil and self:FlyoutOpen())
+end
+
 function W:RestoreSettings()
     if InCombatLockdown() then return end
     local s = settings()
-    if s.stickButtonsWas ~= nil then
+    -- (kept while a party spell's wheel is open: given back when it closes)
+    if s.stickButtonsWas ~= nil and not self:PartyOpen() then
         setCVar("GamePadStickAxisButtons", s.stickButtonsWas)
         s.stickButtonsWas = nil
     end
@@ -1644,6 +1786,7 @@ function W:RestoreSettings()
         for cvar, value in pairs(s.camera) do setCVar(cvar, value) end
         s.camera = nil
     end
+    self:UpdateShield()
 end
 
 -- The action the Gamepad tab puts on an input ("wheel:consumables",
@@ -1687,8 +1830,13 @@ function W:Init()
             end
             return
         end
-        -- Combat starts: each party spell's key opens on its button as it is now
-        if event == "PLAYER_REGEN_DISABLED" then W:PlacePartyKeys() end
+        -- Combat starts: each party spell's key opens on its button as it is
+        -- now; with a party spell on a button, the stick's direction keys on
+        -- for the fight (the game refuses the setting in combat)
+        if event == "PLAYER_REGEN_DISABLED" then
+            W:PlacePartyKeys()
+            if CK.Mapping and CK.Mapping.HasPartySpells and CK.Mapping:HasPartySpells() then W:StickKeys(true) end
+        end
         if event == "PLAYER_REGEN_DISABLED" or event == "BAG_UPDATE_COOLDOWN" or event == "SPELL_UPDATE_COOLDOWN" then
             W:Paint()
             return

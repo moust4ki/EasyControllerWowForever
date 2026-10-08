@@ -711,6 +711,17 @@ function M.PartySpell(action)
     return type(action) == "string" and tonumber(action:match("^wheel:party:(%d+)$")) or nil
 end
 
+-- A party spell on a button (this character's): its wheel needs the
+-- stick's direction keys in combat
+function M:HasPartySpells()
+    for _, list in ipairs({ settings().mapping, settings().replaced }) do
+        for _, action in pairs(list or {}) do
+            if M.PartySpell(action) then return true end
+        end
+    end
+    return false
+end
+
 function M:ActionName(action)
     if not action then return nil end
     if action == M.NOTHING then return L.MAP_NO_ACTION end
