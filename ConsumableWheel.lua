@@ -247,10 +247,12 @@ function W:Log(what)
     local state = C_GamePad and C_GamePad.GetDeviceMappedState and C_GamePad.GetDeviceMappedState()
     local stick = state and state.sticks and state.sticks[aimStick(wheel)]
     local taken = view and view.IsGamePadStickEnabled and view:IsGamePadStickEnabled()
-    log[#log + 1] = format("%s: %s, combat %s, sticks taken %s, left stick %.2f, A = %s, aimed %s",
-        date("%H:%M:%S"), what, tostring(InCombatLockdown()), tostring(taken), stick and stick.len or 0,
-        tostring(GetBindingAction("PAD1", true)), tostring(self.aimed))
-    while #log > 8 do table.remove(log, 1) end
+    local get = C_CVar and C_CVar.GetCVar or GetCVar
+    local ok, keys = pcall(get, "GamePadStickAxisButtons")
+    log[#log + 1] = format("%s (%.2f): %s, combat %s, sticks taken %s, stick %.2f, A = %s, aimed %s, stick keys %s",
+        date("%H:%M:%S"), GetTime(), what, tostring(InCombatLockdown()), tostring(taken), stick and stick.len or 0,
+        tostring(GetBindingAction("PAD1", true)), tostring(self.aimed), ok and tostring(keys) or "?")
+    while #log > 16 do table.remove(log, 1) end
 end
 
 -- /ec wheel: what is in it, what is not and why
@@ -524,29 +526,43 @@ local LET_GO = [[
     if not (owner:IsShown() and strsub(wid, 1, 1) == "p" and owner:GetAttribute("ck-held-" .. button)) then
         return false
     end
+    if down then owner:SetAttribute("ck-held-" .. button, 1) end
     local state = GetGamePadState()
     local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-pstick") or 2]
     local len = stick and stick.len or 0
+    -- Where it points: the stick, a little out; on a press with the stick
+    -- read back near the middle already (a quick flick: reported, the spell
+    -- went only after a second on the portrait), the directions held
+    local x, y
     if len > 0.2 then
-        local best, bestDot = nil, -2
+        x, y = stick.x, stick.y
+    elseif down then
+        x, y = 0, 0
+        for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
+            if owner:GetAttribute("ck-held-" .. key) == 1 then
+                x = x + owner:GetAttribute("ck-kx-" .. key)
+                y = y + owner:GetAttribute("ck-ky-" .. key)
+            end
+        end
+    end
+    if x and (x ~= 0 or y ~= 0) then
+        local best, bestDot = nil, -100
         for i = 1, 5 do
             if owner:GetFrameRef("slot" .. i):IsShown() then
-                local dot = stick.x * owner:GetAttribute("ck-pdx-" .. i) + stick.y * owner:GetAttribute("ck-pdy-" .. i)
+                local dot = x * owner:GetAttribute("ck-pdx-" .. i) + y * owner:GetAttribute("ck-pdy-" .. i)
                 if dot > bestDot then best, bestDot = i, dot end
             end
         end
         if best then owner:SetAttribute("ck-aim", best) end
     end
-    if down then
-        owner:SetAttribute("ck-held-" .. button, 1)
-        return false
-    end
+    if down then return false end
     owner:SetAttribute("ck-held-" .. button, 0)
     for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
         if owner:GetAttribute("ck-held-" .. key) == 1 then return false end
     end
-    -- Still out at the rim (between two directions): not let go
-    if len >= 0.9 then return false end
+    -- (No direction held any more: let go, whatever the stick reads now; a
+    -- diagonal's key comes back while the stick still reads far out:
+    -- reported, the member up left never got the spell)
     local slot = owner:GetAttribute("ck-aim") or 0
     if slot < 1 or not owner:GetFrameRef("slot" .. slot):IsShown() then return false end
     return "s" .. slot, true
@@ -631,6 +647,11 @@ function W:Build()
         wheel:SetAttribute("ck-pdy-" .. i, d[2])
     end
     wheel:SetAttribute("ck-pstickkeys", PARTY_STICK_KEYS)
+    -- Each of them: its direction
+    for key, d in pairs({ PADRSTICKUP = { 0, 1 }, PADRSTICKDOWN = { 0, -1 }, PADRSTICKLEFT = { -1, 0 }, PADRSTICKRIGHT = { 1, 0 } }) do
+        wheel:SetAttribute("ck-kx-" .. key, d[1])
+        wheel:SetAttribute("ck-ky-" .. key, d[2])
+    end
     wheel:SetAttribute("ck-home-w", WHEEL_SIZE)
     wheel:SetAttribute("ck-home-h", 600)
     self.frame = wheel
@@ -667,6 +688,13 @@ function W:Build()
     local letGo = keyButton("ControllerKeyboardWheelLetGo", wheel, LET_GO, DONE, "AnyDown", "AnyUp")
     letGo:SetAttribute("type", "click")
     letGo:SetAttribute("useOnKeyDown", false)
+    -- For /ec wheel: the stick's keys as the game sent them, and the member
+    -- aimed (the secure code's own notes, each change told by the game)
+    wheel:HookScript("OnAttributeChanged", function(_, name, value)
+        if name == "ck-aim" or (type(name) == "string" and name:find("^ck%-held%-PADRSTICK")) then
+            W:Log(format("%s = %s", name, tostring(value)))
+        end
+    end)
     self.letGo = letGo
 
     -- What is drawn: the game's radial menu art, under the slots' buttons
@@ -726,7 +754,7 @@ function W:Build()
             -- go, the stick's direction keys given back
             if not wheel:IsShown() then
                 W:Unmove()
-                if not InCombatLockdown() then W:StickKeys(false) end
+                if not InCombatLockdown() then W:SyncStickKeys() end
             end
         end)
     end)
@@ -1222,6 +1250,11 @@ function W:PartyToggle(id, comboId)
         t:SetAttribute("type", "click")
         for i, b in ipairs(self.buttons) do t:SetAttribute("*clickbutton-s" .. i, b) end
         t.ckCombo, t.ckSpell = comboId, id
+        -- For /ec wheel: its key's presses and releases (its secure code's
+        -- note of them)
+        t:HookScript("OnAttributeChanged", function(_, name, value)
+            if name == "ck-down" then W:Log("party key " .. (value and "down" or "up")) end
+        end)
         self.partyToggles[key] = t
         self:StoreParty(id)
         self.frame:SetAttribute("ck-pstick", stickIndex("Camera", 2))
@@ -1564,7 +1597,7 @@ function W:PaintParty()
     end
     self:RangeParty(true)
     local h = function(key) return CK:GlyphMarkup(key, 14) end
-    pv.help:SetText(format("%s %s   %s %s   %s %s", h("RS"), L.WHEEL_AIM, h("A"), L.PARTY_CAST, h("B"), L.WHEEL_CLOSE))
+    pv.help:SetText(format("%s %s   %s %s", h("RS"), L.PARTY_CAST, h("B"), L.WHEEL_CLOSE))
     -- Not "nothing aimed" (nil): the banner is written, even the first time
     self.aimed = false
     self:TrackParty()
@@ -1850,11 +1883,26 @@ function W:UpdateShield()
     shield:SetShown(settings().stickButtonsWas ~= nil and self:FlyoutOpen())
 end
 
+-- A party spell on a button (this character's, its profile in use)
+function W:PartyBound()
+    local M = CK.Mapping
+    return M and M.HasPartySpells and M:HasPartySpells() or false
+end
+
+-- The stick's direction keys on while a party spell is on a button: on
+-- only as its wheel opened, the game took a second to send them (reported:
+-- the stick had to stay on the portrait a second); the player's value back
+-- when none is left, and at logout (on again at the next login)
+function W:SyncStickKeys()
+    if InCombatLockdown() then return end
+    self:StickKeys(self:PartyOpen() or self:PartyBound())
+end
+
 function W:RestoreSettings()
     if InCombatLockdown() then return end
     local s = settings()
-    -- (kept while a party spell's wheel is open: given back when it closes)
-    if s.stickButtonsWas ~= nil and not self:PartyOpen() then
+    -- (kept while a party spell's wheel is open, or one is on a button)
+    if s.stickButtonsWas ~= nil and not self:PartyOpen() and not self:PartyBound() then
         setCVar("GamePadStickAxisButtons", s.stickButtonsWas)
         s.stickButtonsWas = nil
     end
@@ -1891,7 +1939,7 @@ function W:Init()
     local f = CreateFrame("Frame")
     for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "BAG_UPDATE_DELAYED", "PLAYER_REGEN_ENABLED", "PLAYER_LEVEL_UP",
         "PLAYER_REGEN_DISABLED", "BAG_UPDATE_COOLDOWN", "GET_ITEM_INFO_RECEIVED", "SPELLS_CHANGED", "UPDATE_MACROS",
-        "SPELL_UPDATE_COOLDOWN", "GROUP_ROSTER_UPDATE" }) do
+        "SPELL_UPDATE_COOLDOWN", "GROUP_ROSTER_UPDATE", "PLAYER_LOGOUT" }) do
         pcall(f.RegisterEvent, f, event)
     end
     local queued
@@ -1918,6 +1966,10 @@ function W:Init()
             return
         end
         if event == "PLAYER_REGEN_ENABLED" then W:RestoreSettings() end
+        if event == "PLAYER_LOGOUT" then
+            W:StickKeys(false)
+            return
+        end
         if event == "PLAYER_REGEN_ENABLED" and not W.pending then
             W:Paint()
             return

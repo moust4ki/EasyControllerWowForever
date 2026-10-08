@@ -1531,6 +1531,8 @@ function M:Apply()
     -- The panel's shortcut held: its second button left to the game
     if self.suspended then self:Suspend(self.suspended) end
     self:UpdateMarks()
+    -- The stick's direction keys, while a party spell is on a button
+    if CK.ConsumableWheel and CK.ConsumableWheel.SyncStickKeys then CK.ConsumableWheel:SyncStickKeys() end
     self.applying = false
 end
 
