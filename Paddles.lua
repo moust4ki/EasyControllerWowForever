@@ -1013,6 +1013,8 @@ function P:ApplyBarOffset()
     bar:ClearAllPoints()
     bar:SetPoint(p[1], UIParent, p[2], (p[3] + x * BAR_STEP_X) / k, (p[4] + y * BAR_STEP_Y) / k)
     self.barMoved = true
+    -- Its buttons moved: the party wheels open on them where they are now
+    if CK.ConsumableWheel and CK.ConsumableWheel.PlacePartyKeys then CK.ConsumableWheel:PlacePartyKeys() end
 end
 
 function P:MoveBar(dx, dy)
