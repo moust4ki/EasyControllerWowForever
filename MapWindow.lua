@@ -1104,6 +1104,10 @@ local function displayRows(b)
         onY = function() C:SetTab("gamepad") end, yVerb = L.V_SETTINGS })
     local on = s.modules.mapping and true or false
     b.header(L.HDR_GAMEPAD_BAR)
+    -- Its size: the game's whole gamepad bar, what the addon adds following
+    b.choice({ id = "d_bar_size", label = L.LBL_BAR_SIZE, tip = L.TIP_BAR_SIZE,
+        text = function() return format("%d %%", math.floor(P:BarScale() * 100 + 0.5)) end,
+        step = function(d) P:ScaleBar(d) end })
     b.check({ id = "d_range", label = L.LBL_RANGE_TINT, tip = L.TIP_RANGE_TINT,
         get = function() return f.rangeTint == true end,
         set = function(v)
