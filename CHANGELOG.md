@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.15.5
+
+- **Chat keyboard: ConsolePort's keyboard no longer offered**: two input methods, the daisywheel and
+  the split keyboard (Keyboard tab, `/ec mode wheel|stick`). A player who had chosen ConsolePort's
+  keyboard is back on the daisywheel.
+
 ## 1.15.4
 
 - **Party/Healer wheel: no longer opens in the middle of the screen**: a fight begun with LB or RB
