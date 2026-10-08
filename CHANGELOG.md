@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.15.4
+
+- **Party/Healer wheel: no longer opens in the middle of the screen**: a fight begun with LB or RB
+  held (the game's targeting bar then hides the top bar's buttons) lost the place of the wheel's
+  button, and the wheel opened in the middle of the screen until the fight's end. Its button hidden
+  a while (LB / RB held, a vehicle, a form), the wheel keeps the place where it was last seen.
+
 ## 1.15.3
 
 - **Back paddles: Nothing alone no longer blocks a trigger layer** (found by new randomized tests): a
