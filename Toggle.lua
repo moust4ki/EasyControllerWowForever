@@ -405,6 +405,11 @@ function T:Draw()
         v.trigger:Hide()
         return
     end
+    -- At the game's bar's scale (its size, Home > Gamepad): our counts and
+    -- rings as big as its own (the icons follow its buttons anyway)
+    local main = GamepadMainActionBarFrame
+    local k = main and main.GetEffectiveScale and main:GetEffectiveScale() / (UIParent:GetEffectiveScale() or 1)
+    if k and k > 0 and math.abs((v:GetScale() or 1) - k) > 0.001 then v:SetScale(k) end
     self:DrawTrigger(layer)
     local P = CK.Paddles
     for key, s in pairs(v.slots) do

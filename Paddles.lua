@@ -957,21 +957,43 @@ function P:Step(id, dir)
 end
 
 ---------------------------------------------------------------------------
--- The game's gamepad bar moves too, by steps: only its place on the screen
--- changes, out of combat, and only once the player moved it (the extra
--- buttons follow, they hang on its anchors)
+-- The game's gamepad bar moves too, by steps, and changes size (asked): its
+-- place on the screen and its scale, out of combat, and only once the
+-- player changed them. Its scale takes all of it at once: its four bars (no
+-- trigger, LT, RT, LT + RT), the targeting bars (LB / RB), the class
+-- actions; what the addon puts on and around it follows it (the extra
+-- buttons hang on its anchors at its scale, the pictures on its buttons are
+-- theirs, the trigger toggle's bar takes its scale). It grows from its
+-- bottom middle, where the game anchors it: offsets are in the bar's own
+-- scale, so they are divided by it to keep its place.
 ---------------------------------------------------------------------------
 local BAR_STEP_X, BAR_STEP_Y = 40, 20
+P.BAR_SCALE_MIN, P.BAR_SCALE_MAX, P.BAR_SCALE_STEP = 0.7, 1.5, 0.05
 
 function P:BarOffset()
     local off = settings().barOffset
-    return off and off.x or 0, off and off.y or 0
+    return off and tonumber(off.x) or 0, off and tonumber(off.y) or 0
+end
+
+-- The bar's size (1: the game's), kept within its bounds
+function P:BarScale()
+    local k = tonumber(settings().barScale) or 1
+    return math.max(P.BAR_SCALE_MIN, math.min(P.BAR_SCALE_MAX, k))
+end
+
+-- A step bigger (1) or smaller (-1), in 5 % steps
+function P:ScaleBar(delta)
+    local k = self:BarScale() + delta * P.BAR_SCALE_STEP
+    k = math.floor(k * 100 + 0.5) / 100
+    settings().barScale = math.max(P.BAR_SCALE_MIN, math.min(P.BAR_SCALE_MAX, k))
+    self:ApplyBarOffset()
 end
 
 function P:ApplyBarOffset()
     local bar = GamepadMainActionBarFrame
     local x, y = self:BarOffset()
-    if not bar or (x == 0 and y == 0 and not self.barMoved) then return end
+    local k = self:BarScale()
+    if not bar or (x == 0 and y == 0 and k == 1 and not self.barMoved) then return end
     if InCombatLockdown() then
         self.pendingBar = true
         return
@@ -987,16 +1009,21 @@ function P:ApplyBarOffset()
         end
     end
     local p = self.barPoint
+    bar:SetScale(k)
     bar:ClearAllPoints()
-    bar:SetPoint(p[1], UIParent, p[2], p[3] + x * BAR_STEP_X, p[4] + y * BAR_STEP_Y)
+    bar:SetPoint(p[1], UIParent, p[2], (p[3] + x * BAR_STEP_X) / k, (p[4] + y * BAR_STEP_Y) / k)
     self.barMoved = true
+    -- Its buttons moved: the party wheels open on them where they are now
+    if CK.ConsumableWheel and CK.ConsumableWheel.PlacePartyKeys then CK.ConsumableWheel:PlacePartyKeys() end
 end
 
 function P:MoveBar(dx, dy)
     local x, y = self:BarOffset()
     local w, h = UIParent:GetWidth() or 1920, UIParent:GetHeight() or 1080
-    local maxX = math.max(0, math.floor((w / 2 - 340) / BAR_STEP_X))
-    local maxY = math.max(0, math.floor((h - 340) / BAR_STEP_Y))
+    -- (bigger, it has less room)
+    local k = self:BarScale()
+    local maxX = math.max(0, math.floor((w / 2 - 340 * k) / BAR_STEP_X))
+    local maxY = math.max(0, math.floor((h - 340 * k) / BAR_STEP_Y))
     x = math.max(-maxX, math.min(maxX, x + dx))
     y = math.max(-5, math.min(maxY, y + dy))
     settings().barOffset = { x = x, y = y }
@@ -1028,10 +1055,66 @@ function P:RenderPlacementRings()
     end
     if self.barRing then
         self.barRing:SetShown(id == "BAR")
-        self.barRing.slice:SetVertexColor(color[1], color[2], color[3])
+        self.barRing.box:SetColors(color, 0.08, color, 1)
     end
+    self:UpdatePlaceTag()
     -- The places only matter for a button being moved
     for _, m in ipairs(self.markers or {}) do m:SetShown(id ~= "BAR" and not settings().extraFree) end
+end
+
+-- The bar's buttons on the screen (the game's frame is much larger than
+-- them: reported, a big rectangle that didn't say what it moved): their
+-- bounds, in UIParent's units, the stance bar's in its place
+function P:BarBounds()
+    local ui = UIParent:GetEffectiveScale() or 1
+    local l, r, t, b
+    local function add(f)
+        if not (f and f.IsVisible and f:IsVisible() and f.GetLeft) then return end
+        local fl, fr, ft, fb = f:GetLeft(), f:GetRight(), f:GetTop(), f:GetBottom()
+        if not (fl and fr and ft and fb) then return end
+        local k = (f:GetEffectiveScale() or 1) / ui
+        fl, fr, ft, fb = fl * k, fr * k, ft * k, fb * k
+        l, r = l and math.min(l, fl) or fl, r and math.max(r, fr) or fr
+        t, b = t and math.max(t, ft) or ft, b and math.min(b, fb) or fb
+    end
+    for _, bar in ipairs(P.BARS) do
+        for _, button in ipairs(P.BUTTONS) do add(self:LiveButton("bar:" .. bar.key .. ":" .. button.key)) end
+    end
+    if not l then add(GamepadMainActionBarFrame) end
+    return l, r, t, b
+end
+
+-- What is selected, said over it: its name (the bar: its size too), gold
+-- while chosen, green while picked up
+function P:UpdatePlaceTag()
+    local tag = self.placeTag
+    if not tag then return end
+    local id = self.placeSelected
+    local color = self.grabbed and GRAB_RING or GOLD_RING
+    local target
+    if id == "BAR" then
+        local l, r, t, b = self:BarBounds()
+        if self.barRing and l then
+            self.barRing:ClearAllPoints()
+            self.barRing:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l - 6, t + 6)
+            self.barRing:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", r + 6, b - 6)
+        end
+        target = self.barRing
+        tag.text:SetText(format("%s  %d %%", L.PLACE_BAR, math.floor(self:BarScale() * 100 + 0.5)))
+    else
+        target = id and self.frame.buttons[id]
+        tag.text:SetText(id or "")
+    end
+    if not (target and target:IsShown()) then
+        tag:Hide()
+        return
+    end
+    tag.text:SetTextColor(color[1], color[2], color[3])
+    tag.box:SetColors({ 0.04, 0.04, 0.04 }, 0.85, color, 1)
+    tag:SetSize(math.max(40, (tag.text:GetStringWidth() or 0) + 20), 22)
+    tag:ClearAllPoints()
+    tag:SetPoint("BOTTOM", target, "TOP", 0, id == "BAR" and 4 or 14)
+    tag:Show()
 end
 
 -- Center of an element on the screen
@@ -1071,7 +1154,7 @@ function P:Grab()
     local id = self.placeSelected
     if id == "BAR" then
         local x, y = self:BarOffset()
-        self.grabbed = { bar = true, x = x, y = y }
+        self.grabbed = { bar = true, x = x, y = y, scale = settings().barScale }
     else
         local all = {}
         for _, other in ipairs(P.EXTRA) do
@@ -1090,6 +1173,7 @@ function P:CancelGrab()
     if not g then return end
     if g.bar then
         settings().barOffset = { x = g.x, y = g.y }
+        settings().barScale = g.scale
         self:ApplyBarOffset()
     else
         for other, pos in pairs(g.all) do settings().extraPos[other] = { x = pos.x, y = pos.y } end
@@ -1163,16 +1247,36 @@ function P:StartPlacement()
     end
     self:BuildMarkers()
     self:LayoutMarkers()
-    -- A gold frame around the game's bar while it is the one placed
+    -- A thin frame around the bar's buttons while it is the one placed (gold
+    -- chosen, green picked up), and a tag over what is selected: its name
     local bar = GamepadMainActionBarFrame
     if bar and not self.barRing then
         local ring = CK.NewFrame("Frame", nil, UIParent)
         ring:SetPoint("TOPLEFT", bar, "TOPLEFT", -6, 6)
         ring:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 6, -6)
         ring:SetFrameStrata("HIGH")
-        ring.slice = CK.UIKit.nineSlice(ring, "ck_select", 128, 32, 10, 10, "OVERLAY")
+        ring.box = CK.ConfigKit.Box(ring, 4, 2, "OVERLAY")
+        ring.box:SetPoints(ring)
         ring:Hide()
         self.barRing = ring
+    end
+    if not self.placeTag then
+        local tag = CK.NewFrame("Frame", nil, UIParent)
+        tag:SetFrameStrata("DIALOG")
+        tag.box = CK.ConfigKit.Box(tag, 4, 1, "BACKGROUND")
+        tag.box:SetPoints(tag)
+        tag.text = tag:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        tag.text:SetPoint("CENTER")
+        -- Follows the bar as it moves or grows
+        local elapsed = 0
+        tag:SetScript("OnUpdate", function(_, dt)
+            elapsed = elapsed + dt
+            if elapsed < 0.1 then return end
+            elapsed = 0
+            P:UpdatePlaceTag()
+        end)
+        tag:Hide()
+        self.placeTag = tag
     end
     self.banner:Show()
     self:UpdateVisibility()
@@ -1185,6 +1289,7 @@ function P:StopPlacement()
     self.placing = false
     if self.banner then self.banner:Hide() end
     if self.barRing then self.barRing:Hide() end
+    if self.placeTag then self.placeTag:Hide() end
     for _, m in ipairs(self.markers or {}) do m:Hide() end
     for _, id in ipairs(P.EXTRA) do self.frame.buttons[id].ring:Hide() end
     self:Apply()
@@ -1202,8 +1307,11 @@ function P:RenderPlacement()
         if id ~= "BAR" then
             local sym = settings().extraSymmetric and L.ON or L.OFF
             parts[#parts + 1] = g("Y") .. " " .. format(L.PLACE_P_SYM, sym)
+        else
+            -- The bar's size: LB smaller, RB bigger
+            parts[#parts + 1] = g("LB") .. g("RB") .. " " .. format(L.PLACE_P_SIZE, math.floor(self:BarScale() * 100 + 0.5))
         end
-        parts[#parts + 1] = g("X") .. " " .. L.PLACE_P_RESET
+        parts[#parts + 1] = g("X") .. " " .. (id == "BAR" and L.PLACE_P_RESET_BAR or L.PLACE_P_RESET)
         parts[#parts + 1] = g("A") .. " " .. L.PLACE_P_DROP
         parts[#parts + 1] = g("B") .. " " .. L.PLACE_P_CANCEL
     else
@@ -1213,6 +1321,7 @@ function P:RenderPlacement()
         }
     end
     self.banner.help:SetText(table.concat(parts, "    "))
+    self:UpdatePlaceTag()
 end
 
 function P:PlacementPress(name)
@@ -1252,8 +1361,12 @@ function P:PlacementPress(name)
     elseif id == "BAR" then
         if DIRS[name] then
             self:MoveBar(DIRS[name][1], DIRS[name][2])
+        elseif name == "LB" or name == "RB" then
+            self:ScaleBar(name == "LB" and -1 or 1)
         elseif name == "X" then
+            -- The game's place and size
             settings().barOffset = { x = 0, y = 0 }
+            settings().barScale = 1
             self:ApplyBarOffset()
         end
     elseif DIRS[name] then

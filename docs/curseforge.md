@@ -37,11 +37,13 @@ Every feature you don't need can be turned off to save even more resources.
 - **Bind list**: its tabs on two rows, wider and easier to read.
 - **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
 - **Party/Healer wheel** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
+- **The size of the gamepad buttons** (1.15.2): the whole gamepad bar from 70 % to 150 %, every layer at once, the addon's buttons and pictures following (Home › Gamepad, or Move / size on the Gamepad tab: LB / RB with the bar picked up). Placing is clearer: a thin frame round the bar's buttons and a tag saying what is selected.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
 - **Every free combination usable**: L3 / R3, LT + RB / RT + LB, unused trigger layers, the game's own buttons replaced if you want
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
+- **Bigger or smaller gamepad buttons**: the game's whole gamepad bar, every layer at once, from 70 % to 150 %
 - **Triggers: press to switch** instead of holding them (option), every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
 - **Profiles**: each character its own buttons, wheels and supplies, automatically, and up to 5 sets of them, picked by hand or by your talents
@@ -245,6 +247,14 @@ around the gamepad action bar, in its own round slot style, with the action's ic
 cooldown, and press down like the game's buttons. Place each one where you want among fixed places
 around the bar's controls, with the D-pad or the mouse, mirrored left / right, or anywhere with Free
 placement.
+
+**The gamepad bar's size and place**
+Home › Gamepad › Size of the buttons makes the game's whole gamepad bar bigger or smaller (70 % to
+150 %): its four bars, the targeting bars and the class actions together, growing from its bottom
+middle so it keeps its place; the extra buttons, the pictures on replaced buttons and the party wheels
+follow. Move / size on the Gamepad tab moves it by steps with the D-pad and, picked up, resizes it with
+LB / RB (X: the game's place and size; B: both back). A thin frame and a tag show what is selected.
+Out of combat (in combat: once it ends).
 
 **Extra buttons**
 For both controllers with more buttons (Vader Pro…) and touchpads set as buttons (Steam Deck, Steam
