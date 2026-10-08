@@ -1265,18 +1265,20 @@ end
 
 -- Each party spell's key: where its wheel opens (out of combat). On its
 -- button, moved in just enough to stay whole on the screen (a button near
--- an edge: you at the bottom, your name under you)
+-- an edge: you at the bottom, your name under you). Its button hidden for a
+-- while (LB / RB held: the game's targeting bar in the top bar's place; a
+-- vehicle...): where it was last seen, kept (else a fight begun with LB
+-- held had the wheel open in the middle until its end)
 local PARTY_MARGIN = PARTY_RADIUS + PARTY_SLOT / 2 + 16
 function W:PlaceParty(t)
     if InCombatLockdown() then return end
     local x, y = W.ButtonCenter(t.ckCombo)
-    if x and y then
-        local w, h = UIParent:GetWidth() or 0, UIParent:GetHeight() or 0
-        if w > 2 * PARTY_MARGIN then x = math.min(math.max(x, PARTY_MARGIN), w - PARTY_MARGIN) end
-        if h > 2 * PARTY_MARGIN then y = math.min(math.max(y, PARTY_MARGIN), h - PARTY_MARGIN) end
-    end
-    t:SetAttribute("ck-ax", x and math.floor(x + 0.5) or nil)
-    t:SetAttribute("ck-ay", y and math.floor(y + 0.5) or nil)
+    if not (x and y) then return end
+    local w, h = UIParent:GetWidth() or 0, UIParent:GetHeight() or 0
+    if w > 2 * PARTY_MARGIN then x = math.min(math.max(x, PARTY_MARGIN), w - PARTY_MARGIN) end
+    if h > 2 * PARTY_MARGIN then y = math.min(math.max(y, PARTY_MARGIN), h - PARTY_MARGIN) end
+    t:SetAttribute("ck-ax", math.floor(x + 0.5))
+    t:SetAttribute("ck-ay", math.floor(y + 0.5))
 end
 
 function W:PlacePartyKeys()
