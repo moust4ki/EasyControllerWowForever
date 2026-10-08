@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.15.1
+
+- **Party/Healer wheel: letting the stick go casts reliably** (reported: a buff never went to the
+  member up right but with A, and the stick's release worked only sometimes). The addon's secure code
+  sees the stick only through the game's stick direction keys, near the middle of the stick, and the
+  game sends only the last direction's release: up right gave UP, then RIGHT, then RIGHT's release
+  alone, and the spell went to the member up left (a heal unnoticed, a buff refused) or nowhere. Each
+  flick now keeps its strongest reading of the stick (else the directions it went through, only when
+  they point at one member clearly: never a guess), and the last direction's release lets the stick
+  go. Simulated: 7680 flicks (each member, the game's threshold, its keys, the stick read at once or a
+  frame late, quick or slow), all on the member aimed, the sequence seen in game too. Sliding the
+  stick round the rim from one member to another may cast on the way: aim, then let go.
+- `/ec wheel` also shows each stick direction as the game sends it, the member each party spell went
+  to, and the game's refusal if any (too far, out of sight, a stronger buff).
+- The **Party** list is now **Party/Healer** (Groupe/Soins in French), its actions too.
+
 ## 1.15.0
 
 - **Party spells** (asked: heal and buff the group easily). The Gamepad tab has a new **Party** list:

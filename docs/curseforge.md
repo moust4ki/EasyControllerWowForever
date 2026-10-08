@@ -33,9 +33,10 @@ Every feature you don't need can be turned off to save even more resources.
 [Watch the party spells demo on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)
 
 ## What's new in 1.15
-- **Party spells**: put a heal or a buff on a button from the new **Party** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
+- **Party spells**: put a heal or a buff on a button from the new **Party/Healer** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
 - **Bind list**: its tabs on two rows, wider and easier to read.
 - **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
+- **Party/Healer wheel** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
@@ -159,7 +160,7 @@ button straight from the editor ("Assign a button") or from the Gamepad tab's Ma
 shows its filled slots only, in as many sections, and works like the consumables wheel, in combat too.
 
 **Party spells**
-The Gamepad tab's **Party** list holds your spells for allies (heals, buffs). Put one on a button and
+The Gamepad tab's **Party/Healer** list holds your spells for allies (heals, buffs). Put one on a button and
 that button opens a small wheel like the game's own flyouts, centred on it with the spell in the
 middle: the members of your party who are there, each always in the same place (you at the bottom,
 member 1 on the left, then clockwise), with their portrait and name. Push the right stick toward
@@ -207,7 +208,7 @@ unused trigger combinations (LT + Start…) and the back paddles can run a game 
 autorun, game menu, map, bags, any key binding of the game), one of the game's own gamepad functions
 (jump, back, interact, inspect, Start menu, ping, targeting…), a spell, an item, a macro, or press a
 button of the gamepad action bar. The addon's own (the consumables wheel, the quick phrases, your
-wheels) head the Macros list; your party spells have their own list (Party). The game's own buttons (A, B, X, Y, D-pad, LB / RB) can be replaced too,
+wheels) head the Macros list; your party spells have their own list (Party/Healer). The game's own buttons (A, B, X, Y, D-pad, LB / RB) can be replaced too,
 its menus keeping their buttons; one button gives them all back, and LT + RB / RT + LB (which the game
 leaves to its targeting) can take an action too. Start and Select stay the game's. Each trigger layer
 keeps its own function: what you put on L3 alone stays on L3 alone.

@@ -235,8 +235,8 @@ from button to button, up to the layers, down to the actions under the controlle
 - **The gamepad bar's slots** (D-pad and A / B / X / Y in the four layers, but the fixed jump /
   interact / back / inspect) take a spell, an item or a macro: press A on one, pick it, and it goes
   in the game's own slot, like with its action bar editor (X empties it).
-- **The lists** (LB / RB, on two rows): Game, Spells, Party (spells cast through the party wheel,
-  below), Items, Macros (the addon's wheels first), Bar.
+- **The lists** (LB / RB, on two rows): Game, Spells, Party/Healer (spells cast through the party
+  wheel, below), Items, Macros (the addon's wheels first), Bar.
 - **Start and Select stay the game's** (its radial menu, the interface's focus), in every layer:
   they can't be changed.
 - **L3 / R3 with a trigger, LT + RB and RT + LB**: while the button alone keeps the game's function
@@ -456,7 +456,7 @@ holds changes out of combat only.
 
 ### Party spells
 
-The Gamepad tab's **Party** list holds the spell book's spells for allies (the game's helpful
+The Gamepad tab's **Party/Healer** list holds the spell book's spells for allies (the game's helpful
 spells with a range: heals, buffs, resurrections). Put one on a button (a replaced button of the
 game, a free one, a paddle, any layer) and that button opens the party wheel:
 - small, like the game's own flyouts (the hunter's aspects), **centred on the button** that holds
@@ -475,7 +475,12 @@ game, a free one, a paddle, any layer) and that button opens the party wheel:
   members are your subgroup.
 
 Letting the stick go is seen through the game's stick direction keys (its
-`GamePadStickAxisButtons` setting): secure code only acts on keys. They are on while a party spell
+`GamePadStickAxisButtons` setting): secure code only acts on keys, and reads the stick only when one
+comes, near the middle; the game sends only the last direction's release. Each flick keeps its
+strongest reading of the stick (else the directions it went through, when they point at one member
+clearly), and the last direction's release lets the stick go. Sliding round the rim from one member
+to another may cast on the way. `/ec wheel` shows each direction as the game sends it, the member each
+spell went to, and the game's refusal if any. They are on while a party spell
 is on a button (on only as the wheel opened, the game took a moment to send them); your own value
 comes back when none is left and at logout. The game's own flyouts (aspects, pet actions, pet
 spells) close on any button, those keys too: while one is open, a frame of the addon keeps the
