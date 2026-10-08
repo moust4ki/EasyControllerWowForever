@@ -1168,7 +1168,9 @@ local function routeKeys(input, key, taken)
     for _, layer in ipairs(M.LAYERS) do
         r:SetAttribute("ck-has-" .. layer, nil)
         r:SetAttribute("*clickbutton-ck" .. layer, nil)
-        local action = M:Get(input.id, layer)
+        -- What the layer runs (a layer sharing the key of one with Nothing:
+        -- nothing, as the Gamepad tab shows it)
+        local action = M:EffectiveAction(input, layer)
         local b
         if M.Routable(action) and not taken[M:ArrivalPrefix(layer)] then
             b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"), input.id .. ":" .. layer)
@@ -1196,17 +1198,28 @@ end
 function M:ApplyPaddle(input)
     local key = self:InputKey(input)
     if not key then return end
+    -- Nothing on a layer keeps the key to itself only while no other layer
+    -- of the paddle runs something of ours; else the key goes to the router
+    -- too (it reads the triggers held), that layer doing nothing there. A
+    -- key that came without its trigger's modifier still runs that
+    -- trigger's layer (found by the tests: Nothing alone, a spell on LT, LT
+    -- + the paddle sent without Shift did nothing)
+    local anyRoutable = false
+    for _, layer in ipairs(M.LAYERS) do
+        if M.Routable(self:EffectiveAction(input, layer)) then anyRoutable = true end
+    end
     local taken, routed = {}, false
     for _, layer in ipairs(M.LAYERS) do
         local prefix = self:ArrivalPrefix(layer)
         if taken[prefix] == nil then
             local action = self:Get(input.id, layer)
             taken[prefix] = type(action) == "string" and not M.Routable(action)
+                and not (action == M.NOTHING and anyRoutable)
             if taken[prefix] then bindAction(prefix .. key, input.id .. ":" .. layer, action) end
         end
     end
     for _, layer in ipairs(M.LAYERS) do
-        if M.Routable(self:Get(input.id, layer)) and not taken[self:ArrivalPrefix(layer)] then routed = true end
+        if M.Routable(self:EffectiveAction(input, layer)) and not taken[self:ArrivalPrefix(layer)] then routed = true end
     end
     if routed then routeKeys(input, key, taken) end
 end

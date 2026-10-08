@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.15.3
+
+- **Back paddles: Nothing alone no longer blocks a trigger layer** (found by new randomized tests): a
+  paddle with Nothing alone and an action on LT (or another trigger layer) did nothing when Steam
+  Input sent the paddle without the trigger's modifier; the paddle's key now goes to the part of the
+  addon that reads the triggers held, Nothing still doing nothing alone.
+- New randomized tests, run with every check: random actions on random buttons and layers (over
+  100,000 presses each run, every result checked against what the Gamepad tab shows), long random
+  sequences (fights with changes waiting, the panel opened and closed, RT a modifier or not), the
+  party wheel aimed in every direction with random parties, the gamepad bar's size and placing.
+
 ## 1.15.2
 
 - **The size of the gamepad buttons** (asked): the game's whole gamepad bar bigger or smaller, from
