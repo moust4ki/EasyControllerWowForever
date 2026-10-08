@@ -530,6 +530,10 @@ local USE = [[
 -- gives a direction), and, if the stick never read out, the directions it
 -- went through, but only if they point at one member clearly.
 local LET_GO = [[
+    -- For /ec wheel: each key as it comes, and the stick read then
+    local seen = GetGamePadState()
+    local seenStick = seen and seen.sticks and seen.sticks[owner:GetAttribute("ck-pstick") or 2]
+    owner:SetAttribute("ck-event", format("%s %s %.2f", tostring(button), down and "down" or "up", seenStick and seenStick.len or 0))
     local wid = owner:GetAttribute("wheel") or "c"
     if not (owner:IsShown() and strsub(wid, 1, 1) == "p" and owner:GetAttribute("ck-held-" .. button)) then
         return false
@@ -555,6 +559,10 @@ local LET_GO = [[
     local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-pstick") or 2]
     local len = stick and stick.len or 0
     local strongest = owner:GetAttribute("ck-aimlen") or 0
+    -- Let go: no direction held any more, or one released with the stick back
+    -- in the middle (another one's release may never come: seen in game, the
+    -- member aimed and nothing cast)
+    local letGo = not down and (not held or len < 0.3)
     -- Two directions to try, each giving the nearest member there: first the
     -- stick now, the flick's strongest reading winning (a later one about as
     -- strong too: rolling round the rim); then, let go with nothing aimed,
@@ -564,7 +572,7 @@ local LET_GO = [[
         local x, y, clear
         if pass == 1 then
             if len > 0.05 and len >= strongest * 0.8 then x, y = stick.x, stick.y end
-        elseif not down and not held and (owner:GetAttribute("ck-aim") or 0) < 1 then
+        elseif letGo and (owner:GetAttribute("ck-aim") or 0) < 1 then
             x, y, clear = 0, 0, true
             for key in gmatch(keys, "([^,]+),") do
                 if owner:GetAttribute("ck-seen-" .. key) then
@@ -592,8 +600,9 @@ local LET_GO = [[
             end
         end
     end
-    if down or held then return false end
-    -- Let go
+    if not letGo then return false end
+    -- Let go: every direction counted released
+    for key in gmatch(keys, "([^,]+),") do owner:SetAttribute("ck-held-" .. key, 0) end
     local slot = owner:GetAttribute("ck-aim") or 0
     if slot < 1 or not owner:GetFrameRef("slot" .. slot):IsShown() then return false end
     return "s" .. slot, true
@@ -722,7 +731,9 @@ function W:Build()
     -- For /ec wheel: the stick's keys as the game sent them, and the member
     -- aimed (the secure code's own notes, each change told by the game)
     wheel:HookScript("OnAttributeChanged", function(_, name, value)
-        if name == "ck-aim" or (type(name) == "string" and name:find("^ck%-held%-PADRSTICK")) then
+        -- (the game gives the attributes' names in lower case)
+        local lower = type(name) == "string" and name:lower() or ""
+        if lower == "ck-aim" or lower == "ck-event" or lower:find("^ck%-held%-padrstick") then
             W:Log(format("%s = %s", name, tostring(value)))
         end
     end)
