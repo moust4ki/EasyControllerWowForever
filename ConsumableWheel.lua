@@ -427,8 +427,10 @@ local SHOW = [[
     -- A party spell's wheel: the right stick's direction keys, to see it let go
     if strsub(owner:GetAttribute("wheel") or "c", 1, 1) == "p" then
         owner:SetAttribute("ck-aim", 0)
+        owner:SetAttribute("ck-aimlen", 0)
         for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
             owner:SetAttribute("ck-held-" .. key, 0)
+            owner:SetAttribute("ck-seen-" .. key, nil)
             for prefix in gmatch(owner:GetAttribute("ck-prefixes"), "([^,]*),") do
                 owner:SetBindingClick(true, prefix .. key, "ControllerKeyboardWheelLetGo", key)
             end
@@ -517,53 +519,80 @@ local USE = [[
 ]]
 
 -- A party spell's wheel: the right stick's direction keys (their name comes
--- as the click's button). A press aims (the stick a little out: the nearest
--- member there); a release aims again, then, once no direction is held any
--- more (the stick let go), casts on the member aimed, like the game's
--- flyouts. Rolling round the rim keeps a direction held: nothing is cast.
+-- as the click's button), like the game's flyouts: a flick toward a member
+-- and its release (no direction held any more) casts on them. Secure code
+-- only sees the stick when the game sends one of those keys, at the edge of
+-- their threshold, near the middle: read there, a flick up right gave UP
+-- alone, as near to the member up left as to the one up right, and the
+-- spell went to the wrong one or nowhere (reported: never on member 3 but
+-- with A, which reads the stick held out). So each flick keeps its
+-- strongest reading of the stick (any reading out of the middle at all
+-- gives a direction), and, if the stick never read out, the directions it
+-- went through, but only if they point at one member clearly.
 local LET_GO = [[
     local wid = owner:GetAttribute("wheel") or "c"
     if not (owner:IsShown() and strsub(wid, 1, 1) == "p" and owner:GetAttribute("ck-held-" .. button)) then
         return false
     end
-    if down then owner:SetAttribute("ck-held-" .. button, 1) end
+    local keys = owner:GetAttribute("ck-pstickkeys")
+    local held = false
+    for key in gmatch(keys, "([^,]+),") do
+        if key ~= button and owner:GetAttribute("ck-held-" .. key) == 1 then held = true end
+    end
+    if down then
+        -- A new flick: what it aims at starts afresh
+        if not held and owner:GetAttribute("ck-held-" .. button) ~= 1 then
+            owner:SetAttribute("ck-aim", 0)
+            owner:SetAttribute("ck-aimlen", 0)
+            for key in gmatch(keys, "([^,]+),") do owner:SetAttribute("ck-seen-" .. key, nil) end
+        end
+        owner:SetAttribute("ck-held-" .. button, 1)
+        owner:SetAttribute("ck-seen-" .. button, 1)
+    else
+        owner:SetAttribute("ck-held-" .. button, 0)
+    end
+    -- The nearest member there to a direction; `clear`: no other as near
+    local function nearest(x, y, clear)
+        local best, bestDot, second = nil, -100, -100
+        for i = 1, 5 do
+            if owner:GetFrameRef("slot" .. i):IsShown() then
+                local dot = x * owner:GetAttribute("ck-pdx-" .. i) + y * owner:GetAttribute("ck-pdy-" .. i)
+                if dot > bestDot then
+                    best, second, bestDot = i, bestDot, dot
+                elseif dot > second then
+                    second = dot
+                end
+            end
+        end
+        if clear and best and bestDot - second < 0.1 then return nil end
+        return best
+    end
+    -- The stick now: the flick's strongest reading wins (a later one about as
+    -- strong too: rolling round the rim)
     local state = GetGamePadState()
     local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-pstick") or 2]
     local len = stick and stick.len or 0
-    -- Where it points: the stick, a little out; on a press with the stick
-    -- read back near the middle already (a quick flick: reported, the spell
-    -- went only after a second on the portrait), the directions held
-    local x, y
-    if len > 0.2 then
-        x, y = stick.x, stick.y
-    elseif down then
-        x, y = 0, 0
-        for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
-            if owner:GetAttribute("ck-held-" .. key) == 1 then
+    local strongest = owner:GetAttribute("ck-aimlen") or 0
+    if len > 0.05 and len >= strongest * 0.8 then
+        local slot = nearest(stick.x, stick.y)
+        if slot then
+            owner:SetAttribute("ck-aim", slot)
+            owner:SetAttribute("ck-aimlen", math.max(len, strongest))
+        end
+    end
+    if down or held then return false end
+    -- Let go
+    local slot = owner:GetAttribute("ck-aim") or 0
+    if slot < 1 then
+        local x, y = 0, 0
+        for key in gmatch(keys, "([^,]+),") do
+            if owner:GetAttribute("ck-seen-" .. key) then
                 x = x + owner:GetAttribute("ck-kx-" .. key)
                 y = y + owner:GetAttribute("ck-ky-" .. key)
             end
         end
+        if x ~= 0 or y ~= 0 then slot = nearest(x, y, true) or 0 end
     end
-    if x and (x ~= 0 or y ~= 0) then
-        local best, bestDot = nil, -100
-        for i = 1, 5 do
-            if owner:GetFrameRef("slot" .. i):IsShown() then
-                local dot = x * owner:GetAttribute("ck-pdx-" .. i) + y * owner:GetAttribute("ck-pdy-" .. i)
-                if dot > bestDot then best, bestDot = i, dot end
-            end
-        end
-        if best then owner:SetAttribute("ck-aim", best) end
-    end
-    if down then return false end
-    owner:SetAttribute("ck-held-" .. button, 0)
-    for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
-        if owner:GetAttribute("ck-held-" .. key) == 1 then return false end
-    end
-    -- (No direction held any more: let go, whatever the stick reads now; a
-    -- diagonal's key comes back while the stick still reads far out:
-    -- reported, the member up left never got the spell)
-    local slot = owner:GetAttribute("ck-aim") or 0
     if slot < 1 or not owner:GetFrameRef("slot" .. slot):IsShown() then return false end
     return "s" .. slot, true
 ]]
@@ -806,7 +835,10 @@ function W:Build()
         b:SetScript("OnLeave", function() GameTooltip:Hide() end)
         SecureHandlerWrapScript(b, "OnClick", wheel, "return nil, true", DONE)
         b:HookScript("OnClick", function()
-            W:Log("use " .. i)
+            -- For /ec wheel: the member a party spell went to
+            local unit = W.isParty(wheel:GetAttribute("wheel")) and b:GetAttribute("unit")
+            W:Log("use " .. i .. (unit and (" on " .. unit) or ""))
+            if unit then W.castAt = GetTime() end
             W:NoteMeal(i)
         end)
         b:Hide()
@@ -1939,11 +1971,20 @@ function W:Init()
     local f = CreateFrame("Frame")
     for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "BAG_UPDATE_DELAYED", "PLAYER_REGEN_ENABLED", "PLAYER_LEVEL_UP",
         "PLAYER_REGEN_DISABLED", "BAG_UPDATE_COOLDOWN", "GET_ITEM_INFO_RECEIVED", "SPELLS_CHANGED", "UPDATE_MACROS",
-        "SPELL_UPDATE_COOLDOWN", "GROUP_ROSTER_UPDATE", "PLAYER_LOGOUT" }) do
+        "SPELL_UPDATE_COOLDOWN", "GROUP_ROSTER_UPDATE", "PLAYER_LOGOUT", "UI_ERROR_MESSAGE" }) do
         pcall(f.RegisterEvent, f, event)
     end
     local queued
-    f:SetScript("OnEvent", function(_, event)
+    f:SetScript("OnEvent", function(_, event, ...)
+        -- For /ec wheel: the game refusing a party spell just cast (too far,
+        -- out of sight, a stronger buff...)
+        if event == "UI_ERROR_MESSAGE" then
+            if W.castAt and GetTime() - W.castAt < 1.5 then
+                local _, message = ...
+                W:Log("the game: " .. tostring(message))
+            end
+            return
+        end
         -- The party changed while a party spell's wheel is open: its members
         -- drawn again (their buttons too, out of combat)
         if event == "GROUP_ROSTER_UPDATE" then
