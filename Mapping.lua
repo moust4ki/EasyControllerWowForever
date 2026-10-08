@@ -1700,8 +1700,44 @@ function M:Release()
 end
 
 -- Our function's picture over the game's bar button it replaces (what the
--- slot holds stays under it)
+-- slot holds stays under it), in the button's shape: round, or square with
+-- the game's corners (the D-pad's; reported: a party spell round there)
 local marks = {}        -- the game's button -> our picture
+M.marks = marks
+
+local function isSquare(native)
+    if native.activeButtonShape then return native.activeButtonShape == "Square" end
+    local mask = native.SquareMask
+    return type(mask) == "table" and type(mask.IsShown) == "function" and mask:IsShown() and true or false
+end
+
+local function shapeMark(mark, square)
+    if mark.square == square then return end
+    local key = square and "squareMasks" or "roundMasks"
+    for _, old in ipairs({ "squareMasks", "roundMasks" }) do
+        if old ~= key and mark[old] then
+            mark.bg:RemoveMaskTexture(mark[old][1])
+            mark.icon:RemoveMaskTexture(mark[old][2])
+        end
+    end
+    if not mark[key] then
+        mark[key] = {}
+        for i = 1, 2 do
+            local mask = mark:CreateMaskTexture()
+            if square then
+                mask:SetAtlas("SquareMask")
+                mask:SetAllPoints(mark.bg)
+            else
+                mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+                mask:SetAllPoints(mark.round[i])
+            end
+            mark[key][i] = mask
+        end
+    end
+    mark.bg:AddMaskTexture(mark[key][1])
+    mark.icon:AddMaskTexture(mark[key][2])
+    mark.square = square
+end
 function M:UpdateMarks()
     local wanted = {}
     if self:ReplaceOn() and self:OwnKeys() then
@@ -1727,22 +1763,19 @@ function M:UpdateMarks()
             mark.bg:SetColorTexture(0.04, 0.04, 0.04, 1)
             mark.icon = mark:CreateTexture(nil, "OVERLAY")
             -- The round the picture shows through
-            local round = { mark.bg, CK.NewFrame("Frame", nil, mark) }
-            round[2]:SetPoint("TOPLEFT", 6, -6)
-            round[2]:SetPoint("BOTTOMRIGHT", -6, 6)
-            for i, tex in ipairs({ mark.bg, mark.icon }) do
-                local mask = mark:CreateMaskTexture()
-                mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-                mask:SetAllPoints(round[i])
-                tex:AddMaskTexture(mask)
-            end
+            mark.round = { mark.bg, CK.NewFrame("Frame", nil, mark) }
+            mark.round[2]:SetPoint("TOPLEFT", 6, -6)
+            mark.round[2]:SetPoint("BOTTOMRIGHT", -6, 6)
             marks[native] = mark
         end
+        local square = isSquare(native)
+        shapeMark(mark, square)
         mark:SetFrameLevel(native:GetFrameLevel() + 3)
         local icon = self:ActionIcon(action)
         -- The game's own pictures (jump, ping...) come with their ring:
-        -- larger than the round, it stays outside
-        local zoom = type(icon) == "table" and icon.atlas and -2 or 6
+        -- larger than the round, it stays outside. Square: the icon fills
+        -- the game's square, as its own icons do
+        local zoom = type(icon) == "table" and icon.atlas and -2 or (square and 3 or 6)
         mark.icon:ClearAllPoints()
         mark.icon:SetPoint("TOPLEFT", zoom, -zoom)
         mark.icon:SetPoint("BOTTOMRIGHT", -zoom, zoom)

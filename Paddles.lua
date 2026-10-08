@@ -486,6 +486,9 @@ end
 -- Cooldowns can be secret values in combat: hand them over untouched
 function P.ApplyCooldown(cd, action)
     local kind, value = (action or ""):match("^(%a+):(.+)$")
+    -- A party spell: its spell's cooldown
+    local party = CK.Mapping and CK.Mapping.PartySpell and CK.Mapping.PartySpell(action)
+    if party then kind, value = "spell", tostring(party) end
     local ok
     if kind == "bar" then
         local slot = P:NativeSlot(action)

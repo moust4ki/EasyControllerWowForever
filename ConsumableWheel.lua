@@ -458,6 +458,7 @@ local TOGGLE = [[
     local release = (button and strsub(button, 1, 4) == "ckup") or (not down and self:GetAttribute("ck-down"))
     self:SetAttribute("ck-down", down and true or false)
     if release then
+        if owner:GetAttribute("wheel") == wid then owner:SetAttribute("ck-open-held", nil) end
         if not ((party or owner:GetAttribute("ck-hold")) and owner:IsShown() and owner:GetAttribute("wheel") == wid) then
             return false
         end
@@ -496,6 +497,10 @@ local TOGGLE = [[
             owner:SetAttribute("ck-moved", nil)
         end
         owner:SetAttribute("wheel", wid)
+        -- Its key held (a party spell's wheel): if it is A, B, LB or RB, the
+        -- wheel's own keys while open, its release goes to them (OPENER_UP)
+        owner:SetAttribute("ck-open-held", party and true or nil)
+        owner:SetAttribute("ck-used-down", nil)
         ]] .. SHOW .. [[
     end
     return false
@@ -551,6 +556,25 @@ local LET_GO = [[
 local DONE = HIDE
 
 local CLOSE = HIDE .. " return false"
+
+-- A party spell's wheel opened by A, B, LB or RB: those are the wheel's keys
+-- while it is open, so the release of the key that opened it comes to them
+-- (reported: a party spell on A, held, aimed, let go: nothing). Taken as
+-- that key's release while none of them was pressed since the opening.
+local OPENER_UP = [[
+    if not (owner:IsShown() and owner:GetAttribute("ck-open-held") and not owner:GetAttribute("ck-used-down")) then
+        return false
+    end
+    owner:SetAttribute("ck-open-held", nil)
+    ]] .. AIMED .. [[
+    if slot < 1 then return false end
+    self:SetAttribute("useOnKeyDown", false)
+    return "s" .. slot, true
+]]
+local function keyOf(snippet)
+    return "if not down then " .. OPENER_UP .. " end\n"
+        .. "self:SetAttribute(\"useOnKeyDown\", true)\nowner:SetAttribute(\"ck-used-down\", true)\n" .. snippet
+end
 
 -- A button for the wheel's keys: a secure action button, its OnClick
 -- wrapped by the wheel
@@ -628,14 +652,16 @@ function W:Build()
     end
     -- The party spells' keys: made when a key gets one (PartyToggle)
     self.partyToggles = {}
-    local use = keyButton("ControllerKeyboardWheelUse", wheel, USE, DONE)
+    local use = keyButton("ControllerKeyboardWheelUse", wheel, keyOf(USE), DONE, "AnyDown", "AnyUp")
     use:SetAttribute("type", "click")
     use:HookScript("OnClick", function(_, _, down) if down ~= false then W:Log("A") end end)
     self.use = use
-    keyButton("ControllerKeyboardWheelClose", wheel, CLOSE)
+    local close = keyButton("ControllerKeyboardWheelClose", wheel, keyOf(CLOSE), DONE, "AnyDown", "AnyUp")
+    close:SetAttribute("type", "click")
     -- The stick direction keys: their presses and releases move the choice
 
-    keyButton("ControllerKeyboardWheelPage", wheel, PAGE)
+    local page = keyButton("ControllerKeyboardWheelPage", wheel, keyOf(PAGE), DONE, "AnyDown", "AnyUp")
+    page:SetAttribute("type", "click")
     -- A party spell's wheel: the right stick let go (its direction keys'
     -- presses and releases; the cast on a release)
     local letGo = keyButton("ControllerKeyboardWheelLetGo", wheel, LET_GO, DONE, "AnyDown", "AnyUp")
@@ -759,6 +785,8 @@ function W:Build()
         SecureHandlerSetFrameRef(wheel, "slot" .. i, b)
         use:SetAttribute("*clickbutton-s" .. i, b)
         letGo:SetAttribute("*clickbutton-s" .. i, b)
+        close:SetAttribute("*clickbutton-s" .. i, b)
+        page:SetAttribute("*clickbutton-s" .. i, b)
         self.toggle:SetAttribute("*clickbutton-s" .. i, b)
         for _, t in ipairs(self.myToggles) do t:SetAttribute("*clickbutton-s" .. i, b) end
 
@@ -1146,8 +1174,8 @@ function W.ButtonCenter(comboId)
     if not input then return nil end
     local f
     if input.bar then
-        local bar = M.LAYER_BAR[layer]
-        f = bar and CK.Paddles:NativeButton("bar:" .. bar .. ":" .. input.bar)
+        -- The one shown (in a stance, the stance bar's in its place)
+        f = M.LAYER_BAR[layer] and (M:LiveBarButton(input, layer) or M:NativeBarButton(input, layer))
     else
         local extra = CK.Paddles.frame and CK.Paddles.frame.buttons
         f = extra and extra[inputId]
@@ -1440,7 +1468,10 @@ function W:Track()
         self.ticked = nil
         return self:Paint()
     end
-    if isParty(self.paintedWheel) then return self:TrackParty() end
+    if isParty(self.paintedWheel) then
+        self:RangeParty()
+        return self:TrackParty()
+    end
     local i = self:Aimed()
     if i == self.aimed then return end
     self.aimed = i
@@ -1531,11 +1562,56 @@ function W:PaintParty()
         local ok = pcall(paintMember, seg, list[i])
         if not ok then seg.slot:Hide() seg.label:Hide() end
     end
+    self:RangeParty(true)
     local h = function(key) return CK:GlyphMarkup(key, 14) end
     pv.help:SetText(format("%s %s   %s %s   %s %s", h("RS"), L.WHEEL_AIM, h("A"), L.PARTY_CAST, h("B"), L.WHEEL_CLOSE))
     -- Not "nothing aimed" (nil): the banner is written, even the first time
     self.aimed = false
     self:TrackParty()
+end
+
+-- Too far for the spell: the game's answer for that spell on that member,
+-- else whether the member is in the party's range (40 yards); you never.
+-- Nil when the game doesn't tell (or hides it)
+function W.OutOfRange(spellID, unit)
+    if unit == "player" then return false end
+    local ok, far = pcall(function()
+        local check = C_Spell and C_Spell.IsSpellInRange
+        local inRange = check and check(spellID, unit)
+        if inRange ~= nil then return inRange == false end
+        if UnitInRange then
+            local near, checked = UnitInRange(unit)
+            if checked then return not near end
+        end
+        return nil
+    end)
+    if ok then return far end
+    return nil
+end
+
+-- Each member there too far for the spell: their portrait in red (the
+-- range's red), checked five times a second while the wheel is open
+local RANGE_EVERY = 0.2
+function W:RangeParty(now)
+    local pv = self.pview
+    if not pv then return end
+    local t = GetTime()
+    if not now and self.rangedAt and t - self.rangedAt < RANGE_EVERY then return end
+    self.rangedAt = t
+    local red = CK.Range and CK.Range.RED or { 0.9, 0.15, 0.15 }
+    local list = self:PageItems()
+    for i, seg in ipairs(pv.members) do
+        local item = list[i]
+        if item and seg.slot:IsShown() then
+            local far = W.OutOfRange(item.id, item.unit)
+            seg.far = far and true or false
+            if far then
+                seg.slot.icon:SetVertexColor(red[1], red[2], red[3])
+            else
+                seg.slot.icon:SetVertexColor(1, 1, 1)
+            end
+        end
+    end
 end
 
 -- The member the right stick points at (past half its course): the nearest
