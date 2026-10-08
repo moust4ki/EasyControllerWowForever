@@ -519,6 +519,18 @@ function K.Picker(parent, width)
         self:LoadList()
     end
 
+    -- More than 5 lists: their tabs on two rows (6 in one row were too
+    -- narrow to read), one entry less below them
+    local TAB_ROW = 32
+    function p:TabRows()
+        local n = self.def and #self.def.lists or 0
+        return n > 5 and 2 or 1
+    end
+
+    function p:Rows()
+        return (self.def and self.def.rows or 10) - (self:TabRows() - 1)
+    end
+
     -- Keep the entry (and the section title above it) in the window, with
     -- one entry of context at the edges
     function p:Move(delta)
@@ -531,7 +543,7 @@ function K.Picker(parent, width)
             if entries[j] then i = j end
         end
         self.index = i
-        local max = self.def.rows or 10
+        local max = self:Rows()
         if i - 1 <= self.offset then self.offset = math.max(0, i - 2) end
         if self.offset > 0 and entries[self.offset] and entries[self.offset].header then
             self.offset = self.offset - 1
@@ -547,7 +559,7 @@ function K.Picker(parent, width)
         for i, e in ipairs(entries) do
             if e.header then headers[#headers + 1] = i end
         end
-        if #headers < 2 then return self:Move(step * (self.def.rows or 10)) end
+        if #headers < 2 then return self:Move(step * (self:Rows())) end
         local current = 0
         for n, h in ipairs(headers) do
             if h < (self.index or 0) then current = n end
@@ -593,24 +605,27 @@ function K.Picker(parent, width)
         if type(title) == "function" then title = title() end
         self.kicker:SetText(K.Upper(kicker or ""))
         self.title:SetText(title or "")
-        -- The lists' tabs share the width
+        -- The lists' tabs share the width (of a row)
         local n = #def.lists
-        local tw = (width - 24 - (n - 1) * 4) / n
+        local tabRows = self:TabRows()
+        local perRow = math.ceil(n / tabRows)
+        local tw = (width - 24 - (perRow - 1) * 4) / perRow
         for i = 1, math.max(n, #self.tabs) do
             local t = tab(i)
             t:SetShown(n > 1 and i <= n)
             if i <= n then
+                local col, line = (i - 1) % perRow, math.floor((i - 1) / perRow)
                 t:SetWidth(tw)
                 -- A long name is cut, never over its neighbour
                 t.label:SetWidth(tw - 6)
                 t.label:SetWordWrap(false)
                 t:ClearAllPoints()
-                t:SetPoint("TOPLEFT", self, "TOPLEFT", 12 + (i - 1) * (tw + 4), -54)
+                t:SetPoint("TOPLEFT", self, "TOPLEFT", 12 + col * (tw + 4), -54 - line * TAB_ROW)
                 t.label:SetText(def.lists[i].label)
                 t:SetActive(i == self.list)
             end
         end
-        local top = n > 1 and -88 or -54
+        local top = n > 1 and (-88 - (tabRows - 1) * TAB_ROW) or -54
         local text = def.text
         if type(text) == "function" then text = text() end
         self.text:SetShown(text ~= nil)
@@ -620,7 +635,7 @@ function K.Picker(parent, width)
             self.text:SetText(text)
             top = top - self.text:GetStringHeight() - 12
         end
-        local max = def.rows or 10
+        local max = self:Rows()
         local y = top
         local shown = 0
         for i = 1, max + 1 do

@@ -609,7 +609,7 @@ function W:Detail(layer)
         body = cell.why
     end
     -- A shared key (the trigger no modifier): spells, items and macros
-    if input.paddle and (st == "free" or st == "yours") and M:PaddleTabs(input, layer) == M.SLOT_TABS then
+    if input.paddle and (st == "free" or st == "yours") and M:PaddleTabs(input, layer) == M.SHARED_TABS then
         body = body .. "\n\n" .. L.MAP_SHARED_HINT
     end
     local extra

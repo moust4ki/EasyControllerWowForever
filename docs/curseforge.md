@@ -20,15 +20,10 @@ Every feature you don't need can be turned off to save even more resources.
 
 **WoW Forever's gamepad play, made easy. No keyboard needed.**
 
-## What's new in 1.14
-- **Profiles**: up to 5 sets of a character's buttons, wheels and game bar slots (the spells on the D-pad and the face buttons, the stance and form bars), in a Profiles tab. Pick one from a list or with `/ec profile <name>`, or let your talents pick (primary / secondary). Only that character's, never another's.
-- **ConsolePort keyboard**: a third input method, ConsolePort's own keyboard. 8 groups of 4 around the left stick typed with A / B / X / Y, LT / LB / RT for capitals, numbers, commands and accents, its word suggestions on our dictionaries, and the channel on the D-pad. Thanks to Sebastian Lindfors for ConsolePort.
-- **Our prediction in the ConsolePort keyboard** (1.14.1): the next word, the completions in context and the commands first, ConsolePort's typo-tolerant matches after.
-- **Daisywheel** (1.14.1): no more mouse buttons row under the wheel (its keys stay clickable).
-- **A sends again** (1.14.2): for players whose A did nothing or opened the game's chat menu, the keyboard now keeps its buttons while it is open.
-- **ConsolePort keyboard** (1.14.2): a space after the suggestion put in.
-- **`/ec` opens the options** (1.14.3), even typed in the chat; the keyboard is `/ec keyboard`.
-- **Supplies** (1.14.4): the count on a pill (dark, orange at low, red at critical), readable on any icon.
+## What's new in 1.15
+- **Party spells**: put a heal or a buff on a button from the new **Party** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far.
+- **Bind list**: its tabs on two rows, wider and easier to read.
+- **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
@@ -40,6 +35,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel, split keyboard or ConsolePort's keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
+- **Party spells**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
 - **Hold to show** a wheel, let go to use (option)
@@ -150,6 +146,18 @@ a choice fills the slot and goes on to the next one. Name it with the gamepad ke
 button straight from the editor ("Assign a button") or from the Gamepad tab's Macros list. Each wheel
 shows its filled slots only, in as many sections, and works like the consumables wheel, in combat too.
 
+**Party spells**
+The Gamepad tab's **Party** list holds your spells for allies (heals, buffs). Put one on a button and
+that button opens a small wheel like the game's own flyouts, centred on it with the spell in the
+middle: the members of your party who are there, each always in the same place (you at the bottom,
+member 1 on the left, then clockwise), with their portrait and name. Push the right stick toward
+someone and let it go: the spell is cast on them, your target kept. Or hold the button, aim, and let
+the button go. A short press leaves it open; B closes it. A member too far for the spell has a red
+portrait, a dead one is greyed (still there for a resurrection). It works in combat, in every trigger
+layer, on paddles too; in a raid, with your subgroup. While a party spell is on a button, the game's
+stick direction keys are on (the stick's release needs them): the addon keeps them from the game's
+own flyouts (aspects, pet) and gives your setting back when none is left and at logout.
+
 **Consumables wheel**
 A key of its own (any free button, or a back paddle in any trigger layer) opens a wheel drawn like
 the game's own radial menu, cut in as many sections as it holds (two items: two halves; five: five
@@ -186,7 +194,7 @@ unused trigger combinations (LT + Start…) and the back paddles can run a game 
 autorun, game menu, map, bags, any key binding of the game), one of the game's own gamepad functions
 (jump, back, interact, inspect, Start menu, ping, targeting…), a spell, an item, a macro, or press a
 button of the gamepad action bar. The addon's own (the consumables wheel, the quick phrases, your
-wheels) head the Macros list. The game's own buttons (A, B, X, Y, D-pad, LB / RB) can be replaced too,
+wheels) head the Macros list; your party spells have their own list (Party). The game's own buttons (A, B, X, Y, D-pad, LB / RB) can be replaced too,
 its menus keeping their buttons; one button gives them all back, and LT + RB / RT + LB (which the game
 leaves to its targeting) can take an action too. Start and Select stay the game's. Each trigger layer
 keeps its own function: what you put on L3 alone stays on L3 alone.
@@ -352,7 +360,7 @@ Install with the CurseForge app, or extract the zip into
 - `/ec map`: gamepad mapping (free buttons, back paddles, extra buttons)
 - `/ec keys`: list the keys the game receives (to set up back paddles and extra buttons)
 - `/ec vibe [pattern]`: test the controller vibration
-- `/ec wheel`: what the consumables wheel holds, and why an item is not in it
+- `/ec wheel`: what the consumables wheel holds, and why an item is not in it (and the party wheel's last presses)
 - `/ec phrases`: the quick phrases window
 - `/ec profile`: this character's settings, and what each character holds
 - `/ec profile <name>`: put that profile of this character in use

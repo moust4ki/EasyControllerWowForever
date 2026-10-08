@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.15.0
+
+- **Party spells** (asked: heal and buff the group easily). The Gamepad tab has a new **Party** list:
+  your spells for allies (heals, buffs). Put one on a button and that button opens a small wheel like
+  the game's own flyouts (the hunter's aspects), centred on the button, the spell in its middle, with
+  the members of your party around it: only those who are there, each always in the same place (you
+  at the bottom, member 1 on the left, then clockwise), their portrait and name in their class's
+  colour. Push the right stick toward someone and let it go: the spell is cast on them, your target
+  kept. Holding the button, aiming and letting the button go does it too; a short press leaves the
+  wheel open, B or the button again closes it. A member too far for the spell has a red portrait, a
+  dead or offline one is greyed (still there for a resurrection). It works in combat, in every
+  trigger layer, on the game's buttons replaced, on back paddles and free buttons, on LT + RB /
+  RT + LB, with Triggers: press to switch, and per profile. In a raid: your subgroup.
+  - Letting the stick go is seen through the game's stick direction keys (its
+    GamePadStickAxisButtons setting): on while a party spell is on a button, your own value given
+    back when none is left and at logout. The game's own flyouts (aspects, pet) close on those keys:
+    while one is open, the addon keeps them from it.
+  - `/ec wheel` also shows the party wheel's last presses and stick directions, timed.
+- **Bind list**: its 6 lists (Game, Spells, Party, Items, Macros, Bar) on two rows of 3, twice as
+  wide (the Spanish and Italian names were cut).
+- **The game's buttons replaced**: the addon's picture over them follows their shape, square with the
+  game's corners on the D-pad (reported with a party spell: round there).
+
 ## 1.14.4
 
 - **Supplies: a readable count** (reported: orange or red on the brown bag, hard to read): the count

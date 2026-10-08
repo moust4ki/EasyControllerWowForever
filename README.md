@@ -235,6 +235,8 @@ from button to button, up to the layers, down to the actions under the controlle
 - **The gamepad bar's slots** (D-pad and A / B / X / Y in the four layers, but the fixed jump /
   interact / back / inspect) take a spell, an item or a macro: press A on one, pick it, and it goes
   in the game's own slot, like with its action bar editor (X empties it).
+- **The lists** (LB / RB, on two rows): Game, Spells, Party (spells cast through the party wheel,
+  below), Items, Macros (the addon's wheels first), Bar.
 - **Start and Select stay the game's** (its radial menu, the interface's focus), in every layer:
   they can't be changed.
 - **L3 / R3 with a trigger, LT + RB and RT + LB**: while the button alone keeps the game's function
@@ -452,6 +454,34 @@ holds changes out of combat only.
   rule of the game).
 - Moving from slot to slot can vibrate (Alerts › Vibrations).
 
+### Party spells
+
+The Gamepad tab's **Party** list holds the spell book's spells for allies (the game's helpful
+spells with a range: heals, buffs, resurrections). Put one on a button (a replaced button of the
+game, a free one, a paddle, any layer) and that button opens the party wheel:
+- small, like the game's own flyouts (the hunter's aspects), **centred on the button** that holds
+  the spell (the game's bar button, the stance bar's in a stance, or the paddle's on screen; else
+  where the wheels go), the spell in its middle, moved in just enough to stay whole on the screen;
+- around it, **only the members there**, each **always in the same place**: you at the bottom,
+  party member 1 on the left, then clockwise; their portrait and name in their class's colour, a
+  dead or offline one greyed (still there: a resurrection), **a red portrait when too far** for the
+  spell (its range, else the party's 40 yards), checked five times a second;
+- **push the right stick toward someone and let it go**: the spell is cast on them, the target
+  kept (the slot's secure button has the unit: `/cast [@party1]`). The nearest member there to the
+  stick's direction is the one aimed; alone, any direction is you. Holding the button, aiming and
+  letting the button go does it too; a short press leaves the wheel open (aim, then let the stick
+  go; B or the button again closes it);
+- it works **in combat** (members who join meanwhile come with the next opening); in a raid, the
+  members are your subgroup.
+
+Letting the stick go is seen through the game's stick direction keys (its
+`GamePadStickAxisButtons` setting): secure code only acts on keys. They are on while a party spell
+is on a button (on only as the wheel opened, the game took a moment to send them); your own value
+comes back when none is left and at logout. The game's own flyouts (aspects, pet actions, pet
+spells) close on any button, those keys too: while one is open, a frame of the addon keeps the
+stick's keys from it. A, B, LB and RB being the wheel's while it is open, a party spell on one of
+them gets its release through them.
+
 ## Quest items
 
 Item tooltips show an orange **"Quest item: do not sell"** line on quest items, including the items a
@@ -541,7 +571,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec keys` | list the keys and buttons the game receives, with the modifiers and triggers held (back paddles) |
 | `/ec fish` | list the game's events for a minute, to find which one comes when a fish bites |
 | `/ec vibe [pattern]` | test the controller vibration |
-| `/ec wheel` | what the consumables wheel holds, and why an item is not in it |
+| `/ec wheel` | what the consumables wheel holds, and why an item is not in it; the party wheel's last presses |
 | `/ec phrases` | the quick phrases window |
 | `/ec profile [name]` | this character's settings and the others'; with a name, put that profile in use |
 | `/ec binds` | the game's buttons replaced, and what each key runs now |
