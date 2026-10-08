@@ -551,48 +551,50 @@ local LET_GO = [[
     else
         owner:SetAttribute("ck-held-" .. button, 0)
     end
-    -- The nearest member there to a direction; `clear`: no other as near
-    local function nearest(x, y, clear)
-        local best, bestDot, second = nil, -100, -100
-        for i = 1, 5 do
-            if owner:GetFrameRef("slot" .. i):IsShown() then
-                local dot = x * owner:GetAttribute("ck-pdx-" .. i) + y * owner:GetAttribute("ck-pdy-" .. i)
-                if dot > bestDot then
-                    best, second, bestDot = i, bestDot, dot
-                elseif dot > second then
-                    second = dot
-                end
-            end
-        end
-        if clear and best and bestDot - second < 0.1 then return nil end
-        return best
-    end
-    -- The stick now: the flick's strongest reading wins (a later one about as
-    -- strong too: rolling round the rim)
     local state = GetGamePadState()
     local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-pstick") or 2]
     local len = stick and stick.len or 0
     local strongest = owner:GetAttribute("ck-aimlen") or 0
-    if len > 0.05 and len >= strongest * 0.8 then
-        local slot = nearest(stick.x, stick.y)
-        if slot then
-            owner:SetAttribute("ck-aim", slot)
-            owner:SetAttribute("ck-aimlen", math.max(len, strongest))
+    -- Two directions to try, each giving the nearest member there: first the
+    -- stick now, the flick's strongest reading winning (a later one about as
+    -- strong too: rolling round the rim); then, let go with nothing aimed,
+    -- the directions the flick went through, when one member is clearly the
+    -- nearest. (Written out twice over: the game refuses its keyword here.)
+    for pass = 1, 2 do
+        local x, y, clear
+        if pass == 1 then
+            if len > 0.05 and len >= strongest * 0.8 then x, y = stick.x, stick.y end
+        elseif not down and not held and (owner:GetAttribute("ck-aim") or 0) < 1 then
+            x, y, clear = 0, 0, true
+            for key in gmatch(keys, "([^,]+),") do
+                if owner:GetAttribute("ck-seen-" .. key) then
+                    x = x + owner:GetAttribute("ck-kx-" .. key)
+                    y = y + owner:GetAttribute("ck-ky-" .. key)
+                end
+            end
+            if x == 0 and y == 0 then x = nil end
+        end
+        if x then
+            local best, bestDot, second = nil, -100, -100
+            for i = 1, 5 do
+                if owner:GetFrameRef("slot" .. i):IsShown() then
+                    local dot = x * owner:GetAttribute("ck-pdx-" .. i) + y * owner:GetAttribute("ck-pdy-" .. i)
+                    if dot > bestDot then
+                        best, second, bestDot = i, bestDot, dot
+                    elseif dot > second then
+                        second = dot
+                    end
+                end
+            end
+            if best and not (clear and bestDot - second < 0.1) then
+                owner:SetAttribute("ck-aim", best)
+                if pass == 1 then owner:SetAttribute("ck-aimlen", math.max(len, strongest)) end
+            end
         end
     end
     if down or held then return false end
     -- Let go
     local slot = owner:GetAttribute("ck-aim") or 0
-    if slot < 1 then
-        local x, y = 0, 0
-        for key in gmatch(keys, "([^,]+),") do
-            if owner:GetAttribute("ck-seen-" .. key) then
-                x = x + owner:GetAttribute("ck-kx-" .. key)
-                y = y + owner:GetAttribute("ck-ky-" .. key)
-            end
-        end
-        if x ~= 0 or y ~= 0 then slot = nearest(x, y, true) or 0 end
-    end
     if slot < 1 or not owner:GetFrameRef("slot" .. slot):IsShown() then return false end
     return "s" .. slot, true
 ]]
