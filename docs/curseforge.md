@@ -37,6 +37,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Bind list**: its tabs on two rows, wider and easier to read.
 - **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
 - **Party/Healer wheel** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
+- **Back paddles** (1.15.3): Nothing alone no longer blocks an action on a trigger layer of the same paddle.
 - **The size of the gamepad buttons** (1.15.2): the whole gamepad bar from 70 % to 150 %, every layer at once, the addon's buttons and pictures following (Home › Gamepad, or Move / size on the Gamepad tab: LB / RB with the bar picked up). Placing is clearer: a thin frame round the bar's buttons and a tag saying what is selected.
 
 ## Features
