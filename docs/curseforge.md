@@ -26,8 +26,14 @@ Every feature you don't need can be turned off to save even more resources.
 
 [Watch the demo on YouTube](https://www.youtube.com/watch?v=BUiO3YtK4Cg)
 
+**Party spells (healing) demo**
+
+[![Easy Controller - Forever: party spells, the healing demo (YouTube)](https://img.youtube.com/vi/JXDERP1FTDg/hqdefault.jpg)](https://www.youtube.com/watch?v=JXDERP1FTDg)
+
+[Watch the party spells demo on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)
+
 ## What's new in 1.15
-- **Party spells**: put a heal or a buff on a button from the new **Party** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far.
+- **Party spells**: put a heal or a buff on a button from the new **Party** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
 - **Bind list**: its tabs on two rows, wider and easier to read.
 - **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
 
@@ -163,6 +169,7 @@ portrait, a dead one is greyed (still there for a resurrection). It works in com
 layer, on paddles too; in a raid, with your subgroup. While a party spell is on a button, the game's
 stick direction keys are on (the stick's release needs them): the addon keeps them from the game's
 own flyouts (aspects, pet) and gives your setting back when none is left and at logout.
+[See it in the party spells demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
 
 **Consumables wheel**
 A key of its own (any free button, or a back paddle in any trigger layer) opens a wheel drawn like
