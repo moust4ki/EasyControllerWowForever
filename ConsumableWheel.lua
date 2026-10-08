@@ -552,6 +552,7 @@ local LET_GO = [[
         end
         owner:SetAttribute("ck-held-" .. button, 1)
         owner:SetAttribute("ck-seen-" .. button, 1)
+        owner:SetAttribute("ck-last", button)
     else
         owner:SetAttribute("ck-held-" .. button, 0)
     end
@@ -559,10 +560,12 @@ local LET_GO = [[
     local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-pstick") or 2]
     local len = stick and stick.len or 0
     local strongest = owner:GetAttribute("ck-aimlen") or 0
-    -- Let go: no direction held any more, or one released with the stick back
-    -- in the middle (another one's release may never come: seen in game, the
-    -- member aimed and nothing cast)
-    local letGo = not down and (not held or len < 0.3)
+    -- Let go: no direction held any more, or the last one pressed released
+    -- (the game sends only its release: seen in game (/ec wheel), up right
+    -- pressed UP then RIGHT, RIGHT came back, UP's release never came, nothing
+    -- was cast), or one released with the stick not out at the rim (else it
+    -- rolls round it to another member)
+    local letGo = not down and (not held or owner:GetAttribute("ck-last") == button or len < 0.9)
     -- Two directions to try, each giving the nearest member there: first the
     -- stick now, the flick's strongest reading winning (a later one about as
     -- strong too: rolling round the rim); then, let go with nothing aimed,
