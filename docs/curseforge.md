@@ -70,7 +70,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
-- **Hold to show** a wheel, let go to use (option)
+- **Hold to show** a wheel, let go to use (option), aimed with the left or the right stick
 - **Wheels that fit**: as many sections as items
 - **Stay seated while eating or bandaging**: a nudged stick no longer wastes the meal, the camera still turns
 - **Quest items** marked in your bags, quest links in the chat
@@ -188,8 +188,8 @@ A key of its own (any free button, or a back paddle in any trigger layer) opens 
 the game's own radial menu, cut in as many sections as it holds (two items: two halves; five: five
 sections), up to 8 consumables a page (LB / RB for more), from your bags: food, drink, healing and
 mana potions, healthstone, mana gem, bandages, buff food, elixirs and flasks, scrolls, the best first.
-Point with the left stick and press A to use; B cancels; the mouse works too. Or hold its key, aim and
-let go to use (option). It works in combat (food and drink greyed there).
+Point with the left stick (or the right one: Wheels › Opening › Stick that aims) and press A to use; B
+cancels; the mouse works too. Or hold its key, aim and let go to use (option). It works in combat (food and drink greyed there).
 
 **Stay seated while eating**
 On by default: while you eat or drink (and bandage, an option), a stick still pushed from the wheel,

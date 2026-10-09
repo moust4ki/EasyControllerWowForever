@@ -90,6 +90,8 @@ local DEFAULTS = {
         enabled = true, variants = true, locked = true,
         -- Every wheel: hold its key to show it, let go to use (off: press)
         hold = false,
+        -- The stick that aims them: "left" or "right" (a party spell's: the right)
+        aimStick = "left",
         -- Eating or drinking: a stick nudged doesn't stand the character up
         staySeated = true,
         -- Bandaging: the same (its own option)

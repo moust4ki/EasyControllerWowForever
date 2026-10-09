@@ -783,10 +783,18 @@ end
 local function wheelOpenRows(b)
     local s = settings().wheel
     b.header(L.SEC_WHEEL_OPEN)
-    b.check({ id = "w_hold", label = L.LBL_WHEEL_HOLD, tip = L.TIP_WHEEL_HOLD,
+    b.check({ id = "w_hold", label = L.LBL_WHEEL_HOLD,
+        tip = function() return format(L.TIP_WHEEL_HOLD, CK.ConsumableWheel.StickWords()) end,
         get = function() return s.hold end,
         set = function(v)
             s.hold = v
+            CK.ConsumableWheel:Fill()
+        end })
+    -- The stick that aims (asked): left or right
+    b.choice({ id = "w_stick", label = L.LBL_WHEEL_STICK, tip = L.TIP_WHEEL_STICK,
+        text = function() return s.aimStick == "right" and L.STICK_RIGHT or L.STICK_LEFT end,
+        step = function()
+            s.aimStick = s.aimStick == "right" and "left" or "right"
             CK.ConsumableWheel:Fill()
         end })
 end
@@ -813,7 +821,8 @@ Config.pages.wheels = CK.MyWheels:TabPage(Config.NewRailPage({
     key = "wheels",
     sections = {
         { key = "mine", label = L.MYWHEEL_H, tip = L.MYWHEEL_INFO, view = CK.MyWheels.Grid },
-        { key = "consumables", label = L.SEC_CONSUMABLES, tip = L.WHEEL_INFO2, rows = consumableRows },
+        { key = "consumables", label = L.SEC_CONSUMABLES, rows = consumableRows,
+            tip = function() return format(L.WHEEL_INFO2, CK.ConsumableWheel.StickWords()) end },
         { key = "open", label = L.SEC_WHEEL_OPEN, tip = L.TIP_SEC_WHEEL_OPEN, rows = wheelOpenRows },
         { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_WHEELPOS, rows = wheelPositionRows },
     },
