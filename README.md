@@ -401,8 +401,9 @@ kind can be left out (Wheels › Consumables).
 - Give it a key in the Gamepad tab (Macros list: any free button, or a back paddle in any layer) or
   in *Escape > Key Bindings > AddOns*.
 - Open: **point at an item with the left stick and press A** to use it (the stick back in the middle
-  points at nothing); **B** cancels; LB / RB turn the pages; the wheel's key closes it too. The right
-  stick stays the game's (for its own spell wheels). The mouse works too. While it is open it takes
+  points at nothing); **B** cancels; LB / RB turn the pages; the wheel's key closes it too. **Stick
+  that aims** (Wheels › Opening): the left stick (by default) or the right one, for the consumables
+  wheel and your own wheels (the Party/Healer wheel always aims with the right stick). The mouse works too. While it is open it takes
   the sticks, like the game's own wheels: the camera and the character stay still. The aimed item's
   name shows in the game's banner under the wheel.
 - **Stay seated while eating** (Wheels › Consumables, on by default): while you eat or drink, a
@@ -412,7 +413,8 @@ kind can be left out (Wheels › Consumables).
 - **Hold to show** (Wheels › Opening, off by default, every wheel): hold the wheel's button, aim
   with the left stick, let go to use what it aims at; let go with the stick in the middle closes it
   without using anything. A still uses while you hold it. With Triggers: press to switch on and a
-  bar switched on, the wheel opens on a press as without the option.
+  bar switched on, the wheel opens on a press as without the option. (With the right stick chosen to
+  aim: the right stick.)
 - No game setting is changed. `/ec wheel` lists what the wheel holds, and why an item is not in it.
 
 ### Your own wheels
@@ -600,6 +602,12 @@ are also available in *Escape > Key Bindings > AddOns*.
   `Options.lua` the Home, Wheels, Keyboard and Alerts tabs, `MapWindow.lua` the Gamepad tab,
   `MyWheels.lua` the wheels' cards and editor); `Mapping.lua` / `Paddles.lua`,
   `QuestItems.lua` and `QuestLinks.lua` are the modules.
+- Translations: `Locales/`, one file per language, named by the game's locale. `enUS.lua` is the
+  base (`CK.L`); each other file puts its language in `CK.LOCALES.<locale>`, and `Core.lua` puts the
+  client's language over English (a key left out stays English). To add a language, copy
+  `Locales/frFR.lua` as `Locales/<locale>.lua` (`ruRU`, `ptBR`...), change the locale on its
+  `CK.LOCALES.` line, translate the values (keep `%s`, `%d` and the `|c...|r` color codes as they are),
+  and list the file in `EasyController.toc` before `Core.lua`.
 
 ## Roadmap
 

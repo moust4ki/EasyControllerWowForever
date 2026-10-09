@@ -20,7 +20,8 @@ EXTRA = ["Bindings.xml", "LICENSE", "LICENSE-ConsolePort.md", "README.md", "CHAN
 def main():
     toc = (ROOT / f"{ADDON}.toc").read_text(encoding="utf-8")
     version = re.search(r"^## Version:\s*(\S+)", toc, re.M).group(1)
-    listed = [line.strip() for line in toc.splitlines()
+    # (the TOC's paths with the game's backslash, the zip's with a slash)
+    listed = [line.strip().replace("\\", "/") for line in toc.splitlines()
               if line.strip() and not line.startswith("#")]
 
     files = [f"{ADDON}.toc"] + listed + EXTRA

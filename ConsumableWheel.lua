@@ -196,7 +196,19 @@ function W:TakeSticks(frame, on)
     if frame.EnableGamePadStick then pcall(frame.EnableGamePadStick, frame, on) end
 end
 
--- The stick that aims the open wheel: the left one, the right one for a
+-- The stick that aims the wheels (Wheels > Opening, asked): the left one by
+-- default, the right one if chosen; a party spell's wheel always the right
+-- one ("ck-pstick", its own)
+function W.AimRight()
+    return CK.db ~= nil and settings().aimStick == "right"
+end
+
+-- Its name in the texts ("left stick"...)
+function W.StickWords()
+    return W.AimRight() and L.WHEEL_STICK_RIGHT or L.WHEEL_STICK_LEFT
+end
+
+-- The stick that aims the open wheel: the one chosen, the right one for a
 -- party spell's
 local function aimStick(wheel)
     if not wheel then return 1 end
@@ -1358,7 +1370,7 @@ function W:Fill()
     -- where each key's button is
     for _, t in pairs(self.partyToggles) do self:StoreParty(t.ckSpell) end
     self:PlacePartyKeys()
-    wheel:SetAttribute("ck-stick", stickIndex("Movement", 1))
+    wheel:SetAttribute("ck-stick", W.AimRight() and stickIndex("Camera", 2) or stickIndex("Movement", 1))
     wheel:SetAttribute("ck-pstick", stickIndex("Camera", 2))
     -- The open wheel emptied: closed
     local open = wheel:GetAttribute("wheel") or "c"
@@ -1485,7 +1497,8 @@ function W:Paint()
         self.view.pages:SetText("")
     end
     local h = function(key) return CK:GlyphMarkup(key, 14) end
-    self.view.help:SetText(format("%s %s   %s %s   %s %s", h("LS"), L.WHEEL_AIM, h("A"), L.WHEEL_USE, h("B"), L.WHEEL_CLOSE))
+    self.view.help:SetText(format("%s %s   %s %s   %s %s", h(W.AimRight() and "RS" or "LS"), L.WHEEL_AIM, h("A"), L.WHEEL_USE,
+        h("B"), L.WHEEL_CLOSE))
     -- Not "nothing aimed" (nil): the banner is written, even the first time
     self.aimed = false
     self:Track()
@@ -1566,7 +1579,7 @@ function W:Track()
         self.ticked = nil
         -- A wheel of the player's: its name
         view.name:SetText(mine and CK.MyWheels and CK.MyWheels:Name(mine) or L.WHEEL_NOTHING)
-        view.count:SetText(mine and L.MYWHEEL_NOTHING_HINT or L.WHEEL_NOTHING_HINT)
+        view.count:SetText(format(mine and L.MYWHEEL_NOTHING_HINT or L.WHEEL_NOTHING_HINT, W.StickWords()))
         return
     end
     self:PlaceOverlay(view.highlight, "sel", i, self.paintedCount or SEGMENTS)

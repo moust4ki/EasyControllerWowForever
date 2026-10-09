@@ -50,6 +50,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Bind list**: its tabs on two rows, wider and easier to read.
 - **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
 - **Healer/Buff mode** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
+- **Wheels** (1.15.7): aim with the left or the right stick (Wheels › Opening › Stick that aims); the translations are in their own files (Locales/), easier to contribute to. Restart the game after this update.
 - **Game patch of 9 October** (1.15.6): the gamepad bar is placed in Edit Mode now; the addon only sets its size (through the game's own function) and reads Compact from Edit Mode, and tells you in the chat when the game's bug removes the bar.
 - **Chat keyboard** (1.15.5): two input methods, the daisywheel and the split keyboard; ConsolePort's keyboard is no longer offered (if you used it: the daisywheel).
 - **Healer/Buff mode** (1.15.4): the wheel no longer opens in the middle of the screen after a fight begun with LB or RB held; it stays on its button.
@@ -70,7 +71,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
-- **Hold to show** a wheel, let go to use (option)
+- **Hold to show** a wheel, let go to use (option), aimed with the left or the right stick
 - **Wheels that fit**: as many sections as items
 - **Stay seated while eating or bandaging**: a nudged stick no longer wastes the meal, the camera still turns
 - **Quest items** marked in your bags, quest links in the chat
@@ -188,8 +189,8 @@ A key of its own (any free button, or a back paddle in any trigger layer) opens 
 the game's own radial menu, cut in as many sections as it holds (two items: two halves; five: five
 sections), up to 8 consumables a page (LB / RB for more), from your bags: food, drink, healing and
 mana potions, healthstone, mana gem, bandages, buff food, elixirs and flasks, scrolls, the best first.
-Point with the left stick and press A to use; B cancels; the mouse works too. Or hold its key, aim and
-let go to use (option). It works in combat (food and drink greyed there).
+Point with the left stick (or the right one: Wheels › Opening › Stick that aims) and press A to use; B
+cancels; the mouse works too. Or hold its key, aim and let go to use (option). It works in combat (food and drink greyed there).
 
 **Stay seated while eating**
 On by default: while you eat or drink (and bandage, an option), a stick still pushed from the wheel,
