@@ -293,7 +293,7 @@ While placing, a thin frame goes round the bar's buttons (the game's frame is mu
 and a tag over what is selected says its name (the bar: its size), gold chosen, green picked up.
 
 **Size of the buttons** (Home › Gamepad, D-pad left / right): the game's whole gamepad bar from 70 %
-to 150 % in steps of 5. Since the game's patch of 8 October 2026 the bar is placed in the game's Edit
+to 150 % in steps of 5. Since the game's patch of 9 October 2026 the bar is placed in the game's Edit
 Mode (along with its compact layout, empty bars and button prompts); the addon only sets its size,
 through the game's own function, never through Edit Mode's. Its scale takes all of it at once: its four bars (no trigger, LT, RT, LT + RT),
 the targeting bars (LB / RB), the class actions are its children. It grows from its bottom middle,

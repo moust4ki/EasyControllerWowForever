@@ -1,5 +1,15 @@
 # Easy Controller - Forever
 
+> ⚠️ **Game bug since the 9 October patch, not caused by this addon.** The game's gamepad action
+> bar is now set in Edit Mode, and a bug there removes it from your own Edit Mode layouts every other
+> time you launch the game: no gamepad bar at all, not even in Edit Mode, and a /reload doesn't help.
+> It happens as soon as you use a layout of your own, for example to turn on **Compact**.
+> - **To get the bar back:** quit and relaunch the game (it comes back without Compact).
+> - **To avoid it:** use the game's default **Gamepad** layout in Edit Mode, without Compact.
+>
+> It has been reported to Blizzard; only a game update can fix it. The addon tells you in the chat
+> when it happens.
+
 **Built to be as light as possible, for handhelds and the Steam Deck: about 0.1 % CPU and 5 MB of memory.**
 Every feature you don't need can be turned off to save even more resources.
 
@@ -15,10 +25,6 @@ Every feature you don't need can be turned off to save even more resources.
 > **For the best results, set the game's gamepad action bar to compact** (the game's Edit Mode, its
 > gamepad bar selected): the game then shows one bar, which "Triggers: press to switch" and the extra
 > buttons are made for.
->
-> **No gamepad bar, not even in Edit Mode?** A game bug since its patch of 8 October removes it from
-> your own Edit Mode layout every other launch (a /reload changes nothing): quit and relaunch the game,
-> or use the game's Gamepad layout. The addon tells you in the chat when it happens.
 >
 > **To set the stance bar (stealth, a form, a stance), be in that stance first**: the Gamepad tab
 > shows the stance bar's slots only while you are in it.

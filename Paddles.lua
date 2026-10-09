@@ -970,7 +970,7 @@ end
 local BAR_STEP_X, BAR_STEP_Y = 40, 20
 P.BAR_SCALE_MIN, P.BAR_SCALE_MAX, P.BAR_SCALE_STEP = 0.7, 1.5, 0.05
 
--- Since the game's patch of 8 October 2026 its gamepad bar is one of Edit
+-- Since the game's patch of 9 October 2026 its gamepad bar is one of Edit
 -- Mode's frames: Edit Mode places it (the player moves it there) and has put
 -- its own SetPoint, ClearAllPoints and SetScale on it. Those are never called
 -- from here (the addon's code running in Edit Mode's would spread to it):
@@ -1058,7 +1058,7 @@ function P:ApplyBarOffset()
     if CK.ConsumableWheel and CK.ConsumableWheel.PlacePartyKeys then CK.ConsumableWheel:PlacePartyKeys() end
 end
 
--- The game's bug since its patch of 8 October 2026: launched with its
+-- The game's bug since its patch of 9 October 2026: launched with its
 -- gamepad bar in a layout of the player's, Edit Mode takes the bar out of
 -- that layout (and saves it so) and hides it: no bar, not in Edit Mode
 -- either, a /reload changes nothing; the next launch puts it back (its
