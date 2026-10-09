@@ -46,16 +46,17 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.15
-- **Healer/Buff mode**: put a heal or a buff on a button from the new **Party/Healer** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the Healer Mode Demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
-- **Bind list**: its tabs on two rows, wider and easier to read.
-- **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
-- **Healer/Buff mode** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
-- **Wheels** (1.15.7): aim with the left or the right stick (Wheels › Opening › Stick that aims); the translations are in their own files (Locales/), easier to contribute to. Restart the game after this update.
+- **Wheels** (1.15.7): aim with the left or the right stick (Wheels › Opening › Stick that aims).
+- **Translations** (1.15.7): one file per language (Locales/), easier to contribute to. **Restart the game after this update** (a /reload doesn't load new files).
 - **Game patch of 9 October** (1.15.6): the gamepad bar is placed in Edit Mode now; the addon only sets its size (through the game's own function) and reads Compact from Edit Mode, and tells you in the chat when the game's bug removes the bar.
 - **Chat keyboard** (1.15.5): two input methods, the daisywheel and the split keyboard; ConsolePort's keyboard is no longer offered (if you used it: the daisywheel).
 - **Healer/Buff mode** (1.15.4): the wheel no longer opens in the middle of the screen after a fight begun with LB or RB held; it stays on its button.
 - **Back paddles** (1.15.3): Nothing alone no longer blocks an action on a trigger layer of the same paddle.
 - **The size of the gamepad buttons** (1.15.2): the whole gamepad bar from 70 % to 150 %, every layer at once, the addon's buttons and pictures following (Home › Gamepad, or Move / size on the Gamepad tab: LB / RB with the bar picked up). Placing is clearer: a thin frame round the bar's buttons and a tag saying what is selected.
+- **Healer/Buff mode** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
+- **Healer/Buff mode** (1.15.0): put a heal or a buff on a button from the new **Party/Healer** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the Healer Mode Demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
+- **Bind list** (1.15.0): its tabs on two rows, wider and easier to read.
+- **Replaced D-pad buttons** (1.15.0): the addon's picture is square, like the game's own.
 
 ## Features
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
@@ -82,6 +83,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **OLED burn-in prevention** for the centre dot
 - **Xbox / PlayStation (DualSense) / Nintendo Switch** button icons
 - **Configuration panel** driven entirely with the gamepad (RB + D-pad down)
+- **Five languages**: English, French, German, Spanish and Italian, one file each, easy to translate into another
 
 Every function can be turned off, and the look matches WoW Forever's gamepad UI. The details of each
 part follow.
@@ -362,6 +364,10 @@ X, Y, Start and Select stay with the game's gamepad UI.
 
 Interface in English, French, German, Spanish and Italian. Suggestions and keyboard layout follow
 the game client's language by default.
+
+Each language is a file of its own in the addon's `Locales/` folder. To translate it into another
+one, copy `Locales/frFR.lua` as `Locales/<your locale>.lua`, translate its texts and send it on
+[GitHub](https://github.com/moust4ki/EasyControllerWowForever): the README explains how.
 
 ## Installation
 
