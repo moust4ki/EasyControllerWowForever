@@ -970,6 +970,28 @@ end
 local BAR_STEP_X, BAR_STEP_Y = 40, 20
 P.BAR_SCALE_MIN, P.BAR_SCALE_MAX, P.BAR_SCALE_STEP = 0.7, 1.5, 0.05
 
+-- Since the game's patch of 9 October 2026 its gamepad bar is one of Edit
+-- Mode's frames: Edit Mode places it (the player moves it there) and has put
+-- its own SetPoint, ClearAllPoints and SetScale on it. Those are never called
+-- from here (the addon's code running in Edit Mode's would spread to it):
+-- the size goes through the game's own, which Edit Mode keeps (SetScaleBase,
+-- SetPointBase), the place stays Edit Mode's, the steps (barOffset) unused.
+function P.EditModeBar(bar)
+    bar = bar or GamepadMainActionBarFrame
+    return bar ~= nil and bar.system ~= nil and type(bar.SetScaleBase) == "function"
+        and type(bar.SetPointBase) == "function"
+end
+
+-- The game's compact action bar (one bar shown): an Edit Mode setting of
+-- its bar since that patch, a game setting before
+function P.CompactBar()
+    local bar = GamepadMainActionBarFrame
+    if P.EditModeBar(bar) and type(bar.SetUseCompactLayout) == "function" then
+        return bar.useCompactLayout == true
+    end
+    return GetCVarBool and GetCVarBool("GamepadUseCompactActionBar") and true or false
+end
+
 function P:BarOffset()
     local off = settings().barOffset
     return off and tonumber(off.x) or 0, off and tonumber(off.y) or 0
@@ -989,8 +1011,27 @@ function P:ScaleBar(delta)
     self:ApplyBarOffset()
 end
 
+-- Edit Mode's bar: its size only, its place kept (its anchors' offsets in
+-- its new scale, as Edit Mode does it itself)
+function P:ScaleEditModeBar(bar)
+    local k, old = self:BarScale(), bar:GetScale() or 1
+    if math.abs(old - k) < 0.001 then return end
+    if InCombatLockdown() then
+        self.pendingBar = true
+        return
+    end
+    self.pendingBar = false
+    bar:SetScaleBase(k)
+    for i = 1, bar:GetNumPoints() do
+        local point, relativeTo, relativePoint, x, y = bar:GetPoint(i)
+        if point then bar:SetPointBase(point, relativeTo, relativePoint, (x or 0) * old / k, (y or 0) * old / k) end
+    end
+    if CK.ConsumableWheel and CK.ConsumableWheel.PlacePartyKeys then CK.ConsumableWheel:PlacePartyKeys() end
+end
+
 function P:ApplyBarOffset()
     local bar = GamepadMainActionBarFrame
+    if P.EditModeBar(bar) then return self:ScaleEditModeBar(bar) end
     local x, y = self:BarOffset()
     local k = self:BarScale()
     if not bar or (x == 0 and y == 0 and k == 1 and not self.barMoved) then return end
@@ -1017,7 +1058,28 @@ function P:ApplyBarOffset()
     if CK.ConsumableWheel and CK.ConsumableWheel.PlacePartyKeys then CK.ConsumableWheel:PlacePartyKeys() end
 end
 
+-- The game's bug since its patch of 9 October 2026: launched with its
+-- gamepad bar in a layout of the player's, Edit Mode takes the bar out of
+-- that layout (and saves it so) and hides it: no bar, not in Edit Mode
+-- either, a /reload changes nothing; the next launch puts it back (its
+-- settings by default, compact off). Said once in the chat, with what to do
+function P:CheckEditModeBar()
+    if self.editModeWarned then return end
+    local bar = GamepadMainActionBarFrame
+    if not (P.EditModeBar(bar) and EditModeManagerFrame) then return end
+    -- (its layouts not in use yet: nothing to tell)
+    if EditModeManagerFrame.layoutInfo == nil then return end
+    local ok, gamepadUI = pcall(function() return InputUtil and InputUtil.IsGamepadUIEnabled and InputUtil.IsGamepadUIEnabled() end)
+    if not (ok and gamepadUI) then return end
+    -- Edit Mode gave it its place: its layout holds it
+    if bar.systemInfo ~= nil then return end
+    self.editModeWarned = true
+    CK:Print(L.EDITMODE_BAR_LOST, LAYOUT_STYLE_GAMEPAD or "Gamepad")
+end
+
 function P:MoveBar(dx, dy)
+    -- (placed in the game's Edit Mode)
+    if P.EditModeBar() then return end
     local x, y = self:BarOffset()
     local w, h = UIParent:GetWidth() or 1920, UIParent:GetHeight() or 1080
     -- (bigger, it has less room)
@@ -1303,7 +1365,10 @@ function P:RenderPlacement()
     self.banner.title:SetText(L.PLACE_TITLE .. "  |cffffffff" .. name .. "|r")
     local parts
     if self.grabbed then
-        parts = { g("DPAD_UP") .. " " .. (id == "BAR" and L.MAP_P_MOVE or L.PLACE_P_PLACE) }
+        -- Edit Mode's bar: its size here, its place in Edit Mode
+        local sizeOnly = id == "BAR" and P.EditModeBar()
+        parts = { sizeOnly and format(L.PLACE_P_EDITMODE, HUD_EDIT_MODE_MENU or "Edit Mode")
+            or (g("DPAD_UP") .. " " .. (id == "BAR" and L.MAP_P_MOVE or L.PLACE_P_PLACE)) }
         if id ~= "BAR" then
             local sym = settings().extraSymmetric and L.ON or L.OFF
             parts[#parts + 1] = g("Y") .. " " .. format(L.PLACE_P_SYM, sym)
@@ -1311,7 +1376,8 @@ function P:RenderPlacement()
             -- The bar's size: LB smaller, RB bigger
             parts[#parts + 1] = g("LB") .. g("RB") .. " " .. format(L.PLACE_P_SIZE, math.floor(self:BarScale() * 100 + 0.5))
         end
-        parts[#parts + 1] = g("X") .. " " .. (id == "BAR" and L.PLACE_P_RESET_BAR or L.PLACE_P_RESET)
+        parts[#parts + 1] = g("X") .. " " .. (id ~= "BAR" and L.PLACE_P_RESET
+            or sizeOnly and L.PLACE_P_RESET_SIZE or L.PLACE_P_RESET_BAR)
         parts[#parts + 1] = g("A") .. " " .. L.PLACE_P_DROP
         parts[#parts + 1] = g("B") .. " " .. L.PLACE_P_CANCEL
     else
@@ -1394,12 +1460,17 @@ function P:Init()
     events:RegisterEvent("ADDON_LOADED")
     events:RegisterEvent("PLAYER_REGEN_ENABLED")
     events:RegisterEvent("PLAYER_ENTERING_WORLD")
+    events:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
     events:SetScript("OnEvent", function(_, event, name)
         if event == "PLAYER_REGEN_ENABLED" then
             watchKeys()
             if P.pendingBar then P:ApplyBarOffset() end
+        elseif event == "EDIT_MODE_LAYOUTS_UPDATED" then
+            -- Once Edit Mode has put its layout in use
+            C_Timer.After(1, function() P:CheckEditModeBar() end)
         elseif event == "PLAYER_ENTERING_WORLD" then
             P:ApplyBarOffset()
+            C_Timer.After(5, function() P:CheckEditModeBar() end)
         elseif name == "Blizzard_GamepadActionBars" then
             P:ApplyBarOffset()
             -- The game's gamepad bars may load later (gamepad interface turned on)
