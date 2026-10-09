@@ -9,6 +9,18 @@ CK.Dicts = CK.Dicts or {}
 -- language overrides it (Locales/<locale>.lua, loaded before this file);
 -- the other languages are then let go
 ---------------------------------------------------------------------------
+-- Updated while the game was running: a /reload doesn't load the files the
+-- game didn't know when it started (these). The keys' own names meanwhile,
+-- and a word in the chat once in the world
+if not CK.L then
+    CK.L = setmetatable({}, { __index = function(_, key) return key end })
+    local warn = CreateFrame("Frame")
+    warn:RegisterEvent("PLAYER_ENTERING_WORLD")
+    warn:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        DEFAULT_CHAT_FRAME:AddMessage("|cff33ccffEasy Controller|r: |cffff4040updated while the game was running|r: quit and restart the game (/reload is not enough for new files).")
+    end)
+end
 local L = CK.L
 
 for key, value in pairs(CK.LOCALES and CK.LOCALES[GetLocale()] or {}) do
