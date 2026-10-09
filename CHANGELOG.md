@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.15.7
+
+**After this update, quit and restart the game**: it adds files, which a /reload doesn't load.
+
+- **Wheels: the stick that aims, left or right** (asked): Wheels › Opening › Stick that aims. The
+  consumables wheel and your own wheels are aimed with the left stick (the default, as before) or the
+  right one. The Party/Healer wheel keeps the right stick. The wheel's help, its hint and the options'
+  tips name the stick chosen. Changed in combat, it applies once the fight ends.
+- **Translations in their own files** (asked on CurseForge): `Locales/`, one file per language
+  (`enUS.lua` the base, `frFR.lua`, `deDE.lua`, `esES.lua` also for esMX, `itIT.lua`); `Core.lua`
+  keeps only the code. Every text stays the same in every language. To add a language: copy a file,
+  translate it, list it in the TOC (README › Translations).
+- **Updated while the game was running**: if the game didn't load the new files (a /reload after an
+  update), the addon no longer fails: it says in the chat to restart the game.
+
 ## 1.15.6
 
 - **The game's patch of 9 October: its gamepad bar in Edit Mode.** The game now places its gamepad
