@@ -9,6 +9,11 @@
 ## X-Website: https://github.com/moust4ki/EasyControllerWowForever
 ## X-Curse-Project-ID: 1712492
 
+Locales\enUS.lua
+Locales\frFR.lua
+Locales\deDE.lua
+Locales\esES.lua
+Locales\itIT.lua
 Core.lua
 Dict_frFR.lua
 Dict_frFR_next.lua

@@ -600,6 +600,12 @@ are also available in *Escape > Key Bindings > AddOns*.
   `Options.lua` the Home, Wheels, Keyboard and Alerts tabs, `MapWindow.lua` the Gamepad tab,
   `MyWheels.lua` the wheels' cards and editor); `Mapping.lua` / `Paddles.lua`,
   `QuestItems.lua` and `QuestLinks.lua` are the modules.
+- Translations: `Locales/`, one file per language, named by the game's locale. `enUS.lua` is the
+  base (`CK.L`); each other file puts its language in `CK.LOCALES.<locale>`, and `Core.lua` puts the
+  client's language over English (a key left out stays English). To add a language, copy
+  `Locales/frFR.lua` as `Locales/<locale>.lua` (`ruRU`, `ptBR`...), change the locale on its
+  `CK.LOCALES.` line, translate the values (keep `%s`, `%d` and the `|c...|r` color codes as they are),
+  and list the file in `EasyController.toc` before `Core.lua`.
 
 ## Roadmap
 
