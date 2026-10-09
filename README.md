@@ -280,10 +280,9 @@ you put on them. Spells are listed with their rank.
 
 The extra buttons that do something (back paddles, L3, R3) appear around the gamepad action bar, in
 its round slot style: the action's icon, count, cooldown and usability, the held trigger layer's
-action, and the game's pressed look when you press them. **Move / size** moves the game's gamepad bar by steps with the D-pad (only its
-place on the screen changes, out of combat; X puts it back; the extra buttons follow it), resizes it
-with LB / RB once picked up (X then gives back the game's place and size, B both as they were), and
-puts each extra button
+action, and the game's pressed look when you press them. **Move / size** resizes the game's gamepad
+bar with LB / RB once picked up (X then gives back the game's size, B the size it had; out of combat),
+and puts each extra button
 on one of the fixed places around the bar's controls (two columns on the outer side, two rows above and
 two below): the D-pad chooses the bar or a button (LB / RB too), A picks it up, then the D-pad moves it
 (a button goes from place to place, onto a taken place the two buttons swap), A puts it down and B puts
@@ -294,7 +293,9 @@ While placing, a thin frame goes round the bar's buttons (the game's frame is mu
 and a tag over what is selected says its name (the bar: its size), gold chosen, green picked up.
 
 **Size of the buttons** (Home › Gamepad, D-pad left / right): the game's whole gamepad bar from 70 %
-to 150 % in steps of 5. Its scale takes all of it at once: its four bars (no trigger, LT, RT, LT + RT),
+to 150 % in steps of 5. Since the game's patch of 8 October 2026 the bar is placed in the game's Edit
+Mode (along with its compact layout, empty bars and button prompts); the addon only sets its size,
+through the game's own function, never through Edit Mode's. Its scale takes all of it at once: its four bars (no trigger, LT, RT, LT + RT),
 the targeting bars (LB / RB), the class actions are its children. It grows from its bottom middle,
 where the game anchors it (its offsets divided by its scale to keep its place). What the addon adds
 follows it: the extra buttons hang on its anchors at its scale, the pictures on replaced buttons are
@@ -331,7 +332,7 @@ bar. Press LT alone (no other button while it is down): the left bar stays on, A
 D-pad use it; press LT again: back to the top bar. Same for RT (the right bar); LT then RT: the bottom
 bar. Holding a trigger and pressing a button still works as before, the bar comes back once you let go.
 The back paddles, L3 / R3 and the extra buttons follow the bar on. **It needs the game's compact
-action bar** (the game's gamepad options): the game shows one bar, and the bar switched on shows in its
+action bar** (the game's Edit Mode, its gamepad bar selected): the game shows one bar, and the bar switched on shows in its
 place. Without it, the game keeps showing its usual bars and the top one highlighted. **Top bar again after combat**
 (on by default) brings the top bar back when a fight ends; off, a bar stays on until you press its
 trigger again. A game window, the panel or the chat keyboard get their buttons back while open.

@@ -12,8 +12,13 @@ Every feature you don't need can be turned off to save even more resources.
 >
 > **To open the settings: hold RB and press D-pad down** (or type `/ec` in the chat).
 >
-> **For the best results, set the game's gamepad action bar to compact** (the game's gamepad options):
-> the game then shows one bar, which "Triggers: press to switch" and the extra buttons are made for.
+> **For the best results, set the game's gamepad action bar to compact** (the game's Edit Mode, its
+> gamepad bar selected): the game then shows one bar, which "Triggers: press to switch" and the extra
+> buttons are made for.
+>
+> **No gamepad bar, not even in Edit Mode?** A game bug since its patch of 8 October removes it from
+> your own Edit Mode layout every other launch (a /reload changes nothing): quit and relaunch the game,
+> or use the game's Gamepad layout. The addon tells you in the chat when it happens.
 >
 > **To set the stance bar (stealth, a form, a stance), be in that stance first**: the Gamepad tab
 > shows the stance bar's slots only while you are in it.
@@ -245,13 +250,13 @@ cooldown, and press down like the game's buttons. Place each one where you want 
 around the bar's controls, with the D-pad or the mouse, mirrored left / right, or anywhere with Free
 placement.
 
-**The gamepad bar's size and place**
+**The gamepad bar's size**
 Home › Gamepad › Size of the buttons makes the game's whole gamepad bar bigger or smaller (70 % to
 150 %): its four bars, the targeting bars and the class actions together, growing from its bottom
 middle so it keeps its place; the extra buttons, the pictures on replaced buttons and the party wheels
-follow. Move / size on the Gamepad tab moves it by steps with the D-pad and, picked up, resizes it with
-LB / RB (X: the game's place and size; B: both back). A thin frame and a tag show what is selected.
-Out of combat (in combat: once it ends).
+follow. Move / size on the Gamepad tab resizes it too, picked up, with LB / RB (X: the game's size; B:
+back). Its place is set in the game's Edit Mode. A thin frame and a tag show what is selected. Out of
+combat (in combat: once it ends).
 
 **Extra buttons**
 For both controllers with more buttons (Vader Pro…) and touchpads set as buttons (Steam Deck, Steam
@@ -264,7 +269,7 @@ functions, shown next to the gamepad bar.
 An option in Home › Gamepad: press LT alone (no other button while it is down) and the left bar stays
 on; press LT again to come back to the top bar. Same for RT (the right bar); LT then RT: the bottom bar.
 Holding a trigger and pressing a button still works as before. The back paddles, L3 / R3 and the extra
-buttons follow the bar on. Made for the game's compact action bar (one bar shown): the bar switched on
+buttons follow the bar on. Made for the game's compact action bar (Edit Mode, one bar shown): the bar switched on
 shows in place of the top bar, its icons pressing in on each press, round where the game's buttons are
 round. Optionally back to the top bar after each fight.
 

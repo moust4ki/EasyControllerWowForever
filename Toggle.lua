@@ -399,7 +399,7 @@ function T:Draw()
     local layer = self:Layer()
     local bar = layer ~= "" and CK.Mapping.LAYER_BAR[layer]
     local frame = bar and barFrame(bar)
-    local compact = GetCVarBool and GetCVarBool("GamepadUseCompactActionBar")
+    local compact = CK.Paddles.CompactBar()
     if not (frame and compact) then
         for _, s in pairs(v.slots) do s:Hide() end
         v.trigger:Hide()
