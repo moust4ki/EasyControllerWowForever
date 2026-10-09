@@ -50,6 +50,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Bind list**: its tabs on two rows, wider and easier to read.
 - **Replaced D-pad buttons**: the addon's picture is square, like the game's own.
 - **Healer/Buff mode** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
+- **Game patch of 9 October** (1.15.6): the gamepad bar is placed in Edit Mode now; the addon only sets its size (through the game's own function) and reads Compact from Edit Mode, and tells you in the chat when the game's bug removes the bar.
 - **Chat keyboard** (1.15.5): two input methods, the daisywheel and the split keyboard; ConsolePort's keyboard is no longer offered (if you used it: the daisywheel).
 - **Healer/Buff mode** (1.15.4): the wheel no longer opens in the middle of the screen after a fight begun with LB or RB held; it stays on its button.
 - **Back paddles** (1.15.3): Nothing alone no longer blocks an action on a trigger layer of the same paddle.

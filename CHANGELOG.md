@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.15.6
+
+- **The game's patch of 9 October: its gamepad bar in Edit Mode.** The game now places its gamepad
+  bar in Edit Mode, which also holds its compact layout. The size of the gamepad buttons goes through
+  the game's own function, never through Edit Mode's (no blocked actions); the bar's place is set in
+  Edit Mode (Move / size: its size only, the old steps no longer used); "Triggers: press to switch"
+  reads the compact layout from Edit Mode.
+- **A game bug told in the chat**: since that patch, the game removes its gamepad bar from your own
+  Edit Mode layouts every other launch (no bar, not even in Edit Mode, and a /reload doesn't help).
+  The addon says so once in the chat, with what to do: quit and relaunch the game, or use the game's
+  Gamepad layout.
+
 ## 1.15.5
 
 - **Chat keyboard: ConsolePort's keyboard no longer offered**: two input methods, the daisywheel and
