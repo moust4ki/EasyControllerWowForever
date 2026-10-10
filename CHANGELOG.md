@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.15.8
+
+- **Healer/Buff mode: each member's health on their portrait** (asked): their health in %, outlined
+  to be read over any face, rounded up as the game's own frames show it (never 0 % while alive),
+  green when full, yellow at half, red near nothing, with every shade between; Dead or Offline in
+  grey. Refreshed five times a second while the wheel is open. In combat, where the game may hide
+  health from addons, the percentage and its colour are worked out by the game itself.
+
 ## 1.15.7
 
 **After this update, quit and restart the game**: it adds files, which a /reload doesn't load.

@@ -46,6 +46,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.15
+- **Healer/Buff mode** (1.15.8): each member's health in % on their portrait, green when full, yellow at half, red near nothing; Dead or Offline in grey.
 - **Wheels** (1.15.7): aim with the left or the right stick (Wheels › Opening › Stick that aims).
 - **Translations** (1.15.7): one file per language (Locales/), easier to contribute to. **Restart the game after this update** (a /reload doesn't load new files).
 - **Game patch of 9 October** (1.15.6): the gamepad bar is placed in Edit Mode now; the addon only sets its size (through the game's own function) and reads Compact from Edit Mode, and tells you in the chat when the game's bug removes the bar.
