@@ -450,7 +450,11 @@ game, a free one, a paddle, any layer) and that button opens the party wheel:
 - around it, **only the members there**, each **always in the same place**: you at the bottom,
   party member 1 on the left, then clockwise; their portrait and name in their class's colour, a
   dead or offline one greyed (still there: a resurrection), **a red portrait when too far** for the
-  spell (its range, else the party's 40 yards), checked five times a second;
+  spell (its range, else the party's 40 yards), checked five times a second; **each member's health
+  on their portrait**, outlined, rounded up as the game's frames show it, green when full, yellow at
+  half, red near nothing (a gradient between), Dead / Offline in grey, refreshed with the range (in
+  combat the game may hide health from addons: the percentage and its colour are then the game's
+  own, from `UnitHealthPercent` through curves, handed to the text);
 - **push the right stick toward someone and let it go**: the spell is cast on them, the target
   kept (the slot's secure button has the unit: `/cast [@party1]`). The nearest member there to the
   stick's direction is the one aimed; alone, any direction is you. Holding the button, aiming and

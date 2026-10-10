@@ -935,6 +935,14 @@ function W:BuildParty(wheel)
             seg.label:SetJustifyH("CENTER")
             seg.label:SetPoint(up and "BOTTOM" or "TOP", seg.slot, up and "TOP" or "BOTTOM", 0, up and 1 or -1)
         end
+        -- Their health on the portrait, at its bottom, outlined to be read
+        -- over any face (above the slot's rim, following its pressed look)
+        seg.hp = seg.slot.over:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+        local font = NumberFontNormal and NumberFontNormal.GetFont and NumberFontNormal:GetFont()
+        seg.hp:SetFont(font or STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
+        seg.hp:SetPoint("BOTTOM", seg.slot.over, "BOTTOM", 0, 3)
+        seg.hp:SetWordWrap(false)
+        seg.hp:Hide()
         pv.members[i] = seg
     end
     -- Above it: the banner (the spell, the member aimed), the help
@@ -1599,15 +1607,97 @@ end
 ---------------------------------------------------------------------------
 -- A party spell's wheel's drawing (its own frame, `pview`)
 ---------------------------------------------------------------------------
+-- A member's health on their portrait (asked): its percentage, rounded up
+-- as the game's own frames show it, green when full, yellow at half, red
+-- near nothing; dead or offline: said in grey. In combat the game may hide
+-- health from addons (secret values): the percentage and its colour are
+-- then the game's own work (UnitHealthPercent through curves), handed
+-- straight to the text, never read here
+local HP_GREEN, HP_YELLOW, HP_RED = { 0.2, 1, 0.2 }, { 1, 0.85, 0.1 }, { 1, 0.15, 0.15 }
+local hpCurves
+local function healthCurves()
+    if hpCurves ~= nil then return hpCurves end
+    hpCurves = false
+    local util = C_CurveUtil
+    if not (util and util.CreateCurve and util.CreateColorCurve and UnitHealthPercent and CreateColor) then return false end
+    local ok, curves = pcall(function()
+        local linear = Enum and Enum.LuaCurveType and Enum.LuaCurveType.Linear
+        -- 0 to 1 as 0 to 100, a half up: "%.0f" then rounds up (1 % while alive)
+        local text = util.CreateCurve()
+        if linear and text.SetType then text:SetType(linear) end
+        text:AddPoint(0, 0.499)
+        text:AddPoint(1, 100.499)
+        local color = util.CreateColorCurve()
+        if linear and color.SetType then color:SetType(linear) end
+        color:AddPoint(0, CreateColor(HP_RED[1], HP_RED[2], HP_RED[3]))
+        color:AddPoint(0.5, CreateColor(HP_YELLOW[1], HP_YELLOW[2], HP_YELLOW[3]))
+        color:AddPoint(1, CreateColor(HP_GREEN[1], HP_GREEN[2], HP_GREEN[3]))
+        return { text = text, color = color }
+    end)
+    hpCurves = ok and curves or false
+    return hpCurves
+end
+
+-- The colour of a percentage worked out here (no curves: the game shows it)
+local function healthColor(pct)
+    local from, to, t
+    if pct >= 50 then from, to, t = HP_YELLOW, HP_GREEN, (pct - 50) / 50
+    else from, to, t = HP_RED, HP_YELLOW, pct / 50 end
+    return from[1] + (to[1] - from[1]) * t, from[2] + (to[2] - from[2]) * t, from[3] + (to[3] - from[3]) * t
+end
+
+-- (its colour on its own: if the game turned it down, the percentage
+-- stays, in white)
+local function curveColor(hp, unit, curve)
+    hp:SetTextColor(UnitHealthPercent(unit, true, curve):GetRGB())
+end
+
+local function paintHealth(seg, unit)
+    local hp = seg.hp
+    if UnitIsConnected and not UnitIsConnected(unit) then
+        hp:SetText(L.PARTY_OFFLINE)
+        hp:SetTextColor(0.6, 0.6, 0.6)
+    elseif UnitIsDeadOrGhost and UnitIsDeadOrGhost(unit) then
+        hp:SetText(L.PARTY_DEAD)
+        hp:SetTextColor(0.6, 0.6, 0.6)
+    else
+        local curves = healthCurves()
+        if curves then
+            hp:SetFormattedText("%.0f%%", UnitHealthPercent(unit, true, curves.text))
+            if not pcall(curveColor, hp, unit, curves.color) then hp:SetTextColor(1, 1, 1) end
+        else
+            local max = UnitHealthMax(unit)
+            if not (max and max > 0) then
+                hp:Hide()
+                return
+            end
+            local pct = math.min(100, math.max(0, math.ceil(100 * UnitHealth(unit) / max)))
+            hp:SetText(pct .. "%")
+            hp:SetTextColor(healthColor(pct))
+        end
+    end
+    hp:Show()
+end
+W.PaintHealth = paintHealth
+
+-- Painted apart: a health the game won't give leaves the member there
+local function healthOf(seg, unit)
+    if not pcall(paintHealth, seg, unit) then seg.hp:Hide() end
+end
+
 -- A member's place: their portrait and name in their class's colour
--- (greyed when dead or offline: a resurrection is cast on them too); a
--- member who isn't there: nothing at all
+-- (greyed when dead or offline: a resurrection is cast on them too), their
+-- health on the portrait; a member who isn't there: nothing at all
 local function paintMember(seg, item)
     local unit = item and item.unit
     local here = unit and UnitExists(unit) and true or false
     seg.slot:SetShown(here)
     seg.label:SetShown(here)
-    if not here then return end
+    if not here then
+        seg.hp:Hide()
+        return
+    end
+    healthOf(seg, unit)
     SetPortraitTexture(seg.slot.icon, unit)
     seg.slot.icon:SetTexCoord(0, 1, 0, 1)
     seg.slot.icon:Show()
@@ -1686,7 +1776,8 @@ function W.OutOfRange(spellID, unit)
 end
 
 -- Each member there too far for the spell: their portrait in red (the
--- range's red), checked five times a second while the wheel is open
+-- range's red), checked five times a second while the wheel is open; their
+-- health with it
 local RANGE_EVERY = 0.2
 function W:RangeParty(now)
     local pv = self.pview
@@ -1699,6 +1790,7 @@ function W:RangeParty(now)
     for i, seg in ipairs(pv.members) do
         local item = list[i]
         if item and seg.slot:IsShown() then
+            healthOf(seg, item.unit)
             local far = W.OutOfRange(item.id, item.unit)
             seg.far = far and true or false
             if far then
