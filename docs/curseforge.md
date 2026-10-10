@@ -69,7 +69,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
-- **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept
+- **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health in % on their portrait
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
 - **Hold to show** a wheel, let go to use (option), aimed with the left or the right stick
@@ -180,7 +180,8 @@ middle: the members of your party who are there, each always in the same place (
 member 1 on the left, then clockwise), with their portrait and name. Push the right stick toward
 someone and let it go: the spell is cast on them, your target kept. Or hold the button, aim, and let
 the button go. A short press leaves it open; B closes it. A member too far for the spell has a red
-portrait, a dead one is greyed (still there for a resurrection). It works in combat, in every trigger
+portrait, a dead one is greyed (still there for a resurrection). Each member's health shows on their
+portrait in %, green when full, yellow at half, red near nothing; Dead or Offline in grey. It works in combat, in every trigger
 layer, on paddles too; in a raid, with your subgroup. While a Healer/Buff mode spell is on a button, the game's
 stick direction keys are on (the stick's release needs them): the addon keeps them from the game's
 own flyouts (aspects, pet) and gives your setting back when none is left and at logout.
