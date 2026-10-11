@@ -46,6 +46,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.15
+- **Usable items wheel** (1.15.9): every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside, quest items first; give it a key in the Gamepad tab's Macros list, hide any item in Wheels › Usable items.
 - **Healer/Buff mode** (1.15.8): each member's health in % on their portrait, green when full, yellow at half, red near nothing; Dead or Offline in grey.
 - **Wheels** (1.15.7): aim with the left or the right stick (Wheels › Opening › Stick that aims).
 - **Translations** (1.15.7): one file per language (Locales/), easier to contribute to. **Restart the game after this update** (a /reload doesn't load new files).

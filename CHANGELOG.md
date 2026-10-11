@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.15.9
+
+- **Usable items wheel** (asked): a new wheel, like the consumables one, for every item of your bags
+  you can use, the consumables aside (they keep their own wheel): a sleeping bag, a battle standard, a
+  quest item to use somewhere, a quest's first page... Items you wear (a trinket in the bags) are left
+  out. Quest items first, then by name, 8 a page (LB / RB for more). Give it a key in the Gamepad tab
+  (Macros list: *Usable items wheel*) or in the game's key bindings. It opens, aims and uses like the
+  consumables wheel, in combat too.
+- **Wheels › Usable items**: what the wheel holds now, each ticked when shown; untick an item to hide
+  it from the wheel (it stays in your bags). The hearthstone is hidden by default.
+- `/ec wheel` also tells how many items the usable items wheel holds, and how many are hidden.
+
 ## 1.15.8
 
 - **Healer/Buff mode: each member's health on their portrait** (asked): their health in %, outlined
