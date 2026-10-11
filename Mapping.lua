@@ -748,6 +748,7 @@ function M:ActionName(action)
         if value == "phrases" then return L.PHRASES_NAME end
         local spell = M.PartySpell(action)
         if spell then return format(L.PARTY_ACTION, M.SpellName(spell) or tostring(spell)) end
+        if value == "usable" then return L.USABLE_WHEEL_NAME end
         if not n then return L.WHEEL_NAME end
         return CK.MyWheels and CK.MyWheels:Name(n) or L.MYWHEEL_GONE
     end
@@ -774,6 +775,7 @@ function M:ActionIcon(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
         if value == "phrases" then return CK.Phrases and CK.Phrases.ICON end
+        if value == "usable" then return M.USABLE_ICON end
         local spell = M.PartySpell(action)
         if spell then return C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spell) end
         return n and CK.MyWheels and CK.MyWheels:Icon(n) or M.WHEEL_ICON
@@ -798,6 +800,8 @@ local function commandEntry(command)
 end
 
 M.WHEEL_ICON = "Interface\\Icons\\INV_Potion_54"
+-- The usable items' wheel: a bag
+M.USABLE_ICON = "Interface\\Icons\\INV_Misc_Bag_08"
 
 -- forSlot: for one of the game's bar slots (spells, items, macros only).
 -- noBound: a trigger layer of a pad button, where a game function (a key
@@ -881,6 +885,7 @@ function M:Catalog(tab, forSlot, noBound)
         if not forSlot and CK.ConsumableWheel then
             list[#list + 1] = { header = L.HDR_OURS }
             list[#list + 1] = { action = "wheel:consumables", name = L.WHEEL_NAME, icon = M.WHEEL_ICON }
+            list[#list + 1] = { action = "wheel:usable", name = L.USABLE_WHEEL_NAME, icon = M.USABLE_ICON }
             -- The quick phrases window (Phrases.lua), opened like a wheel
             if CK.Phrases then
                 list[#list + 1] = { action = "wheel:phrases", name = L.PHRASES_NAME, icon = CK.Phrases.ICON }

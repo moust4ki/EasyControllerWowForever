@@ -190,6 +190,93 @@ function W.Reason(id)
 end
 
 ---------------------------------------------------------------------------
+-- The usable items' wheel (asked, "u"): every item of the bags that can be
+-- used, the consumables aside (their own wheel): a sleeping bag, a battle
+-- standard, a quest item to use somewhere, a quest's first page... Items
+-- one wears (using them from the bags would put them on) left out. Quest
+-- items first, then by name; one of each. The player hides some (Wheels >
+-- Usable items; the hearthstone by default)
+---------------------------------------------------------------------------
+local QUEST_CLASS = Enum and Enum.ItemClass and Enum.ItemClass.Questitem or 12
+
+local function questInfo(bag, slot)
+    local get = C_Container and C_Container.GetContainerItemQuestInfo
+    local ok, info = pcall(function() return get and get(bag, slot) end)
+    return ok and type(info) == "table" and info or nil
+end
+
+-- An item of the bags this wheel takes, and whether it is a quest's
+function W.UsableItem(id, bag, slot)
+    local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(id)
+    local equip = C_Item.IsEquippableItem or IsEquippableItem
+    if equip and equip(id) then return false end
+    local info = bag and questInfo(bag, slot)
+    local quest = classID == QUEST_CLASS or (info and (info.isQuestItem or info.questID ~= nil)) or false
+    local spell = C_Item.GetItemSpell and C_Item.GetItemSpell(id)
+    -- A quest's first page: used, it opens the quest
+    local starter = info and info.questID ~= nil and not info.isActive
+    if not (spell or starter) then return false end
+    if W.Category(id) then return false end
+    return true, quest and true or false
+end
+
+local function itemName(id)
+    local name = C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)
+    if not name then
+        local get = C_Item.GetItemInfo or GetItemInfo
+        name = get and get(id)
+    end
+    return name
+end
+
+-- Every one in the bags, hidden ones too ({ id, quest, name, hidden })
+function W:UsableCandidates()
+    local hidden = settings().usableHidden or {}
+    local list, seen = {}, {}
+    for bag = 0, NUM_BAG_SLOTS or 4 do
+        for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
+            local id = C_Container.GetContainerItemID(bag, slot)
+            if id and not seen[id] then
+                seen[id] = true
+                local ok, usable, quest = pcall(W.UsableItem, id, bag, slot)
+                if ok and usable then
+                    list[#list + 1] = { id = id, quest = quest, name = itemName(id), hidden = hidden[id] == true }
+                end
+            end
+        end
+    end
+    -- (names compared without case or accents: É with the E)
+    local key = CK.Normalize or string.lower
+    for _, c in ipairs(list) do c.key = key(c.name or "") end
+    table.sort(list, function(a, b)
+        if a.quest ~= b.quest then return a.quest end
+        if a.key ~= b.key then return a.key < b.key end
+        return a.id < b.id
+    end)
+    return list
+end
+
+-- What the wheel shows: those not hidden, as entries
+function W:ScanUsable()
+    local items = {}
+    for _, c in ipairs(self:UsableCandidates()) do
+        if not c.hidden and #items < MAX then
+            items[#items + 1] = { kind = "item", id = c.id, cat = c.quest and "quest" or "usable" }
+        end
+    end
+    return items
+end
+
+-- Shown or hidden in it (out of combat: the wheel is filled again)
+function W:SetUsableHidden(id, hide)
+    local s = settings()
+    s.usableHidden = s.usableHidden or {}
+    -- (false, not nil: the hearthstone's default would come back)
+    s.usableHidden[id] = hide and true or false
+    self:Fill()
+end
+
+---------------------------------------------------------------------------
 -- The sticks while the wheel is open, and just after
 ---------------------------------------------------------------------------
 function W:TakeSticks(frame, on)
@@ -272,6 +359,9 @@ function W:Diagnose()
     local wheel = self.frame
     CK:Print(L.WHEEL_DIAG, wheel and wheel:GetAttribute("ck-c-total") or 0, wheel and wheel:GetAttribute("ck-c-pages") or 0,
         tostring(settings().enabled), tostring(InCombatLockdown()), tostring(self.pending or false))
+    local hiddenCount = 0
+    for _, c in ipairs(self:UsableCandidates()) do if c.hidden then hiddenCount = hiddenCount + 1 end end
+    CK:Print(L.USABLE_DIAG, wheel and wheel:GetAttribute("ck-u-total") or 0, hiddenCount)
     local seen = {}
     for bag = 0, NUM_BAG_SLOTS or 4 do
         for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
@@ -718,6 +808,11 @@ function W:Build()
     -- On a release (hold option): the slot aimed at ("s3")
     toggle:SetAttribute("type", "click")
     self.toggle = toggle
+    -- The usable items' wheel's key
+    local usable = keyButton("ControllerKeyboardUsableToggle", wheel, TOGGLE, nil, "AnyDown", "AnyUp")
+    usable:SetAttribute("ck-wheel", "u")
+    usable:SetAttribute("type", "click")
+    self.usableToggle = usable
     -- The key of each wheel of the player's
     self.myToggles = {}
     for n = 1, W.MY_MAX do
@@ -1356,6 +1451,15 @@ function W:Fill()
     -- Bandages on yourself
     store(wheel, "c", pages, function(e) return e.cat == "bandage" and "player" or nil end)
     self.lists.c = pages
+    -- The usable items: 8 a page, quest items first
+    local upages = {}
+    for n, e in ipairs(self:ScanUsable()) do
+        local page = math.floor((n - 1) / SEGMENTS) + 1
+        upages[page] = upages[page] or {}
+        upages[page][(n - 1) % SEGMENTS + 1] = e
+    end
+    store(wheel, "u", upages)
+    self.lists.u = upages
     -- The player's own: one page, each slot where it was put
     for n = 1, W.MY_MAX do
         -- Its filled slots in their order, one after the other: the wheel has
@@ -2078,6 +2182,7 @@ function W:Toggle(which, comboId)
     local spell = type(which) == "string" and tonumber(which:match("^party:(%d+)$"))
     if spell then return self:PartyToggle(spell, comboId) end
     self:Build()
+    if which == "usable" then return self.usableToggle end
     local n = tonumber(which)
     return n and self.myToggles[n] or self.toggle
 end
