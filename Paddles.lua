@@ -62,6 +62,31 @@ function P:Config(id)
     return paddles[id]
 end
 
+-- A paddle's key learned (pressed once when asked): until then the addon
+-- expects the controller's own paddle button, and a paddle Steam Input sends
+-- as a keyboard key does nothing (reported: forms on L4 / R4, never cast)
+function P:Identified(id)
+    local cfg = settings().paddles[id]
+    return type(cfg) == "table" and cfg.key ~= nil
+end
+
+-- Those given something to do but not identified (the paddles, the
+-- touchpad buttons turned on), in their order
+function P:Unidentified()
+    local M, list = CK.Mapping, {}
+    for _, id in ipairs(self:Order()) do
+        if not self:Identified(id) then
+            for _, layer in ipairs(M.LAYERS) do
+                if M:Get(id, layer) then
+                    list[#list + 1] = id
+                    break
+                end
+            end
+        end
+    end
+    return list
+end
+
 local function findBy(list, key)
     for _, item in ipairs(list) do
         if item.key == key then return item end
