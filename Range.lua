@@ -59,14 +59,33 @@ end
 local out, tinted = {}, {}
 R.out, R.tinted = out, tinted
 
+-- Our pictures over the game's buttons we replaced (Mapping.lua): a spell
+-- there is red too when out of range of the target (reported: Wrath on X,
+-- never red; the game's slot under it holds something else)
+local outMarks, tintedMarks = {}, {}
+R.outMarks = outMarks
+
+local function spellOutOfRange(action)
+    local id = type(action) == "string" and tonumber(action:match("^spell:(%d+)$") or "")
+    if not (id and C_Spell and C_Spell.IsSpellInRange and UnitExists("target")) then return false end
+    local ok, inRange = pcall(function() return C_Spell.IsSpellInRange(id, "target") == false end)
+    return ok and inRange or false
+end
+R.SpellOutOfRange = spellOutOfRange
+
 -- Which of the game's buttons shown are out of range
 function R:Check()
     wipe(out)
+    wipe(outMarks)
     if not on() then return end
     for _, button in ipairs(gameButtons()) do
         if type(button.icon) == "table" and button:IsVisible() and inRange(button.action) == false then
             out[button] = true
         end
+    end
+    local marks = CK.Mapping and CK.Mapping.marks
+    for _, mark in pairs(marks or {}) do
+        if mark:IsVisible() and spellOutOfRange(mark.action) then outMarks[mark] = true end
     end
 end
 
@@ -90,6 +109,19 @@ function R:Paint()
             usableColor(button.icon, button.action)
         end
     end
+    -- Our pictures: nothing else paints them, set on a change only
+    for mark in pairs(outMarks) do
+        if not tintedMarks[mark] then
+            mark.icon:SetVertexColor(red[1], red[2], red[3])
+            tintedMarks[mark] = true
+        end
+    end
+    for mark in pairs(tintedMarks) do
+        if not outMarks[mark] then
+            tintedMarks[mark] = nil
+            mark.icon:SetVertexColor(1, 1, 1)
+        end
+    end
 end
 
 -- The option turned on or off
@@ -101,6 +133,7 @@ function R:Apply()
     else
         self.holder:Hide()
         wipe(out)
+        wipe(outMarks)
     end
     self:Paint()
     if CK.Paddles.Refresh and CK.Paddles.frame then CK.Paddles:Refresh(false) end

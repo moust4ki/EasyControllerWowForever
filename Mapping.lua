@@ -1792,6 +1792,8 @@ function M:UpdateMarks()
         shapeMark(mark, square)
         mark:SetFrameLevel(native:GetFrameLevel() + 3)
         local icon = self:ActionIcon(action)
+        -- (what it shows: Range.lua turns a spell out of range red)
+        mark.action = action
         -- The game's own pictures (jump, ping...) come with their ring:
         -- larger than the round, it stays outside. Square: the icon fills
         -- the game's square, as its own icons do
