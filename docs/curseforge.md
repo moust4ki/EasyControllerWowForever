@@ -46,6 +46,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.15
+- **Back paddles** (1.15.11): the Gamepad tab now tells you when a paddle's key isn't identified yet (needed when Steam Input sends it as a keyboard key).
 - **Red when out of range** (1.15.10): also on the game's buttons you replaced with a spell (Wrath on X, for example).
 - **Usable items wheel** (1.15.9): every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside, quest items first; give it a key in the Gamepad tab's Macros list, hide any item in Wheels › Usable items.
 - **Healer/Buff mode** (1.15.8): each member's health in % on their portrait, green when full, yellow at half, red near nothing; Dead or Offline in grey.

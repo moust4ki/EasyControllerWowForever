@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.15.11
+
+- **Back paddles not identified: the Gamepad tab says so** (reported: forms on L4 / R4 never cast,
+  the paddles sent as numpad keys by Steam Input). Until a paddle's key is learned, the addon expects
+  the controller's own paddle button. Now a paddle's details say its key isn't identified yet (instead
+  of the default button's name, which looked set), putting an action on one reminds you to identify
+  it, and opening the Gamepad tab with such paddles in use says so, once a session. Identify them
+  once (Identify paddles, or Y on a paddle, then press it) and the reminders are gone.
+
 ## 1.15.10
 
 - **Red when out of range: the replaced buttons too** (reported: Wrath on X and Moonfire on Y never
