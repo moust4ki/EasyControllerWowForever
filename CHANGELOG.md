@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.15.10
+
+- **Red when out of range: the replaced buttons too** (reported: Wrath on X and Moonfire on Y never
+  turned red). X and Y alone are game functions (interact, inspect): a spell put there replaces them,
+  the addon's picture over the game's button. That picture now turns red as well when its spell is
+  out of range of your target.
+
 ## 1.15.9
 
 - **Usable items wheel** (asked): a new wheel, like the consumables one, for every item of your bags
