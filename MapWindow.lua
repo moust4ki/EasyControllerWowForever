@@ -441,6 +441,14 @@ function W:Show(resume)
     end
     self.heldLayer = ""
     self.frame:Show()
+    -- Paddles given something to do, not identified: said once a session
+    if not self.paddlesReminded then
+        local ids = P:Unidentified()
+        if #ids > 0 then
+            self.paddlesReminded = true
+            C:Toast(format(L.TOAST_PADDLES_NOT_SET, table.concat(ids, ", ")), true)
+        end
+    end
 end
 
 function W:Hide()
@@ -616,6 +624,9 @@ function W:Detail(layer)
     if input.paddle then
         if P:IsCapturing(input.id) then
             extra = L.MAP_PADDLE_PRESS
+        elseif not P:Identified(input.id) then
+            -- (its key never learned: said plainly, not the default's name)
+            extra = L.MAP_PADDLE_NOT_SET
         elseif M:InputKey(input) then
             extra = format(L.MAP_PADDLE_KEY, keyText(M:InputKey(input)))
         end
@@ -852,7 +863,11 @@ function W:ChooseIn(input, layer)
         onChoose = function(e)
             self.picker:Close()
             if self:Put(input, layer, e.action) then
-                C:Toast(format(L.TOAST_PAIR, K.ComboMarkup(input.id, layer, 14), e.name or ""))
+                if input.paddle and not P:Identified(input.id) then
+                    C:Toast(format(L.TOAST_PADDLE_NOT_SET, input.id), true)
+                else
+                    C:Toast(format(L.TOAST_PAIR, K.ComboMarkup(input.id, layer, 14), e.name or ""))
+                end
             end
             C:Render()
         end,
