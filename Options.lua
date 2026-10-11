@@ -301,6 +301,13 @@ local function talentRows(b, page)
     end
 end
 
+-- The first launch guide (Guide.lua), again from its first step
+local function guideRows(b)
+    b.header(L.SEC_GUIDE)
+    b.button({ id = "g_open", label = L.LBL_GUIDE_OPEN, tip = L.TIP_SEC_GUIDE, verb = L.V_OPEN,
+        func = function() CK.Guide:Open(1) end })
+end
+
 Config.pages.home = Config.NewRailPage({
     key = "home",
     sections = {
@@ -309,6 +316,7 @@ Config.pages.home = Config.NewRailPage({
         { key = "look", label = L.SEC_LOOK, tip = L.TIP_SEC_LOOK, rows = lookRows },
         { key = "gamepad", label = L.TAB_GAMEPAD, tip = L.TIP_SEC_DISPLAY, rows = function(b) CK.MapPage.DisplayRows(b) end },
         { key = "automation", label = L.SEC_AUTOMATION, tip = L.TIP_SEC_AUTOMATION, rows = automationRows },
+        { key = "guide", label = L.SEC_GUIDE, tip = L.TIP_SEC_GUIDE, rows = guideRows },
     },
 })
 
@@ -782,7 +790,14 @@ end
 -- The usable items' wheel (asked): what it holds now, each shown or hidden
 local function usableRows(b)
     local W = CK.ConsumableWheel
+    local s = settings().wheel
     b.header(L.USABLE_WHEEL_NAME)
+    b.check({ id = "usable_on", label = L.LBL_USE_WHEEL, tip = L.USABLE_INFO,
+        get = function() return s.usableEnabled ~= false end,
+        set = function(v)
+            s.usableEnabled = v
+            W:Fill()
+        end })
     local list = W:UsableCandidates()
     if #list == 0 then
         b.info(L.USABLE_EMPTY)

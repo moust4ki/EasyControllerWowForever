@@ -96,6 +96,8 @@ local DEFAULTS = {
         -- The usable items' wheel: the items hidden from it ({ [item ID] =
         -- true }, false once shown again); the hearthstone by default
         usableHidden = { [6948] = true },
+        -- The usable items' wheel itself (off: its key does nothing)
+        usableEnabled = true,
         -- Eating or drinking: a stick nudged doesn't stand the character up
         staySeated = true,
         -- Bandaging: the same (its own option)
@@ -225,7 +227,9 @@ function CK.CleanEntries(s)
 end
 
 function CK:InitDB()
-    if type(ControllerKeyboardDB) ~= "table" then ControllerKeyboardDB = {} end
+    -- No saved settings yet: a new install (the first launch guide)
+    local fresh = type(ControllerKeyboardDB) ~= "table"
+    if fresh then ControllerKeyboardDB = {} end
     local db = ControllerKeyboardDB
     if type(db.settings) ~= "table" then db.settings = {} end
     if db.settings.configSection ~= nil and type(db.settings.configSection) ~= "table" then
@@ -238,6 +242,8 @@ function CK:InitDB()
     end
     copyDefaults(DEFAULTS, db.settings)
     CK.CleanEntries(db.settings)
+    -- The first launch guide (Guide.lua): shown to a new install only
+    if type(db.onboarding) ~= "table" then db.onboarding = { seen = not fresh, version = 1 } end
     -- v2: auto-open no longer requires the gamepad to be the active input
     if (tonumber(db.version) or 1) < 2 then
         db.settings.onlyWithGamepad = false

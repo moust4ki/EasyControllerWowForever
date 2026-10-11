@@ -192,6 +192,33 @@ second A.
 - **Alerts**: the vibrations, the supplies buttons, the quest items and the better items below.
 - **Profiles**: this character's profiles and the talents' ones (see Profiles).
 
+### First launch guide
+
+On a new install (no saved settings yet) six screens open by themselves over the panel, once the
+game is free, a few seconds in; an install that already ran the addon doesn't see them. Again any
+time from **Home › Guide** or `/ec welcome`. The D-pad moves, A chooses, B goes back a step (on the
+first: Later), LB / RB change step; each choice is the panel's own setting, saved at once.
+
+1. **Welcome**: what the addon does, the panel's shortcut, the buttons' icons, the Steam Input tip.
+2. **Back paddles and touchpads**: *Identify my paddles* asks for each one in turn (X skips, 5 seconds
+   with nothing: the next one), then the touchpad buttons turned on; each touchpad ticked becomes 4
+   buttons; RT as a modifier.
+3. **The gamepad bar**: its size, previewed live (the window shrinks to the top of the screen, at the
+   bottom if the bar is up there; A keeps, B puts the size back); Triggers: press to switch; Edit
+   Mode's compact bar: its button saves a copy of the game's Gamepad layout (*Easy Controller*) with
+   compact on, with the game's own functions (no Edit Mode frame touched), then reloads the
+   interface, the guide coming back at that step. The game's bug (its patch of 9 October) drops that
+   bar at the next launch: said on the screen.
+4. **The chat keyboard**: on or off, daisywheel or split keyboard, their layout and suggestions.
+5. **The wheels**: the consumables and usable items wheels, each on or off; *Choose its key* waits for
+   the button pressed next, LT / RT held for their layers (B alone cancels; A, X and Y alone stay the
+   game's), and puts the wheel there as the Gamepad tab does; hold to show. For the healing classes,
+   Healer mode explained.
+6. **Comfort**: red when out of range, quest items, better items, supplies, sell greys and repair,
+   vibrations, stay seated; a summary; *Put my spells* (the Gamepad tab) or *Finish*.
+
+A fight closes it; it comes back at the same step once the fight is over.
+
 ## Gamepad mapping
 
 The Gamepad tab (`/ec map`) draws your controller, each button where it is, with what it does in the
@@ -427,6 +454,7 @@ Gamepad tab's Macros list (*Usable items wheel*), or *Escape > Key Bindings > Ad
 and uses like the consumables wheel, in combat too (what is in it is updated out of combat).
 **Wheels › Usable items** lists what it holds now, each ticked when shown: untick one to hide it from
 the wheel (it stays in your bags), tick it to show it again. The hearthstone is hidden by default.
+*Use the wheel* at the top turns the wheel itself off (its key then does nothing).
 
 ### Your own wheels
 
@@ -462,10 +490,12 @@ game, a free one, a paddle, any layer) and that button opens the party wheel:
   party member 1 on the left, then clockwise; their portrait and name in their class's colour, a
   dead or offline one greyed (still there: a resurrection), **a red portrait when too far** for the
   spell (its range, else the party's 40 yards), checked five times a second; **each member's health
-  on their portrait**, outlined, rounded up as the game's frames show it, green when full, yellow at
-  half, red near nothing (a gradient between), Dead / Offline in grey, refreshed with the range (in
-  combat the game may hide health from addons: the percentage and its colour are then the game's
-  own, from `UnitHealthPercent` through curves, handed to the text);
+  as a ring around their portrait and in % on it**: the ring empties clockwise from the top (40 arcs,
+  each lit while the health is above its share), the percentage outlined, rounded up as the game's
+  frames show it, both green when full, yellow at half, red near nothing (a gradient between); dead
+  or offline: no ring, Dead / Offline in grey; refreshed with the range (in combat the game may hide
+  health from addons: the arcs, the percentage and their colours are then the game's own, from
+  `UnitHealthPercent` through curves, handed to the textures and the text);
 - **push the right stick toward someone and let it go**: the spell is cast on them, the target
   kept (the slot's secure button has the unit: `/cast [@party1]`). The nearest member there to the
   stick's direction is the one aimed; alone, any direction is you. Holding the button, aiming and

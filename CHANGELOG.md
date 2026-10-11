@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.16.0
+
+- **First launch guide** (asked): six screens over the configuration panel, shown once on a new
+  install (an install that already ran the addon doesn't see it), again from Home › Guide or
+  `/ec welcome`. Driven with the gamepad (D-pad, A, B back, LB / RB a step); each choice is the
+  panel's own setting, saved at once.
+  1. **Welcome**: what the addon does, the panel's shortcut, the buttons' icons (Xbox, PlayStation,
+     Switch), the Steam Input tip.
+  2. **Back paddles and touchpads**: the paddles identified live, each asked in turn (X skips; 5
+     seconds with nothing: the next one); each touchpad turned into 4 buttons; RT as a modifier.
+  3. **The gamepad bar**: its size previewed live (the window shrinks to the top of the screen; A
+     keeps, B puts the size back); Triggers: press to switch; Edit Mode's compact bar, with a button
+     that turns it on (a copy of the game's Gamepad layout named Easy Controller, saved with the
+     game's own functions, then the interface reloaded, the guide back at that step) and the game's
+     bug explained.
+  4. **The chat keyboard**: on or off, daisywheel or split keyboard, their layout and suggestions.
+  5. **The wheels**: the consumables and usable items wheels, each on or off and given a key by
+     pressing it (LT / RT held for their layers; B alone cancels; A, X and Y alone stay the game's);
+     hold to show; Healer mode explained for the healing classes.
+  6. **Comfort**: red when out of range, quest items, better items, supplies, sell greys and repair,
+     vibrations, stay seated; a summary, then Put my spells (the Gamepad tab) or Finish.
+
+  A fight closes it; it comes back at the same step once the fight is over.
+- **Healer/Buff mode: each member's health as a ring around their portrait** (asked): a thin ring
+  that empties clockwise from the top, green when full, yellow at half, red near nothing; the
+  percentage stays on the portrait. Dead or offline: no ring, a grey track. In combat the game hides
+  health from addons: each part of the ring is lit by the game's own health percentage through a
+  curve, never read by the addon. The names moved out past the ring.
+- **Usable items wheel: on or off** (Wheels › Usable items, or the guide): off, its key does nothing.
+- **Restart the game after this update**: new files (a /reload doesn't load them).
+
 ## 1.15.11
 
 - **Back paddles not identified: the Gamepad tab says so** (reported: forms on L4 / R4 never cast,

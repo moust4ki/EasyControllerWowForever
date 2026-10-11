@@ -74,6 +74,10 @@ local BANNER_W, BANNER_H = 360, 64
 -- fifth of a turn (member 1 on the left)
 local PARTY_UNITS = { "player", "party1", "party2", "party3", "party4" }
 local PARTY_RADIUS, PARTY_SLOT, PARTY_CENTER, PARTY_BASE = 62, 38, 44, 196
+-- Each member's health as a ring around their portrait (asked): its size,
+-- its arcs (one a 40th of the health), how far it reaches past the portrait
+local HP_RING, HP_ARCS = 50, 40
+local HP_RING_OUT = (HP_RING - PARTY_SLOT) / 2
 local PARTY_DIRS = {}
 for i = 1, #PARTY_UNITS do
     local a = math.pi + (i - 1) * 2 * math.pi / #PARTY_UNITS
@@ -259,6 +263,8 @@ end
 -- What the wheel shows: those not hidden, as entries
 function W:ScanUsable()
     local items = {}
+    -- (turned off: Wheels > Usable items, or the guide)
+    if settings().usableEnabled == false then return items end
     for _, c in ipairs(self:UsableCandidates()) do
         if not c.hidden and #items < MAX then
             items[#items + 1] = { kind = "item", id = c.id, cat = c.quest and "quest" or "usable" }
@@ -1017,6 +1023,27 @@ function W:BuildParty(wheel)
         seg.slot = CK.Paddles:CreateSlot(pv, PARTY_SLOT)
         seg.slot:SetPoint("CENTER", pv, "CENTER", PARTY_RADIUS * d[1], PARTY_RADIUS * d[2])
         seg.slot:Hide()
+        -- Their health as a ring around the portrait (asked): a dark track,
+        -- and HP_ARCS arcs clockwise from the top, each lit while the health
+        -- is above its share, in the health's colour (paintRing)
+        local ring = CK.NewFrame("Frame", nil, pv)
+        ring:SetSize(HP_RING, HP_RING)
+        ring:SetPoint("CENTER", seg.slot, "CENTER")
+        ring.track = ring:CreateTexture(nil, "BACKGROUND")
+        ring.track:SetAllPoints()
+        ring.track:SetTexture(TEX .. "ck_hp_ring_bg")
+        ring.track:SetVertexColor(0, 0, 0, 0.6)
+        ring.arcs = {}
+        for n = 1, HP_ARCS do
+            local arc = ring:CreateTexture(nil, "ARTWORK")
+            arc:SetAllPoints()
+            arc:SetTexture(TEX .. "ck_hp_ring_seg")
+            arc:SetRotation(-(n - 0.5) * 2 * math.pi / HP_ARCS)
+            arc:SetVertexColor(1, 1, 1, 0)
+            ring.arcs[n] = arc
+        end
+        ring:Hide()
+        seg.ring = ring
         -- The name against the portrait, outward: beside it on the sides,
         -- above it at the top, under it at the bottom
         seg.label = pv:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -1024,11 +1051,13 @@ function W:BuildParty(wheel)
         if math.abs(d[1]) > 0.8 then
             local right = d[1] > 0
             seg.label:SetJustifyH(right and "LEFT" or "RIGHT")
-            seg.label:SetPoint(right and "LEFT" or "RIGHT", seg.slot, right and "RIGHT" or "LEFT", right and 3 or -3, 0)
+            seg.label:SetPoint(right and "LEFT" or "RIGHT", seg.slot, right and "RIGHT" or "LEFT",
+                (right and 1 or -1) * (3 + HP_RING_OUT), 0)
         else
             local up = d[2] > 0
             seg.label:SetJustifyH("CENTER")
-            seg.label:SetPoint(up and "BOTTOM" or "TOP", seg.slot, up and "TOP" or "BOTTOM", 0, up and 1 or -1)
+            seg.label:SetPoint(up and "BOTTOM" or "TOP", seg.slot, up and "TOP" or "BOTTOM", 0,
+                (up and 1 or -1) * (1 + HP_RING_OUT))
         end
         -- Their health on the portrait, at its bottom, outlined to be read
         -- over any face (above the slot's rim, following its pressed look)
@@ -1784,9 +1813,77 @@ local function paintHealth(seg, unit)
 end
 W.PaintHealth = paintHealth
 
--- Painted apart: a health the game won't give leaves the member there
+-- The ring's curves, one an arc: clear while the health is up to its share,
+-- then the health's colour (as the percentage's)
+local ringCurves
+local function healthRingCurves()
+    if ringCurves ~= nil then return ringCurves end
+    ringCurves = false
+    if not healthCurves() then return false end
+    local util = C_CurveUtil
+    local ok, list = pcall(function()
+        local linear = Enum and Enum.LuaCurveType and Enum.LuaCurveType.Linear
+        local function color(x, alpha)
+            local r, g, b = healthColor(x * 100)
+            return CreateColor(r, g, b, alpha)
+        end
+        local list = {}
+        for n = 1, HP_ARCS do
+            local from = (n - 1) / HP_ARCS
+            local lit = from + 0.0001
+            local c = util.CreateColorCurve()
+            if linear and c.SetType then c:SetType(linear) end
+            c:AddPoint(0, color(lit, 0))
+            if from > 0 then c:AddPoint(from, color(lit, 0)) end
+            c:AddPoint(lit, color(lit, 1))
+            if lit < 0.5 then c:AddPoint(0.5, color(0.5, 1)) end
+            c:AddPoint(1, color(1, 1))
+            list[n] = c
+        end
+        return list
+    end)
+    ringCurves = ok and list or false
+    return ringCurves
+end
+
+-- The ring: its arcs lit by the game's curves (the health never read here);
+-- dead or offline: a grey track, no arc. Without the curves (an older
+-- client): worked out from the health
+local function paintRing(seg, unit)
+    local ring = seg.ring
+    local away = (UnitIsConnected and not UnitIsConnected(unit)) or (UnitIsDeadOrGhost and UnitIsDeadOrGhost(unit))
+    local grey = away and 0.35 or 0
+    ring.track:SetVertexColor(grey, grey, grey, 0.6)
+    if away then
+        for _, arc in ipairs(ring.arcs) do arc:SetVertexColor(1, 1, 1, 0) end
+    else
+        local curves = healthRingCurves()
+        if curves then
+            for n, arc in ipairs(ring.arcs) do
+                arc:SetVertexColor(UnitHealthPercent(unit, true, curves[n]):GetRGBA())
+            end
+        else
+            local max = UnitHealthMax(unit)
+            if not (max and max > 0) then
+                ring:Hide()
+                return
+            end
+            local pct = math.min(1, math.max(0, UnitHealth(unit) / max))
+            local r, g, b = healthColor(pct * 100)
+            for n, arc in ipairs(ring.arcs) do
+                arc:SetVertexColor(r, g, b, pct > (n - 1) / HP_ARCS and 1 or 0)
+            end
+        end
+    end
+    ring:Show()
+end
+W.PaintRing = paintRing
+
+-- Painted apart: a health the game won't give leaves the member there (the
+-- ring and the percentage each on their own)
 local function healthOf(seg, unit)
     if not pcall(paintHealth, seg, unit) then seg.hp:Hide() end
+    if seg.ring and not pcall(paintRing, seg, unit) then seg.ring:Hide() end
 end
 
 -- A member's place: their portrait and name in their class's colour
@@ -1799,6 +1896,7 @@ local function paintMember(seg, item)
     seg.label:SetShown(here)
     if not here then
         seg.hp:Hide()
+        if seg.ring then seg.ring:Hide() end
         return
     end
     healthOf(seg, unit)
@@ -1850,7 +1948,11 @@ function W:PaintParty()
     end)
     for i, seg in ipairs(pv.members) do
         local ok = pcall(paintMember, seg, list[i])
-        if not ok then seg.slot:Hide() seg.label:Hide() end
+        if not ok then
+            seg.slot:Hide()
+            seg.label:Hide()
+            if seg.ring then seg.ring:Hide() end
+        end
     end
     self:RangeParty(true)
     local h = function(key) return CK:GlyphMarkup(key, 14) end

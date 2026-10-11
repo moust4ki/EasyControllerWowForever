@@ -962,6 +962,8 @@ end
 function C:Render()
     local f = self.frame
     if not (f and f:IsShown()) then return end
+    -- The first launch guide over the panel (Guide.lua): its own drawing
+    if self.guide then return self.guide:Render() end
     f.lbGlyph:Set("LB")
     f.rbGlyph:Set("RB")
     for _, t in ipairs(f.tabs) do
@@ -1025,6 +1027,8 @@ end
 function C:Press(name)
     -- Learning the shortcut: the presses are for it
     if self:IsCapturingChord() then return end
+    -- The first launch guide over the panel (Guide.lua): the presses are its
+    if self.guide then return self.guide:Press(name) end
     -- A name being typed (no addon keyboard: the panel's A / B for it)
     if self.ask and self.ask.def then
         if name == "A" then self:FinishAsk(self.ask.edit:GetText()) end
@@ -1214,8 +1218,11 @@ function C:DropPlacement()
     self.placing, self.placer = false, nil
 end
 
-function C:Close()
+-- reason: "combat" (a fight started)
+function C:Close(reason)
     if not self:IsOpen() then return end
+    -- The guide over it: ended (a fight: back once it's over)
+    if self.guide then self.guide:Closed(reason) end
     self:DropPlacement()
     CK.Paddles:StopCapture(nil)
     self:StopChordCapture(nil)
@@ -1318,7 +1325,7 @@ function C:Init()
     events:RegisterEvent("GET_ITEM_INFO_RECEIVED")
     local redraw
     events:SetScript("OnEvent", function(_, event)
-        if event == "PLAYER_REGEN_DISABLED" then return C:Close() end
+        if event == "PLAYER_REGEN_DISABLED" then return C:Close("combat") end
         if redraw or not (C.frame and C.frame:IsShown()) then return end
         redraw = true
         C_Timer.After(0.2, function()

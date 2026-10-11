@@ -220,6 +220,10 @@ local function slash(msg)
     elseif cmd == "map" or cmd == "config" or cmd == "options" then
         -- The chat edit box is still sending this command: open once it is closed
         CK.Config:OpenWhenFree(cmd == "map" and "gamepad" or nil, true)
+    elseif cmd == "welcome" or cmd == "guide" then
+        -- The first launch guide, from its first step (over the chat it
+        -- was typed in, once the send is done)
+        CK.Guide:OpenWhenFree(1, true)
     elseif cmd == "phrases" then
         -- The chat edit box is still sending this command: open once it is done
         C_Timer.After(0.1, function() CK.Phrases:Open(nil) end)

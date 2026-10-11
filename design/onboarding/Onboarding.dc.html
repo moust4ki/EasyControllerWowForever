@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=PT+Sans+Narrow:wght@400;700&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#0B0906}a{color:#F2C43C}a:hover{color:#FFD24A}</style>
+</helmet>
+<div style="width:1820px;padding:64px;box-sizing:border-box;font-family:'Marcellus',serif;color:#EFE4C8;background:#0B0906;display:flex;flex-direction:column;gap:72px">
+
+<div style="display:flex;flex-direction:column;gap:12px;max-width:1100px">
+<div style="font-size:13px;letter-spacing:.16em;color:#C9A25A">EASY CONTROLLER – FOREVER</div>
+<div style="font-size:40px;color:#F2C43C">Guide de premier lancement</div>
+<div style="font-family:'PT Sans Narrow','Arial Narrow',sans-serif;font-size:17px;line-height:25px;color:#B9AB8C;text-wrap:pretty">Maquettes de référence à 820 × 580, puis les textures à exporter et leur tableau. Toutes les positions sont en pixels depuis le coin haut gauche de la fenêtre. Marcellus remplace Friz Quadrata et PT Sans Narrow remplace la police d'aide du jeu, uniquement pour ces maquettes. Les pastilles de boutons et l'icône de croix sont des remplaçants des icônes du jeu. Les textes sont en français ; les zones de texte gardent la marge des 30 % de l'allemand.</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:28px">
+<div style="font-size:26px;color:#F2C43C">Écrans</div>
+<div style="display:flex;flex-wrap:wrap;gap:56px 64px">
+
+<!-- ÉCRAN 1 -->
+<div id="ecran-1" data-screen-label="01 Bienvenue" style="display:flex;flex-direction:column;gap:14px;width:820px">
+<div style="position:relative;width:820px;height:580px;flex:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:12px;right:20px;height:44px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:11px;letter-spacing:.14em;color:#C9A25A">EASY CONTROLLER · GUIDE</div><div style="font-size:22px;line-height:24px;color:#F2C43C">Bienvenue</div></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A;box-shadow:0 0 6px rgba(255,210,74,.7)"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C;min-width:30px;text-align:right">1 / 6</div>
+<div style="width:30px;height:28px;border:1.5px solid #5A4630;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#D8CCB0;font-size:15px;background:#0F0B07;box-sizing:border-box">X</div>
+</div>
+<div style="position:absolute;left:16px;right:16px;top:62px;height:1px;background:#3A2C1D"></div>
+
+<img src="textures/ck_onb_welcome.png" alt="" style="position:absolute;left:24px;top:72px;width:384px;height:192px">
+<div style="position:absolute;left:24px;top:276px;width:384px;display:flex;flex-direction:column;gap:10px;font-family:'PT Sans Narrow','Arial Narrow',sans-serif;font-size:16px;line-height:20px;color:#EFE4C8">
+<div style="display:flex;gap:10px;align-items:baseline"><span style="width:6px;height:6px;flex:none;background:#C9A25A;transform:rotate(45deg) translateY(-2px)"></span><span style="text-wrap:pretty">Joue à tout le jeu à la manette : déplacement, ciblage, combat, sacs.</span></div>
+<div style="display:flex;gap:10px;align-items:baseline"><span style="width:6px;height:6px;flex:none;background:#C9A25A;transform:rotate(45deg) translateY(-2px)"></span><span style="text-wrap:pretty">Tes sorts sur les boutons ; LT et RT ouvrent deux barres de plus.</span></div>
+<div style="display:flex;gap:10px;align-items:baseline"><span style="width:6px;height:6px;flex:none;background:#C9A25A;transform:rotate(45deg) translateY(-2px)"></span><span style="text-wrap:pretty">Roues, clavier de chat et alertes pour tout le reste.</span></div>
+</div>
+<div style="position:absolute;left:24px;top:404px;width:384px;box-sizing:border-box;padding:10px 14px;background:#0F0B07;border:1px solid #3A2C1D;border-radius:4px;display:flex;flex-direction:column;gap:8px">
+<div style="font-size:15px;color:#D8CCB0">Ouvrir les réglages à tout moment</div>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:'PT Sans Narrow',sans-serif;font-size:15px;color:#B9AB8C"><span>Maintenir</span><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-weight:700;font-size:11px;color:#EFE4C8">RB</span><span style="color:#C9A25A">+</span><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#9D917A;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#9D917A;border-radius:1.5px"></span><span style="position:absolute;left:7px;top:13px;width:6px;height:7px;background:#FFD24A;border-radius:1.5px"></span></span><span>croix bas</span></div>
+</div>
+
+<div style="position:absolute;left:428px;top:72px;width:368px;display:flex;flex-direction:column;gap:4px">
+<div style="font-size:16px;color:#F2C43C">Icônes de boutons</div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#B9AB8C">Les aides de l'addon s'affichent dans ce style.</div>
+</div>
+<div style="position:absolute;left:428px;top:122px;width:368px;display:flex;flex-direction:column;gap:8px">
+<div style="height:48px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,#3A2E12,#221A0A);border:2px solid #FFD24A;border-radius:4px;box-shadow:0 0 10px rgba(255,210,74,.35)">
+<span style="width:16px;height:16px;flex:none;border-radius:50%;border:1.5px solid #FFD24A;display:flex;align-items:center;justify-content:center;box-sizing:border-box"><span style="width:8px;height:8px;border-radius:50%;background:#FFD24A"></span></span>
+<span style="flex:1;font-size:16px;color:#FFF3D0">Xbox</span>
+<div style="display:flex;gap:6px;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px"><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;color:#8DC63F;box-sizing:border-box">A</span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;color:#FF5A3C;box-sizing:border-box">B</span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;color:#3FA9F5;box-sizing:border-box">X</span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;color:#F2C43C;box-sizing:border-box">Y</span></div>
+</div>
+<div style="height:48px;box-sizing:border-box;padding:0 15px;display:flex;align-items:center;gap:12px;background:#0F0B07;border:1.5px solid #5A4630;border-radius:4px">
+<span style="width:16px;height:16px;flex:none;border-radius:50%;border:1.5px solid #7A6448;box-sizing:border-box"></span>
+<span style="flex:1;font-size:16px;color:#EFE4C8">PlayStation</span>
+<div style="display:flex;gap:6px;font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#D8CCB0"><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box">✕</span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box"><span style="width:10px;height:10px;border-radius:50%;border:1.5px solid #D8CCB0;box-sizing:border-box"></span></span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box"><span style="width:9px;height:9px;border:1.5px solid #D8CCB0;box-sizing:border-box"></span></span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-size:12px">△</span></div>
+</div>
+<div style="height:48px;box-sizing:border-box;padding:0 15px;display:flex;align-items:center;gap:12px;background:#0F0B07;border:1.5px solid #5A4630;border-radius:4px">
+<span style="width:16px;height:16px;flex:none;border-radius:50%;border:1.5px solid #7A6448;box-sizing:border-box"></span>
+<span style="flex:1;font-size:16px;color:#EFE4C8">Switch</span>
+<div style="display:flex;gap:6px;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#EFE4C8"><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box">B</span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box">A</span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box">Y</span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;box-sizing:border-box">X</span></div>
+</div>
+</div>
+<div style="position:absolute;left:428px;top:304px;width:368px;box-sizing:border-box;padding:12px 14px;background:rgba(95,192,208,.06);border:1px solid rgba(159,216,226,.45);border-radius:4px;display:flex;flex-direction:column;gap:6px">
+<div style="font-size:15px;color:#9FD8E2">Conseil</div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#D8CCB0;text-wrap:pretty">Lance Battle.net depuis Steam, avec Steam Input activé : les palettes arrière et les pavés tactiles de ta manette deviennent utilisables dans le jeu.</div>
+</div>
+<div style="position:absolute;left:428px;top:468px;width:368px;display:flex;gap:12px">
+<div style="flex:1;height:40px;padding:0 16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#1F1810,#0F0B07);border:1.5px solid #5A4630;border-radius:4px;font-size:16px;color:#EFE4C8">Plus tard</div>
+<div style="flex:1.3;height:40px;padding:0 16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#1F1810,#0F0B07);border:1.5px solid #7A6448;border-radius:4px;font-size:16px;color:#F2C43C">Commencer</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:532px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide › Bienvenue</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#B9AB8C;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#B9AB8C;border-radius:1.5px"></span></span><span style="font-size:15px">Choisir</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#8DC63F;box-sizing:border-box">A</span><span style="font-size:15px">Valider</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">RB</span><span style="font-size:15px">Suivant</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Plus tard</span></div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">1</span><span style="font-size:18px;color:#F2C43C">Bienvenue et ta manette</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;text-wrap:pretty">Focus initial sur le style d'icônes déjà détecté. Les 4 pastilles suivent la même position physique (bas, droite, gauche, haut) : A B X Y, ✕ ○ □ △, B A Y X. Choisir un style met à jour la barre d'aide en direct. B sur cet écran = « Plus tard ».</div>
+</div>
+
+<!-- ÉCRAN 2 -->
+<div id="ecran-2" data-screen-label="02 Palettes et pavés" style="display:flex;flex-direction:column;gap:14px;width:820px">
+<div style="position:relative;width:820px;height:580px;flex:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:12px;right:20px;height:44px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:11px;letter-spacing:.14em;color:#C9A25A">EASY CONTROLLER · GUIDE</div><div style="font-size:22px;line-height:24px;color:#F2C43C">Palettes arrière et pavés tactiles</div></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A;box-shadow:0 0 6px rgba(255,210,74,.7)"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C;min-width:30px;text-align:right">2 / 6</div>
+<div style="width:30px;height:28px;border:1.5px solid #5A4630;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#D8CCB0;font-size:15px;background:#0F0B07;box-sizing:border-box">X</div>
+</div>
+<div style="position:absolute;left:16px;right:16px;top:62px;height:1px;background:#3A2C1D"></div>
+
+<div style="position:absolute;left:24px;top:72px;font-size:16px;color:#F2C43C">Palettes arrière</div>
+<img src="textures/ck_onb_paddles.png" alt="" style="position:absolute;left:24px;top:100px;width:400px;height:200px">
+<div style="position:absolute;left:24px;top:308px;width:400px;font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#B9AB8C;text-wrap:pretty">Si ta manette a des palettes (L4, R4, L5, R5), identifie-les une fois : tu pourras ensuite y poser des sorts.</div>
+<div style="position:absolute;left:24px;top:360px;height:40px;padding:0 22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#3A2E12,#221A0A);border:2px solid #FFD24A;border-radius:4px;box-shadow:0 0 10px rgba(255,210,74,.35);font-size:16px;color:#FFD24A;box-sizing:border-box">Identifier mes palettes</div>
+
+<div style="position:absolute;left:448px;top:72px;font-size:16px;color:#F2C43C">Pavés tactiles</div>
+<img src="textures/ck_onb_touchpad.png" alt="" style="position:absolute;left:448px;top:100px;width:160px;height:160px">
+<div style="position:absolute;left:624px;top:112px;width:172px;display:flex;flex-direction:column;gap:10px">
+<div style="height:36px;display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span><span style="font-size:15px">Pavé gauche</span></div>
+<div style="height:36px;display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;box-sizing:border-box"></span><span style="font-size:15px">Pavé droit</span></div>
+</div>
+<div style="position:absolute;left:448px;top:272px;width:348px;font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#B9AB8C;text-wrap:pretty">Chaque pavé coché devient 4 boutons : haut, bas, gauche, droite.</div>
+
+<div style="position:absolute;left:24px;right:24px;top:424px;height:1px;background:#3A2C1D"></div>
+<div style="position:absolute;left:24px;top:438px;width:772px;display:flex;gap:12px;align-items:flex-start">
+<span style="width:20px;height:20px;flex:none;margin-top:1px;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;box-sizing:border-box"></span>
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="font-size:16px">RT comme modificateur</div><div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#B9AB8C;text-wrap:pretty">Maintenu, RT change la fonction des autres boutons, comme LT. La barre de droite ne s'ouvre plus avec RT.</div></div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:532px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide › Palettes et pavés</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#B9AB8C;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#B9AB8C;border-radius:1.5px"></span></span><span style="font-size:15px">Choisir</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#8DC63F;box-sizing:border-box">A</span><span style="font-size:15px">Valider</span></div>
+<div style="display:flex;align-items:center;gap:4px"><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">LB</span><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">RB</span><span style="font-size:15px;margin-left:2px">Étape</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Retour</span></div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">2</span><span style="font-size:18px;color:#F2C43C">Palettes arrière et pavés tactiles</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;text-wrap:pretty">Manette vue de dos, gauche à gauche (comme tenue en main). Les 4 glows des palettes sont allumés au repos via <span style="color:#D8CCB0">ck_onb_paddles_glow</span> en pulsation douce, au choix. Cocher un pavé allume ses 4 zones l'une après l'autre (glows haut, droite, bas, gauche).</div>
+</div>
+
+<!-- ÉCRAN 2b -->
+<div id="ecran-2b" data-screen-label="02b Identification" style="display:flex;flex-direction:column;gap:14px;width:820px">
+<div style="position:relative;width:820px;height:580px;flex:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:12px;right:20px;height:44px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:11px;letter-spacing:.14em;color:#C9A25A">EASY CONTROLLER · GUIDE</div><div style="font-size:22px;line-height:24px;color:#F2C43C">Palettes arrière et pavés tactiles</div></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A;box-shadow:0 0 6px rgba(255,210,74,.7)"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C;min-width:30px;text-align:right">2 / 6</div>
+<div style="width:30px;height:28px;border:1.5px solid #5A4630;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#D8CCB0;font-size:15px;background:#0F0B07;box-sizing:border-box">X</div>
+</div>
+<div style="position:absolute;left:16px;right:16px;top:62px;height:1px;background:#3A2C1D"></div>
+
+<div style="position:absolute;left:24px;top:72px;font-size:16px;color:#F2C43C">Palettes arrière</div>
+<img src="textures/ck_onb_paddles.png" alt="" style="position:absolute;left:24px;top:100px;width:400px;height:200px">
+<img src="textures/ck_onb_paddles_l4_glow.png" alt="" style="position:absolute;left:24px;top:100px;width:400px;height:200px;mix-blend-mode:screen">
+<div style="position:absolute;left:24px;top:308px;width:400px;box-sizing:border-box;padding:14px 16px;background:linear-gradient(90deg,#3A2E12,#221A0A);border:2px solid #FFD24A;border-radius:4px;box-shadow:0 0 10px rgba(255,210,74,.35);display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:12px"><span style="flex:1;font-size:22px;color:#FFD24A">Appuie sur L4…</span><div style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #7A6448;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #7A6448;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #7A6448;box-sizing:border-box"></span></div></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#D8CCB0;text-wrap:pretty">La palette extérieure gauche. Pas de palette ici ? Attends 5 secondes, on passe à la suivante.</div>
+</div>
+<div style="position:absolute;left:24px;top:420px;font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#7AA04A">Aucune palette identifiée pour l'instant.</div>
+
+<div style="position:absolute;left:448px;top:72px;width:348px;height:360px;opacity:.35">
+<div style="font-size:16px;color:#F2C43C">Pavés tactiles</div>
+<img src="textures/ck_onb_touchpad.png" alt="" style="position:absolute;left:0;top:28px;width:160px;height:160px">
+</div>
+
+<div style="position:absolute;left:0;right:0;top:532px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide › Palettes › Identification</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Annuler</span></div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">2b</span><span style="font-size:18px;color:#F2C43C">Identification en direct</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;text-wrap:pretty">Après « Identifier mes palettes ». Le glow de la palette attendue (<span style="color:#D8CCB0">_l4_glow</span>, puis _r4, _l5, _r5) pulse en additif. Chaque palette reconnue passe en vert dans la ligne de statut. Seul B reste actif ; tout le reste de la fenêtre est inerte.</div>
+</div>
+
+<!-- ÉCRAN 3 -->
+<div id="ecran-3" data-screen-label="03 Barre manette" style="display:flex;flex-direction:column;gap:14px;width:820px">
+<div style="position:relative;width:820px;height:580px;flex:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:12px;right:20px;height:44px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:11px;letter-spacing:.14em;color:#C9A25A">EASY CONTROLLER · GUIDE</div><div style="font-size:22px;line-height:24px;color:#F2C43C">La barre manette</div></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A;box-shadow:0 0 6px rgba(255,210,74,.7)"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C;min-width:30px;text-align:right">3 / 6</div>
+<div style="width:30px;height:28px;border:1.5px solid #5A4630;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#D8CCB0;font-size:15px;background:#0F0B07;box-sizing:border-box">X</div>
+</div>
+<div style="position:absolute;left:16px;right:16px;top:62px;height:1px;background:#3A2C1D"></div>
+
+<div style="position:absolute;left:24px;top:72px;font-size:16px;color:#F2C43C">Taille de la barre</div>
+<div style="position:absolute;left:24px;top:100px;width:772px;height:64px;box-sizing:border-box;padding:0 18px;display:flex;align-items:center;gap:16px;background:linear-gradient(90deg,#3A2E12,#221A0A);border:2px solid #FFD24A;border-radius:4px;box-shadow:0 0 10px rgba(255,210,74,.35)">
+<span style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C">70 %</span>
+<div style="flex:1;position:relative;height:8px;background:#0F0B07;border:1px solid #5A4630;border-radius:4px"><div style="position:absolute;left:0;top:0;bottom:0;width:37.5%;background:linear-gradient(90deg,#7A5D36,#F2C43C);border-radius:4px"></div><div style="position:absolute;left:37.5%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#FFD24A;border:2px solid #FFF3D0;box-shadow:0 0 8px rgba(255,210,74,.7);box-sizing:border-box"></div><div style="position:absolute;left:37.5%;top:16px;width:1px;height:6px;background:#7A6448"></div></div>
+<span style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C">150 %</span>
+<span style="min-width:72px;text-align:right;font-size:20px;color:#FFD24A">100 %</span>
+</div>
+<div style="position:absolute;left:24px;top:174px;width:772px;font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#B9AB8C;text-wrap:pretty">La barre du jeu change de taille en direct. Pendant le réglage, cette fenêtre se réduit en haut de l'écran pour la laisser voir.</div>
+
+<div style="position:absolute;left:24px;right:24px;top:204px;height:1px;background:#3A2C1D"></div>
+<div style="position:absolute;left:24px;top:226px;width:496px;display:flex;gap:12px;align-items:flex-start">
+<span style="width:20px;height:20px;flex:none;margin-top:1px;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span>
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="font-size:16px">Gâchettes : appuyer pour basculer</div><div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#B9AB8C;text-wrap:pretty">Un appui sur LT garde la barre de gauche active jusqu'au prochain appui (même chose pour RT à droite). Décoché : il faut maintenir la gâchette.</div></div>
+</div>
+<img src="textures/ck_onb_toggle.png" alt="" style="position:absolute;left:540px;top:214px;width:256px;height:128px">
+
+<div style="position:absolute;left:24px;top:364px;width:772px;box-sizing:border-box;padding:14px 16px;background:rgba(240,160,144,.06);border:1px solid rgba(240,160,144,.55);border-radius:4px;display:flex;flex-direction:column;gap:6px">
+<div style="font-size:16px;color:#F0A090">Barre compacte du mode Édition</div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:19px;color:#D8CCB0;text-wrap:pretty">Si la barre d'actions compacte du mode Édition est activée, le jeu peut l'afficher sous la barre manette. Bug actuel du jeu : sa position n'est pas toujours enregistrée. En attendant un correctif, désactive-la dans le mode Édition.</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:532px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide › Barre manette</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#9D917A;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#FFD24A;border-radius:1.5px"></span></span><span style="font-size:15px">Ajuster</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#8DC63F;box-sizing:border-box">A</span><span style="font-size:15px">Aperçu</span></div>
+<div style="display:flex;align-items:center;gap:4px"><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">LB</span><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">RB</span><span style="font-size:15px;margin-left:2px">Étape</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Retour</span></div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">3</span><span style="font-size:18px;color:#F2C43C">La barre manette</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;text-wrap:pretty">Curseur au focus : croix gauche/droite par pas de 5 %, la barre réelle suit en direct. Au premier pas, la fenêtre passe en mode réduit (<a href="#ecran-3b">3b</a>). Le glow du toggle s'allume quand la case est cochée. Texte de l'avertissement à valider avec toi.</div>
+</div>
+
+<!-- ÉCRAN 4 -->
+<div id="ecran-4" data-screen-label="04 Clavier de chat" style="display:flex;flex-direction:column;gap:14px;width:820px">
+<div style="position:relative;width:820px;height:580px;flex:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:12px;right:20px;height:44px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:11px;letter-spacing:.14em;color:#C9A25A">EASY CONTROLLER · GUIDE</div><div style="font-size:22px;line-height:24px;color:#F2C43C">Le clavier de chat</div></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A;box-shadow:0 0 6px rgba(255,210,74,.7)"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C;min-width:30px;text-align:right">4 / 6</div>
+<div style="width:30px;height:28px;border:1.5px solid #5A4630;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#D8CCB0;font-size:15px;background:#0F0B07;box-sizing:border-box">X</div>
+</div>
+<div style="position:absolute;left:16px;right:16px;top:62px;height:1px;background:#3A2C1D"></div>
+
+<div style="position:absolute;left:24px;top:72px;width:772px;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:16px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:16px">Clavier de chat</div><div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C">S'ouvre quand tu écris dans le chat ou dans une zone de texte.</div></div>
+<span style="width:40px;height:20px;flex:none;border-radius:10px;border:1.5px solid #C9A25A;background:#2E2410;position:relative;box-sizing:border-box"><span style="position:absolute;right:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#FFD24A"></span></span>
+</div>
+
+<div style="position:absolute;left:24px;top:136px;width:378px;height:380px;box-sizing:border-box;padding:180px 18px 16px;display:flex;flex-direction:column;gap:6px;background:linear-gradient(#2A210E,#140F08);border:2px solid #FFD24A;border-radius:6px;box-shadow:0 0 12px rgba(255,210,74,.3)">
+<div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:18px;color:#FFD24A">Marguerite</span><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid #FFD24A;display:flex;align-items:center;justify-content:center;box-sizing:border-box"><span style="width:8px;height:8px;border-radius:50%;background:#FFD24A"></span></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#D8CCB0;text-wrap:pretty">8 pétales de 4 caractères autour du stick. Le stick choisit un pétale, A B X Y le caractère.</div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:96px;flex:none;font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C">Disposition</span><div style="flex:1;display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border:1.5px solid #5A4630;background:#0F0B07;border-radius:4px;box-sizing:border-box"><span style="color:#C9A25A;font-size:10px">◀</span><span style="flex:1;text-align:center;font-size:15px">AZERTY</span><span style="color:#C9A25A;font-size:10px">▶</span></div></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:96px;flex:none;font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C">Suggestions</span><div style="flex:1;display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border:1.5px solid #5A4630;background:#0F0B07;border-radius:4px;box-sizing:border-box"><span style="color:#C9A25A;font-size:10px">◀</span><span style="flex:1;text-align:center;font-size:15px">Français</span><span style="color:#C9A25A;font-size:10px">▶</span></div></div>
+</div>
+</div>
+<div style="position:absolute;left:418px;top:136px;width:378px;height:380px;box-sizing:border-box;padding:180px 18px 16px;display:flex;flex-direction:column;gap:6px;background:#0F0B07;border:1.5px solid #5A4630;border-radius:6px">
+<div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:18px;color:#EFE4C8">Clavier 2 sticks</span><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid #7A6448;box-sizing:border-box"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px;color:#B9AB8C;text-wrap:pretty">Le clavier coupé en deux moitiés : chaque stick déplace son curseur sur sa moitié.</div>
+<div style="margin-top:auto;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#6F6452">Choisis cette carte pour voir ses options.</div>
+</div>
+<img src="textures/ck_onb_daisywheel.png" alt="" style="position:absolute;left:133px;top:150px;width:160px;height:160px">
+<img src="textures/ck_onb_splitkb.png" alt="" style="position:absolute;left:527px;top:150px;width:160px;height:160px;opacity:.7">
+
+<div style="position:absolute;left:0;right:0;top:532px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide › Clavier de chat</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#B9AB8C;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#B9AB8C;border-radius:1.5px"></span></span><span style="font-size:15px">Choisir</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#8DC63F;box-sizing:border-box">A</span><span style="font-size:15px">Valider</span></div>
+<div style="display:flex;align-items:center;gap:4px"><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">LB</span><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">RB</span><span style="font-size:15px;margin-left:2px">Étape</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Retour</span></div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">4</span><span style="font-size:18px;color:#F2C43C">Le clavier de chat</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;text-wrap:pretty">Cartes à 160 × 160 sur fond sombre ; la carte non choisie affiche son illustration à 70 % d'opacité. Disposition : AZERTY, QWERTY, QWERTZ, espagnol, italien. Interrupteur coupé : les deux cartes passent à 35 % et ne prennent plus le focus.</div>
+</div>
+
+<!-- ÉCRAN 5 -->
+<div id="ecran-5" data-screen-label="05 Roues et soigneur" style="display:flex;flex-direction:column;gap:14px;width:820px">
+<div style="position:relative;width:820px;height:580px;flex:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:12px;right:20px;height:44px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:11px;letter-spacing:.14em;color:#C9A25A">EASY CONTROLLER · GUIDE</div><div style="font-size:22px;line-height:24px;color:#F2C43C">Les roues et le mode Soigneur</div></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A;box-shadow:0 0 6px rgba(255,210,74,.7)"></span><span style="width:8px;height:8px;border-radius:50%;border:1.5px solid #5A4630;box-sizing:border-box"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C;min-width:30px;text-align:right">5 / 6</div>
+<div style="width:30px;height:28px;border:1.5px solid #5A4630;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#D8CCB0;font-size:15px;background:#0F0B07;box-sizing:border-box">X</div>
+</div>
+<div style="position:absolute;left:16px;right:16px;top:62px;height:1px;background:#3A2C1D"></div>
+
+<div style="position:absolute;left:24px;top:72px;width:378px;height:172px;box-sizing:border-box;padding:12px 16px 12px 144px;display:flex;flex-direction:column;gap:6px;background:#120D08;border:1.5px solid #5A4630;border-radius:6px">
+<div style="font-size:16px;color:#F2C43C">Roue des consommables</div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:17px;color:#B9AB8C">Potions, nourriture, bandages.</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:2px"><span style="flex:1;font-size:14px">Activée</span><span style="width:40px;height:20px;flex:none;border-radius:10px;border:1.5px solid #C9A25A;background:#2E2410;position:relative;box-sizing:border-box"><span style="position:absolute;right:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#FFD24A"></span></span></div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:6px">
+<div style="height:34px;padding:0 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#3A2E12,#221A0A);border:2px solid #FFD24A;border-radius:4px;box-shadow:0 0 10px rgba(255,210,74,.35);font-size:15px;color:#FFD24A;box-sizing:border-box">Choisir sa touche</div>
+<div style="display:flex;align-items:center;gap:5px;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A"><span>Touche :</span><span style="height:18px;padding:0 4px;border:1.5px solid #D8CCB0;border-radius:5px;display:flex;align-items:center;font-weight:700;font-size:10px;color:#EFE4C8">LB</span><span>+</span><span style="width:18px;height:18px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#F2C43C;box-sizing:border-box">Y</span></div>
+</div>
+</div>
+<div style="position:absolute;left:418px;top:72px;width:378px;height:172px;box-sizing:border-box;padding:12px 16px 12px 144px;display:flex;flex-direction:column;gap:6px;background:#120D08;border:1.5px solid #5A4630;border-radius:6px">
+<div style="font-size:16px;color:#F2C43C">Roue des objets utilisables</div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:17px;color:#B9AB8C">Sac de couchage, étendard, objets de quête.</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:2px"><span style="flex:1;font-size:14px;color:#9D917A">Désactivée</span><span style="width:40px;height:20px;flex:none;border-radius:10px;border:1.5px solid #5A4630;background:#0F0B07;position:relative;box-sizing:border-box"><span style="position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#6F6452"></span></span></div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:6px">
+<div style="height:34px;padding:0 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#1F1810,#0F0B07);border:1.5px solid #5A4630;border-radius:4px;font-size:15px;color:#EFE4C8;box-sizing:border-box">Choisir sa touche</div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;line-height:18px;color:#6F6452">Aucune touche</div>
+</div>
+</div>
+<img src="textures/ck_onb_wheel_consumables.png" alt="" style="position:absolute;left:40px;top:88px;width:112px;height:112px">
+<img src="textures/ck_onb_wheel_usable.png" alt="" style="position:absolute;left:434px;top:88px;width:112px;height:112px;opacity:.6">
+
+<div style="position:absolute;left:24px;top:256px;width:378px;height:44px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #3A2C1D">
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span><span style="font-size:15px">Maintenir pour afficher</span>
+</div>
+<div style="position:absolute;left:418px;top:256px;width:378px;height:44px;box-sizing:border-box;padding:0 0 0 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #3A2C1D">
+<span style="flex:1;font-size:15px">Stick pour viser</span>
+<div style="width:140px;display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border:1.5px solid #5A4630;background:#0F0B07;border-radius:4px;box-sizing:border-box"><span style="color:#C9A25A;font-size:10px">◀</span><span style="flex:1;text-align:center;font-size:15px">Droit</span><span style="color:#C9A25A;font-size:10px">▶</span></div>
+</div>
+
+<div style="position:absolute;left:24px;top:312px;width:772px;height:204px;box-sizing:border-box;padding:16px 18px 16px 180px;display:flex;flex-direction:column;gap:8px;background:#120D08;border:1px solid #7A5D36;border-radius:6px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="flex:1;font-size:18px;color:#F2C43C">Mode Soigneur</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:12px;color:#9D917A;border:1px solid #4A3A26;border-radius:10px;padding:2px 9px">Classes de soin</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:19px;color:#D8CCB0;text-wrap:pretty">Une petite roue de groupe sur un bouton : vise un membre avec le stick, sa couleur montre sa vie (vert, jaune, rouge). Relâche pour lancer le soin sur lui.</div>
+<div style="margin-top:auto;display:flex"><div style="height:40px;padding:0 22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#1F1810,#0F0B07);border:1.5px solid #5A4630;border-radius:4px;font-size:16px;color:#EFE4C8;box-sizing:border-box">Poser un soin sur un bouton</div></div>
+</div>
+<img src="textures/ck_onb_wheel_party.png" alt="" style="position:absolute;left:40px;top:328px;width:144px;height:144px">
+
+<div style="position:absolute;left:0;right:0;top:532px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide › Roues</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#B9AB8C;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#B9AB8C;border-radius:1.5px"></span></span><span style="font-size:15px">Choisir</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#8DC63F;box-sizing:border-box">A</span><span style="font-size:15px">Valider</span></div>
+<div style="display:flex;align-items:center;gap:4px"><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">LB</span><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">RB</span><span style="font-size:15px;margin-left:2px">Étape</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Retour</span></div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">5</span><span style="font-size:18px;color:#F2C43C">Les roues et le mode Soigneur</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;text-wrap:pretty">« Choisir sa touche » attend la prochaine combinaison pressée, comme l'identification des palettes. Roue désactivée : illustration à 60 %. Sans classe de soin, le bloc Soigneur disparaît et les cartes du haut descendent de 20 px pour centrer la page. Les % de vie restent des anneaux colorés ; si tu veux des chiffres, le jeu peut les poser au centre des portraits (voir tableau).</div>
+</div>
+
+<!-- ÉCRAN 6 -->
+<div id="ecran-6" data-screen-label="06 Confort" style="display:flex;flex-direction:column;gap:14px;width:820px">
+<div style="position:relative;width:820px;height:580px;flex:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:12px;right:20px;height:44px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:11px;letter-spacing:.14em;color:#C9A25A">EASY CONTROLLER · GUIDE</div><div style="font-size:22px;line-height:24px;color:#F2C43C">Confort, et c'est parti</div></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9A25A"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFD24A;box-shadow:0 0 6px rgba(255,210,74,.7)"></span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C;min-width:30px;text-align:right">6 / 6</div>
+<div style="width:30px;height:28px;border:1.5px solid #5A4630;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#D8CCB0;font-size:15px;background:#0F0B07;box-sizing:border-box">X</div>
+</div>
+<div style="position:absolute;left:16px;right:16px;top:62px;height:1px;background:#3A2C1D"></div>
+
+<div style="position:absolute;left:24px;top:72px;font-size:16px;color:#F2C43C">Confort</div>
+<div style="position:absolute;left:24px;top:100px;width:452px;display:flex;flex-direction:column">
+<div style="height:54px;box-sizing:border-box;padding:0 12px;display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,#3A2E12,#221A0A);border:2px solid #FFD24A;border-radius:4px;box-shadow:0 0 10px rgba(255,210,74,.35)">
+<span style="width:32px;height:32px;flex:none;border:1.5px solid #7A6448;border-radius:3px;background:radial-gradient(circle at 40% 35%,#3A2C1D,#0F0B07);box-sizing:border-box"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;color:#FFF3D0">Rouge hors de portée</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#D8CCB0">Les boutons rougissent si la cible est trop loin.</span></div>
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #FFD24A;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span>
+</div>
+<div style="height:54px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #3A2C1D">
+<span style="width:32px;height:32px;flex:none;border:1.5px solid #5A4630;border-radius:3px;background:radial-gradient(circle at 40% 35%,#3A2C1D,#0F0B07);box-sizing:border-box"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px">Objets de quête</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#B9AB8C">Signale les objets de quête dans tes sacs.</span></div>
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span>
+</div>
+<div style="height:54px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #3A2C1D">
+<span style="width:32px;height:32px;flex:none;border:1.5px solid #5A4630;border-radius:3px;background:radial-gradient(circle at 40% 35%,#3A2C1D,#0F0B07);box-sizing:border-box"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px">Meilleur équipement</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#B9AB8C">Flèche verte sur un objet meilleur que le tien.</span></div>
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span>
+</div>
+<div style="height:54px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #3A2C1D">
+<span style="width:32px;height:32px;flex:none;border:1.5px solid #5A4630;border-radius:3px;background:radial-gradient(circle at 40% 35%,#3A2C1D,#0F0B07);box-sizing:border-box"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px">Suivi des réserves</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#B9AB8C">Prévient quand munitions ou nourriture baissent.</span></div>
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span>
+</div>
+<div style="height:54px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #3A2C1D">
+<span style="width:32px;height:32px;flex:none;border:1.5px solid #5A4630;border-radius:3px;background:radial-gradient(circle at 40% 35%,#3A2C1D,#0F0B07);box-sizing:border-box"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px">Vendre les gris et réparer</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#B9AB8C">Automatique chez le marchand.</span></div>
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span>
+</div>
+<div style="height:54px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #3A2C1D">
+<span style="width:32px;height:32px;flex:none;border:1.5px solid #5A4630;border-radius:3px;background:radial-gradient(circle at 40% 35%,#3A2C1D,#0F0B07);box-sizing:border-box"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px">Vibrations</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#B9AB8C">La manette vibre aux moments importants.</span></div>
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;box-sizing:border-box"></span>
+</div>
+<div style="height:54px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:12px">
+<span style="width:32px;height:32px;flex:none;border:1.5px solid #5A4630;border-radius:3px;background:radial-gradient(circle at 40% 35%,#3A2C1D,#0F0B07);box-sizing:border-box"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px">Rester assis en mangeant</span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#B9AB8C">Le stick ne te relève pas pendant le repas.</span></div>
+<span style="width:20px;height:20px;flex:none;border:1.5px solid #7A6448;background:#0F0B07;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#FFD24A;font-size:15px;line-height:1;box-sizing:border-box">✓</span>
+</div>
+</div>
+
+<div style="position:absolute;left:492px;top:72px;width:1px;height:444px;background:#3A2C1D"></div>
+<img src="textures/ck_onb_done.png" alt="" style="position:absolute;left:584px;top:72px;width:128px;height:128px">
+<div style="position:absolute;left:508px;top:212px;width:288px;display:flex;flex-direction:column;gap:8px">
+<div style="font-size:15px;color:#F2C43C">Récapitulatif</div>
+<div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-family:'PT Sans Narrow',sans-serif;font-size:14px;line-height:18px">
+<span style="color:#9D917A">Icônes</span><span style="color:#D8CCB0">Xbox</span>
+<span style="color:#9D917A">Palettes</span><span style="color:#D8CCB0">4 identifiées</span>
+<span style="color:#9D917A">Pavés</span><span style="color:#D8CCB0">gauche</span>
+<span style="color:#9D917A">Barre</span><span style="color:#D8CCB0">100 %, gâchettes à bascule</span>
+<span style="color:#9D917A">Clavier</span><span style="color:#D8CCB0">marguerite, AZERTY</span>
+<span style="color:#9D917A">Roues</span><span style="color:#D8CCB0">consommables</span>
+</div>
+</div>
+<div style="position:absolute;left:508px;top:388px;width:288px;display:flex;flex-direction:column;gap:10px">
+<div style="height:40px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#1F1810,#0F0B07);border:1.5px solid #5A4630;border-radius:4px;font-size:16px;color:#EFE4C8;box-sizing:border-box">Poser mes sorts</div>
+<div style="height:40px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#1F1810,#0F0B07);border:1.5px solid #7A6448;border-radius:4px;font-size:16px;color:#F2C43C;box-sizing:border-box">Terminer</div>
+</div>
+<div style="position:absolute;left:508px;top:492px;width:288px;font-family:'PT Sans Narrow',sans-serif;font-size:13px;line-height:17px;color:#9D917A;text-wrap:pretty">Relancer ce guide : Accueil › Guide, ou /ec welcome</div>
+
+<div style="position:absolute;left:0;right:0;top:532px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide › Confort</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#B9AB8C;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#B9AB8C;border-radius:1.5px"></span></span><span style="font-size:15px">Choisir</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#8DC63F;box-sizing:border-box">A</span><span style="font-size:15px">Décocher</span></div>
+<div style="display:flex;align-items:center;gap:4px"><span style="height:20px;padding:0 5px;border:1.5px solid #D8CCB0;border-radius:6px;display:flex;align-items:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:11px">LB</span><span style="font-size:15px;margin-left:2px">Étape</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Retour</span></div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">6</span><span style="font-size:18px;color:#F2C43C">Confort et c'est parti</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;text-wrap:pretty">Les cases 32 × 32 accueillent des icônes du jeu : je n'en propose pas, elles seraient moins lisibles qu'une icône que le joueur connaît déjà. Le récapitulatif reprend les choix des écrans 1 à 5 ; une ligne sans changement peut être omise. « Poser mes sorts » ferme le guide et ouvre l'onglet Manette.</div>
+</div>
+
+</div>
+</div>
+
+<!-- ÉCRAN 3b -->
+<div id="ecran-3b" data-screen-label="03b Aperçu taille" style="display:flex;flex-direction:column;gap:14px;width:1280px">
+<div style="position:relative;width:1280px;height:720px;background:repeating-linear-gradient(135deg,#15110C 0 12px,#18130E 12px 24px);border:1px solid #3A2C1D;overflow:hidden">
+<div style="position:absolute;left:16px;bottom:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#6F6452">vue du jeu, 1280 × 720</div>
+
+<div style="position:absolute;left:230px;top:24px;width:820px;height:176px;background:radial-gradient(ellipse 80% 60% at 50% 0%,#1E170F,#16110C);border:1px solid #7A6448;border-radius:4px;box-shadow:inset 0 0 0 3px #120D08,inset 0 0 0 4px #3A2C1D,0 24px 60px rgba(0,0,0,.55);overflow:hidden;box-sizing:border-box">
+<div style="position:absolute;left:24px;top:14px;right:24px;display:flex;align-items:baseline;gap:12px"><span style="font-size:18px;color:#F2C43C">Taille de la barre</span><span style="flex:1"></span><span style="font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Guide · 3 / 6</span></div>
+<div style="position:absolute;left:24px;top:46px;width:772px;height:64px;box-sizing:border-box;padding:0 18px;display:flex;align-items:center;gap:16px;background:linear-gradient(90deg,#3A2E12,#221A0A);border:2px solid #FFD24A;border-radius:4px;box-shadow:0 0 10px rgba(255,210,74,.35)">
+<span style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C">70 %</span>
+<div style="flex:1;position:relative;height:8px;background:#0F0B07;border:1px solid #5A4630;border-radius:4px"><div style="position:absolute;left:0;top:0;bottom:0;width:62.5%;background:linear-gradient(90deg,#7A5D36,#F2C43C);border-radius:4px"></div><div style="position:absolute;left:62.5%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#FFD24A;border:2px solid #FFF3D0;box-shadow:0 0 8px rgba(255,210,74,.7);box-sizing:border-box"></div><div style="position:absolute;left:37.5%;top:16px;width:1px;height:6px;background:#7A6448"></div></div>
+<span style="font-family:'PT Sans Narrow',sans-serif;font-size:14px;color:#B9AB8C">150 %</span>
+<span style="min-width:72px;text-align:right;font-size:20px;color:#FFD24A">120 %</span>
+</div>
+<div style="position:absolute;left:0;right:0;top:128px;height:48px;box-sizing:border-box;border-top:1px solid #3A2C1D;background:#120D08;display:flex;align-items:center;gap:18px;padding:0 20px 0 24px">
+<div style="flex:1;min-width:0;font-family:'PT Sans Narrow',sans-serif;font-size:13px;color:#9D917A">Aperçu en direct</div>
+<div style="display:flex;align-items:center;gap:6px"><span style="position:relative;width:20px;height:20px;display:inline-block"><span style="position:absolute;left:7px;top:0;width:6px;height:20px;background:#9D917A;border-radius:1.5px"></span><span style="position:absolute;left:0;top:7px;width:20px;height:6px;background:#FFD24A;border-radius:1.5px"></span></span><span style="font-size:15px">Ajuster</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#8DC63F;box-sizing:border-box">A</span><span style="font-size:15px">Garder</span></div>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9D917A;background:#0F0B07;display:flex;align-items:center;justify-content:center;font-family:'PT Sans Narrow',sans-serif;font-weight:700;font-size:14px;color:#FF5A3C;box-sizing:border-box">B</span><span style="font-size:15px">Annuler</span></div>
+</div>
+</div>
+
+<div style="position:absolute;left:372px;top:650px;width:535px;height:40px;border:1.5px dashed #7A6448;border-radius:4px;box-sizing:border-box"></div>
+<div style="position:absolute;left:319px;top:642px;width:642px;height:48px;display:flex;gap:6px">
+<span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span><span style="flex:1;border:1.5px solid #7A6448;border-radius:4px;background:rgba(15,11,7,.92)"></span>
+</div>
+<div style="position:absolute;left:976px;top:646px;display:flex;flex-direction:column;gap:4px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#9D917A"><span>barre manette du jeu, 120 %</span><span style="color:#6F6452">pointillés : taille d'origine</span></div>
+</div>
+<div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:13px;color:#16110C;background:#F2C43C;padding:2px 8px;border-radius:3px">3b</span><span style="font-size:18px;color:#F2C43C">Aperçu de taille, fenêtre réduite</span></div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#B9AB8C;max-width:820px;text-align:left;text-wrap:pretty">Dès que le curseur bouge, la fenêtre passe à 820 × 176 et se cale à 24 px du haut de l'écran : seuls le curseur et une barre d'aide réduite restent. A garde la taille, B revient à la valeur d'avant ; dans les deux cas la fenêtre reprend 820 × 580 à sa place. Si la barre est placée en haut de l'écran, la fenêtre se cale en bas à la place.</div>
+</div>
+
+<!-- GALERIE -->
+<div style="display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:26px;color:#F2C43C">Illustrations à exporter</div><div style="font-family:'PT Sans Narrow',sans-serif;font-size:16px;color:#B9AB8C">Dossier <span style="color:#D8CCB0">textures/</span> · 20 PNG RGBA, fond transparent, taille native ci-dessous. Les _glow se superposent à la même position, en mode additif.</div></div>
+<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D"><img src="textures/ck_onb_welcome.png" alt="" style="width:512px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="display:flex;gap:10px;align-items:baseline;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_welcome</span><span style="color:#9D917A">512 × 256</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D">
+<div style="display:flex;gap:12px"><img src="textures/ck_onb_paddles.png" alt="" style="width:512px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><img src="textures/ck_onb_paddles_glow.png" alt="" style="width:256px;height:128px;background:#000;align-self:flex-start"></div>
+<div style="display:flex;gap:10px;align-items:baseline;font-family:ui-monospace,Menlo,monospace;font-size:13px;flex-wrap:wrap"><span style="color:#F2C43C">ck_onb_paddles</span><span style="color:#9D917A">512 × 256</span><span style="color:#D8CCB0">+ _glow, _l4_glow, _r4_glow, _l5_glow, _r5_glow</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D">
+<div style="display:flex;gap:12px;align-items:flex-start"><img src="textures/ck_onb_touchpad.png" alt="" style="width:256px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="position:relative;width:256px;height:256px"><img src="textures/ck_onb_touchpad.png" alt="" style="position:absolute;inset:0;width:256px;height:256px"><img src="textures/ck_onb_touchpad_up_glow.png" alt="" style="position:absolute;inset:0;width:256px;height:256px;mix-blend-mode:screen"></div>
+<div style="display:grid;grid-template-columns:repeat(2,120px);gap:8px"><img src="textures/ck_onb_touchpad_up_glow.png" alt="" style="width:120px;height:120px;background:#000"><img src="textures/ck_onb_touchpad_right_glow.png" alt="" style="width:120px;height:120px;background:#000"><img src="textures/ck_onb_touchpad_down_glow.png" alt="" style="width:120px;height:120px;background:#000"><img src="textures/ck_onb_touchpad_left_glow.png" alt="" style="width:120px;height:120px;background:#000"></div></div>
+<div style="display:flex;gap:10px;align-items:baseline;font-family:ui-monospace,Menlo,monospace;font-size:13px;flex-wrap:wrap"><span style="color:#F2C43C">ck_onb_touchpad</span><span style="color:#9D917A">256 × 256</span><span style="color:#D8CCB0">+ _up_glow, _right_glow, _down_glow, _left_glow</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D">
+<div style="display:flex;gap:12px"><img src="textures/ck_onb_toggle.png" alt="" style="width:256px;height:128px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><img src="textures/ck_onb_toggle_glow.png" alt="" style="width:256px;height:128px;background:#000"></div>
+<div style="display:flex;gap:10px;align-items:baseline;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_toggle</span><span style="color:#9D917A">256 × 128</span><span style="color:#D8CCB0">+ _glow</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D"><img src="textures/ck_onb_daisywheel.png" alt="" style="width:256px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="display:flex;gap:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_daisywheel</span><span style="color:#9D917A">256²</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D"><img src="textures/ck_onb_splitkb.png" alt="" style="width:256px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="display:flex;gap:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_splitkb</span><span style="color:#9D917A">256²</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D"><img src="textures/ck_onb_wheel_consumables.png" alt="" style="width:256px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="display:flex;gap:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_wheel_consumables</span><span style="color:#9D917A">256²</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D"><img src="textures/ck_onb_wheel_usable.png" alt="" style="width:256px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="display:flex;gap:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_wheel_usable</span><span style="color:#9D917A">256²</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D"><img src="textures/ck_onb_wheel_party.png" alt="" style="width:256px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="display:flex;gap:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_wheel_party</span><span style="color:#9D917A">256²</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:16px;background:#120D08;border:1px solid #3A2C1D"><img src="textures/ck_onb_done.png" alt="" style="width:256px;height:256px;background:repeating-conic-gradient(#19140E 0 25%,#120D08 0 50%) 0 0/16px 16px"><div style="display:flex;gap:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px"><span style="color:#F2C43C">ck_onb_done</span><span style="color:#9D917A">256²</span></div></div>
+</div>
+</div>
+
+<!-- TABLEAU -->
+<div style="display:flex;flex-direction:column;gap:20px;max-width:1500px">
+<div style="font-size:26px;color:#F2C43C">Tableau récapitulatif</div>
+<div style="display:grid;grid-template-columns:300px 100px 60px minmax(0,1fr) 120px 110px;font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:20px;color:#D8CCB0;border-top:1px solid #5A4630">
+<span style="padding:10px 12px;color:#C9A25A;border-bottom:1px solid #5A4630">Fichier</span><span style="padding:10px 12px;color:#C9A25A;border-bottom:1px solid #5A4630">Taille</span><span style="padding:10px 12px;color:#C9A25A;border-bottom:1px solid #5A4630">Écran</span><span style="padding:10px 12px;color:#C9A25A;border-bottom:1px solid #5A4630">Rôle</span><span style="padding:10px 12px;color:#C9A25A;border-bottom:1px solid #5A4630">Position x, y</span><span style="padding:10px 12px;color:#C9A25A;border-bottom:1px solid #5A4630">Affichage</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_welcome</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">512 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">1</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Illustration d'accueil : manette de face, bouton du bas allumé.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">24, 72</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">384 × 192</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_paddles</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">512 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">2, 2b</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Manette de dos, 4 palettes dorées. Centres des palettes dans la texture : L4 128,174 · L5 160,188 · R5 352,188 · R4 384,174 (soit dans la fenêtre : 124,236 · 149,247 · 299,247 · 324,236).</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">24, 100</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">400 × 200</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_paddles_glow</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">512 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">2</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Les 4 palettes seules, en glow. Additif, au-dessus de ck_onb_paddles.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">24, 100</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">400 × 200</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_paddles_l4_glow<br>…_r4_glow, _l5_glow, _r5_glow</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">512 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">2b</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Une palette seule, pour l'identification « appuie sur L4… ».</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">24, 100</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">400 × 200</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_touchpad</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">2</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Pavé tactile divisé en 4 zones par ses diagonales.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">448, 100</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">160 × 160</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_touchpad_up_glow<br>…_right_glow, _down_glow, _left_glow</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">2</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Une zone seule allumée (haut, droite, bas, gauche). Additif.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">448, 100</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">160 × 160</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_toggle</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 128</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">3</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">LT pressé une fois → la barre de gauche reste active (trait de maintien dessous).</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">540, 214</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 128</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_toggle_glow</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 128</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">3</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">LT, barre de gauche et trait de maintien seuls. Allumé quand la case est cochée.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">540, 214</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 128</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_daisywheel</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">4</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Marguerite : 8 pétales de 4 points autour d'un stick, un pétale visé.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">133, 150</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">160 × 160</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_splitkb</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">4</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Clavier en deux moitiés, un curseur et un stick par moitié.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">527, 150</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">160 × 160</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_wheel_consumables</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">5</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Roue radiale 8 cases : potions, pain, viande, une case libre.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">40, 88</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">112 × 112</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_wheel_usable</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">5</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Roue radiale 6 cases : sac de couchage, étendard, parchemin, clé, bourse, une case libre.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">434, 88</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">112 × 112</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_wheel_party</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">5</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">5 portraits en pentagone, anneau de vie vert/jaune/rouge, soin au centre. Centres des portraits dans la fenêtre (pour un % éventuel) : 112,357 · 155,388 · 138,439 · 86,439 · 69,388.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">40, 328</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">144 × 144</span>
+
+<span style="padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#F2C43C;border-bottom:1px solid #3A2C1D">ck_onb_done</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">256 × 256</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">6</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">Médaille dorée avec coche, illustration de fin.</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">584, 72</span><span style="padding:10px 12px;border-bottom:1px solid #3A2C1D">128 × 128</span>
+</div>
+<div style="font-family:'PT Sans Narrow',sans-serif;font-size:15px;line-height:21px;color:#9D917A;max-width:1000px;text-wrap:pretty">Positions dans la fenêtre de 820 × 580, depuis son coin haut gauche. Les affichages sont des réductions exactes de la texture (0,75 · 0,78 · 0,625 · 0,4375 · 0,5625 · 0,5) ; rien n'est agrandi. Les fichiers de glow ont la taille et la position de leur texture de base : SetBlendMode("ADD") puis on joue sur l'alpha.</div>
+</div>
+
+</div>
+</x-dc>
+</body>
+</html>
