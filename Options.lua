@@ -779,6 +779,26 @@ local function consumableRows(b)
     end
 end
 
+-- The usable items' wheel (asked): what it holds now, each shown or hidden
+local function usableRows(b)
+    local W = CK.ConsumableWheel
+    b.header(L.USABLE_WHEEL_NAME)
+    local list = W:UsableCandidates()
+    if #list == 0 then
+        b.info(L.USABLE_EMPTY)
+        return
+    end
+    for _, c in ipairs(list) do
+        local icon = C_Item.GetItemIconByID and C_Item.GetItemIconByID(c.id)
+        local name = c.name or ("item:" .. c.id)
+        local label = icon and format("|T%s:16:16:0:0|t %s", icon, name) or name
+        b.check({ id = "uw_" .. c.id, label = label,
+            tip = c.quest and (L.WHEEL_CAT_QUEST .. ". " .. L.TIP_USABLE_ITEM) or L.TIP_USABLE_ITEM,
+            get = function() return not (CK.db.settings.wheel.usableHidden or {})[c.id] end,
+            set = function(v) W:SetUsableHidden(c.id, not v) end })
+    end
+end
+
 -- How every wheel opens: pressed (open, A uses, press again closes) or held
 local function wheelOpenRows(b)
     local s = settings().wheel
@@ -823,6 +843,7 @@ Config.pages.wheels = CK.MyWheels:TabPage(Config.NewRailPage({
         { key = "mine", label = L.MYWHEEL_H, tip = L.MYWHEEL_INFO, view = CK.MyWheels.Grid },
         { key = "consumables", label = L.SEC_CONSUMABLES, rows = consumableRows,
             tip = function() return format(L.WHEEL_INFO2, CK.ConsumableWheel.StickWords()) end },
+        { key = "usable", label = L.SEC_USABLE, tip = L.USABLE_INFO, rows = usableRows },
         { key = "open", label = L.SEC_WHEEL_OPEN, tip = L.TIP_SEC_WHEEL_OPEN, rows = wheelOpenRows },
         { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_WHEELPOS, rows = wheelPositionRows },
     },

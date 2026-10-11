@@ -9,6 +9,7 @@
         ControllerKeyboard_OpenConfig()
     </Binding>
     <Binding name="CLICK ControllerKeyboardWheelToggle:LeftButton" category="ADDONS"/>
+    <Binding name="CLICK ControllerKeyboardUsableToggle:LeftButton" category="ADDONS"/>
     <Binding name="CLICK ControllerKeyboardMyWheel1:LeftButton" category="ADDONS"/>
     <Binding name="CLICK ControllerKeyboardMyWheel2:LeftButton" category="ADDONS"/>
     <Binding name="CLICK ControllerKeyboardMyWheel3:LeftButton" category="ADDONS"/>

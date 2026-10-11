@@ -417,6 +417,17 @@ kind can be left out (Wheels › Consumables).
   aim: the right stick.)
 - No game setting is changed. `/ec wheel` lists what the wheel holds, and why an item is not in it.
 
+### Usable items wheel
+
+The same wheel for **every item of your bags you can use, the consumables aside** (they have their
+own wheel): a sleeping bag, a battle standard, a quest item to use somewhere, a quest's first page...
+Items you wear (a trinket in the bags) are left out: used from the bags, they would be put on. **Quest
+items first, then by name** (accents aside), one of each, 8 a page (LB / RB for more). Its own key: the
+Gamepad tab's Macros list (*Usable items wheel*), or *Escape > Key Bindings > AddOns*. It opens, aims
+and uses like the consumables wheel, in combat too (what is in it is updated out of combat).
+**Wheels › Usable items** lists what it holds now, each ticked when shown: untick one to hide it from
+the wheel (it stays in your bags), tick it to show it again. The hearthstone is hidden by default.
+
 ### Your own wheels
 
 Up to 8 wheels of your own, made in Wheels › My wheels with the gamepad: a card per wheel (its 8

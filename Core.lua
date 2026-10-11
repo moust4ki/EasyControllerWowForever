@@ -33,6 +33,7 @@ BINDING_NAME_CONTROLLERKEYBOARD_TOGGLE = L.BINDING_TOGGLE
 BINDING_NAME_CONTROLLERKEYBOARD_MAP = L.BINDING_MAP
 BINDING_NAME_CONTROLLERKEYBOARD_CONFIG = L.BINDING_CONFIG
 _G["BINDING_NAME_CLICK ControllerKeyboardWheelToggle:LeftButton"] = L.WHEEL_NAME
+_G["BINDING_NAME_CLICK ControllerKeyboardUsableToggle:LeftButton"] = L.USABLE_WHEEL_NAME
 _G["BINDING_NAME_CLICK ControllerKeyboardPhrasesToggle:LeftButton"] = L.PHRASES_NAME
 
 ---------------------------------------------------------------------------
@@ -92,6 +93,9 @@ local DEFAULTS = {
         hold = false,
         -- The stick that aims them: "left" or "right" (a party spell's: the right)
         aimStick = "left",
+        -- The usable items' wheel: the items hidden from it ({ [item ID] =
+        -- true }, false once shown again); the hearthstone by default
+        usableHidden = { [6948] = true },
         -- Eating or drinking: a stick nudged doesn't stand the character up
         staySeated = true,
         -- Bandaging: the same (its own option)
@@ -213,6 +217,11 @@ function CK.CleanEntries(s)
     keep(s.myWheels.list, wheels)
     -- The consumables wheel's kinds
     copyDefaults(DEFAULTS.wheel.categories, tbl(tbl(s, "wheel"), "categories"))
+    -- The usable items' wheel's hidden items: { [item ID] = true / false }
+    local hiddenItems = tbl(s.wheel, "usableHidden")
+    for k, v in pairs(hiddenItems) do
+        if type(k) ~= "number" or type(v) ~= "boolean" then hiddenItems[k] = nil end
+    end
 end
 
 function CK:InitDB()

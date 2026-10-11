@@ -73,6 +73,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health in % on their portrait
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
+- **Usable items wheel**: every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside
 - **Hold to show** a wheel, let go to use (option), aimed with the left or the right stick
 - **Wheels that fit**: as many sections as items
 - **Stay seated while eating or bandaging**: a nudged stick no longer wastes the meal, the camera still turns
@@ -195,6 +196,12 @@ sections), up to 8 consumables a page (LB / RB for more), from your bags: food, 
 mana potions, healthstone, mana gem, bandages, buff food, elixirs and flasks, scrolls, the best first.
 Point with the left stick (or the right one: Wheels › Opening › Stick that aims) and press A to use; B
 cancels; the mouse works too. Or hold its key, aim and let go to use (option). It works in combat (food and drink greyed there).
+
+**Usable items wheel**
+The same wheel for every item of your bags you can use, the consumables aside: a sleeping bag, a
+battle standard, a quest item to use somewhere, a quest's first page... Quest items first, then by
+name. Give it a key in the Gamepad tab's Macros list. Wheels › Usable items lists what it holds: untick
+an item to hide it from the wheel (it stays in your bags). The hearthstone is hidden by default.
 
 **Stay seated while eating**
 On by default: while you eat or drink (and bandage, an option), a stick still pushed from the wheel,
