@@ -77,8 +77,9 @@ local function atlasExists(name)
     return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
 end
 
-function CK:SetGlyph(tex, key)
-    local style = self.db.settings.glyphStyle
+-- style: another one than the one chosen (the guide's choices show theirs)
+function CK:SetGlyph(tex, key, style)
+    style = style or self.db.settings.glyphStyle
     if self.db.settings.gameGlyphs then
         for _, name in ipairs((ATLAS[style] or ATLAS.xbox)[key] or {}) do
             if atlasExists(name) then

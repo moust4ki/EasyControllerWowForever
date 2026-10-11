@@ -23,8 +23,11 @@ Every feature you don't need can be turned off to save even more resources.
 > **To open the settings: hold RB and press D-pad down** (or type `/ec` in the chat).
 >
 > **For the best results, set the game's gamepad action bar to compact** (the game's Edit Mode, its
-> gamepad bar selected): the game then shows one bar, which "Triggers: press to switch" and the extra
-> buttons are made for.
+> gamepad bar selected, or the button in the guide's step 3): the game then shows one bar, which
+> "Triggers: press to switch" and the extra buttons are made for. Mind the game's bug above.
+>
+> **New install? A guide opens by itself** and sets everything up with the gamepad; run it again
+> any time from Home › Guide or `/ec welcome`.
 >
 > **To set the stance bar (stealth, a form, a stance), be in that stance first**: the Gamepad tab
 > shows the stance bar's slots only while you are in it.
@@ -45,24 +48,15 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.15
-- **Back paddles** (1.15.11): the Gamepad tab now tells you when a paddle's key isn't identified yet (needed when Steam Input sends it as a keyboard key).
-- **Red when out of range** (1.15.10): also on the game's buttons you replaced with a spell (Wrath on X, for example).
-- **Usable items wheel** (1.15.9): every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside, quest items first; give it a key in the Gamepad tab's Macros list, hide any item in Wheels › Usable items.
-- **Healer/Buff mode** (1.15.8): each member's health in % on their portrait, green when full, yellow at half, red near nothing; Dead or Offline in grey.
-- **Wheels** (1.15.7): aim with the left or the right stick (Wheels › Opening › Stick that aims).
-- **Translations** (1.15.7): one file per language (Locales/), easier to contribute to. **Restart the game after this update** (a /reload doesn't load new files).
-- **Game patch of 9 October** (1.15.6): the gamepad bar is placed in Edit Mode now; the addon only sets its size (through the game's own function) and reads Compact from Edit Mode, and tells you in the chat when the game's bug removes the bar.
-- **Chat keyboard** (1.15.5): two input methods, the daisywheel and the split keyboard; ConsolePort's keyboard is no longer offered (if you used it: the daisywheel).
-- **Healer/Buff mode** (1.15.4): the wheel no longer opens in the middle of the screen after a fight begun with LB or RB held; it stays on its button.
-- **Back paddles** (1.15.3): Nothing alone no longer blocks an action on a trigger layer of the same paddle.
-- **The size of the gamepad buttons** (1.15.2): the whole gamepad bar from 70 % to 150 %, every layer at once, the addon's buttons and pictures following (Home › Gamepad, or Move / size on the Gamepad tab: LB / RB with the bar picked up). Placing is clearer: a thin frame round the bar's buttons and a tag saying what is selected.
-- **Healer/Buff mode** (1.15.1): letting the stick go now casts reliably on the member aimed, the ones up left and up right too; the list is named Party/Healer.
-- **Healer/Buff mode** (1.15.0): put a heal or a buff on a button from the new **Party/Healer** list. That button opens a small wheel like the hunter's aspects, centred on it, with your party around it: you at the bottom, member 1 on the left, then clockwise, only those who are there. Push the right stick toward someone and let it go: the spell goes on them, your target kept. In combat too, in every trigger layer; a red portrait when someone is too far. [Watch the Healer Mode Demo](https://www.youtube.com/watch?v=JXDERP1FTDg).
-- **Bind list** (1.15.0): its tabs on two rows, wider and easier to read.
-- **Replaced D-pad buttons** (1.15.0): the addon's picture is square, like the game's own.
+## What's new in 1.16
+- **First launch guide** (1.16.0): six screens to set the addon up with the gamepad, shown once on a new install: the buttons' icons, the back paddles (identified live) and touchpads, the gamepad bar's size (previewed live) and its compact mode, the chat keyboard, the consumables and usable items wheels with their keys (press the button you want), Healer mode, and the comfort options. Again any time from Home › Guide or `/ec welcome`.
+- **Healer/Buff mode** (1.16.0): each member's health as a ring around their portrait, emptying clockwise, green, then yellow, then red; the % stays on the portrait.
+- **Compact gamepad bar** (1.16.0): the guide's step 3 turns Edit Mode's compact bar on for you (the game's bug at the top of this page still applies).
+- **Usable items wheel** (1.16.0): can be turned off (Wheels › Usable items).
+- **Restart the game after this update** (new files: a /reload doesn't load them).
 
 ## Features
+- **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
 - **Gamepad mapping (ABXY)** and **back paddles** (Steam Deck, Xbox Elite, DualSense Edge…), every trigger layer explained
 - **Every free combination usable**: L3 / R3, LT + RB / RT + LB, unused trigger layers, the game's own buttons replaced if you want
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
@@ -73,10 +67,10 @@ Every feature you don't need can be turned off to save even more resources.
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
-- **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health in % on their portrait
+- **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health as a ring around their portrait and in %
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
-- **Usable items wheel**: every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside
+- **Usable items wheel**: every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside, on or off
 - **Hold to show** a wheel, let go to use (option), aimed with the left or the right stick
 - **Wheels that fit**: as many sections as items
 - **Stay seated while eating or bandaging**: a nudged stick no longer wastes the meal, the camera still turns
@@ -171,6 +165,16 @@ automation at merchants), Gamepad (your controller drawn button by button), Whee
 middle, what the selected one does on the right, and a help bar showing only the buttons that work
 there.
 
+**First launch guide**
+On a new install, six screens open by themselves over the panel to set the addon up, with the
+gamepad (D-pad, A, B back, LB / RB a step), each choice saved at once: the buttons' icons; the back
+paddles, identified live one after the other, and the touchpads; the gamepad bar's size, previewed
+live (the window shrinks to the top of the screen), Triggers: press to switch and Edit Mode's compact
+bar (a button turns it on); the chat keyboard; the consumables and usable items wheels, each given a
+key by simply pressing it (LT / RT held for their layers); Healer mode for the healing classes; and the
+comfort options, with a summary. A fight closes it, it comes back at the same step after. Run it again
+any time from Home › Guide or `/ec welcome`.
+
 **Your own wheels**
 Up to 8 wheels of your own, shown as cards (their 8 slots, their name, the button they're on). Each
 opens an editor: the wheel with its slots around it and the lists beside it (spells, items, macros);
@@ -185,8 +189,9 @@ middle: the members of your party who are there, each always in the same place (
 member 1 on the left, then clockwise), with their portrait and name. Push the right stick toward
 someone and let it go: the spell is cast on them, your target kept. Or hold the button, aim, and let
 the button go. A short press leaves it open; B closes it. A member too far for the spell has a red
-portrait, a dead one is greyed (still there for a resurrection). Each member's health shows on their
-portrait in %, green when full, yellow at half, red near nothing; Dead or Offline in grey. It works in combat, in every trigger
+portrait, a dead one is greyed (still there for a resurrection). Each member's health shows as a ring
+around their portrait, emptying clockwise from the top, and in % on it, green when full, yellow at
+half, red near nothing; Dead or Offline in grey. It works in combat, in every trigger
 layer, on paddles too; in a raid, with your subgroup. While a Healer/Buff mode spell is on a button, the game's
 stick direction keys are on (the stick's release needs them): the addon keeps them from the game's
 own flyouts (aspects, pet) and gives your setting back when none is left and at logout.
@@ -204,7 +209,8 @@ cancels; the mouse works too. Or hold its key, aim and let go to use (option). I
 The same wheel for every item of your bags you can use, the consumables aside: a sleeping bag, a
 battle standard, a quest item to use somewhere, a quest's first page... Quest items first, then by
 name. Give it a key in the Gamepad tab's Macros list. Wheels › Usable items lists what it holds: untick
-an item to hide it from the wheel (it stays in your bags). The hearthstone is hidden by default.
+an item to hide it from the wheel (it stays in your bags). The hearthstone is hidden by default. The
+wheel itself can be turned off there.
 
 **Stay seated while eating**
 On by default: while you eat or drink (and bandage, an option), a stick still pushed from the wheel,
@@ -397,6 +403,7 @@ Install with the CurseForge app, or extract the zip into
 - `/ec lock`: lock / unlock the position (unlocking shows the keyboard to move it)
 - `/ec scale 1.2`: any size (the options offer 4 presets)
 - `/ec config`: configuration panel (also RB + D-pad down)
+- `/ec welcome`: the first launch guide (also Home › Guide)
 - `/ec map`: gamepad mapping (free buttons, back paddles, extra buttons)
 - `/ec keys`: list the keys the game receives (to set up back paddles and extra buttons)
 - `/ec vibe [pattern]`: test the controller vibration
