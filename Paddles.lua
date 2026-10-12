@@ -1204,8 +1204,22 @@ function P:UpdatePlaceTag()
     tag:Show()
 end
 
--- Center of an element on the screen
+-- The bar's buttons' bounds on the screen, in pixels (its gold frame's)
+local function barRect()
+    local l, r, t, b = P:BarBounds()
+    if not l then return nil end
+    local k = UIParent:GetEffectiveScale() or 1
+    return l * k, r * k, t * k, b * k
+end
+
+-- Center of an element on the screen. The bar: its buttons' middle (its
+-- game frame, an Edit Mode system, is much larger than them: its centre far
+-- from them, the bar never reached from the extra buttons, reported)
 local function screenCenter(id)
+    if id == "BAR" then
+        local l, r, t, b = barRect()
+        if l then return (l + r) / 2, (t + b) / 2 end
+    end
     local f = id == "BAR" and GamepadMainActionBarFrame or P.frame.buttons[id]
     if not f then return nil end
     local x, y = f:GetCenter()
@@ -1214,15 +1228,35 @@ local function screenCenter(id)
     return x * scale, y * scale
 end
 
+-- Where an element is, seen from a point: the bar, its buttons' nearest
+-- point (pressing toward it reaches it, from any side); a button, its centre
+local function seenFrom(id, fx, fy)
+    if id == "BAR" then
+        local l, r, t, b = barRect()
+        if l then
+            local x, y = math.max(l, math.min(r, fx)), math.max(b, math.min(t, fy))
+            if x ~= fx or y ~= fy then return x, y end
+        end
+    end
+    return screenCenter(id)
+end
+
 -- The nearest element in a D-pad direction
 function P:SelectToward(dir)
     local fx, fy = screenCenter(self.placeSelected)
     if not fx then return end
+    -- From the bar: from its buttons' edge nearest each element
+    local rect = self.placeSelected == "BAR" and { barRect() }
     local dx, dy = DIRS[dir][1], DIRS[dir][2]
     local best, bestScore
     local order = GamepadMainActionBarFrame and P.PLACE_ORDER or P.EXTRA
     for _, id in ipairs(order) do
-        local x, y = screenCenter(id)
+        local x, y = seenFrom(id, fx, fy)
+        if rect and rect[1] and x then
+            local l, r, t, b = rect[1], rect[2], rect[3], rect[4]
+            local ox, oy = math.max(l, math.min(r, x)), math.max(b, math.min(t, y))
+            if ox ~= x or oy ~= y then fx, fy = ox, oy else fx, fy = (l + r) / 2, (t + b) / 2 end
+        end
         local shown = id == "BAR" or (self.frame.buttons[id] and self.frame.buttons[id]:IsShown())
         if id ~= self.placeSelected and x and shown then
             local vx, vy = x - fx, y - fy
