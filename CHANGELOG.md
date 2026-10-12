@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.16.3
+
+- **The panel's shortcut: back to how it was before 1.16.2** (reported: LB + RB + B, the game's
+  bags, no longer worked). Changing D-pad down's bindings while RB was held got in the way of the
+  game's own RB combinations. Holding RB no longer changes anything; RB + D-pad down runs D-pad
+  down's action again, as before 1.16.2: if it bothers you, pick another shortcut in Home ›
+  Shortcut (RB + a D-pad direction you don't use, for example).
+- **Move / size: the gamepad bar reached again from the extra buttons** (reported: once on L4,
+  L5..., the bar could never be selected again). The bar was found by its game frame's centre, much
+  larger than its buttons since the game's patch of 9 October (an Edit Mode system); it is now its
+  buttons' bounds, as its gold frame: pressing the D-pad toward it from any side selects it.
+- **Guide**: the wheels' hold option said in full: "Hold the button to show the wheel", with what it
+  does on and off.
+
 ## 1.16.2
 
 - **The panel's shortcut no longer runs D-pad down's action** (reported: "every time I want to open
