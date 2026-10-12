@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.16.2
+
+- **The panel's shortcut no longer runs D-pad down's action** (reported: "every time I want to open
+  the options the character does mushrooms"). The game has no function of its own on RB + D-pad
+  down (its hostile targeting bar, RB held, only uses A, B, X and Y), so the D-pad down action of the
+  bar ran with each opening. Now, while the shortcut's first button is held (out of combat, nothing
+  else having the pad), its second one only opens the panel: neither the game's action on it nor the
+  addon's runs, whatever modifier the first one sends. Back as soon as it is let go, or a fight
+  starts. It follows the shortcut you set (Home › Shortcut); off, nothing changes.
+
 ## 1.16.1
 
 - **Triggers: press to switch, every bar shown** (reported: without the game's compact bar, nothing
