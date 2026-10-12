@@ -1632,32 +1632,20 @@ function M:KeepShoulders()
     end
 end
 
--- The panel's shortcut (RB + D-pad down by default, or the player's own):
--- while its first button is held, out of combat, nothing else having the
--- pad, the second one only opens the panel. What we put on it is taken off
--- (a wheel on D-pad down opened with it), and the key bound to nothing above
--- the game's own: the game has no function of its own on RB + D-pad down
--- (its hostile targeting bar only uses A, B, X, Y), so the D-pad down
--- action ran with it (reported: a spell of the bar cast on each opening).
--- In every modifier the first button may send (a shoulder the game makes
--- Ctrl). Back on release, or when a fight starts (no binding then).
-local SHORTCUT_PREFIXES = { "", "SHIFT-", "CTRL-", "ALT-", "CTRL-SHIFT-", "ALT-SHIFT-", "ALT-CTRL-", "ALT-CTRL-SHIFT-" }
-local shortcutBlock
+-- The panel's shortcut (RB + D-pad down): while its first button is held,
+-- out of combat, what we put on the second one is taken off, so the press
+-- only opens the panel (a wheel on D-pad down opened with it). Back on
+-- release.
 function M:Suspend(key)
-    if InCombatLockdown() or not key then return end
+    if InCombatLockdown() or not (owner and key) then return end
     self.suspended = key
-    shortcutBlock = shortcutBlock or CK.NewFrame("Frame")
-    for _, prefix in ipairs(SHORTCUT_PREFIXES) do
-        local combo = prefix .. key
-        if owner and self.bound[combo] then
-            SetOverrideBinding(owner, false, combo, nil)
-            self.bound[combo] = nil
-        end
-        if takeOwner and self.taken[combo] then
-            SetOverrideBinding(takeOwner, true, combo, nil)
-            self.taken[combo] = nil
-        end
-        SetOverrideBinding(shortcutBlock, true, combo, NOOP)
+    if self.bound[key] then
+        SetOverrideBinding(owner, false, key, nil)
+        self.bound[key] = nil
+    end
+    if self.taken[key] then
+        SetOverrideBinding(takeOwner, true, key, nil)
+        self.taken[key] = nil
     end
     if CK.Toggle then CK.Toggle:Unbind(key) end
 end
@@ -1665,7 +1653,6 @@ end
 function M:Resume()
     if not self.suspended then return end
     self.suspended = nil
-    if shortcutBlock and not InCombatLockdown() then ClearOverrideBindings(shortcutBlock) end
     self:Apply()
 end
 
@@ -1903,7 +1890,6 @@ function M:Init()
     local events = CreateFrame("Frame")
     events:RegisterEvent("PLAYER_ENTERING_WORLD")
     events:RegisterEvent("PLAYER_REGEN_ENABLED")
-    events:RegisterEvent("PLAYER_REGEN_DISABLED")
     events:RegisterEvent("CVAR_UPDATE")
     -- A gamepad connected: the triggers' indexes the routers read
     pcall(events.RegisterEvent, events, "GAME_PAD_CONNECTED")
@@ -1913,12 +1899,6 @@ function M:Init()
     pcall(events.RegisterEvent, events, "UPDATE_SHAPESHIFT_FORMS")
     pcall(events.RegisterEvent, events, "UPDATE_BONUS_ACTIONBAR")
     events:SetScript("OnEvent", function(_, event, name)
-        -- A fight starting (bindings still free this once): the panel's
-        -- shortcut's second button given back
-        if event == "PLAYER_REGEN_DISABLED" then
-            if M.suspended then M:Resume() end
-            return
-        end
         if event == "UPDATE_BONUS_ACTIONBAR" then
             if CK.Config and CK.Config:IsOpen() and not InCombatLockdown() then CK.Config:Render() end
             return

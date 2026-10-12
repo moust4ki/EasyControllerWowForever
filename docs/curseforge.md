@@ -49,7 +49,8 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.16
-- **Settings shortcut** (1.16.2): RB + D-pad down (or your own shortcut) only opens the settings now; the D-pad down action no longer runs with it.
+- **Settings shortcut** (1.16.3): back to how it was before 1.16.2, which got in the way of the game's own RB combinations (LB + RB + B for the bags). If RB + D-pad down also runs your D-pad down action, pick another shortcut in Home › Shortcut.
+- **Move / size** (1.16.3): the gamepad bar can be selected again from the extra buttons (L4, L5...) with the D-pad.
 - **Triggers: press to switch** (1.16.1): without the compact bar, the bar switched on now looks like the game's active bar (its buttons large and spread out, the top bar small, its trigger icon lit once); both triggers pressed together switch the bottom bar on.
 - **First launch guide** (1.16.0): six screens to set the addon up with the gamepad, shown once on a new install: the buttons' icons, the back paddles (identified live) and touchpads, the gamepad bar's size (previewed live) and its compact mode, the chat keyboard, the consumables and usable items wheels with their keys (press the button you want), Healer mode, and the comfort options. Again any time from Home › Guide or `/ec welcome`.
 - **Healer/Buff mode** (1.16.0): each member's health as a ring around their portrait, emptying clockwise, green, then yellow, then red; the % stays on the portrait.
@@ -160,8 +161,7 @@ binding or `/ec phrases`.
 ## Modules
 
 **Configuration panel**
-RB + D-pad down (or `/ec config`) opens the addon's own panel, driven with the gamepad or the mouse
-(while RB is held, D-pad down only opens it: its own action waits):
+RB + D-pad down (or `/ec config`) opens the addon's own panel, driven with the gamepad or the mouse:
 Home (every module and its state, the panel's shortcut, the look, the gamepad bar and extra buttons,
 automation at merchants), Gamepad (your controller drawn button by button), Wheels, Keyboard, Alerts
 (vibrations, supplies, quest items, better items) and Profiles. Sections on the left, settings in the

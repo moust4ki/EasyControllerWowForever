@@ -991,17 +991,18 @@ function G:BuildScreen5(s, f)
             settings().wheel.usableEnabled = v
             Wheel():Fill()
         end)
-    -- How every wheel opens (the stick that aims: Wheels > Opening)
-    check(s, f, 24, 261, 378, L.LBL_WHEEL_HOLD, nil,
+    -- How every wheel opens, said in full (asked: "Hold to show" wasn't
+    -- clear); the stick that aims: Wheels > Opening
+    check(s, f, 24, 252, 772, L.GUIDE_HOLD, L.GUIDE_HOLD_HELP,
         function() return settings().wheel.hold and true or false end,
         function(v)
             settings().wheel.hold = v
             Wheel():Fill()
         end)
-    rule(f, 24, 300, 772)
+    rule(f, 24, 328, 772)
     -- The healer's: a party wheel on a button (the healing classes), how to
     -- set it explained (asked: no button leaving the guide)
-    local hb = frameAt(f, "Frame", 24, 312, 772, 204)
+    local hb = frameAt(f, "Frame", 24, 336, 772, 180)
     box(hb, KC.panel, 1, KC.bronze, 1)
     image(hb, "ck_onb_wheel_party", 16, 16, 144, 144)
     text(hb, 18, KC.title, 180, 16):SetText(L.GUIDE_HEALER)
@@ -1012,7 +1013,7 @@ function G:BuildScreen5(s, f)
     help(hb, 14, KC.info, 180, 128, 574):SetText(L.GUIDE_HEALER_HOW)
     s.healerBlock = hb
     -- The others: what the wheels do by themselves
-    local auto = frameAt(f, "Frame", 24, 312, 772, 120)
+    local auto = frameAt(f, "Frame", 24, 336, 772, 120)
     box(auto, KC.yours, 0.06, KC.info, 0.45)
     text(auto, 15, KC.info, 16, 14):SetText(L.GUIDE_AUTO_TITLE)
     help(auto, 14, KC.cream2, 16, 40, 740):SetText(L.GUIDE_AUTO_TEXT)
