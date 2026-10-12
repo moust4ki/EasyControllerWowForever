@@ -172,9 +172,12 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
 
 ## Configuration panel
 
-**RB + D-pad down** opens the addon's own panel (only watched, never bound: the game's own buttons stay as they are;
-Home › Shortcut learns any other pair: press A on it, then hold a button and press a second one;
-also `/ec config`, a key binding, or *Options > AddOns > Easy Controller - Forever*).
+**RB + D-pad down** opens the addon's own panel (RB is never bound: the game keeps it, its hostile
+targeting; while it is held, out of combat and nothing else having the pad, D-pad down does nothing
+else, neither the game's action on it nor ours, in any modifier RB may send, back once RB is let go or
+a fight starts; Home › Shortcut learns any other pair, which works the same: press A on it, then hold
+a button and press a second one; also `/ec config`, a key binding, or *Options > AddOns > Easy
+Controller - Forever*).
 
 Six tabs, LB / RB to go from one to the next. In each, its sections on the left, their settings in
 the middle, and on the right what the selected one does. The help bar at the bottom shows where you

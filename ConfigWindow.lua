@@ -1346,9 +1346,11 @@ function C:Init()
         end, C)
     end
     -- The panel's shortcut: a button held, another pressed (RB + D-pad down
-    -- by default: with RB held, the game's hostile targeting bar turns its
-    -- D-pad off). Only watched, never bound: the game keeps whatever it does
-    -- with them, and the game's own windows keep their buttons.
+    -- by default: the game has no function of its own on it). Watched; the
+    -- first button never bound (the game keeps whatever it does with it: RB
+    -- held is its hostile targeting), the second one does nothing else while
+    -- the first is held (Mapping:Suspend), and the game's own windows keep
+    -- their buttons.
     local watch = CK.NewFrame("Frame", nil, UIParent)
     C.watch = watch
     local wasDown = false
@@ -1360,11 +1362,13 @@ function C:Init()
             CK.Mapping:Resume()
             return
         end
-        -- Its first button held: our action on the second one waits (the
-        -- press opens the panel only), back once it is released
+        -- Its first button held: the second one does nothing else (the
+        -- press opens the panel only: ours and the game's action wait), back
+        -- once it is released; not while something else has the pad (a game
+        -- window, this panel, the chat keyboard, a wheel)
         local M = CK.Mapping
         if IsKeyDown(chord.hold) then
-            if not M.suspended and M:IsOurs(chord.press) and not InCombatLockdown() then M:Suspend(chord.press) end
+            if not M.suspended and not InCombatLockdown() and M:CoreActive() then M:Suspend(chord.press) end
         elseif M.suspended then
             M:Resume()
         end
