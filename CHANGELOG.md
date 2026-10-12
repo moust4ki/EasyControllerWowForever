@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.16.1
+
+- **Triggers: press to switch, every bar shown** (reported: without the game's compact bar, nothing
+  said which bar was on). The bar switched on now takes the game's own active-bar look, the one it
+  gets when its trigger is held: its buttons large and spread out, the top bar small again, the
+  game's light on its trigger icon (lit once, a glow kept behind it), and the game's active-bar
+  background if Edit Mode shows it. The addon draws those two bars in the game's own layout over the
+  game's bar, whose buttons of those two bars are only made invisible meanwhile (nothing moved, back
+  as soon as the bar goes off). A trigger really held: the game's own look. While a bar is on this
+  way, the effects the game draws on its own buttons (proc glow, casting animation, its range dot)
+  don't show on those two bars, as in the compact layout.
+- **Triggers: press to switch, both pressed together** (reported: one trigger's bar came on): the
+  bottom bar (LT + RT) now comes on once both are let go, and shows until then; together again:
+  back to the top bar.
+
 ## 1.16.0
 
 - **First launch guide** (asked): six screens over the configuration panel, shown once on a new

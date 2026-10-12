@@ -49,6 +49,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.16
+- **Triggers: press to switch** (1.16.1): without the compact bar, the bar switched on now looks like the game's active bar (its buttons large and spread out, the top bar small, its trigger icon lit once); both triggers pressed together switch the bottom bar on.
 - **First launch guide** (1.16.0): six screens to set the addon up with the gamepad, shown once on a new install: the buttons' icons, the back paddles (identified live) and touchpads, the gamepad bar's size (previewed live) and its compact mode, the chat keyboard, the consumables and usable items wheels with their keys (press the button you want), Healer mode, and the comfort options. Again any time from Home › Guide or `/ec welcome`.
 - **Healer/Buff mode** (1.16.0): each member's health as a ring around their portrait, emptying clockwise, green, then yellow, then red; the % stays on the portrait.
 - **Compact gamepad bar** (1.16.0): the guide's step 3 turns Edit Mode's compact bar on for you (the game's bug at the top of this page still applies).
@@ -61,7 +62,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Every free combination usable**: L3 / R3, LT + RB / RT + LB, unused trigger layers, the game's own buttons replaced if you want
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
 - **Bigger or smaller gamepad buttons**: the game's whole gamepad bar, every layer at once, from 70 % to 150 %
-- **Triggers: press to switch** instead of holding them (option), every press shown on the bar
+- **Triggers: press to switch** instead of holding them (option), the bar on shown as the game's active one, every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
 - **Profiles**: each character its own buttons, wheels and supplies, automatically, and up to 5 sets of them, picked by hand or by your talents
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
@@ -295,11 +296,12 @@ functions, shown next to the gamepad bar.
 
 **Triggers: press to switch**
 An option in Home › Gamepad: press LT alone (no other button while it is down) and the left bar stays
-on; press LT again to come back to the top bar. Same for RT (the right bar); LT then RT: the bottom bar.
-Holding a trigger and pressing a button still works as before. The back paddles, L3 / R3 and the extra
-buttons follow the bar on. Made for the game's compact action bar (Edit Mode, one bar shown): the bar switched on
-shows in place of the top bar, its icons pressing in on each press, round where the game's buttons are
-round. Optionally back to the top bar after each fight.
+on; press LT again to come back to the top bar. Same for RT (the right bar); LT then RT, or both
+together: the bottom bar. Holding a trigger and pressing a button still works as before. The back
+paddles, L3 / R3 and the extra buttons follow the bar on. With the game's compact action bar (Edit
+Mode, one bar shown), the bar switched on shows in place of the top bar; with every bar shown, it takes
+the game's own active-bar look (its buttons large and spread out, the top bar small, its trigger icon
+lit once). Its icons press in on each press. Optionally back to the top bar after each fight.
 
 **Red when out of range**
 Turn it on in Home › Gamepad: when the target is out of range (too far, or too close for a hunter's
