@@ -834,6 +834,7 @@ CK.LOCALES.itIT = {
     GUIDE_DAISY_TEXT = "8 petali di 4 caratteri attorno allo stick. Lo stick sceglie un petalo, A B X Y il carattere.",
     GUIDE_SPLIT_TEXT = "La tastiera divisa in due metà: ogni stick muove il suo cursore sulla sua metà.",
     GUIDE_CARD_PICK = "Scegli questa scheda per vederne le opzioni.",
+    GUIDE_PHRASES_TEXT = "Frasi già pronte (gg, grazie, servono cure...) inviate con una pressione sul canale scelto, tutte modificabili. Dagli un pulsante o aprile con la bolla alla fine dei suggerimenti della tastiera.",
     GUIDE_WHEEL_ON = "Attivata",
     GUIDE_WHEEL_OFF = "Disattivata",
     GUIDE_WHEEL_C_TEXT = "Pozioni, cibo, bevande, bende. Si riempie da sola con le tue borse, il migliore prima.",

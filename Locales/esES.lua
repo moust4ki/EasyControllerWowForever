@@ -834,6 +834,7 @@ CK.LOCALES.esES = {
     GUIDE_DAISY_TEXT = "8 pétalos de 4 caracteres alrededor del stick. El stick elige un pétalo, A B X Y el carácter.",
     GUIDE_SPLIT_TEXT = "El teclado partido en dos mitades: cada stick mueve su cursor por su mitad.",
     GUIDE_CARD_PICK = "Elige esta tarjeta para ver sus opciones.",
+    GUIDE_PHRASES_TEXT = "Frases ya hechas (gg, gracias, necesito sanación...) enviadas con una pulsación en el canal elegido, todas editables. Dales un botón o ábrelas con la burbuja al final de las sugerencias del teclado.",
     GUIDE_WHEEL_ON = "Activada",
     GUIDE_WHEEL_OFF = "Desactivada",
     GUIDE_WHEEL_C_TEXT = "Pociones, comida, bebida, vendas. Se llena sola con tus bolsas, lo mejor primero.",

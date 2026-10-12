@@ -834,6 +834,7 @@ CK.LOCALES.deDE = {
     GUIDE_DAISY_TEXT = "8 Blütenblätter mit je 4 Zeichen um den Stick. Der Stick wählt ein Blatt, A B X Y das Zeichen.",
     GUIDE_SPLIT_TEXT = "Die Tastatur in zwei Hälften geteilt: Jeder Stick bewegt seinen Cursor auf seiner Hälfte.",
     GUIDE_CARD_PICK = "Wähle diese Karte, um ihre Optionen zu sehen.",
+    GUIDE_PHRASES_TEXT = "Fertige Sätze (gg, danke, brauche Heilung...), mit einem Druck im gewählten Kanal gesendet, alle änderbar. Gib ihnen eine Taste oder öffne sie mit der Blase am Ende der Tastaturvorschläge.",
     GUIDE_WHEEL_ON = "An",
     GUIDE_WHEEL_OFF = "Aus",
     GUIDE_WHEEL_C_TEXT = "Tränke, Essen, Getränke, Verbände. Füllt sich selbst aus deinen Taschen, das Beste zuerst.",
