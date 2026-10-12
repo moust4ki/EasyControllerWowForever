@@ -356,11 +356,26 @@ supplies and consumables wheel categories are shared by its profiles.
 
 Home › Gamepad › **Triggers: press to switch** (off by default): no need to hold a trigger to use its
 bar. Press LT alone (no other button while it is down): the left bar stays on, A, B, X, Y and the
-D-pad use it; press LT again: back to the top bar. Same for RT (the right bar); LT then RT: the bottom
-bar. Holding a trigger and pressing a button still works as before, the bar comes back once you let go.
-The back paddles, L3 / R3 and the extra buttons follow the bar on. **It needs the game's compact
-action bar** (the game's Edit Mode, its gamepad bar selected): the game shows one bar, and the bar switched on shows in its
-place. Without it, the game keeps showing its usual bars and the top one highlighted. **Top bar again after combat**
+D-pad use it; press LT again: back to the top bar. Same for RT (the right bar); LT then RT, or both
+pressed together (no other button: the bottom bar once both are let go, the top bar if it was on):
+the bottom bar. Holding a trigger and pressing a button still works as before, the bar comes back once
+you let go. The back paddles, L3 / R3 and the extra buttons follow the bar on.
+
+- **With the game's compact action bar** (the game's Edit Mode, its gamepad bar selected): the game
+  shows one bar, and the bar switched on shows in its place.
+- **With every bar shown**: the game gives its active-bar look (buttons large and spread out, the
+  others small, its trigger icon lit) to the bar of a trigger held, so to the top bar when none is.
+  While a bar is switched on, the addon draws that bar and the top bar in the game's own layout
+  (Blizzard_GamepadActionBars, ActionBarStyles: offsets from the bar's centre, 30 / 32 px small, 38 /
+  40 px large), that bar large, the top bar small, with the game's light on its trigger icon (a flash
+  over it in 0.3 s, a glow behind it from 0.7 to 0.2 in 0.5 s, kept while on, gone in 0.33 s) and the
+  game's active-bar background if Edit Mode shows it. The game's own buttons of those two bars are only
+  made invisible meanwhile (their alpha, allowed in combat; nothing moved), back as soon as the bar
+  goes off, the option is turned off or the panel opens. A trigger really held: the game's own look.
+  On those two bars, the effects the game draws on its own buttons (proc glow, casting animation, its
+  range dot) don't show while a bar is on this way, as in the compact layout.
+
+**Top bar again after combat**
 (on by default) brings the top bar back when a fight ends; off, a bar stays on until you press its
 trigger again. A game window, the panel or the chat keyboard get their buttons back while open.
 
