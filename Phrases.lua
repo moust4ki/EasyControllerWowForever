@@ -398,6 +398,9 @@ function P:Build()
     edit:SetScript("OnEnterPressed", function(self)
         if CK.prompt and CK.prompt.box == self then
             CK:FinishPrompt(true)
+        elseif P.field and P.field.message then
+            -- (sending is A's secure button only: Enter lets go of the field)
+            self:ClearFocus()
         elseif P.field then
             P:FinishField(true)
         end
@@ -506,6 +509,13 @@ function P:Hints()
         add({ "B" }, L.PH_V_CANCEL, "B")
         return list
     end
+    -- A message in the field alone (no addon keyboard): A sends it
+    if self.field and self.field.message then
+        add({ "A" }, L.PH_V_SEND)
+        add({ "LB", "RB" }, L.PH_V_CHANNEL, "RB")
+        add({ "B" }, L.PH_V_CANCEL, "B")
+        return list
+    end
     -- Written with the keyboard: its own keys
     if self.prompting then
         add({ "A" }, L.V_OK)
@@ -552,7 +562,8 @@ function P:Render()
     f.rb:Set("RB")
 
     local kind, _, focusedText = self:Focused()
-    local typing = self.prompting and (CK.prompt and CK:GetText() or (self.field and f.edit:GetText()))
+    local typing = self.prompting
+        and (CK.prompt and CK:GetText() or (self.field and not self.field.message and f.edit:GetText()))
     -- What is typed, with a cursor
     local function typed()
         return (typing ~= "" and typing or "") .. "|cffffd24a_|r"
@@ -598,8 +609,13 @@ function P:Render()
         end
     end
     f.preview.text:SetText(preview)
-    -- The field shows it while writing
-    f.preview.text:SetShown(not typing)
+    -- The field shows it while writing (a message: in its channel's colour)
+    f.preview.text:SetShown(not typing and not self.field)
+    if self.field and self.field.message then
+        f.edit:SetTextColor(self:ChannelColor(self.channel))
+    else
+        f.edit:SetTextColor(C.focusText[1], C.focusText[2], C.focusText[3])
+    end
 
     f.ask:SetShown(self.ask ~= nil)
     if self.ask then f.ask.text:SetText(self.ask.text) end
@@ -774,7 +790,8 @@ end
 -- chat the same way first: a physical keyboard then types in the window's
 -- field (taking the focus from the chat would close it from addon code)
 function P:SendText()
-    if self.ask or self.field then return "" end
+    if self.ask then return "" end
+    if self.field then return self.field.message and self:MacroText(self.frame.edit:GetText()) or "" end
     if self:WillSend() then
         local close = self:CloseChatLine()
         local _, _, text = self:Focused()
@@ -786,7 +803,8 @@ end
 
 -- A on a phrase: sent
 function P:WillSend()
-    if self.ask or self.field then return false end
+    if self.ask then return false end
+    if self.field then return (self.field.message and P.Clean(self.frame.edit:GetText()) ~= "") and true or false end
     local kind, _, text = self:Focused()
     return kind == "tile" and text ~= ""
 end
@@ -855,6 +873,18 @@ end
 ---------------------------------------------------------------------------
 function P:Press(name)
     if not self.active then return end
+    -- A message in the field alone: A is the secure button's (sent), LB / RB
+    -- the channel, Y back in the field, B cancels
+    if self.field and self.field.message then
+        if name == "B" then
+            self:FinishField(false)
+        elseif name == "LB" or name == "RB" then
+            self:CycleChannel(name == "LB" and -1 or 1)
+        elseif name == "Y" then
+            self:FocusField()
+        end
+        return
+    end
     -- Written in the field alone (no addon keyboard): A confirms, B cancels
     if self.field then
         if name == "A" then
@@ -939,18 +969,44 @@ end
 -- (A and B for it, the others nothing meanwhile). Never over the game's chat
 -- being typed in: taking its focus would close it from addon code
 function P:PromptField(text, onDone)
+    self:OpenField(text, { onDone = onDone })
+end
+
+-- Y with the keyboard turned off (asked): the message written in the field,
+-- from the phrase, on the window's channel (LB / RB); A sends it and closes,
+-- as a phrase. Enter only lets go of the field (Y takes it again): the
+-- message goes through A's secure button only
+function P:WriteMessage(text)
+    self:OpenField(text ~= "" and (text .. " ") or "", { message = true })
+end
+
+local function chatTyping(self)
     local chat = CK.ActiveChatWindow and CK.ActiveChatWindow()
-    if self:ChatOpen() or (chat and chat.HasFocus and chat:HasFocus()) then
+    return self:ChatOpen() or (chat and chat.HasFocus and chat:HasFocus()) and true or false
+end
+
+function P:OpenField(text, field)
+    if chatTyping(self) then
         CK:Print(L.TOAST_CLOSE_CHAT)
         return
     end
     self.prompting = true
-    self.field = { onDone = onDone }
+    self.field = field
     local edit = self.frame.edit
     edit:SetText(text or "")
     edit:Show()
     edit:SetFocus()
     self:Render()
+end
+
+function P:FocusField()
+    local edit = self.frame.edit
+    if not self.field or edit:HasFocus() then return end
+    if chatTyping(self) then
+        CK:Print(L.TOAST_CLOSE_CHAT)
+        return
+    end
+    edit:SetFocus()
 end
 
 function P:FinishField(confirmed)
@@ -963,7 +1019,7 @@ function P:FinishField(confirmed)
     edit:ClearFocus()
     edit:Hide()
     if not self.active then return end
-    if confirmed then field.onDone(P.Clean(value)) end
+    if confirmed and field.onDone then field.onDone(P.Clean(value)) end
     self:Render()
 end
 
@@ -1098,10 +1154,7 @@ end
 -- Y: the keyboard with the phrase, on the channel picked here (after what
 -- the keyboard already held, when opened from it)
 function P:TypeMessage(text)
-    if not settings().modules.keyboard then
-        CK:Print(L.KEYBOARD_OFF)
-        return
-    end
+    if not settings().modules.keyboard then return self:WriteMessage(text) end
     local from = self.from
     local before = from and from.buffer or ""
     local message = text

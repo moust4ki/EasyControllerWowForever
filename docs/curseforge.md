@@ -49,6 +49,8 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.16
+- **Guide** (1.16.5): LB and RB alone can no longer be picked as a wheel's key (they are the game's targeting; pressing LB first for an "LB + A" took LB alone). If a wheel took your LB: Gamepad tab, select LB, X gives it back to the game.
+- **Quick phrases** (1.16.5): Y works with the keyboard module turned off too: the message is written in the window's field from the phrase, LB / RB pick the channel, A sends.
 - **Quick phrases** (1.16.4): editable with the keyboard module turned off, typed with any keyboard (a physical one, a handheld's on-screen one): Enter or A confirms, Escape or B cancels. The guide's keyboard step now explains them and gives them a button.
 - **Settings shortcut** (1.16.3): back to how it was before 1.16.2, which got in the way of the game's own RB combinations (LB + RB + B for the bags). If RB + D-pad down also runs your D-pad down action, pick another shortcut in Home › Shortcut.
 - **Move / size** (1.16.3): the gamepad bar can be selected again from the extra buttons (L4, L5...) with the D-pad.
@@ -157,7 +159,7 @@ binding or `/ec phrases`.
   with the controller or a physical keyboard, the window showing what you type (with the keyboard
   module off too: any keyboard, Enter or A confirms). Add rows (up to 8), delete one by emptying its
   name.
-- Y opens the keyboard with the phrase, to add to it.
+- Y opens the keyboard with the phrase, to add to it (keyboard module off: the window's field, A sends).
 - The same phrases on every character; one option puts the default ones back. Not in combat.
 
 ## Modules

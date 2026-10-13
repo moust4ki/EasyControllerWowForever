@@ -857,6 +857,7 @@ CK.L = {
     GUIDE_KEY_UNKNOWN = "This button isn't known yet (a paddle: identify it first, step 2).",
     GUIDE_KEY_REFUSED = "%s can't take a wheel.",
     GUIDE_KEY_ALONE = "%s alone stays the game's: hold LT and / or RT with it, or press a paddle.",
+    GUIDE_KEY_SHOULDER = "%s is the game's targeting: hold LT and / or RT with another button, or press a paddle.",
     GUIDE_AUTO_TITLE = "Nothing to fill in",
     GUIDE_AUTO_TEXT = "Both wheels fill themselves with what is in your bags and follow it: an item picked up shows up, an item used up goes. The consumables are sorted by kind, the best first; the usable items put quest items first (hide one in Wheels › Usable items). They work in combat: just give each one a key.",
     GUIDE_HEALER = "Healer mode",

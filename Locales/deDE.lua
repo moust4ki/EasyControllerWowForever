@@ -848,6 +848,7 @@ CK.LOCALES.deDE = {
     GUIDE_KEY_UNKNOWN = "Diese Taste ist noch nicht bekannt (ein Paddle: erst erkennen lassen, Schritt 2).",
     GUIDE_KEY_REFUSED = "%s kann kein Rad nehmen.",
     GUIDE_KEY_ALONE = "%s allein bleibt beim Spiel: Halte LT und/oder RT dazu, oder drück ein Paddle.",
+    GUIDE_KEY_SHOULDER = "%s wählt im Spiel Ziele aus: Halte LT und/oder RT mit einer anderen Taste, oder ein Paddle.",
     GUIDE_AUTO_TITLE = "Nichts einzuräumen",
     GUIDE_AUTO_TEXT = "Beide Räder füllen sich selbst mit dem Inhalt deiner Taschen und folgen ihm: Ein aufgehobener Gegenstand erscheint, ein verbrauchter verschwindet. Die Verbrauchsgüter sind nach Art sortiert, das Beste zuerst; die benutzbaren Gegenstände zeigen Quests zuerst (einen ausblenden: Räder › Benutzbares). Sie funktionieren im Kampf: Gib jedem einfach eine Taste.",
     GUIDE_HEALER = "Heiler-Modus",

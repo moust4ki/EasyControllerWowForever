@@ -848,6 +848,7 @@ CK.LOCALES.frFR = {
     GUIDE_KEY_UNKNOWN = "Ce bouton n'est pas encore connu (une palette : identifiez-la d'abord, étape 2).",
     GUIDE_KEY_REFUSED = "%s ne peut pas prendre de roue.",
     GUIDE_KEY_ALONE = "%s seul reste au jeu : maintenez LT et/ou RT avec, ou appuyez sur une palette.",
+    GUIDE_KEY_SHOULDER = "%s sert au ciblage du jeu : maintenez LT et/ou RT avec un autre bouton, ou une palette.",
     GUIDE_AUTO_TITLE = "Rien à remplir",
     GUIDE_AUTO_TEXT = "Les deux roues se remplissent toutes seules avec le contenu de vos sacs et le suivent : un objet ramassé apparaît, un objet épuisé disparaît. Les consommables sont rangés par type, le meilleur d'abord ; les objets utilisables mettent la quête d'abord (masquez-en un dans Roues › Utilisables). Elles marchent en combat : donnez simplement une touche à chacune.",
     GUIDE_HEALER = "Mode Soigneur",

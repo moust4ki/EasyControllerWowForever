@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.16.5
+
+- **Guide: LB and RB alone are refused** (reported: "the consumables wheel bind is locked to LB…
+  this unbinds the game's friendly targeting"). The guide's "Choose its key" took the first button
+  pressed: pressing LB to start an "LB + A" put the wheel on LB alone, replacing the game's friendly
+  targeting (RB: the hostile one), and choosing other keys afterwards only added keys. LB and RB
+  alone are now refused there, the help bar saying why. Already on LB? Gamepad tab: select LB, X
+  gives it back to the game.
+- **Quick phrases: Y works with the keyboard turned off too.** It said the keyboard was off; it now
+  writes the message in the window's field, starting from the phrase, with any keyboard: LB / RB
+  pick the channel, A sends it and closes the window, B or Escape cancel. Enter only lets go of the
+  field (Y takes it back): the message goes out through A's button, as a phrase does. Not while the
+  game's chat is being typed in.
+
 ## 1.16.4
 
 - **Quick phrases: editable with the keyboard turned off** (reported, ROG Ally: the player types
