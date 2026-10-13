@@ -396,15 +396,25 @@ function P:Build()
     edit:SetAutoFocus(false)
     edit:SetMaxLetters(MAX_LEN)
     edit:SetScript("OnEnterPressed", function(self)
-        if CK.prompt and CK.prompt.box == self then CK:FinishPrompt(true) end
+        if CK.prompt and CK.prompt.box == self then
+            CK:FinishPrompt(true)
+        elseif P.field then
+            P:FinishField(true)
+        end
     end)
     edit:SetScript("OnEscapePressed", function(self)
-        if CK.prompt and CK.prompt.box == self then CK:FinishPrompt(false) end
+        if CK.prompt and CK.prompt.box == self then
+            CK:FinishPrompt(false)
+        elseif P.field then
+            P:FinishField(false)
+        end
     end)
     edit:SetScript("OnTextChanged", function(self, userInput)
         if userInput and P.prompting and CK.prompt and CK.prompt.box == self then
             CK.buffer = self:GetText()
             CK:Refresh()
+        elseif userInput and P.field and P.active then
+            P:Render()
         end
     end)
     edit:Hide()
@@ -542,7 +552,7 @@ function P:Render()
     f.rb:Set("RB")
 
     local kind, _, focusedText = self:Focused()
-    local typing = self.prompting and CK.prompt and CK:GetText()
+    local typing = self.prompting and (CK.prompt and CK:GetText() or (self.field and f.edit:GetText()))
     -- What is typed, with a cursor
     local function typed()
         return (typing ~= "" and typing or "") .. "|cffffd24a_|r"
@@ -745,7 +755,7 @@ function P:PlaceSendButton()
     else
         cell = f.add
     end
-    s:EnableMouse(not self.ask and cell ~= nil and cell:GetLeft() ~= nil)
+    s:EnableMouse(not self.ask and not self.field and cell ~= nil and cell:GetLeft() ~= nil)
     if not (cell and cell:GetLeft()) then return end
     s:SetScale(cell:GetEffectiveScale())
     s:ClearAllPoints()
@@ -764,7 +774,7 @@ end
 -- chat the same way first: a physical keyboard then types in the window's
 -- field (taking the focus from the chat would close it from addon code)
 function P:SendText()
-    if self.ask then return "" end
+    if self.ask or self.field then return "" end
     if self:WillSend() then
         local close = self:CloseChatLine()
         local _, _, text = self:Focused()
@@ -776,7 +786,7 @@ end
 
 -- A on a phrase: sent
 function P:WillSend()
-    if self.ask then return false end
+    if self.ask or self.field then return false end
     local kind, _, text = self:Focused()
     return kind == "tile" and text ~= ""
 end
@@ -844,8 +854,18 @@ end
 -- Presses
 ---------------------------------------------------------------------------
 function P:Press(name)
+    if not self.active then return end
+    -- Written in the field alone (no addon keyboard): A confirms, B cancels
+    if self.field then
+        if name == "A" then
+            self:FinishField(true)
+        elseif name == "B" then
+            self:FinishField(false)
+        end
+        return
+    end
     -- Written with the keyboard meanwhile: its keys, not ours (a click here)
-    if not self.active or self.prompting then return end
+    if self.prompting then return end
     if self.ask then
         local ask = self.ask
         if name == "A" then
@@ -885,10 +905,9 @@ end
 -- written shows what is typed (reported: the window went away, nothing to
 -- type in), the keyboard above it
 function P:Prompt(title, text, onDone)
-    if not settings().modules.keyboard then
-        CK:Print(L.KEYBOARD_OFF)
-        return
-    end
+    -- The keyboard turned off (reported: a ROG Ally's own keyboard types):
+    -- the field alone
+    if not settings().modules.keyboard then return self:PromptField(text, onDone) end
     self:Unbind()
     self.prompting = true
     local edit = self.frame.edit
@@ -913,6 +932,39 @@ function P:Prompt(title, text, onDone)
     if not (self:ChatOpen() or (chat and chat.HasFocus and chat:HasFocus())) then edit:SetFocus() end
     self:Render()
     if CK.frame then CK.frame:Raise() end
+end
+
+-- The field alone, written with any keyboard (a physical one, the system's
+-- on screen): Enter or A confirm, Escape or B cancel; the window's keys stay
+-- (A and B for it, the others nothing meanwhile). Never over the game's chat
+-- being typed in: taking its focus would close it from addon code
+function P:PromptField(text, onDone)
+    local chat = CK.ActiveChatWindow and CK.ActiveChatWindow()
+    if self:ChatOpen() or (chat and chat.HasFocus and chat:HasFocus()) then
+        CK:Print(L.TOAST_CLOSE_CHAT)
+        return
+    end
+    self.prompting = true
+    self.field = { onDone = onDone }
+    local edit = self.frame.edit
+    edit:SetText(text or "")
+    edit:Show()
+    edit:SetFocus()
+    self:Render()
+end
+
+function P:FinishField(confirmed)
+    local field = self.field
+    if not field then return end
+    self.field = nil
+    self.prompting = false
+    local edit = self.frame.edit
+    local value = edit:GetText()
+    edit:ClearFocus()
+    edit:Hide()
+    if not self.active then return end
+    if confirmed then field.onDone(P.Clean(value)) end
+    self:Render()
 end
 
 function P:Resume()
@@ -1075,6 +1127,11 @@ function P:Close(reason)
     self.from = nil
     -- A prompt still open (combat): it closes on its own
     if self.prompting and CK.prompt then CK:Close("phrases closed") end
+    if self.field then
+        self.field = nil
+        self.frame.edit:ClearFocus()
+        self.frame.edit:Hide()
+    end
     self.prompting = false
     if reason == "sent" then
         -- Sent: everything closes. On the chat, the game's B closed it (the

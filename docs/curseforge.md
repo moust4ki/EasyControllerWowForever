@@ -49,6 +49,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.16
+- **Quick phrases** (1.16.4): editable with the keyboard module turned off, typed with any keyboard (a physical one, a handheld's on-screen one): Enter or A confirms, Escape or B cancels. The guide's keyboard step now explains them and gives them a button.
 - **Settings shortcut** (1.16.3): back to how it was before 1.16.2, which got in the way of the game's own RB combinations (LB + RB + B for the bags). If RB + D-pad down also runs your D-pad down action, pick another shortcut in Home › Shortcut.
 - **Move / size** (1.16.3): the gamepad bar can be selected again from the extra buttons (L4, L5...) with the D-pad.
 - **Triggers: press to switch** (1.16.1): without the compact bar, the bar switched on now looks like the game's active bar (its buttons large and spread out, the top bar small, its trigger icon lit once); both triggers pressed together switch the bottom bar on.
@@ -153,8 +154,9 @@ binding or `/ec phrases`.
   skipped), A sends and closes everything, the chat included.
 - A phrase starting with `/` is a command (an emote, a roll…): the emotes row uses the game's own.
 - **Everything is yours to change**: X rewrites any phrase, the default ones too, or a row's name,
-  with the controller or a physical keyboard, the window showing what you type. Add rows (up to 8),
-  delete one by emptying its name.
+  with the controller or a physical keyboard, the window showing what you type (with the keyboard
+  module off too: any keyboard, Enter or A confirms). Add rows (up to 8), delete one by emptying its
+  name.
 - Y opens the keyboard with the phrase, to add to it.
 - The same phrases on every character; one option puts the default ones back. Not in combat.
 
