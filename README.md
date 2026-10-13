@@ -169,7 +169,10 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
   a handheld's on-screen one), Enter or A confirms, Escape or B cancels (not while the game's chat
   is being typed in).
   An empty name deletes the row (asked first when it holds phrases); **+ Add a row** at the bottom,
-  up to 8. **Y** opens the keyboard with the phrase, to add to it.
+  up to 8. **Y** opens the keyboard with the phrase, to add to it; the keyboard module turned off,
+  the message is written in the window's field from the phrase (any keyboard), **LB / RB** the
+  channel, **A** sends it and closes, B or Escape cancel (Enter only lets go of the field, Y takes it
+  back).
 - The phrases are the account's, the same for every character. Keyboard › Quick phrases: the bubble
   on or off, and back to the default phrases. Out of combat only.
 
@@ -215,7 +218,8 @@ first: Later), LB / RB change step; each choice is the panel's own setting, save
 4. **The chat keyboard**: on or off, daisywheel or split keyboard, their layout and suggestions.
 5. **The wheels**: the consumables and usable items wheels, each on or off; *Choose its key* waits for
    the button pressed next, LT / RT held for their layers (B alone cancels; A, X and Y alone stay the
-   game's), and puts the wheel there as the Gamepad tab does; hold to show. For the healing classes,
+   game's, LB and RB alone too: its targeting), and puts the wheel there as the Gamepad tab does;
+   hold to show. For the healing classes,
    Healer mode explained.
 6. **Comfort**: red when out of range, quest items, better items, supplies, sell greys and repair,
    vibrations, stay seated; a summary; *Put my spells* (the Gamepad tab) or *Finish*.

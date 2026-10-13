@@ -848,6 +848,7 @@ CK.LOCALES.itIT = {
     GUIDE_KEY_UNKNOWN = "Questo pulsante non è ancora noto (una levetta: falla prima riconoscere, passo 2).",
     GUIDE_KEY_REFUSED = "%s non può prendere una ruota.",
     GUIDE_KEY_ALONE = "%s da solo resta al gioco: tieni premuto LT e/o RT insieme, o premi una levetta.",
+    GUIDE_KEY_SHOULDER = "%s seleziona i bersagli nel gioco: tieni LT e/o RT con un altro pulsante, o una levetta.",
     GUIDE_AUTO_TITLE = "Niente da riempire",
     GUIDE_AUTO_TEXT = "Le due ruote si riempiono da sole con il contenuto delle tue borse e lo seguono: un oggetto raccolto appare, uno esaurito sparisce. I consumabili sono ordinati per tipo, il migliore prima; gli oggetti utilizzabili mettono prima le missioni (nascondine uno in Ruote › Utilizzabili). Funzionano in combattimento: basta dare un pulsante a ciascuna.",
     GUIDE_HEALER = "Modalità Guaritore",

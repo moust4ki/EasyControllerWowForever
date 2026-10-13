@@ -1082,6 +1082,9 @@ local TRIGGER_OF = { PADLTRIGGER = "LT", PADRTRIGGER = "RT" }
 -- Alone, the game's own (jump, interact, inspect): never taken here, a
 -- wrong layer read would replace them (B alone cancels)
 local GAME_ALONE = { PAD1 = true, PAD3 = true, PAD4 = true }
+-- LB and RB alone: the game's targeting, friendly and hostile (reported: LB
+-- pressed first for "LB + A" took LB alone, the friendly targeting lost)
+local SHOULDER = { PADLSHOULDER = true, PADRSHOULDER = true }
 
 -- A trigger down on the controller itself (its buttons as the game maps them)
 local function padHeld(button)
@@ -1175,6 +1178,7 @@ function G:BindPressed(key)
     if not input then return self:BindRefused(L.GUIDE_KEY_UNKNOWN) end
     local combo = K.ComboMarkup(input.id, layer, 14)
     if layer == "" and GAME_ALONE[key] then return self:BindRefused(format(L.GUIDE_KEY_ALONE, combo)) end
+    if layer == "" and SHOULDER[key] then return self:BindRefused(format(L.GUIDE_KEY_SHOULDER, combo)) end
     local page = CK.MapPage
     local cell = page:Cell(input, layer)
     if cell.lockedAlone or (cell.state == "off" and not cell.pick) then

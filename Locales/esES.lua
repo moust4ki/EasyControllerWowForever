@@ -848,6 +848,7 @@ CK.LOCALES.esES = {
     GUIDE_KEY_UNKNOWN = "Este botón aún no se conoce (una palanca: identifícala primero, paso 2).",
     GUIDE_KEY_REFUSED = "%s no puede llevar una rueda.",
     GUIDE_KEY_ALONE = "%s solo sigue siendo del juego: mantén LT y/o RT con él, o pulsa una palanca.",
+    GUIDE_KEY_SHOULDER = "%s es la selección de objetivo del juego: mantén LT y/o RT con otro botón, o una palanca.",
     GUIDE_AUTO_TITLE = "Nada que rellenar",
     GUIDE_AUTO_TEXT = "Las dos ruedas se llenan solas con lo que hay en tus bolsas y lo siguen: un objeto recogido aparece, uno agotado desaparece. Los consumibles se ordenan por tipo, lo mejor primero; los objetos utilizables ponen las misiones primero (oculta uno en Ruedas › Utilizables). Funcionan en combate: solo dale un botón a cada una.",
     GUIDE_HEALER = "Modo Sanador",
