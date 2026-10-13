@@ -843,6 +843,7 @@ CK.L = {
     GUIDE_DAISY_TEXT = "8 petals of 4 characters around the stick. The stick picks a petal, A B X Y the character.",
     GUIDE_SPLIT_TEXT = "The keyboard split in two halves: each stick moves its cursor on its half.",
     GUIDE_CARD_PICK = "Pick this card to see its options.",
+    GUIDE_PHRASES_TEXT = "Ready-made phrases (gg, thanks, need heals...) sent in one press on the channel you pick, all editable. Give them a button, or open them from the bubble at the end of the keyboard's suggestions.",
     GUIDE_WHEEL_ON = "On",
     GUIDE_WHEEL_OFF = "Off",
     GUIDE_WHEEL_C_TEXT = "Potions, food, drinks, bandages. Fills itself from your bags, the best first.",

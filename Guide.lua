@@ -861,23 +861,24 @@ function G:BuildScreen4(s, f)
             if not v then CK:Close("keyboard module off") end
         end)
     local function card(method, x, title, desc, art)
-        local cf = frameAt(f, "Button", x, 136, 378, 380)
+        -- (smaller than the design's: the quick phrases under them, asked)
+        local cf = frameAt(f, "Button", x, 132, 378, 296)
         cf.bg = K.Box(cf, 4, 2, "BACKGROUND")
         cf.bg:SetPoints(cf)
-        cf.art = image(cf, art, 109, 14, 160, 160)
-        cf.title = text(cf, 18, KC.title, 18, 182)
+        cf.art = image(cf, art, 133, 10, 112, 112)
+        cf.title = text(cf, 18, KC.title, 18, 128)
         cf.title:SetText(title)
         cf.ring = cf:CreateTexture(nil, "ARTWORK")
         cf.ring:SetTexture(TEX .. "ck_ring")
         cf.ring:SetSize(16, 16)
-        cf.ring:SetPoint("TOPRIGHT", -18, -184)
+        cf.ring:SetPoint("TOPRIGHT", -18, -130)
         cf.dot = cf:CreateTexture(nil, "OVERLAY")
         cf.dot:SetTexture(TEX .. "ck_dot")
         cf.dot:SetSize(8, 8)
         cf.dot:SetPoint("CENTER", cf.ring, "CENTER")
         cf.dot:SetVertexColor(unpack(KC.focus))
-        help(cf, 14, KC.cream2, 18, 210, 342):SetText(desc)
-        cf.note = help(cf, 13, KC.disabled, 18, 340, 342)
+        help(cf, 14, KC.cream2, 18, 156, 342):SetText(desc)
+        cf.note = help(cf, 13, KC.disabled, 18, 256, 342)
         cf.note:SetText(L.GUIDE_CARD_PICK)
         local c = add(s, { frame = cf, method = method, enabled = keyboardOn })
         function c.press(self)
@@ -914,27 +915,48 @@ function G:BuildScreen4(s, f)
     end
     local function language() return CK:GetLanguage().name end
     s.options = {
-        option(wheelCard, "wheel", 292, L.LBL_DW_LOOK,
+        option(wheelCard, "wheel", 212, L.LBL_DW_LOOK,
             function() return settings().petalRings and L.DW_LOOK_RINGS or L.DW_LOOK_PLAIN end,
             function()
                 settings().petalRings = not settings().petalRings
                 CK:UpdateMethod()
             end),
-        option(wheelCard, "wheel", 332, L.LBL_SUGGESTIONS, language, stepLanguage),
-        option(stickCard, "stick", 292, L.LBL_LAYOUT,
+        option(wheelCard, "wheel", 252, L.LBL_SUGGESTIONS, language, stepLanguage),
+        option(stickCard, "stick", 212, L.LBL_LAYOUT,
             function() return nameIn(LAYOUTS, settings().kbLayout) end,
             function(d)
                 settings().kbLayout = stepIn(LAYOUTS, settings().kbLayout, d).key
                 CK:UpdateMethod()
             end),
-        option(stickCard, "stick", 332, L.LBL_SUGGESTIONS, language, stepLanguage),
+        option(stickCard, "stick", 252, L.LBL_SUGGESTIONS, language, stepLanguage),
     }
+    -- The quick phrases (asked: little used, their settings unclear): what
+    -- they are, their key given here as a wheel's (they send without the
+    -- keyboard too: never greyed with it)
+    local qp = frameAt(f, "Frame", 24, 436, 772, 88)
+    box(qp, KC.panel, 1, KC.line1, 1)
+    local icon = qp:CreateTexture(nil, "ARTWORK")
+    icon:SetTexture(CK.Phrases and CK.Phrases.ICON or "Interface\\Icons\\UI_Chat")
+    icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    at(icon, qp, 16, 18, 48, 48)
+    text(qp, 16, KC.title, 78, 10):SetText(L.PHRASES_NAME)
+    help(qp, 13, KC.help, 78, 32, 456):SetText(L.GUIDE_PHRASES_TEXT)
+    s.phrasesKey = button(s, qp, L.GUIDE_PICK_KEY, 552, 14, 204, 34, false, function() G:StartBind("wheel:phrases") end)
+    s.phrasesLine = help(qp, 13, KC.help, 552, 54, 204)
     function s.first() return s.module end
     function s.render()
         for _, c in ipairs(s.options) do
             local on = shown(c)
             c.frame:SetShown(on)
             c.label:SetShown(on)
+        end
+        local keys = G.KeysOf("wheel:phrases")
+        if #keys > 0 then
+            s.phrasesLine:SetText(format(L.GUIDE_KEY_IS, table.concat(keys, ", ", 1, math.min(2, #keys))))
+            s.phrasesLine:SetTextColor(unpack(KC.cream2))
+        else
+            s.phrasesLine:SetText(L.GUIDE_NO_KEY)
+            s.phrasesLine:SetTextColor(unpack(KC.disabled))
         end
     end
 end

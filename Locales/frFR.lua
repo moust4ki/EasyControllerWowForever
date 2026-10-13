@@ -834,6 +834,7 @@ CK.LOCALES.frFR = {
     GUIDE_DAISY_TEXT = "8 pétales de 4 caractères autour du stick. Le stick choisit un pétale, A B X Y le caractère.",
     GUIDE_SPLIT_TEXT = "Le clavier coupé en deux moitiés : chaque stick déplace son curseur sur sa moitié.",
     GUIDE_CARD_PICK = "Choisissez cette carte pour voir ses options.",
+    GUIDE_PHRASES_TEXT = "Des phrases toutes prêtes (gg, merci, besoin de soins...) envoyées d'un appui sur le canal choisi, toutes modifiables. Donnez-leur un bouton, ou ouvrez-les avec la bulle au bout des suggestions du clavier.",
     GUIDE_WHEEL_ON = "Activée",
     GUIDE_WHEEL_OFF = "Désactivée",
     GUIDE_WHEEL_C_TEXT = "Potions, nourriture, boissons, bandages. Se remplit toute seule avec vos sacs, le meilleur d'abord.",

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.16.4
+
+- **Quick phrases: editable with the keyboard turned off** (reported, ROG Ally: the player types
+  with the handheld's own keyboard and turned ours off, and could no longer change the phrases).
+  With the keyboard module off, X (or A on an empty phrase, a row's name, + Add a row) now opens the
+  window's own field: type with any keyboard (a physical one, the system's on-screen one), Enter or
+  A confirms, Escape or B cancels. Not while the game's chat is being typed in (close it first).
+  With the keyboard on, nothing changes.
+- **Guide, keyboard step**: the quick phrases explained, and their button picked there, like the
+  wheels'.
+
 ## 1.16.3
 
 - **The panel's shortcut: back to how it was before 1.16.2** (reported: LB + RB + B, the game's

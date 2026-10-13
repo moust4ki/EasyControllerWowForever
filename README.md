@@ -165,6 +165,9 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
 - A phrase starting with `/` is a command, run as typed (`/wave`, `/roll`...).
 - **X** rewrites a phrase (the default ones too) or a row's name: the window stays, the cell shows
   what is typed, with the controller's keyboard or a physical one (Enter confirms, Escape cancels).
+  The keyboard module turned off: the window's field alone, typed with any keyboard (a physical one,
+  a handheld's on-screen one), Enter or A confirms, Escape or B cancels (not while the game's chat
+  is being typed in).
   An empty name deletes the row (asked first when it holds phrases); **+ Add a row** at the bottom,
   up to 8. **Y** opens the keyboard with the phrase, to add to it.
 - The phrases are the account's, the same for every character. Keyboard › Quick phrases: the bubble
