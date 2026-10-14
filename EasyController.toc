@@ -45,6 +45,8 @@ Automation.lua
 ConsumableWheel.lua
 ConfigKit.lua
 Phrases.lua
+MinimapNodes.lua
+MinimapLabels.lua
 ConfigWindow.lua
 MyWheels.lua
 MapWindow.lua

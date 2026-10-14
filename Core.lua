@@ -35,6 +35,7 @@ BINDING_NAME_CONTROLLERKEYBOARD_CONFIG = L.BINDING_CONFIG
 _G["BINDING_NAME_CLICK ControllerKeyboardWheelToggle:LeftButton"] = L.WHEEL_NAME
 _G["BINDING_NAME_CLICK ControllerKeyboardUsableToggle:LeftButton"] = L.USABLE_WHEEL_NAME
 _G["BINDING_NAME_CLICK ControllerKeyboardPhrasesToggle:LeftButton"] = L.PHRASES_NAME
+_G["BINDING_NAME_CLICK ControllerKeyboardMinimapLabels:LeftButton"] = L.MML_NAME
 
 ---------------------------------------------------------------------------
 -- Saved variables
@@ -134,6 +135,10 @@ local DEFAULTS = {
     glyphStyle = "xbox",
     -- The gamepad UI's centre dot (Reticle.lua): "game", "color", "cycle", "hidden"
     reticle = { mode = "game", color = 1 },
+    -- Labels beside the minimap's dots (MinimapLabels.lua): "always" (its
+    -- button hides them) or "hold" (shown while its button is held); text
+    -- size, at most that many, herbs and ore in the skill's colours
+    minimapLabels = { enabled = false, mode = "always", size = 10, max = 12, skill = true },
     gameGlyphs = true,
     debug = false,
 }

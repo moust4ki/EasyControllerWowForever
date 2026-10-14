@@ -445,7 +445,8 @@ end
 ---------------------------------------------------------------------------
 -- Assignments: settings.mapping["L3:LT"] = "cmd:TOGGLERUN" | "spell:133" |
 -- "item:5512" | "macro:Name" | "bar:bottom:a" | "wheel:consumables" |
--- "wheel:phrases" (the quick phrases window)
+-- "wheel:phrases" (the quick phrases window) | "wheel:minimap" (the
+-- minimap's labels)
 ---------------------------------------------------------------------------
 function M:Get(inputId, layer)
     return settings().mapping[inputId .. ":" .. layer]
@@ -746,6 +747,7 @@ function M:ActionName(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
         if value == "phrases" then return L.PHRASES_NAME end
+        if value == "minimap" then return L.MML_NAME end
         local spell = M.PartySpell(action)
         if spell then return format(L.PARTY_ACTION, M.SpellName(spell) or tostring(spell)) end
         if value == "usable" then return L.USABLE_WHEEL_NAME end
@@ -775,6 +777,7 @@ function M:ActionIcon(action)
     elseif kind == "wheel" then
         local n = tonumber(value)
         if value == "phrases" then return CK.Phrases and CK.Phrases.ICON end
+        if value == "minimap" then return CK.MinimapLabels and CK.MinimapLabels.ICON end
         if value == "usable" then return M.USABLE_ICON end
         local spell = M.PartySpell(action)
         if spell then return C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spell) end
@@ -889,6 +892,11 @@ function M:Catalog(tab, forSlot, noBound)
             -- The quick phrases window (Phrases.lua), opened like a wheel
             if CK.Phrases then
                 list[#list + 1] = { action = "wheel:phrases", name = L.PHRASES_NAME, icon = CK.Phrases.ICON }
+            end
+            -- The minimap's labels (MinimapLabels.lua): shown, hidden, or
+            -- shown while held
+            if CK.MinimapLabels then
+                list[#list + 1] = { action = "wheel:minimap", name = L.MML_NAME, icon = CK.MinimapLabels.ICON }
             end
             for _, w in ipairs(CK.MyWheels and CK.MyWheels:List() or {}) do
                 list[#list + 1] = { action = "wheel:" .. w.id, name = w.name, icon = CK.MyWheels:Icon(w.id) }

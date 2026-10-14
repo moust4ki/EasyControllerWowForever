@@ -2280,6 +2280,8 @@ end
 function W:Toggle(which, comboId)
     -- The quick phrases window, given like a wheel (Phrases.lua)
     if which == "phrases" and CK.Phrases then return CK.Phrases:ToggleButton() end
+    -- The minimap's labels (MinimapLabels.lua), given the same way
+    if which == "minimap" and CK.MinimapLabels then return CK.MinimapLabels:ToggleButton() end
     -- A party spell ("party:<spell ID>"): its small wheel, on that button
     local spell = type(which) == "string" and tonumber(which:match("^party:(%d+)$"))
     if spell then return self:PartyToggle(spell, comboId) end
