@@ -5,8 +5,9 @@ local L = CK.L
 -- Labels beside the minimap's dots (asked: a hunter's tracking fills the
 -- minimap with dots only a mouse could name). Each dot's name written small
 -- beside it: a creature with its level in the game's colours (once one of
--- that name was seen up close), a player in their class colour, a herb or
--- an ore in the colours of your skill, the rest in white.
+-- that name was seen up close), an enemy in red, a quest's creature in gold,
+-- a player in their class colour, a herb or an ore in the colours of your
+-- skill, the rest in white.
 --
 -- The game draws the dots itself and tells addons only the names under the
 -- minimap's hover point (C_TooltipInfo.GetMinimapMouseover, what its own
@@ -48,10 +49,12 @@ end
 ---------------------------------------------------------------------------
 local players = {}       -- name -> class file ("HUNTER")
 local creatures = {}     -- name -> { level, elite }
+local enemies = {}       -- name -> true / false: hostile, as seen up close
+local tipRed = {}        -- name -> true: the minimap's own tooltip writes it in red
 local known = 0
 
 local function forget()
-    players, creatures, known = {}, {}, 0
+    players, creatures, enemies, tipRed, known = {}, {}, {}, {}, 0
 end
 
 -- A unit seen (a nameplate, the target, the mouse, the soft targets)
@@ -64,6 +67,8 @@ local function learn(unit)
     known = known + 1
     -- (a long session: never more than a few hundred names kept)
     if known > 600 then forget() end
+    local enemy = UnitIsEnemy and UnitIsEnemy("player", unit)
+    if not secret(enemy) then enemies[name] = enemy and true or false end
     if isPlayer then
         local _, class = UnitClass(unit)
         if type(class) == "string" and not secret(class) then players[name] = class end
@@ -190,12 +195,20 @@ local function hex(r, g, b)
     local function byte(v) return math.floor((v or 1) * 255 + 0.5) end
     return string.format("%02x%02x%02x", byte(r), byte(g), byte(b))
 end
--- A quest's creatures: the game's quest colour
+-- A quest's creatures: the game's quest colour; enemies: red
 local QUEST_COLOR = "ffd100"
+local ENEMY_COLOR = "ff4040"
 
--- A label's text, its colours in it: the name (a player's class, a herb's
--- or an ore's skill, gold for a quest's creature, else white), then a
--- creature's level in the game's colours, then how many
+-- An enemy (asked: a hunter's humanoids, the hostile ones in red): as seen
+-- up close, else as the minimap's own tooltip writes it
+function ML.Enemy(name)
+    if enemies[name] ~= nil then return enemies[name] end
+    return tipRed[name] == true
+end
+
+-- A label's text, its colours in it: the name (an enemy's red, a player's
+-- class, a herb's or an ore's skill, gold for a quest's creature, else
+-- white), then a creature's level in the game's colours, then how many
 function ML.Describe(name, count)
     local color, level = "ffffff", nil
     local class = players[name]
@@ -209,6 +222,7 @@ function ML.Describe(name, count)
         local c = ML.SKILL_COLORS[ML.SkillState(nodeOf(name)) or ""]
         if c then color = hex(c[1], c[2], c[3]) end
     end
+    if ML.Enemy(name) then color = ENEMY_COLOR end
     if not class and ML.QuestTarget(name) then color = QUEST_COLOR end
     local text = "|cff" .. color .. name .. "|r"
     if level then text = text .. " " .. level end
@@ -254,6 +268,18 @@ local function questLine(name)
     return name:find("^%-") ~= nil or name:find("%d+%s*/%s*%d+") ~= nil or questLog().titles[name] == true
 end
 
+-- A colour from the tooltip: red (an enemy, as the game writes them)
+local function red(r, g, b)
+    return type(r) == "number" and type(g) == "number" and type(b) == "number" and not secret(r)
+        and r >= 0.75 and g <= 0.4 and b <= 0.4
+end
+local function lineRed(line)
+    local c = line.leftColor
+    if type(c) ~= "table" then return false end
+    if c.GetRGB then return red(c:GetRGB()) end
+    return red(c.r, c.g, c.b)
+end
+
 -- The names a point reads into `out` (name -> how many dots of it: two of
 -- one herb under the point list it twice). The player's own arrow and pet
 -- left out
@@ -265,10 +291,21 @@ local function namesAt(sx, sy, skip, out)
     for _, line in ipairs(lines) do
         local text = line.leftText
         if type(text) == "string" and not secret(text) and not QUEST_LINES[line.type] then
+            local whole = lineRed(line)
             for piece in text:gmatch("[^\n]+") do
                 local name = trim(piece:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|cn[^:]*:", ""):gsub("|r", "")
                     :gsub("|T.-|t", ""):gsub("|A.-|a", ""):gsub("|H.-|h(.-)|h", "%1"))
-                if name ~= "" and not skip[name] and not questLine(name) then out[name] = (out[name] or 0) + 1 end
+                if name ~= "" and not skip[name] and not questLine(name) then
+                    out[name] = (out[name] or 0) + 1
+                    -- (its own colour code first, else the line's)
+                    local code = piece:match("|c%x%x(%x%x%x%x%x%x)")
+                    if code then
+                        tipRed[name] = red(tonumber(code:sub(1, 2), 16) / 255, tonumber(code:sub(3, 4), 16) / 255,
+                            tonumber(code:sub(5, 6), 16) / 255)
+                    else
+                        tipRed[name] = whole
+                    end
+                end
             end
         end
     end
