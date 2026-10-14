@@ -1104,8 +1104,17 @@ function G:BindLayer()
     return (lt and "LT" or "") .. (rt and "RT" or "")
 end
 
-function G:StartBind(action)
+-- The wait shown: by the guide, or by the panel's row that asked (`host`:
+-- { render = fn, refused = fn(why) }; the minimap labels' button)
+function G:BindRender()
+    local host = self.bindHost
+    if host then return host.render() end
+    self:Render()
+end
+
+function G:StartBind(action, host)
     if CK:BlockedByCombat() then return end
+    self.bindHost = host
     self.mode = "bind"
     self.binding = action
     self.bindAt = GetTime()
@@ -1138,7 +1147,7 @@ function G:StartBind(action)
     f:SetPropagateKeyboardInput(false)
     if f.EnableGamePadButton then f:EnableGamePadButton(true) end
     f:Show()
-    self:Render()
+    self:BindRender()
 end
 
 function G:EndBind()
@@ -1151,14 +1160,16 @@ function G:EndBind()
         end
     end
     self.mode, self.binding, self.bindHeld, self.bindWhy = "normal", nil, nil, nil
-    self:Render()
+    self:BindRender()
+    self.bindHost = nil
 end
 
 -- Refused: why, kept in the help bar while it still waits (more time given)
 function G:BindRefused(why)
     self.bindWhy = why
     self.bindAt = GetTime()
-    self:Render()
+    if self.bindHost and self.bindHost.refused then self.bindHost.refused(why) end
+    self:BindRender()
 end
 
 function G:BindPressed(key)

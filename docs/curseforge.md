@@ -48,17 +48,8 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.16
-- **Guide** (1.16.5): LB and RB alone can no longer be picked as a wheel's key (they are the game's targeting; pressing LB first for an "LB + A" took LB alone). If a wheel took your LB: Gamepad tab, select LB, X gives it back to the game.
-- **Quick phrases** (1.16.5): Y works with the keyboard module turned off too: the message is written in the window's field from the phrase, LB / RB pick the channel, A sends.
-- **Quick phrases** (1.16.4): editable with the keyboard module turned off, typed with any keyboard (a physical one, a handheld's on-screen one): Enter or A confirms, Escape or B cancels. The guide's keyboard step now explains them and gives them a button.
-- **Settings shortcut** (1.16.3): back to how it was before 1.16.2, which got in the way of the game's own RB combinations (LB + RB + B for the bags). If RB + D-pad down also runs your D-pad down action, pick another shortcut in Home › Shortcut.
-- **Move / size** (1.16.3): the gamepad bar can be selected again from the extra buttons (L4, L5...) with the D-pad.
-- **Triggers: press to switch** (1.16.1): without the compact bar, the bar switched on now looks like the game's active bar (its buttons large and spread out, the top bar small, its trigger icon lit once); both triggers pressed together switch the bottom bar on.
-- **First launch guide** (1.16.0): six screens to set the addon up with the gamepad, shown once on a new install: the buttons' icons, the back paddles (identified live) and touchpads, the gamepad bar's size (previewed live) and its compact mode, the chat keyboard, the consumables and usable items wheels with their keys (press the button you want), Healer mode, and the comfort options. Again any time from Home › Guide or `/ec welcome`.
-- **Healer/Buff mode** (1.16.0): each member's health as a ring around their portrait, emptying clockwise, green, then yellow, then red; the % stays on the portrait.
-- **Compact gamepad bar** (1.16.0): the guide's step 3 turns Edit Mode's compact bar on for you (the game's bug at the top of this page still applies).
-- **Usable items wheel** (1.16.0): can be turned off (Wheels › Usable items).
+## What's new in 1.17
+- **Minimap labels** (1.17.0): each dot of the minimap named beside it, no mouse needed: tracked creatures and humanoids, herbs, ore, treasure, your group. Creatures in white with their level in the game's colours (an option), a quest's creatures in gold, players in their class colour, enemy players (PvP) in red, herbs and ore in your skill's colours. The nearest first, the same names grouped ("Boar x3"), never over each other, on several lines rather than past the minimap's edge. **Alerts › Minimap**: on by default on a new install (after an update, turn it on there); shown always or while a button is held, its button picked right there.
 - **Restart the game after this update** (new files: a /reload doesn't load them).
 
 ## Features
@@ -73,6 +64,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
+- **Minimap labels**: every dot of the minimap named beside it (tracking, herbs, ore, treasure, your group), colour-coded: quest creatures, enemy players, your gathering skill
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health as a ring around their portrait and in %
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
@@ -161,6 +153,23 @@ binding or `/ec phrases`.
   name.
 - Y opens the keyboard with the phrase, to add to it (keyboard module off: the window's field, A sends).
 - The same phrases on every character; one option puts the default ones back. Not in combat.
+
+## Minimap labels
+
+With a gamepad there is no mouse to hover the minimap's dots: their names are written beside them,
+small, read from the minimap itself twice a second (tracked creatures and humanoids, herbs, ore,
+the dwarves' treasure, your group, quest givers…).
+
+- **Colours**: creatures in white, with their level in the game's colours once one of that name was
+  seen up close (nameplate, target; the level is an option); a quest's creatures to kill in gold;
+  players in their class colour, enemy players (PvP) in red; herbs and ore in the colours of your
+  Herbalism or Mining (red: too low, then orange, yellow, green, grey).
+- **Readable**: the nearest first, at most 12 (a setting), the same names close together on one
+  label ("Boar x3"), never two over each other, on several lines rather than past the minimap's
+  edge, the text size yours (smaller when zoomed out). Quest areas are never named.
+- **Shown always** (its button hides them) **or while its button is held**; its button picked in
+  Alerts › Minimap (A, then the button) or in the Gamepad tab (Macros › Minimap labels).
+- On by default on a new install; after an update, turn it on in Alerts › Minimap.
 
 ## Modules
 

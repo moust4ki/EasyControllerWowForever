@@ -733,6 +733,58 @@ local function inventoryRows(b)
         end })
 end
 
+-- Labels beside the minimap's dots (MinimapLabels.lua)
+local function minimapRows(b)
+    local ML = CK.MinimapLabels
+    local s = settings().minimapLabels
+    b.header(L.SEC_MINIMAP)
+    if not ML.Supported() then
+        b.info(L.MML_UNSUPPORTED)
+        return
+    end
+    b.check({ id = "mm_on", label = L.LBL_MML_ON, tip = L.TIP_MML_ON,
+        get = function() return s.enabled end,
+        set = function(v)
+            s.enabled = v
+            ML:Apply()
+        end })
+    if not s.enabled then return end
+    local modes = { { key = "always", name = L.MML_ALWAYS }, { key = "hold", name = L.MML_HOLD } }
+    local text, step = pick(modes, s, "mode", function()
+        ML.held, ML.hidden = nil, nil
+        ML:Apply()
+    end)
+    b.choice({ id = "mm_mode", label = L.LBL_MML_SHOW, indent = true, text = text, step = step, tip = L.TIP_MML_SHOW })
+    -- Its button, picked here (asked): the next one pressed, as in the guide
+    local G = CK.Guide
+    b.value({ id = "mm_key", label = L.LBL_MML_KEY, indent = true, verb = L.V_CHOOSE, tip = L.TIP_MML_KEY,
+        text = function()
+            if G.mode == "bind" and G.binding == "wheel:minimap" and G.bindHost then return L.MML_PRESS end
+            local keys = G.KeysOf("wheel:minimap")
+            return #keys > 0 and table.concat(keys, ", ", 1, math.min(2, #keys)) or L.GUIDE_NO_KEY
+        end,
+        onA = function()
+            G:StartBind("wheel:minimap", {
+                render = function() Config:Render() end,
+                refused = function(why) Config:Toast(why, true) end,
+            })
+        end })
+    b.slider({ id = "mm_size", label = L.LBL_MML_SIZE, indent = true, tip = L.TIP_MML_SIZE, min = 7, max = 16,
+        stepSize = 1, fmt = function(v) return tostring(math.floor(v + 0.5)) end,
+        get = function() return s.size end,
+        set = function(v) s.size = math.floor(v + 0.5) end })
+    b.slider({ id = "mm_max", label = L.LBL_MML_MAX, indent = true, tip = L.TIP_MML_MAX, min = 3, max = 30,
+        stepSize = 1, fmt = function(v) return tostring(math.floor(v + 0.5)) end,
+        get = function() return s.max end,
+        set = function(v) s.max = math.floor(v + 0.5) end })
+    b.check({ id = "mm_level", label = L.LBL_MML_LEVEL, indent = true, tip = L.TIP_MML_LEVEL,
+        get = function() return s.level end,
+        set = function(v) s.level = v end })
+    b.check({ id = "mm_skill", label = L.LBL_MML_SKILL, indent = true, tip = L.TIP_MML_SKILL,
+        get = function() return s.skill end,
+        set = function(v) s.skill = v end })
+end
+
 Config.pages.alerts = Config.NewRailPage({
     key = "alerts",
     sections = {
@@ -740,6 +792,7 @@ Config.pages.alerts = Config.NewRailPage({
         { key = "supplies", label = L.SEC_SUPPLIES, tip = L.SUP_INFO, rows = suppliesRows },
         { key = "quest", label = L.SEC_QUESTITEMS, tip = L.TIP_SEC_QUESTITEMS, rows = questRows },
         { key = "inventory", label = L.SEC_INVENTORY, tip = L.TIP_SEC_INVENTORY, rows = inventoryRows },
+        { key = "minimap", label = L.SEC_MINIMAP, tip = L.TIP_SEC_MINIMAP, rows = minimapRows },
     },
 })
 

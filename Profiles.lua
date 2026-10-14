@@ -270,6 +270,7 @@ local function reread()
     if CK.MyWheels and CK.MyWheels.UpdateBindingNames then CK.MyWheels:UpdateBindingNames() end
     if CK.ConsumableWheel then CK.ConsumableWheel:Fill() end
     if CK.Supplies then CK.Supplies:Refresh() end
+    if CK.MinimapLabels then CK.MinimapLabels:Apply() end
 end
 
 -- The names of the spells in the character's spell book (by name: a lower
