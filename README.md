@@ -176,6 +176,33 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
 - The phrases are the account's, the same for every character. Keyboard › Quick phrases: the bubble
   on or off, and back to the default phrases. Out of combat only.
 
+## Minimap labels
+
+With a gamepad there is no mouse to hover the minimap's dots (a hunter's tracking, herbs, ore...):
+each one is named beside it, small (Alerts › Minimap; on by default on a new install, off after an
+update).
+
+- Creatures in white, with their level in the game's colours once one of that name was seen up close
+  (nameplate, target, the mouse; the level is an option); a quest's creatures to kill (an objective
+  of the log naming them, not done yet) in gold. Players in their class colour, enemy players (PvP)
+  in red. Herbs and ore in the colours of your Herbalism or Mining, as the game colours a gathering
+  (`MinimapNodes.lua`: WoW Forever's own nodes in the five languages). The rest in white.
+- Quest areas are never named (the minimap's tooltip lists their title and objectives there), nor
+  your own pet.
+- The nearest dots first, at most 12 (setting), the same names closer than a few units on one label
+  ("Boar x3"), never two labels over each other; too wide for the circle at its height, a label goes
+  on several lines (3 at most), toward its dot. The text size is yours, smaller when zoomed out.
+- Shown always (its button hides and shows them) or only while its button is held. Its button:
+  Alerts › Minimap › Its button (A, then the button, LT / RT held for their layers, as in the guide)
+  or the Gamepad tab (Macros › Minimap labels), or a key binding.
+- How: WoW Forever's minimap can be told where its hover point is (`Minimap:UpdateMouseoverAtPoint`,
+  made for the gamepad's soft cursor), and `C_TooltipInfo.GetMinimapMouseover` gives the names
+  there. A grid of points over the minimap is read twice a second; the points reading one name side
+  by side are one dot, their middle its place. In between, each label follows its dot from the
+  player's map position and facing; while moving, the minimap's answers trail a moment, measured on
+  the dots already placed and taken off the new ones. A mouse over the minimap: not read (its
+  tooltip stays the game's). Refused by the game: off for the session, said once.
+
 ## Configuration panel
 
 **RB + D-pad down** opens the addon's own panel (only watched, never bound: the game's own buttons stay as they are;
@@ -195,7 +222,8 @@ second A.
 - **Gamepad**: the mapping below.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
-- **Alerts**: the vibrations, the supplies buttons, the quest items and the better items below.
+- **Alerts**: the vibrations, the supplies buttons, the quest items, the better items and the
+  minimap labels below.
 - **Profiles**: this character's profiles and the talents' ones (see Profiles).
 
 ### First launch guide

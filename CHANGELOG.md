@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.17.0
+
+- **Minimap labels** (asked, for a hunter's tracking): each dot of the minimap named beside it, no
+  mouse needed: tracked creatures and humanoids, herbs, ore, the dwarves' treasure, your group.
+  - Creatures in white, with their level in the game's colours once one of that name was seen up
+    close (nameplate, target; the level is an option); a quest's creatures to kill in gold.
+  - Players in their class colour; enemy players (PvP) in red.
+  - Herbs and ore in the colours of your Herbalism or Mining (red: too low, then orange, yellow,
+    green, grey): WoW Forever's own nodes, in the five languages.
+  - Quest areas are never named (their objectives, "4/12", stay off the minimap); your pet neither.
+- **Kept readable**: the nearest dots first, at most 12 (a setting), the same names close together
+  on one label ("Boar x3"), never two labels over each other, on several lines rather than past the
+  minimap's edge, the text size yours (smaller when the minimap is zoomed out). The labels follow
+  their dots as you move and turn.
+- **Alerts › Minimap**: on by default on a new install (an update leaves it off: turn it on there).
+  Shown always (its button hides them) or only while its button is held; its button picked right
+  there (A, then the button, as in the guide) or in the Gamepad tab (Macros › Minimap labels).
+- The minimap is read the way WoW Forever allows for the gamepad's soft cursor (as Improved
+  Forever's gathering labels do); should the game ever refuse it, the labels turn off for the
+  session and say so in the chat.
+- **Restart the game after this update** (new files: a /reload doesn't load them).
+
 ## 1.16.5
 
 - **Guide: LB and RB alone are refused** (reported: "the consumables wheel bind is locked to LB…
