@@ -1223,6 +1223,8 @@ function C:Close(reason)
     if not self:IsOpen() then return end
     -- The guide over it: ended (a fight: back once it's over)
     if self.guide then self.guide:Closed(reason) end
+    -- A button being picked from a row (the minimap labels'): let go
+    if CK.Guide and CK.Guide.bindHost then CK.Guide:EndBind() end
     self:DropPlacement()
     CK.Paddles:StopCapture(nil)
     self:StopChordCapture(nil)

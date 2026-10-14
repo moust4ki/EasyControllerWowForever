@@ -138,8 +138,8 @@ local DEFAULTS = {
     -- Labels beside the minimap's dots (MinimapLabels.lua): on for a new
     -- install (asked; off for an update, see InitDB); "always" (its button
     -- hides them) or "hold" (shown while its button is held); text size, at
-    -- most that many, herbs and ore in the skill's colours
-    minimapLabels = { enabled = true, mode = "always", size = 10, max = 12, skill = true },
+    -- most that many, herbs and ore in the skill's colours, creatures' level
+    minimapLabels = { enabled = true, mode = "always", size = 10, max = 12, skill = true, level = true },
     gameGlyphs = true,
     debug = false,
 }

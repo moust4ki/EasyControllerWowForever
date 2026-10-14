@@ -755,6 +755,20 @@ local function minimapRows(b)
         ML:Apply()
     end)
     b.choice({ id = "mm_mode", label = L.LBL_MML_SHOW, indent = true, text = text, step = step, tip = L.TIP_MML_SHOW })
+    -- Its button, picked here (asked): the next one pressed, as in the guide
+    local G = CK.Guide
+    b.value({ id = "mm_key", label = L.LBL_MML_KEY, indent = true, verb = L.V_CHOOSE, tip = L.TIP_MML_KEY,
+        text = function()
+            if G.mode == "bind" and G.binding == "wheel:minimap" and G.bindHost then return L.MML_PRESS end
+            local keys = G.KeysOf("wheel:minimap")
+            return #keys > 0 and table.concat(keys, ", ", 1, math.min(2, #keys)) or L.GUIDE_NO_KEY
+        end,
+        onA = function()
+            G:StartBind("wheel:minimap", {
+                render = function() Config:Render() end,
+                refused = function(why) Config:Toast(why, true) end,
+            })
+        end })
     b.slider({ id = "mm_size", label = L.LBL_MML_SIZE, indent = true, tip = L.TIP_MML_SIZE, min = 7, max = 16,
         stepSize = 1, fmt = function(v) return tostring(math.floor(v + 0.5)) end,
         get = function() return s.size end,
@@ -763,6 +777,9 @@ local function minimapRows(b)
         stepSize = 1, fmt = function(v) return tostring(math.floor(v + 0.5)) end,
         get = function() return s.max end,
         set = function(v) s.max = math.floor(v + 0.5) end })
+    b.check({ id = "mm_level", label = L.LBL_MML_LEVEL, indent = true, tip = L.TIP_MML_LEVEL,
+        get = function() return s.level end,
+        set = function(v) s.level = v end })
     b.check({ id = "mm_skill", label = L.LBL_MML_SKILL, indent = true, tip = L.TIP_MML_SKILL,
         get = function() return s.skill end,
         set = function(v) s.skill = v end })
