@@ -33,6 +33,7 @@ local MATCH = 25         -- yards: the same dot from one reading to the next
 local MOVED = 6          -- yards: a dot that moved by itself (a creature)
 local STILL_AFTER = 1    -- seconds standing before the answers are taken as they are
 local MIN_SIZE = 7
+local MIN_WIDTH = 30     -- a label on several lines: never narrower
 
 local function settings() return CK.db.settings.minimapLabels end
 local function secret(v) return issecretvalue ~= nil and issecretvalue(v) or false end
@@ -153,24 +154,66 @@ function ML.SkillState(node)
     return "grey"
 end
 
--- A label's text and colour
+-- The quests in the log: their titles (a quest's area names them on the
+-- minimap: never a label) and what their kill objectives name, not done yet
+-- (read again when the log changes)
+local quests
+local function questLog()
+    if quests then return quests end
+    quests = { titles = {}, kill = "" }
+    local QL = C_QuestLog
+    if not (QL and QL.GetNumQuestLogEntries and QL.GetInfo) then return quests end
+    local kills = {}
+    for i = 1, QL.GetNumQuestLogEntries() or 0 do
+        local info = QL.GetInfo(i)
+        if type(info) == "table" and not info.isHeader then
+            if type(info.title) == "string" and not secret(info.title) then quests.titles[info.title] = true end
+            local objectives = info.questID and QL.GetQuestObjectives and QL.GetQuestObjectives(info.questID)
+            for _, o in ipairs(type(objectives) == "table" and objectives or {}) do
+                if o.type == "monster" and not o.finished and type(o.text) == "string" and not secret(o.text) then
+                    kills[#kills + 1] = o.text:lower()
+                end
+            end
+        end
+    end
+    quests.kill = table.concat(kills, "\n")
+    return quests
+end
+
+-- A creature a quest asks to kill (asked: shown apart)
+function ML.QuestTarget(name)
+    local kill = questLog().kill
+    return kill ~= "" and kill:find(name:lower(), 1, true) ~= nil
+end
+
+local function hex(r, g, b)
+    local function byte(v) return math.floor((v or 1) * 255 + 0.5) end
+    return string.format("%02x%02x%02x", byte(r), byte(g), byte(b))
+end
+-- A quest's creatures: the game's quest colour
+local QUEST_COLOR = "ffd100"
+
+-- A label's text, its colours in it: the name (a player's class, a herb's
+-- or an ore's skill, gold for a quest's creature, else white), then a
+-- creature's level in the game's colours, then how many
 function ML.Describe(name, count)
-    local text = name
-    local r, g, b = 1, 1, 1
+    local color, level = "ffffff", nil
     local class = players[name]
     local creature = not class and creatures[name]
     if class then
-        r, g, b = classColor(class)
-        r, g, b = r or 1, g or 1, b or 1
+        color = hex(classColor(class))
     elseif creature then
-        r, g, b = levelColor(creature.level)
-        text = text .. " " .. (creature.level < 0 and "??" or (creature.level .. (creature.elite and "+" or "")))
+        level = creature.level < 0 and "??" or (creature.level .. (creature.elite and "+" or ""))
+        level = "|cff" .. hex(levelColor(creature.level)) .. level .. "|r"
     elseif settings().skill then
         local c = ML.SKILL_COLORS[ML.SkillState(nodeOf(name)) or ""]
-        if c then r, g, b = c[1], c[2], c[3] end
+        if c then color = hex(c[1], c[2], c[3]) end
     end
+    if not class and ML.QuestTarget(name) then color = QUEST_COLOR end
+    local text = "|cff" .. color .. name .. "|r"
+    if level then text = text .. " " .. level end
     if count and count > 1 then text = text .. " x" .. count end
-    return text, r, g, b
+    return text
 end
 
 ---------------------------------------------------------------------------
@@ -200,20 +243,32 @@ end
 
 local function trim(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
 
+-- A quest's area, not a dot (reported: "- Bog Crawler: 4/12 slain" over
+-- the minimap): its title, its objectives ("- ...", "4/12")
+local LINE_TYPE = Enum and Enum.TooltipDataLineType or {}
+local QUEST_LINES = {
+    [LINE_TYPE.QuestObjective or 8] = true, [LINE_TYPE.QuestTitle or 17] = true,
+    [LINE_TYPE.QuestPlayer or 18] = true,
+}
+local function questLine(name)
+    return name:find("^%-") ~= nil or name:find("%d+%s*/%s*%d+") ~= nil or questLog().titles[name] == true
+end
+
 -- The names a point reads into `out` (name -> how many dots of it: two of
--- one herb under the point list it twice). The player's own arrow left out
-local function namesAt(sx, sy, me, out)
+-- one herb under the point list it twice). The player's own arrow and pet
+-- left out
+local function namesAt(sx, sy, skip, out)
     Minimap:UpdateMouseoverAtPoint(sx, sy)
     local data = C_TooltipInfo.GetMinimapMouseover()
     local lines = type(data) == "table" and data.lines
     if type(lines) ~= "table" then return end
     for _, line in ipairs(lines) do
         local text = line.leftText
-        if type(text) == "string" and not secret(text) then
+        if type(text) == "string" and not secret(text) and not QUEST_LINES[line.type] then
             for piece in text:gmatch("[^\n]+") do
-                local name = trim(piece:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|T.-|t", "")
-                    :gsub("|A.-|a", ""))
-                if name ~= "" and name ~= me then out[name] = (out[name] or 0) + 1 end
+                local name = trim(piece:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|cn[^:]*:", ""):gsub("|r", "")
+                    :gsub("|T.-|t", ""):gsub("|A.-|a", ""):gsub("|H.-|h(.-)|h", "%1"))
+                if name ~= "" and not skip[name] and not questLine(name) then out[name] = (out[name] or 0) + 1 end
             end
         end
     end
@@ -271,12 +326,16 @@ function ML:Read()
     local mx, my = Minimap:GetCenter()
     if not (mx and radius > 4) then return nil end
     local scale = Minimap:GetEffectiveScale()
-    local me = UnitName("player")
+    local skip = {}
+    for _, unit in ipairs({ "player", "pet" }) do
+        local name = UnitExists(unit) and UnitName(unit)
+        if type(name) == "string" and not secret(name) then skip[name] = true end
+    end
     if Minimap.SetUsingSoftCursor then Minimap:SetUsingSoftCursor(true) end
     local hits, grid, names = {}, gridFor(radius), {}
     for i = 1, #grid, 2 do
         local x, y = grid[i], grid[i + 1]
-        namesAt((mx + x) * scale, (my + y) * scale, me, names)
+        namesAt((mx + x) * scale, (my + y) * scale, skip, names)
         if next(names) then
             for name, count in pairs(names) do
                 hits[#hits + 1] = { name = name, count = count, x = x, y = y }
@@ -411,11 +470,55 @@ local function labelAt(i)
     local fs = f.labels[i]
     if not fs then
         fs = f:CreateFontString(nil, "OVERLAY")
-        fs:SetShadowOffset(1, -1)
-        fs:SetShadowColor(0, 0, 0, 1)
+        fs:SetTextColor(1, 1, 1)
+        fs:SetWordWrap(true)
+        if fs.SetMaxLines then fs:SetMaxLines(3) end
         f.labels[i] = fs
     end
     return fs
+end
+
+-- The labels' font at a size: the one chosen in the panel for the Latin
+-- alphabet, the game's own for the others (reported: a name in boxes)
+local families, familyCount = {}, 0
+local function fontFamily(size)
+    local path = CK:GetFontPath()
+    local key = path .. size
+    if families[key] ~= nil then return families[key] end
+    local family = false
+    if CreateFontFamily then
+        familyCount = familyCount + 1
+        local function member(alphabet, file, height)
+            return { alphabet = alphabet, file = file, height = height, flags = "OUTLINE" }
+        end
+        local ok, made = pcall(CreateFontFamily, "ControllerKeyboardMinimapFont" .. familyCount, {
+            member("roman", path, size), member("russian", "Fonts\\FRIZQT___CYR.TTF", size),
+            member("korean", "Fonts\\2002.TTF", size + 1),
+            member("simplifiedchinese", "Fonts\\ARKai_T.ttf", size + 3),
+            member("traditionalchinese", "Fonts\\blei00d.TTF", size + 3),
+        })
+        if ok and made then family = made end
+    end
+    families[key] = family
+    return family
+end
+
+local function setSize(fs, size)
+    local key = CK:GetFontPath() .. size
+    if fs.fontKey == key then return end
+    fs.fontKey = key
+    local family = fontFamily(size)
+    if family then fs:SetFontObject(family) else fs:SetFont(CK:GetFontPath(), size, "OUTLINE") end
+    fs:SetShadowOffset(1, -1)
+    fs:SetShadowColor(0, 0, 0, 1)
+    -- (measured again)
+    fs.natural = nil
+end
+
+-- Half the circle's width at a height from its middle
+local function halfAt(r, y)
+    local v = r * r - y * y
+    return v > 0 and math.sqrt(v) or 0
 end
 
 -- The text's size: smaller as the minimap zooms out
@@ -462,22 +565,49 @@ function ML:Place()
     end
     local size = self:Size()
     local max = settings().max or 12
+    local inner = radius - 2
     local boxes, n = {}, 0
     for _, d in ipairs(kept) do
         if n >= max then break end
         local fs = labelAt(n + 1)
-        if fs.size ~= size then
-            fs:SetFont(CK:GetFontPath(), size, "OUTLINE")
-            fs.size = size
-        end
-        local text, r, g, b = ML.Describe(d.name, d.count)
-        if fs.text ~= text then
+        setSize(fs, size)
+        local text = ML.Describe(d.name, d.count)
+        if fs.text ~= text or not fs.natural then
+            fs:SetWidth(0)
+            fs.wrap = nil
             fs:SetText(text)
             fs.text = text
+            fs.natural, fs.lineH = fs:GetStringWidth() or 0, fs:GetStringHeight() or size
         end
-        -- Beside its dot, toward the minimap's middle (never out of it)
-        local w, h = fs:GetStringWidth() or 0, size
-        local left = d.x > 0 and (d.x - 5 - w) or (d.x + 5)
+        -- Beside its dot, toward the minimap's middle; too wide for the
+        -- circle there, on several lines (reported: past the frame)
+        local toLeft = d.x > 0
+        local function room(h)
+            local half = halfAt(inner, math.max(math.abs(d.y - h / 2), math.abs(d.y + h / 2)))
+            return toLeft and (d.x - 5 + half) or (half - d.x - 5)
+        end
+        local w, h = fs.natural, fs.lineH
+        if w > room(h) then
+            local width = math.max(MIN_WIDTH, math.floor(room(h)))
+            if fs.wrap ~= width then
+                fs:SetWidth(width)
+                fs.wrap = width
+            end
+            h = fs:GetStringHeight() or h
+            -- (taller now: where the circle is narrower)
+            local again = math.max(MIN_WIDTH, math.floor(room(h)))
+            if again < width then
+                width = again
+                fs:SetWidth(width)
+                fs.wrap = width
+                h = fs:GetStringHeight() or h
+            end
+            w = width
+        elseif fs.wrap then
+            fs:SetWidth(0)
+            fs.wrap = nil
+        end
+        local left = toLeft and (d.x - 5 - w) or (d.x + 5)
         local bottom = d.y - h / 2
         local free = true
         for _, box in ipairs(boxes) do
@@ -489,7 +619,7 @@ function ML:Place()
         if free then
             n = n + 1
             boxes[#boxes + 1] = { left - 1, bottom - 1, left + w + 1, bottom + h + 1 }
-            fs:SetTextColor(r, g, b)
+            fs:SetJustifyH(toLeft and "RIGHT" or "LEFT")
             fs:ClearAllPoints()
             fs:SetPoint("BOTTOMLEFT", f, "CENTER", left, bottom)
             fs:Show()
@@ -525,7 +655,7 @@ end
 local EVENTS = {
     "NAME_PLATE_UNIT_ADDED", "PLAYER_TARGET_CHANGED", "UPDATE_MOUSEOVER_UNIT", "PLAYER_SOFT_ENEMY_CHANGED",
     "PLAYER_SOFT_FRIEND_CHANGED", "PLAYER_SOFT_INTERACT_CHANGED", "GROUP_ROSTER_UPDATE", "SKILL_LINES_CHANGED",
-    "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA",
+    "QUEST_LOG_UPDATE", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA",
 }
 local UNIT_OF = {
     PLAYER_TARGET_CHANGED = "target", UPDATE_MOUSEOVER_UNIT = "mouseover",
@@ -548,6 +678,8 @@ function ML:Apply()
                 learnGroup()
             elseif event == "SKILL_LINES_CHANGED" then
                 skills = nil
+            elseif event == "QUEST_LOG_UPDATE" then
+                quests = nil
             else
                 -- Another place: its dots read anew
                 ML.dots = nil

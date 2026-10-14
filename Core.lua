@@ -135,10 +135,11 @@ local DEFAULTS = {
     glyphStyle = "xbox",
     -- The gamepad UI's centre dot (Reticle.lua): "game", "color", "cycle", "hidden"
     reticle = { mode = "game", color = 1 },
-    -- Labels beside the minimap's dots (MinimapLabels.lua): "always" (its
-    -- button hides them) or "hold" (shown while its button is held); text
-    -- size, at most that many, herbs and ore in the skill's colours
-    minimapLabels = { enabled = false, mode = "always", size = 10, max = 12, skill = true },
+    -- Labels beside the minimap's dots (MinimapLabels.lua): on for a new
+    -- install (asked; off for an update, see InitDB); "always" (its button
+    -- hides them) or "hold" (shown while its button is held); text size, at
+    -- most that many, herbs and ore in the skill's colours
+    minimapLabels = { enabled = true, mode = "always", size = 10, max = 12, skill = true },
     gameGlyphs = true,
     debug = false,
 }
@@ -245,6 +246,9 @@ function CK:InitDB()
         local d = db.settings.dicts
         db.settings.lang = (d.frFR and d.enUS) and "fren" or (d.enUS and "en") or "fr"
     end
+    -- The minimap's labels (1.17.0): on for a new install, off for those who
+    -- had the addon before (an update never changes their minimap)
+    if not fresh and db.settings.minimapLabels == nil then db.settings.minimapLabels = { enabled = false } end
     copyDefaults(DEFAULTS, db.settings)
     CK.CleanEntries(db.settings)
     -- The first launch guide (Guide.lua): shown to a new install only
