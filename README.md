@@ -217,8 +217,9 @@ left it. Forgetting the learned words, restoring the game's buttons and deleting
 second A.
 
 - **Home**: every module with its state, Y on one jumps to its settings; the panel's shortcut;
-  button glyphs (Xbox / PlayStation / Nintendo Switch), the game's button icons, font, the centre dot for
-  OLED screens; automation at merchants.
+  button glyphs (Auto: your controller's, or Xbox / PlayStation / Nintendo Switch, which the game's own
+  interface takes too), the game's button icons, font, the centre dot for OLED screens; automation at
+  merchants.
 - **Gamepad**: the mapping below.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
@@ -627,7 +628,15 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 - keyboard size: small (80 %), normal, large (125 %), extra large (150 %) — `/ec scale` for any
   other value; invert the sticks vertical axis, show / hide the mouse buttons row (split keyboard);
 - font (Blizzard fonts: Friz Quadrata, Morpheus, Skurri, Arial Narrow, or the chat font);
-- button style (Xbox / PlayStation / Nintendo Switch) and the game's button icons;
+- button style (Auto, Xbox / PlayStation / Nintendo Switch) and the game's button icons. A style
+  picked (here or in the guide) sets the game's own too: the game shows its icons by its controller
+  config's label style (Letters, Shapes, Reverse), which the addon writes (`C_GamePad.SetConfig` +
+  `ApplyConfigs`: the controller's own config when the game names it, else the one every controller
+  reads, as with Steam Input), keeping what was there to put back on Auto. The game's windows take
+  it after a reload (a Reload row offered), the icons over NPCs, drawn by the game itself, once it
+  is restarted. Not in combat; refused, or the controller no longer read: put back and said;
+  set again at login if the game lost it. Auto (a new install's default): the controller's icons,
+  the game untouched;
 - the gamepad UI's centre dot, for OLED screens: the game's, a colour, a colour changing every 5
   minutes, or hidden;
 - suggestion language (French, English, German, Spanish, Italian, or French + English), learning;
