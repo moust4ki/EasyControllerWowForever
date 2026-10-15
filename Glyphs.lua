@@ -139,8 +139,9 @@ end
 -- The game's own icons (asked): its interface (the NPCs' interact icon, the
 -- quest log, the gamepad bar...) shows those of its controller config's
 -- label style. Forever lets an addon set it (C_GamePad.SetConfig, then
--- ApplyConfigs: tried in game, the whole interface follows, after a /reload
--- if it doesn't at once). A style picked here (the panel, the guide) sets
+-- ApplyConfigs: tried in game, the windows follow after a /reload, the
+-- icons over NPCs, drawn by the game itself, once the game is restarted).
+-- A style picked here (the panel, the guide) sets
 -- it too; Auto puts the game's back. The config: the controller's own (its
 -- vendor and product, when the game gives them), else the one every
 -- controller without its own uses (Steam Input, XInput: no identity given).
@@ -188,7 +189,8 @@ local function restore(saved)
 end
 
 -- The game's icons to the style picked (nil, "auto": the game's own).
--- Returns false when the game can't take it (said why: L.GLYPHS_GAME_*)
+-- Returns false when the game can't take it (said why: L.GLYPHS_GAME_*);
+-- its third value: the game's config changed
 function CK:SetGameGlyphs(style)
     if not (GP and GP.GetConfig and GP.SetConfig and GP.ApplyConfigs) then return false, "unsupported" end
     if InCombatLockdown() then return false, "combat" end
@@ -202,7 +204,7 @@ function CK:SetGameGlyphs(style)
         end
         db.gameGlyphs = nil
         self.labelCache = nil
-        return true
+        return true, nil, saved ~= nil
     end
     local id = saved and saved.id or configID()
     local c = configOf(id)
@@ -234,7 +236,7 @@ function CK:SetGameGlyphs(style)
     db.gameGlyphs = saved
     self.labelCache = nil
     self.glyphsExpect = want
-    return true
+    return true, nil, true
 end
 
 -- The game's interface showing the style its config now says (else after
@@ -251,10 +253,13 @@ end
 -- A style picked (the panel, the guide): ours and the game's
 function CK:PickGlyphStyle(style)
     self.db.settings.glyphStyle = style
-    local ok, why = self:SetGameGlyphs(style)
+    local ok, why, changed = self:SetGameGlyphs(style)
     self:UpdateGlyphs()
     if not ok and why ~= "unsupported" then
         self:Print(CK.L["GLYPHS_GAME_" .. why:upper()] or CK.L.GLYPHS_GAME_REFUSED)
+    elseif changed then
+        -- When the game shows them (tried in game)
+        self:Print(CK.L.GLYPHS_GAME_DONE)
     end
     return ok, why
 end
