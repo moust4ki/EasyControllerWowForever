@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.18.1
+
+- **Supplies are now called bag counters** (Comfort › Bag counters): the round buttons that count
+  your free bag slots, ammunition and reagents, and glow when you run low. A clearer name, nothing
+  else changes (your settings are kept). The low supplies vibration keeps its name.
+
 ## 1.18.0
 
 - **The game's own button icons follow your style** (asked): until now the addon's glyph setting

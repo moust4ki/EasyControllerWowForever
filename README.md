@@ -223,7 +223,7 @@ second A.
 - **Gamepad**: the mapping below.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
-- **Comfort** (named Alerts before): the vibrations, the supplies buttons, the quest items, the better items and the
+- **Comfort** (named Alerts before): the vibrations, the bag counters, the quest items, the better items and the
   minimap labels below.
 - **Profiles**: this character's profiles and the talents' ones (see Profiles).
 
@@ -250,7 +250,7 @@ first: Later), LB / RB change step; each choice is the panel's own setting, save
    game's, LB and RB alone too: its targeting), and puts the wheel there as the Gamepad tab does;
    hold to show. For the healing classes,
    Healer mode explained.
-6. **Comfort**: red when out of range, quest items, better items, supplies, sell greys and repair,
+6. **Comfort**: red when out of range, quest items, better items, bag counters, sell greys and repair,
    vibrations, stay seated; a summary; *Put my spells* (the Gamepad tab) or *Finish*.
 
 A fight closes it; it comes back at the same step once the fight is over.
@@ -375,7 +375,7 @@ RB without the trigger). LT + LB and RT + RB stay the game's class and pet actio
 ### Profiles
 
 Each character has its own buttons and paddles (and the game's buttons replaced), its own wheels,
-supplies and consumables wheel categories, automatically: nothing to set, and nothing done on one
+bag counters and consumables wheel categories, automatically: nothing to set, and nothing done on one
 character ever changes another's. On its first load, a character starts from a copy of the
 configuration you had before profiles (1.9), if any: nothing is lost on an update. The paddles' keys,
 the look, the keyboard and the vibrations are the same for all.
@@ -386,7 +386,7 @@ bar once the character has been in it. The Profiles tab picks the one in use fro
 (empty), renames or deletes them; with the talents option, the primary talents put one in use and the
 secondary another. `/ec profile <name>` too. Switching happens out of combat (in combat: once it
 ends); an action that can't be placed now is kept for later. They're the character's only; its
-supplies and consumables wheel categories are shared by its profiles.
+bag counters and consumables wheel categories are shared by its profiles.
 
 ### Triggers: press to switch
 
@@ -452,9 +452,10 @@ Only the two standard motors are used, so any controller the game drives vibrate
 your health: WoW Forever hides it from addons in combat. `/ec vibe [pattern]` tells what the client
 allows and plays a pattern.
 
-## Supplies
+## Bag counters
 
-One round button per resource, in the gamepad bar's style (Comfort › Supplies):
+One round button per resource, in the gamepad bar's style (Comfort › Bag counters; named Supplies
+before):
 
 - **free bag slots** (quivers, ammo pouches and soul bags apart), the **equipped ammunition**, the
   **class reagents** (soul shards, infernal stones, arcane powder, runes, candles, symbols, seeds,
