@@ -94,6 +94,9 @@ local DEFAULTS = {
         hold = false,
         -- The stick that aims them: "left" or "right" (a party spell's: the right)
         aimStick = "left",
+        -- Aimed with the right stick: letting it go uses what it aims at
+        -- (asked; off: a press confirms, nothing used by accident)
+        stickRelease = false,
         -- The usable items' wheel: the items hidden from it ({ [item ID] =
         -- true }, false once shown again); the hearthstone by default
         usableHidden = { [6948] = true },
