@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.18.2
+
+- **Move / size: the gamepad bar says where it moves** (reported as a bug: picked up, the bar
+  turned green as if it could move, and the D-pad did nothing). Since the game's patch of 9
+  October its place belongs to the game's Edit Mode: its green frame now says it right over the
+  bar, its size here (LB / RB), to move it the game's Edit Mode. Your extra buttons move as before.
+
 ## 1.18.1
 
 - **Supplies are now called bag counters** (Comfort › Bag counters): the round buttons that count
