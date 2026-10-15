@@ -1143,6 +1143,20 @@ function P:RenderPlacementRings()
     if self.barRing then
         self.barRing:SetShown(id == "BAR")
         self.barRing.box:SetColors(color, 0.08, color, 1)
+        -- Picked up, an Edit Mode bar (since the game's patch of 9 October):
+        -- said in its frame, where the eyes are (reported: it went green as
+        -- if it could move, the D-pad did nothing), its size only here
+        local note = self.barRing.note
+        if note then
+            local on = id == "BAR" and self.grabbed ~= nil and P.EditModeBar()
+            if on then
+                local g = function(key) return CK:GlyphMarkup(key, 16) end
+                note.size:SetText(format(L.PLACE_BAR_SIZE_HERE, g("LB") .. g("RB")))
+                note.move:SetText(format(L.PLACE_BAR_MOVE_EDITMODE, HUD_EDIT_MODE_MENU or "Edit Mode"))
+                note:SetSize(math.max(note.size:GetStringWidth() or 0, note.move:GetStringWidth() or 0) + 28, 52)
+            end
+            note:SetShown(on and true or false)
+        end
     end
     self:UpdatePlaceTag()
     -- The places only matter for a button being moved
@@ -1378,6 +1392,19 @@ function P:StartPlacement()
         ring:SetFrameStrata("HIGH")
         ring.box = CK.ConfigKit.Box(ring, 4, 2, "OVERLAY")
         ring.box:SetPoints(ring)
+        -- An Edit Mode bar picked up: its size here, its place in Edit Mode
+        local note = CK.NewFrame("Frame", nil, ring)
+        note:SetPoint("CENTER")
+        note:SetSize(300, 52)
+        note.box = CK.ConfigKit.Box(note, 4, 1, "BACKGROUND")
+        note.box:SetPoints(note)
+        note.box:SetColors({ 0.04, 0.04, 0.04 }, 0.9, GRAB_RING, 1)
+        note.size = note:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        note.size:SetPoint("TOP", 0, -9)
+        note.move = note:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        note.move:SetPoint("TOP", note.size, "BOTTOM", 0, -5)
+        note:Hide()
+        ring.note = note
         ring:Hide()
         self.barRing = ring
     end
@@ -1425,9 +1452,10 @@ function P:RenderPlacement()
     local parts
     if self.grabbed then
         -- Edit Mode's bar: its size here, its place in Edit Mode
+        -- (said in its frame: PLACE_BAR_MOVE_EDITMODE)
         local sizeOnly = id == "BAR" and P.EditModeBar()
-        parts = { sizeOnly and format(L.PLACE_P_EDITMODE, HUD_EDIT_MODE_MENU or "Edit Mode")
-            or (g("DPAD_UP") .. " " .. (id == "BAR" and L.MAP_P_MOVE or L.PLACE_P_PLACE)) }
+        parts = {}
+        if not sizeOnly then parts[1] = g("DPAD_UP") .. " " .. (id == "BAR" and L.MAP_P_MOVE or L.PLACE_P_PLACE) end
         if id ~= "BAR" then
             local sym = settings().extraSymmetric and L.ON or L.OFF
             parts[#parts + 1] = g("Y") .. " " .. format(L.PLACE_P_SYM, sym)
