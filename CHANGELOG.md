@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.18.0
+
+- **The game's own button icons follow your style** (asked): until now the addon's glyph setting
+  changed only its own icons, while the game's interface kept those of the controller it detected.
+  Picking Xbox, PlayStation or Switch (Home › Look, or the guide's first screen) now sets the
+  game's too: its windows and prompts after a reload (a "Reload" row appears right there, no
+  /reload to type), the icons over NPCs once the game is restarted. The addon writes the style
+  into the game's controller config, keeps what was there, and puts it back on **Auto**.
+- **Auto (your controller's)**: a new first choice, the default on a new install: the addon's
+  icons follow the controller detected, the game's left as they are. An update keeps the style you
+  had, and the game untouched until you pick one.
+- Safe: in combat nothing is written; refused by the game, or the controller no longer read with
+  it, everything is put back and said in the chat; if the game loses the style (an update), it is
+  set again at login.
+- **The Alerts tab is now called Comfort** (its vibrations, supplies, quest items, better items and
+  minimap labels: the guide's word for the same options). Nothing else changes.
+
 ## 1.17.0
 
 - **Minimap labels** (asked, for a hunter's tracking): each dot of the minimap named beside it, no

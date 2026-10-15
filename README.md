@@ -179,7 +179,7 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
 ## Minimap labels
 
 With a gamepad there is no mouse to hover the minimap's dots (a hunter's tracking, herbs, ore...):
-each one is named beside it, small (Alerts › Minimap; on by default on a new install, off after an
+each one is named beside it, small (Comfort › Minimap; on by default on a new install, off after an
 update).
 
 - Creatures in white, with their level in the game's colours once one of that name was seen up close
@@ -193,7 +193,7 @@ update).
   ("Boar x3"), never two labels over each other; too wide for the circle at its height, a label goes
   on several lines (3 at most), toward its dot. The text size is yours, smaller when zoomed out.
 - Shown always (its button hides and shows them) or only while its button is held. Its button:
-  Alerts › Minimap › Its button (A, then the button, LT / RT held for their layers, as in the guide)
+  Comfort › Minimap › Its button (A, then the button, LT / RT held for their layers, as in the guide)
   or the Gamepad tab (Macros › Minimap labels), or a key binding.
 - How: WoW Forever's minimap can be told where its hover point is (`Minimap:UpdateMouseoverAtPoint`,
   made for the gamepad's soft cursor), and `C_TooltipInfo.GetMinimapMouseover` gives the names
@@ -217,12 +217,13 @@ left it. Forgetting the learned words, restoring the game's buttons and deleting
 second A.
 
 - **Home**: every module with its state, Y on one jumps to its settings; the panel's shortcut;
-  button glyphs (Xbox / PlayStation / Nintendo Switch), the game's button icons, font, the centre dot for
-  OLED screens; automation at merchants.
+  button glyphs (Auto: your controller's, or Xbox / PlayStation / Nintendo Switch, which the game's own
+  interface takes too), the game's button icons, font, the centre dot for OLED screens; automation at
+  merchants.
 - **Gamepad**: the mapping below.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
-- **Alerts**: the vibrations, the supplies buttons, the quest items, the better items and the
+- **Comfort** (named Alerts before): the vibrations, the supplies buttons, the quest items, the better items and the
   minimap labels below.
 - **Profiles**: this character's profiles and the talents' ones (see Profiles).
 
@@ -436,7 +437,7 @@ the game's small red dot only.
 
 ## Vibrations
 
-The controller vibrates on the game events you choose (Alerts › Vibrations): one switch and one
+The controller vibrates on the game events you choose (Comfort › Vibrations): one switch and one
 intensity for all, then each event with its own box and its own pattern (micro tick, tick, double
 tick, pulse, long, heartbeat, crescendo): A turns it on or off, the D-pad picks its pattern, Y tests
 it.
@@ -453,7 +454,7 @@ allows and plays a pattern.
 
 ## Supplies
 
-One round button per resource, in the gamepad bar's style (Alerts › Supplies):
+One round button per resource, in the gamepad bar's style (Comfort › Supplies):
 
 - **free bag slots** (quivers, ammo pouches and soul bags apart), the **equipped ammunition**, the
   **class reagents** (soul shards, infernal stones, arcane powder, runes, candles, symbols, seeds,
@@ -464,7 +465,7 @@ One round button per resource, in the gamepad bar's style (Alerts › Supplies):
 - the bar is **placed freely**: dragged with the mouse while unlocked, or moved with the D-pad
   ("Move with the D-pad"), growing right, left, down or up, in 3 sizes; a click opens the bags
   (through the game's own backpack button);
-- low supplies and little room left can vibrate (Alerts › Vibrations).
+- low supplies and little room left can vibrate (Comfort › Vibrations).
 
 ## Consumables wheel
 
@@ -526,7 +527,7 @@ holds changes out of combat only.
 - It works **in combat**: the wheel and the keys it takes are secure, run by the game. Food and drink
   are greyed there (the game forbids them in combat). Its content is updated out of combat only (a
   rule of the game).
-- Moving from slot to slot can vibrate (Alerts › Vibrations).
+- Moving from slot to slot can vibrate (Comfort › Vibrations).
 
 ### Party spells
 
@@ -579,7 +580,7 @@ off, selecting one at a merchant warns too.
 ## Better items
 
 A green arrow at the bottom right of a bag item that would be better than what you wear in its slot
-(Alerts › Inventory). Items are compared by their stats, weighed for your class: a weapon's damage
+(Comfort › Inventory). Items are compared by their stats, weighed for your class: a weapon's damage
 per second first, then strength, agility, stamina, intellect, spirit, attack and spell power, armor,
 each with its weight (a hybrid's by the talent tree with the most points: a holy paladin weighs
 intellect and healing, a protection one stamina and armor). The side panel shows your weights. Only
@@ -627,7 +628,15 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 - keyboard size: small (80 %), normal, large (125 %), extra large (150 %) — `/ec scale` for any
   other value; invert the sticks vertical axis, show / hide the mouse buttons row (split keyboard);
 - font (Blizzard fonts: Friz Quadrata, Morpheus, Skurri, Arial Narrow, or the chat font);
-- button style (Xbox / PlayStation / Nintendo Switch) and the game's button icons;
+- button style (Auto, Xbox / PlayStation / Nintendo Switch) and the game's button icons. A style
+  picked (here or in the guide) sets the game's own too: the game shows its icons by its controller
+  config's label style (Letters, Shapes, Reverse), which the addon writes (`C_GamePad.SetConfig` +
+  `ApplyConfigs`: the controller's own config when the game names it, else the one every controller
+  reads, as with Steam Input), keeping what was there to put back on Auto. The game's windows take
+  it after a reload (a Reload row offered), the icons over NPCs, drawn by the game itself, once it
+  is restarted. Not in combat; refused, or the controller no longer read: put back and said;
+  set again at login if the game lost it. Auto (a new install's default): the controller's icons,
+  the game untouched;
 - the gamepad UI's centre dot, for OLED screens: the game's, a colour, a colour changing every 5
   minutes, or hidden;
 - suggestion language (French, English, German, Spanish, Italian, or French + English), learning;
@@ -694,7 +703,7 @@ are also available in *Escape > Key Bindings > AddOns*.
   `Wheel.lua` and `StickKeyboard.lua` are the input methods (`ConsolePort.lua`, ConsolePort's keyboard,
   no longer offered), `UI.lua` the common panel, `Input.lua`
   the pad buttons and sticks; `ConfigWindow.lua` the configuration panel (`ConfigKit.lua` its parts,
-  `Options.lua` the Home, Wheels, Keyboard and Alerts tabs, `MapWindow.lua` the Gamepad tab,
+  `Options.lua` the Home, Wheels, Keyboard and Comfort tabs, `MapWindow.lua` the Gamepad tab,
   `MyWheels.lua` the wheels' cards and editor); `Mapping.lua` / `Paddles.lua`,
   `QuestItems.lua` and `QuestLinks.lua` are the modules.
 - Translations: `Locales/`, one file per language, named by the game's locale. `enUS.lua` is the

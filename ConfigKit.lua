@@ -188,7 +188,7 @@ local CHIP_PS = { SELECT = "Create", START = "Options" }
 local CHIP_SWITCH = { SELECT = "-", START = "+" }
 
 function K.ChipText(key)
-    local style = CK.db and CK.db.settings.glyphStyle
+    local style = CK.db and CK:GlyphStyle()
     if style == "playstation" and CHIP_PS[key] then return CHIP_PS[key] end
     if style == "switch" and CHIP_SWITCH[key] then return CHIP_SWITCH[key] end
     return CHIP_TEXT[key] or key
