@@ -49,7 +49,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.17
-- **Minimap labels** (1.17.0): each dot of the minimap named beside it, no mouse needed: tracked creatures and humanoids, herbs, ore, treasure, your group. Creatures in white with their level in the game's colours (an option), a quest's creatures in gold, players in their class colour, enemy players (PvP) in red, herbs and ore in your skill's colours. The nearest first, the same names grouped ("Boar x3"), never over each other, on several lines rather than past the minimap's edge. **Alerts › Minimap**: on by default on a new install (after an update, turn it on there); shown always or while a button is held, its button picked right there.
+- **Minimap labels** (1.17.0): each dot of the minimap named beside it, no mouse needed: tracked creatures and humanoids, herbs, ore, treasure, your group. Creatures in white with their level in the game's colours (an option), a quest's creatures in gold, players in their class colour, enemy players (PvP) in red, herbs and ore in your skill's colours. The nearest first, the same names grouped ("Boar x3"), never over each other, on several lines rather than past the minimap's edge. **Comfort › Minimap**: on by default on a new install (after an update, turn it on there); shown always or while a button is held, its button picked right there.
 - **Restart the game after this update** (new files: a /reload doesn't load them).
 
 ## Features
@@ -168,15 +168,15 @@ the dwarves' treasure, your group, quest givers…).
   label ("Boar x3"), never two over each other, on several lines rather than past the minimap's
   edge, the text size yours (smaller when zoomed out). Quest areas are never named.
 - **Shown always** (its button hides them) **or while its button is held**; its button picked in
-  Alerts › Minimap (A, then the button) or in the Gamepad tab (Macros › Minimap labels).
-- On by default on a new install; after an update, turn it on in Alerts › Minimap.
+  Comfort › Minimap (A, then the button) or in the Gamepad tab (Macros › Minimap labels).
+- On by default on a new install; after an update, turn it on in Comfort › Minimap.
 
 ## Modules
 
 **Configuration panel**
 RB + D-pad down (or `/ec config`) opens the addon's own panel, driven with the gamepad or the mouse:
 Home (every module and its state, the panel's shortcut, the look, the gamepad bar and extra buttons,
-automation at merchants), Gamepad (your controller drawn button by button), Wheels, Keyboard, Alerts
+automation at merchants), Gamepad (your controller drawn button by button), Wheels, Keyboard, Comfort
 (vibrations, supplies, quest items, better items) and Profiles. Sections on the left, settings in the
 middle, what the selected one does on the right, and a help bar showing only the buttons that work
 there.
