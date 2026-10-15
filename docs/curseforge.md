@@ -50,7 +50,7 @@ Every feature you don't need can be turned off to save even more resources.
 
 ## What's new in 1.18
 - **The game's own button icons follow your style** (1.18.0): pick Xbox, PlayStation or Switch in Home › Look and the game's interface uses it too, not only the addon: its windows and prompts after a reload (a Reload row appears right there), the icons over NPCs once the game is restarted. **Auto** (new, the default on a new install) follows your controller and leaves the game as it is; back on Auto, the game's own style is put back.
-- **The Alerts tab is now called Comfort** (1.18.0): same options, a clearer name.
+- **The Alerts tab is now called Comfort** (1.18.0), and **Supplies are now bag counters** (1.18.1): same options, clearer names.
 - **Minimap labels** (1.17.0): each dot of the minimap named beside it, no mouse needed: tracked creatures and humanoids, herbs, ore, treasure, your group. Creatures in white with their level in the game's colours (an option), a quest's creatures in gold, players in their class colour, enemy players (PvP) in red, herbs and ore in your skill's colours. **Comfort › Minimap**: on by default on a new install (after an update, turn it on there); shown always or while a button is held, its button picked right there.
 
 ## Features
