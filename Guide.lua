@@ -330,6 +330,7 @@ end
 -- 1. Welcome, your controller
 ---------------------------------------------------------------------------
 local GLYPH_STYLES = {
+    { key = "auto", name = L.GLYPH_AUTO },
     { key = "xbox", name = "Xbox" },
     { key = "playstation", name = "PlayStation" },
     { key = "switch", name = "Switch" },
@@ -355,7 +356,7 @@ function G:BuildScreen1(s, f)
     help(f, 14, KC.help, 428, 94, 368):SetText(L.GUIDE_GLYPHS_HELP)
     s.radios = {}
     for n, style in ipairs(GLYPH_STYLES) do
-        local r = frameAt(f, "Button", 428, 122 + (n - 1) * 56, 368, 48)
+        local r = frameAt(f, "Button", 428, 122 + (n - 1) * 45, 368, 40)
         r.bg = box(r, KC.controlBg, 1, KC.line1, 1)
         r.ring = r:CreateTexture(nil, "ARTWORK")
         r.ring:SetTexture(TEX .. "ck_ring")
@@ -378,9 +379,9 @@ function G:BuildScreen1(s, f)
             r.glyphs[key] = g
         end
         local c = add(s, { frame = r, style = style.key })
+        -- (the game's own icons too)
         function c.press(self)
-            settings().glyphStyle = self.style
-            CK:UpdateGlyphs()
+            CK:PickGlyphStyle(self.style)
             return true
         end
         function c.verbA() return L.V_CHOOSE end

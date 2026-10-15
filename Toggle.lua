@@ -751,7 +751,7 @@ function T:DrawTrigger(layer)
     t:Show()
     -- The glyphs set again only when the bar or the button style changes
     local st = CK.db.settings
-    local key = layer .. "|" .. tostring(st.glyphStyle) .. "|" .. tostring(st.gameGlyphs)
+    local key = layer .. "|" .. tostring(CK:GlyphStyle()) .. "|" .. tostring(st.gameGlyphs)
     if t.drawn == key then return end
     t.drawn = key
     local both = layer == "LTRT"

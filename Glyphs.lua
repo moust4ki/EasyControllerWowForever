@@ -77,9 +77,40 @@ local function atlasExists(name)
     return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
 end
 
+---------------------------------------------------------------------------
+-- The style in use: the one picked, or Auto: the controller's, as the game
+-- labels it (its config's label style: Letters, Shapes, Reverse)
+---------------------------------------------------------------------------
+local LABEL_OF = { xbox = "Letters", playstation = "Shapes", switch = "Reverse" }
+local STYLE_OF = { Letters = "xbox", Shapes = "playstation", Reverse = "switch" }
+CK.GLYPH_LABEL_OF = LABEL_OF
+
+local GP = C_GamePad
+
+local function activeState()
+    local id = GP and GP.GetActiveDeviceID and GP.GetActiveDeviceID()
+    local state = id and GP.GetDeviceMappedState and GP.GetDeviceMappedState(id)
+    return id, type(state) == "table" and state or nil
+end
+
+-- The label style the game gives the controller in use now (nil: none)
+function CK:GameLabelStyle()
+    local _, state = activeState()
+    local label = state and state.labelStyle
+    return type(label) == "string" and label or nil
+end
+
+-- (read again when the game's controllers or configs change)
+function CK:GlyphStyle(style)
+    style = style or (self.db and self.db.settings.glyphStyle) or "xbox"
+    if style ~= "auto" then return style end
+    if self.labelCache == nil then self.labelCache = self:GameLabelStyle() or false end
+    return STYLE_OF[self.labelCache or ""] or "xbox"
+end
+
 -- style: another one than the one chosen (the guide's choices show theirs)
 function CK:SetGlyph(tex, key, style)
-    style = style or self.db.settings.glyphStyle
+    style = self:GlyphStyle(style)
     if self.db.settings.gameGlyphs then
         for _, name in ipairs((ATLAS[style] or ATLAS.xbox)[key] or {}) do
             if atlasExists(name) then
@@ -95,13 +126,175 @@ end
 -- The same glyph inline in a text ("|A...|a" or "|T...|t")
 function CK:GlyphMarkup(key, size)
     size = size or 16
-    local style = self.db.settings.glyphStyle
+    local style = self:GlyphStyle()
     if self.db.settings.gameGlyphs then
         for _, name in ipairs((ATLAS[style] or ATLAS.xbox)[key] or {}) do
             if atlasExists(name) then return format("|A:%s:%d:%d|a", name, size, size) end
         end
     end
     return format("|T%s%s:%d:%d|t", TEX, fallback(style, key), size, size)
+end
+
+---------------------------------------------------------------------------
+-- The game's own icons (asked): its interface (the NPCs' interact icon, the
+-- quest log, the gamepad bar...) shows those of its controller config's
+-- label style. Forever lets an addon set it (C_GamePad.SetConfig, then
+-- ApplyConfigs: tried in game, the whole interface follows, after a /reload
+-- if it doesn't at once). A style picked here (the panel, the guide) sets
+-- it too; Auto puts the game's back. The config: the controller's own (its
+-- vendor and product, when the game gives them), else the one every
+-- controller without its own uses (Steam Input, XInput: no identity given).
+-- What was there kept to be put back (CK.db.gameGlyphs); nothing touched
+-- before a style is picked.
+---------------------------------------------------------------------------
+local function copy(t)
+    if type(t) ~= "table" then return t end
+    local c = {}
+    for k, v in pairs(t) do c[k] = copy(v) end
+    return c
+end
+
+local function configOf(id)
+    local ok, c = pcall(GP.GetConfig, id)
+    return ok and type(c) == "table" and c or nil
+end
+
+-- The config the controller in use reads
+local function configID()
+    local id = GP.GetActiveDeviceID and GP.GetActiveDeviceID()
+    local raw = id and GP.GetDeviceRawState and GP.GetDeviceRawState(id)
+    if type(raw) == "table" and type(raw.vendorID) == "number" and type(raw.productID) == "number" then
+        return { vendorID = raw.vendorID, productID = raw.productID }
+    end
+    return {}
+end
+
+local function apply(config)
+    return pcall(GP.SetConfig, config) and pcall(GP.ApplyConfigs)
+end
+
+-- What the game had, back (Auto, or a broken controller)
+local function restore(saved)
+    if saved.created then
+        pcall(GP.DeleteConfig, saved.id)
+        pcall(GP.ApplyConfigs)
+    else
+        local c = configOf(saved.id)
+        if c then
+            c.labelStyle = saved.original
+            apply(c)
+        end
+    end
+end
+
+-- The game's icons to the style picked (nil, "auto": the game's own).
+-- Returns false when the game can't take it (said why: L.GLYPHS_GAME_*)
+function CK:SetGameGlyphs(style)
+    if not (GP and GP.GetConfig and GP.SetConfig and GP.ApplyConfigs) then return false, "unsupported" end
+    if InCombatLockdown() then return false, "combat" end
+    local db = self.db
+    local saved = db.gameGlyphs
+    local want = LABEL_OF[style or ""]
+    if not want then
+        if saved then
+            restore(saved)
+            self.glyphsExpect = saved.original
+        end
+        db.gameGlyphs = nil
+        self.labelCache = nil
+        return true
+    end
+    local id = saved and saved.id or configID()
+    local c = configOf(id)
+    local created = false
+    if not c then
+        -- None of its own: one made from the one every controller reads
+        -- (its mappings empty: the game's own)
+        c = copy(configOf({}) or { rawButtonMappings = {}, rawAxisMappings = {}, axisConfigs = {}, stickConfigs = {} })
+        c.configID = copy(id)
+        created = true
+    end
+    if not saved then saved = { id = copy(id), original = c.labelStyle, created = created } end
+    if c.labelStyle == want and db.gameGlyphs then return true end
+    c.labelStyle = want
+    if not apply(c) then
+        restore(saved)
+        return false, "refused"
+    end
+    -- The controller still read (its buttons): else everything put back
+    local _, state = activeState()
+    if state and (tonumber(state.buttonCount) or 0) == 0 then
+        restore(saved)
+        db.gameGlyphs = nil
+        self.labelCache = nil
+        self.glyphsExpect = saved.original
+        return false, "broken"
+    end
+    saved.forced = want
+    db.gameGlyphs = saved
+    self.labelCache = nil
+    self.glyphsExpect = want
+    return true
+end
+
+-- The game's interface showing the style its config now says (else after
+-- a /reload: it reads its icons when it loads). Read only, never called
+function CK:GameGlyphsShown()
+    local manager = InputDeviceIconSetManager
+    local shown = type(manager) == "table" and rawget(manager, "activeInputDeviceIconSet")
+    -- (the keyboard and mouse in use: "Generic", nothing to compare)
+    if type(shown) ~= "string" or shown == "Generic" then return true end
+    local expect = self.glyphsExpect or self:GameLabelStyle()
+    return expect == nil or shown == expect
+end
+
+-- A style picked (the panel, the guide): ours and the game's
+function CK:PickGlyphStyle(style)
+    self.db.settings.glyphStyle = style
+    local ok, why = self:SetGameGlyphs(style)
+    self:UpdateGlyphs()
+    if not ok and why ~= "unsupported" then
+        self:Print(CK.L["GLYPHS_GAME_" .. why:upper()] or CK.L.GLYPHS_GAME_REFUSED)
+    end
+    return ok, why
+end
+
+-- At login: the game's config as it was left (a game update may have put
+-- it back): set again when it differs; a style left on Auto with ours
+-- still there: put back
+function CK:CheckGameGlyphs()
+    local saved = self.db.gameGlyphs
+    if not saved then return end
+    if InCombatLockdown() then
+        self.glyphsCheckPending = true
+        return
+    end
+    local style = self.db.settings.glyphStyle
+    if not LABEL_OF[style or ""] then
+        self:SetGameGlyphs(nil)
+    elseif self:GameLabelStyle() ~= LABEL_OF[style] then
+        self:SetGameGlyphs(style)
+    end
+end
+
+do
+    local f = CreateFrame("Frame")
+    for _, e in ipairs({ "GAME_PAD_ACTIVE_CHANGED", "GAME_PAD_CONNECTED", "GAME_PAD_DISCONNECTED",
+        "GAME_PAD_CONFIGS_CHANGED", "PLAYER_REGEN_ENABLED" }) do
+        pcall(f.RegisterEvent, f, e)
+    end
+    f:SetScript("OnEvent", function(_, event)
+        if event == "PLAYER_REGEN_ENABLED" then
+            if CK.glyphsCheckPending then
+                CK.glyphsCheckPending = nil
+                CK:CheckGameGlyphs()
+            end
+            return
+        end
+        -- Auto: the controller's glyphs, whichever it is now
+        CK.labelCache = nil
+        if CK.db and CK.db.settings.glyphStyle == "auto" and CK.UpdateGlyphs then CK:UpdateGlyphs() end
+    end)
 end
 
 -- /ec glyphs: print the gamepad atlases found in this client

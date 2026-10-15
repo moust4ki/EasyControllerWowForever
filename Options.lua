@@ -28,6 +28,7 @@ end
 local Config = CK.Config
 
 local GLYPH_STYLES = {
+    { key = "auto", name = L.GLYPH_AUTO },
     { key = "xbox", name = "Xbox" },
     { key = "playstation", name = "PlayStation" },
     { key = "switch", name = "Nintendo Switch" },
@@ -161,8 +162,21 @@ end
 local function lookRows(b)
     local s = settings()
     b.header(L.SEC_LOOK)
-    local text, step = pick(GLYPH_STYLES, s, "glyphStyle", function() CK:UpdateGlyphs() end)
+    -- Picked: the game's own icons too (Glyphs.lua)
+    local text = function() return GLYPH_STYLES[indexOf(GLYPH_STYLES, s.glyphStyle)].name end
+    local function step(d)
+        local i = (indexOf(GLYPH_STYLES, s.glyphStyle) - 1 + d) % #GLYPH_STYLES + 1
+        CK:PickGlyphStyle(GLYPH_STYLES[i].key)
+    end
     b.choice({ id = "glyph", label = L.LBL_GLYPHS, text = text, step = step, tip = L.TIP_GLYPHS })
+    -- The game's interface shows them after a reload (no /reload to type)
+    if not CK:GameGlyphsShown() then
+        b.button({ id = "glyph_reload", label = L.LBL_GLYPHS_RELOAD, indent = true, tip = L.TIP_GLYPHS_RELOAD,
+            verb = L.V_RELOAD, func = function()
+                local reload = C_UI and C_UI.Reload or ReloadUI
+                reload()
+            end })
+    end
     b.check({ id = "gicons", label = L.LBL_GAME_ICONS, tip = L.OPT_GAME_GLYPHS,
         get = function() return s.gameGlyphs end,
         set = function(v)

@@ -132,7 +132,10 @@ local DEFAULTS = {
     -- (Phrases.lua); the phrases themselves: settings.phrases, nil = defaults
     phrasesChip = true,
     font = "friz",
-    glyphStyle = "xbox",
+    -- "auto" (the controller's), "xbox", "playstation", "switch"; a style
+    -- picked sets the game's own icons too (Glyphs.lua). Auto on a new
+    -- install; an update keeps the one it had (the game untouched)
+    glyphStyle = "auto",
     -- The gamepad UI's centre dot (Reticle.lua): "game", "color", "cycle", "hidden"
     reticle = { mode = "game", color = 1 },
     -- Labels beside the minimap's dots (MinimapLabels.lua): on for a new
