@@ -61,7 +61,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Bigger or smaller gamepad buttons**: the game's whole gamepad bar, every layer at once, from 70 % to 150 %
 - **Triggers: press to switch** instead of holding them (option), the bar on shown as the game's active one, every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
-- **Profiles**: each character its own buttons, wheels and supplies, automatically, and up to 5 sets of them, picked by hand or by your talents
+- **Profiles**: each character its own buttons, wheels and bag counters, automatically, and up to 5 sets of them, picked by hand or by your talents
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
@@ -75,7 +75,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Stay seated while eating or bandaging**: a nudged stick no longer wastes the meal, the camera still turns
 - **Quest items** marked in your bags, quest links in the chat
 - **Vibrations** on the events you pick
-- **Supplies** tracker (arrows, soul shards, reagents, bag space…) that glows when you run low
+- **Bag counters** (arrows, soul shards, reagents, bag space…) that glow when you run low
 - **Better items**: highlights upgrade items in your bags
 - **At merchants**: auto-sell junk and auto-repair
 - **OLED burn-in prevention** for the centre dot
@@ -178,7 +178,7 @@ the dwarves' treasure, your group, quest givers…).
 RB + D-pad down (or `/ec config`) opens the addon's own panel, driven with the gamepad or the mouse:
 Home (every module and its state, the panel's shortcut, the look, the gamepad bar and extra buttons,
 automation at merchants), Gamepad (your controller drawn button by button), Wheels, Keyboard, Comfort
-(vibrations, supplies, quest items, better items) and Profiles. Sections on the left, settings in the
+(vibrations, bag counters, quest items, better items, minimap labels) and Profiles. Sections on the left, settings in the
 middle, what the selected one does on the right, and a help bar showing only the buttons that work
 there.
 
@@ -235,7 +235,7 @@ or nudged, no longer stands you up and wastes the meal. Push the left stick all 
 of a second to get up. The right stick still turns the camera, and the game's radial menu, the map
 and the addon's windows get the sticks while they are open.
 
-**Supplies**
+**Bag counters**
 A round button per resource: free bag slots, your ammunition, your class reagents (soul shards,
 powders, candles, symbols, seeds, poisons…) and any item you add from your bags. Under its low
 threshold it glows, stronger and redder down to the critical one; thresholds are yours to set.
@@ -274,7 +274,7 @@ bar's slots only while you are in it (stealth for a rogue's, cat form for a drui
 
 **Profiles**
 Each character (by its full name, surname included) keeps its own buttons, paddles, wheels and
-supplies, with nothing to set; nothing done on one changes another. A new character starts from your
+bag counters, with nothing to set; nothing done on one changes another. A new character starts from your
 setup, without the spells it doesn't have. `/ec profile` shows what each character holds.
 
 A character can have up to 5 profiles (a druid's healing and feral, a warrior's tank and damage...):
