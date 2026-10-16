@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.18.3
+
+- **The centre dot's colour works again** (reported: it no longer changed). The game's update of
+  16 October rebuilt its gamepad reticle (the dot now sits beside a new swing timer), and the
+  addon no longer found the dot to colour it. Home › Look › Centre dot: its colour and its
+  changing colour are back; hidden worked throughout.
+
 ## 1.18.2
 
 - **Move / size: the gamepad bar says where it moves** (reported as a bug: picked up, the bar
