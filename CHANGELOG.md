@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.18.5
+
+- **A trigger setting not kept: restarting the game is now suggested too** (reported: for one
+  player the setting only changed once the game was restarted, a /reload wasn't enough). The
+  chat message now ends with it: still refused, restart the game.
+
 ## 1.18.4
 
 - **A trigger setting the game doesn't keep is now said** (reported: "RT as a modifier" wouldn't
