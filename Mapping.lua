@@ -109,21 +109,44 @@ local FREE = { [""] = true, none = true, NONE = true }
 
 function M:SetTriggerModifier(button, on)
     if InCombatLockdown() then return CK:BlockedByCombat() end
+    local wrote = false
     if on then
         if self:TriggerModifier(button) then return end
         for _, cvar in ipairs({ "GamePadEmulateAlt", "GamePadEmulateCtrl" }) do
             if FREE[GetCVar(cvar) or ""] then
                 SetCVar(cvar, button)
+                wrote = true
                 break
             end
         end
     else
         for _, e in ipairs(EMULATE) do
-            if GetCVar(e[2]) == button then SetCVar(e[2], "none") end
+            if GetCVar(e[2]) == button then
+                SetCVar(e[2], "none")
+                wrote = true
+            end
         end
     end
     self:Apply()
     CK.Paddles:Apply()
+    if wrote then self:CheckTriggerModifier(button, on) end
+end
+
+-- The setting written, kept? Checked at once and a moment later (another
+-- addon may put it back on its own change event or a timer). Reported: the
+-- box wouldn't stay ticked, the setting not changed by /console either,
+-- and nothing said why. Said once, in the chat (and the window's toast).
+function M:CheckTriggerModifier(button, on)
+    local name = button == "PADLTRIGGER" and "LT" or "RT"
+    local function kept() return (self:TriggerModifier(button) ~= nil) == (on and true or false) end
+    local function refused()
+        CK:Print(L.TRIGGER_MOD_REFUSED, name)
+        if CK.Config and CK.Config:IsOpen() then CK.Config:Toast(format(L.TOAST_TRIGGER_MOD_REFUSED, name), true) end
+    end
+    if not kept() then return refused() end
+    C_Timer.After(1, function()
+        if not kept() then refused() end
+    end)
 end
 
 function M:CanBeModifier(button)

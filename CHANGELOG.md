@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.18.4
+
+- **A trigger setting the game doesn't keep is now said** (reported: "RT as a modifier" wouldn't
+  stay ticked, and nothing said why). Making RT a modifier (Home › Gamepad, or the guide), or
+  replacing a game button, writes the game's own setting for the triggers. The addon now checks it
+  was kept, at once and a moment later: if another addon refuses it or puts it back, the chat says
+  so (and the window, if open), with what to do: turn other controller addons off, /reload, try
+  again.
+
 ## 1.18.3
 
 - **The centre dot's colour works again** (reported: it no longer changed). The game's update of
