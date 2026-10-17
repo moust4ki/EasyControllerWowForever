@@ -53,6 +53,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **The Alerts tab is now called Comfort** (1.18.0), and **Supplies are now bag counters** (1.18.1): same options, clearer names.
 - **Move / size** (1.18.2): picked up, the gamepad bar says it in its frame: its size here (LB / RB), its place in the game's Edit Mode (since the game's patch of 9 October).
 - **The centre dot's colour works again** (1.18.3): the game's update of 16 October rebuilt its reticle, and the dot's colour (Home › Look) had stopped changing.
+- **Trigger settings checked** (1.18.4): if another addon refuses or undoes "RT as a modifier" (or LT's), the chat now says so and what to do, instead of the box just not staying ticked.
 - **Minimap labels** (1.17.0): each dot of the minimap named beside it, no mouse needed: tracked creatures and humanoids, herbs, ore, treasure, your group. Creatures in white with their level in the game's colours (an option), a quest's creatures in gold, players in their class colour, enemy players (PvP) in red, herbs and ore in your skill's colours. **Comfort › Minimap**: on by default on a new install (after an update, turn it on there); shown always or while a button is held, its button picked right there.
 
 ## Features
