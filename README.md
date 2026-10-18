@@ -494,7 +494,14 @@ kind can be left out (Wheels › Consumables).
   without using anything. A still uses while you hold it. With Triggers: press to switch on and a
   bar switched on, the wheel opens on a press as without the option. (With the right stick chosen to
   aim: the right stick.)
-- No game setting is changed. `/ec wheel` lists what the wheel holds, and why an item is not in it.
+- **Let go of the stick to use** (Wheels › Opening, under Stick that aims, off by default, the right
+  stick aiming): push the right stick toward an item and let it go, the item is used, no A needed,
+  as the Party/Healer wheel does; for the consumables, the usable items and your own wheels. Sliding
+  round the rim uses nothing on the way, the last item aimed when you let go; A and B still work.
+  Off by default: a press confirms, so nothing is used by accident while you aim.
+- No game setting is changed, but for that option: the game's stick direction keys
+  (`GamePadStickAxisButtons`, which the release needs) are on while it is, and your own value comes
+  back when it is turned off. `/ec wheel` lists what the wheel holds, and why an item is not in it.
 
 ### Usable items wheel
 
