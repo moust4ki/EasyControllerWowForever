@@ -40,7 +40,10 @@ function R:Apply()
     if not f then return end
     local s = settings()
     f:SetAlpha(s.mode == "hidden" and 0 or 1)
-    local dot = f.StandardIcon
+    -- The dot: in the reticle's Icons frame since the game's build 70425 (16
+    -- October, with its swing timer; reported: its colour no longer changed),
+    -- on the reticle itself before
+    local dot = f.StandardIcon or (f.Icons and f.Icons.StandardIcon)
     if not dot then return end
     local color
     if s.mode == "color" then

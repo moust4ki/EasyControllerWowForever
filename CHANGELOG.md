@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.18.5
+
+- **A trigger setting not kept: restarting the game is now suggested too** (reported: for one
+  player the setting only changed once the game was restarted, a /reload wasn't enough). The
+  chat message now ends with it: still refused, restart the game.
+
+## 1.18.4
+
+- **A trigger setting the game doesn't keep is now said** (reported: "RT as a modifier" wouldn't
+  stay ticked, and nothing said why). Making RT a modifier (Home › Gamepad, or the guide), or
+  replacing a game button, writes the game's own setting for the triggers. The addon now checks it
+  was kept, at once and a moment later: if another addon refuses it or puts it back, the chat says
+  so (and the window, if open), with what to do: turn other controller addons off, /reload, try
+  again.
+
+## 1.18.3
+
+- **The centre dot's colour works again** (reported: it no longer changed). The game's update of
+  16 October rebuilt its gamepad reticle (the dot now sits beside a new swing timer), and the
+  addon no longer found the dot to colour it. Home › Look › Centre dot: its colour and its
+  changing colour are back; hidden worked throughout.
+
+## 1.18.2
+
+- **Move / size: the gamepad bar says where it moves** (reported as a bug: picked up, the bar
+  turned green as if it could move, and the D-pad did nothing). Since the game's patch of 9
+  October its place belongs to the game's Edit Mode: its green frame now says it right over the
+  bar, its size here (LB / RB), to move it the game's Edit Mode. Your extra buttons move as before.
+
 ## 1.18.1
 
 - **Supplies are now called bag counters** (Comfort › Bag counters): the round buttons that count
