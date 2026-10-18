@@ -296,6 +296,14 @@ function W.AimRight()
     return CK.db ~= nil and settings().aimStick == "right"
 end
 
+-- Letting the right stick go uses what it aims at (asked; Wheels >
+-- Opening, off by default: a press confirming, nothing is used by accident),
+-- as a party spell's wheel does: the consumables, usable items and the
+-- player's own wheels, aimed with the right stick
+function W.LetGo()
+    return CK.db ~= nil and settings().stickRelease == true and W.AimRight()
+end
+
 -- Its name in the texts ("left stick"...)
 function W.StickWords()
     return W.AimRight() and L.WHEEL_STICK_RIGHT or L.WHEEL_STICK_LEFT
@@ -532,8 +540,9 @@ local SHOW = [[
         owner:SetBindingClick(true, prefix .. "PADRSHOULDER", "ControllerKeyboardWheelPage", "RB")
     end
     owner:SetBindingClick(true, "ESCAPE", "ControllerKeyboardWheelClose")
-    -- A party spell's wheel: the right stick's direction keys, to see it let go
-    if strsub(owner:GetAttribute("wheel") or "c", 1, 1) == "p" then
+    -- A party spell's wheel, or another one let go to use (option): the
+    -- right stick's direction keys, to see it let go
+    if strsub(owner:GetAttribute("wheel") or "c", 1, 1) == "p" or owner:GetAttribute("ck-letgo") then
         owner:SetAttribute("ck-aim", 0)
         owner:SetAttribute("ck-aimlen", 0)
         for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
@@ -637,15 +646,22 @@ local USE = [[
 -- strongest reading of the stick (any reading out of the middle at all
 -- gives a direction), and, if the stick never read out, the directions it
 -- went through, but only if they point at one member clearly.
+--
+-- The other wheels let go to use (option, "ck-letgo"): the same, aimed at
+-- the page's slots (their sections) with the stick that aims them.
 local LET_GO = [[
+    local wid = owner:GetAttribute("wheel") or "c"
+    local party = strsub(wid, 1, 1) == "p"
+    local stickAt = owner:GetAttribute(party and "ck-pstick" or "ck-stick") or 2
     -- For /ec wheel: each key as it comes, and the stick read then
     local seen = GetGamePadState()
-    local seenStick = seen and seen.sticks and seen.sticks[owner:GetAttribute("ck-pstick") or 2]
+    local seenStick = seen and seen.sticks and seen.sticks[stickAt]
     owner:SetAttribute("ck-event", format("%s %s %.2f", tostring(button), down and "down" or "up", seenStick and seenStick.len or 0))
-    local wid = owner:GetAttribute("wheel") or "c"
-    if not (owner:IsShown() and strsub(wid, 1, 1) == "p" and owner:GetAttribute("ck-held-" .. button)) then
+    if not (owner:IsShown() and (party or owner:GetAttribute("ck-letgo")) and owner:GetAttribute("ck-held-" .. button)) then
         return false
     end
+    -- The slots aimed at: the members (5 places), or the page's sections
+    local n = party and 5 or (owner:GetAttribute("ck-" .. wid .. "-" .. (owner:GetAttribute("page") or 1) .. "-n") or 0)
     local keys = owner:GetAttribute("ck-pstickkeys")
     local held = false
     for key in gmatch(keys, "([^,]+),") do
@@ -665,7 +681,7 @@ local LET_GO = [[
         owner:SetAttribute("ck-held-" .. button, 0)
     end
     local state = GetGamePadState()
-    local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-pstick") or 2]
+    local stick = state and state.sticks and state.sticks[stickAt]
     local len = stick and stick.len or 0
     local strongest = owner:GetAttribute("ck-aimlen") or 0
     -- Let go: no direction held any more, or the last one pressed released
@@ -695,9 +711,11 @@ local LET_GO = [[
         end
         if x then
             local best, bestDot, second = nil, -100, -100
-            for i = 1, 5 do
+            for i = 1, n do
                 if owner:GetFrameRef("slot" .. i):IsShown() then
-                    local dot = x * owner:GetAttribute("ck-pdx-" .. i) + y * owner:GetAttribute("ck-pdy-" .. i)
+                    local dx = owner:GetAttribute(party and ("ck-pdx-" .. i) or ("ck-x" .. n .. "-" .. i))
+                    local dy = owner:GetAttribute(party and ("ck-pdy-" .. i) or ("ck-y" .. n .. "-" .. i))
+                    local dot = x * dx + y * dy
                     if dot > bestDot then
                         best, second, bestDot = i, bestDot, dot
                     elseif dot > second then
@@ -1468,6 +1486,8 @@ function W:Fill()
     local wheel = self.frame
     -- Hold its key to show it, let go to use what the stick aims at (option)
     wheel:SetAttribute("ck-hold", settings().hold and true or nil)
+    -- Let the right stick go to use (option)
+    wheel:SetAttribute("ck-letgo", W.LetGo() and true or nil)
     self.lists = {}
     -- The consumables: by kind, 8 a page
     local items = settings().enabled and self:Scan() or {}
@@ -1638,8 +1658,12 @@ function W:Paint()
         self.view.pages:SetText("")
     end
     local h = function(key) return CK:GlyphMarkup(key, 14) end
-    self.view.help:SetText(format("%s %s   %s %s   %s %s", h(W.AimRight() and "RS" or "LS"), L.WHEEL_AIM, h("A"), L.WHEEL_USE,
-        h("B"), L.WHEEL_CLOSE))
+    if W.LetGo() then
+        self.view.help:SetText(format("%s %s   %s %s", h("RS"), L.WHEEL_LETGO, h("B"), L.WHEEL_CLOSE))
+    else
+        self.view.help:SetText(format("%s %s   %s %s   %s %s", h(W.AimRight() and "RS" or "LS"), L.WHEEL_AIM, h("A"),
+            L.WHEEL_USE, h("B"), L.WHEEL_CLOSE))
+    end
     -- Not "nothing aimed" (nil): the banner is written, even the first time
     self.aimed = false
     self:Track()
@@ -2185,7 +2209,8 @@ end
 -- spell's wheel (letting the stick go casts): on while one is open, and for
 -- a whole fight when a party spell is on a button (the game refuses the
 -- setting in combat: turned on as the fight starts); the player's own
--- value given back after. Kept on, they close the game's own flyouts as
+-- value given back after. The other wheels let go to use (option): on
+-- while the option is. Kept on, they close the game's own flyouts as
 -- soon as their stick moves: the shield below keeps them away meanwhile.
 function W:StickKeys(on)
     if InCombatLockdown() then return end
@@ -2256,14 +2281,15 @@ end
 -- when none is left, and at logout (on again at the next login)
 function W:SyncStickKeys()
     if InCombatLockdown() then return end
-    self:StickKeys(self:PartyOpen() or self:PartyBound())
+    self:StickKeys(self:PartyOpen() or self:PartyBound() or W.LetGo())
 end
 
 function W:RestoreSettings()
     if InCombatLockdown() then return end
     local s = settings()
-    -- (kept while a party spell's wheel is open, or one is on a button)
-    if s.stickButtonsWas ~= nil and not self:PartyOpen() and not self:PartyBound() then
+    -- (kept while a party spell's wheel is open, or one is on a button, or
+    -- the wheels are let go to use)
+    if s.stickButtonsWas ~= nil and not self:PartyOpen() and not self:PartyBound() and not W.LetGo() then
         setCVar("GamePadStickAxisButtons", s.stickButtonsWas)
         s.stickButtonsWas = nil
     end
@@ -2332,7 +2358,9 @@ function W:Init()
         -- for the fight (the game refuses the setting in combat)
         if event == "PLAYER_REGEN_DISABLED" then
             W:PlacePartyKeys()
-            if CK.Mapping and CK.Mapping.HasPartySpells and CK.Mapping:HasPartySpells() then W:StickKeys(true) end
+            if (CK.Mapping and CK.Mapping.HasPartySpells and CK.Mapping:HasPartySpells()) or W.LetGo() then
+                W:StickKeys(true)
+            end
         end
         if event == "PLAYER_REGEN_DISABLED" or event == "BAG_UPDATE_COOLDOWN" or event == "SPELL_UPDATE_COOLDOWN" then
             W:Paint()

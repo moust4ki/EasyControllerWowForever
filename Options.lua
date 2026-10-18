@@ -898,6 +898,16 @@ local function wheelOpenRows(b)
         step = function()
             s.aimStick = s.aimStick == "right" and "left" or "right"
             CK.ConsumableWheel:Fill()
+            CK.ConsumableWheel:SyncStickKeys()
+        end })
+    -- The right stick let go uses (asked; off by default: a press confirms)
+    b.check({ id = "w_letgo", label = L.LBL_WHEEL_LETGO, indent = true, disabled = s.aimStick ~= "right",
+        tip = L.TIP_WHEEL_LETGO,
+        get = function() return s.stickRelease == true end,
+        set = function(v)
+            s.stickRelease = v
+            CK.ConsumableWheel:Fill()
+            CK.ConsumableWheel:SyncStickKeys()
         end })
 end
 

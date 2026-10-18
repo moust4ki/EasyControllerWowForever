@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.19.0
+
+- **Let go of the stick to use** (asked, Wheels › Opening, off by default): aiming with the right
+  stick, push it toward an item and let it go, the item is used, no A needed, like the
+  Party/Healer wheel. For the consumables, the usable items and your own wheels; easier while
+  moving, the same thumb no longer has to leave the stick for A. Sliding round the rim uses nothing
+  on the way, only the last item aimed when you let go; A and B still work. Off by default: a press
+  confirms, so nothing is used by accident while you aim. While it is on, the game's stick direction
+  keys are on (the release needs them); your own setting comes back when you turn it off.
+
 ## 1.18.5
 
 - **A trigger setting not kept: restarting the game is now suggested too** (reported: for one

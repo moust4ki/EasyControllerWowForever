@@ -48,13 +48,8 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.18
-- **The game's own button icons follow your style** (1.18.0): pick Xbox, PlayStation or Switch in Home › Look and the game's interface uses it too, not only the addon: its windows and prompts after a reload (a Reload row appears right there), the icons over NPCs once the game is restarted. **Auto** (new, the default on a new install) follows your controller and leaves the game as it is; back on Auto, the game's own style is put back.
-- **The Alerts tab is now called Comfort** (1.18.0), and **Supplies are now bag counters** (1.18.1): same options, clearer names.
-- **Move / size** (1.18.2): picked up, the gamepad bar says it in its frame: its size here (LB / RB), its place in the game's Edit Mode (since the game's patch of 9 October).
-- **The centre dot's colour works again** (1.18.3): the game's update of 16 October rebuilt its reticle, and the dot's colour (Home › Look) had stopped changing.
-- **Trigger settings checked** (1.18.4, 1.18.5): if another addon refuses or undoes "RT as a modifier" (or LT's), the chat now says so and what to do (other controller addons off, /reload, else restart the game), instead of the box just not staying ticked.
-- **Minimap labels** (1.17.0): each dot of the minimap named beside it, no mouse needed: tracked creatures and humanoids, herbs, ore, treasure, your group. Creatures in white with their level in the game's colours (an option), a quest's creatures in gold, players in their class colour, enemy players (PvP) in red, herbs and ore in your skill's colours. **Comfort › Minimap**: on by default on a new install (after an update, turn it on there); shown always or while a button is held, its button picked right there.
+## What's new in 1.19
+- **Let go of the stick to use** (1.19.0, asked): aiming with the right stick, push it toward an item and let it go, the item is used, no A needed, like the Party/Healer wheel: the consumables, the usable items and your own wheels. Easier while moving, your thumb stays on the stick. Sliding round the rim uses nothing on the way, only the last item aimed when you let go; A and B still work. **Wheels › Opening**, under Stick that aims (Right): off by default, so a press confirms and nothing is used by accident while you aim.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -74,6 +69,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Consumables wheel**, usable in combat
 - **Usable items wheel**: every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside, on or off
 - **Hold to show** a wheel, let go to use (option), aimed with the left or the right stick
+- **Let go of the stick to use** (option): push the right stick toward an item and let it go, no A needed
 - **Wheels that fit**: as many sections as items
 - **Stay seated while eating or bandaging**: a nudged stick no longer wastes the meal, the camera still turns
 - **Quest items** marked in your bags, quest links in the chat
@@ -223,7 +219,8 @@ the game's own radial menu, cut in as many sections as it holds (two items: two 
 sections), up to 8 consumables a page (LB / RB for more), from your bags: food, drink, healing and
 mana potions, healthstone, mana gem, bandages, buff food, elixirs and flasks, scrolls, the best first.
 Point with the left stick (or the right one: Wheels › Opening › Stick that aims) and press A to use; B
-cancels; the mouse works too. Or hold its key, aim and let go to use (option). It works in combat (food and drink greyed there).
+cancels; the mouse works too. Or hold its key, aim and let go to use (option). Or, aiming with the right
+stick, push it toward an item and let it go (option: Wheels › Opening › Let go of the stick to use). It works in combat (food and drink greyed there).
 
 **Usable items wheel**
 The same wheel for every item of your bags you can use, the consumables aside: a sleeping bag, a
