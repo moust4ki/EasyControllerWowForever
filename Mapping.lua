@@ -984,6 +984,26 @@ local function bindCommand(o, priority, combo, command)
 end
 local buttons = {}      -- comboId -> secure button (spells, items, macros)
 
+-- The game's mouseover cast (its enableMouseoverCast setting, on with the
+-- gamepad cursor): its bar buttons cast a helpful spell on the friendly unit
+-- under the cursor, a harmful one on the enemy there (SecureTemplates.lua,
+-- "checkmouseovercast"), its modifier held if one is set. Ours did not: a
+-- heal on a paddle went on the target or yourself, never the raid frame
+-- hovered (reported). Each press picks the unit as the game's button does;
+-- "ck-mo" says what the button's spell or item is for ("help", "harm"),
+-- "ck-mo-any" that no modifier is needed. No unit otherwise, as before.
+local MOUSEOVER = [[
+    local mo = self:GetAttribute("ck-mo")
+    local unit
+    if mo and UnitExists("mouseover") and (self:GetAttribute("ck-mo-any") or IsModifiedClick("MOUSEOVERCAST")) then
+        if (mo == "help" and PlayerCanAssist("mouseover")) or (mo == "harm" and PlayerCanAttack("mouseover")) then
+            unit = "mouseover"
+        end
+    end
+    self:SetAttribute("unit", unit)
+]]
+local moHeader
+
 local function secureButton(comboId)
     local b = buttons[comboId]
     if not b then
@@ -997,10 +1017,34 @@ local function secureButton(comboId)
         b:SetScript("PreClick", function(_, _, down)
             if down ~= false then CK.Paddles:NotifyPress(inputId) end
         end)
+        moHeader = moHeader or CK.NewFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
+        SecureHandlerWrapScript(b, "OnClick", moHeader, MOUSEOVER)
         b:Hide()
         buttons[comboId] = b
     end
     return b
+end
+
+-- What a spell or an item is for, when the game's mouseover cast is on:
+-- "help", "harm", else nil (a macro: its own options)
+local function safe(f, ...)
+    if not f then return nil end
+    local ok, v = pcall(f, ...)
+    return ok and v or nil
+end
+
+function M.MouseoverKind(kind, value)
+    if not (GetCVarBool and GetCVarBool("enableMouseoverCast")) then return nil end
+    local id = tonumber(value)
+    if not id then return nil end
+    if kind == "spell" and C_Spell then
+        if safe(C_Spell.IsSpellHelpful, id) then return "help" end
+        if safe(C_Spell.IsSpellHarmful, id) then return "harm" end
+    elseif kind == "item" and C_Item then
+        if safe(C_Item.IsHelpfulItem, id) then return "help" end
+        if safe(C_Item.IsHarmfulItem, id) then return "harm" end
+    end
+    return nil
 end
 
 -- A secure button set to cast a spell, use an item or run a macro
@@ -1011,6 +1055,11 @@ local function actionButton(comboId, action)
     b:SetAttribute("spell", kind == "spell" and M.SpellCast(value) or nil)
     b:SetAttribute("item", kind == "item" and ("item:" .. value) or nil)
     b:SetAttribute("macro", kind == "macro" and value or nil)
+    -- The game's mouseover cast, as its own buttons
+    b:SetAttribute("ck-mo", M.MouseoverKind(kind, value))
+    local modifier = GetModifiedClick and GetModifiedClick("MOUSEOVERCAST")
+    b:SetAttribute("ck-mo-any", (modifier == nil or modifier == "NONE") or nil)
+    b:SetAttribute("unit", nil)
     return b
 end
 
@@ -1940,7 +1989,7 @@ function M:Init()
             M.hadStances = has
         end
         if event == "CVAR_UPDATE" and not (name and (tostring(name):find("GamePadEmulate")
-            or tostring(name) == "GamepadStanceBarOverride")) then return end
+            or tostring(name) == "GamepadStanceBarOverride" or tostring(name):lower() == "enablemouseovercast")) then return end
         if event == "GAME_PAD_CONNECTED" or event == "GAME_PAD_ACTIVE_CHANGED" then
             local lt, rt = padIndex("PADLTRIGGER"), padIndex("PADRTRIGGER")
             if lt == M.ltIndex and rt == M.rtIndex then return end

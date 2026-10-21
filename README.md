@@ -341,9 +341,16 @@ on **RT as a modifier** in Home › Gamepad), or the layers share it. Spells are
 L3 / R3 can be shown too (Home › Gamepad), with what the game does with them (autorun, ping...) or what
 you put on them. Spells are listed with their rank.
 
+Spells and items on the addon's buttons (paddles, free buttons, replaced game buttons) follow the
+game's mouseover cast like its own bar buttons: with its `enableMouseoverCast` setting on, a helpful
+one goes on the friendly unit under the cursor (a raid frame hovered with the gamepad cursor, a gyro
+mouse...), a harmful one on the enemy there, the setting's modifier held if one is set; otherwise on
+your target or yourself, as the game decides. Macros keep their own options.
+
 The extra buttons that do something (back paddles, L3, R3) appear around the gamepad action bar, in
 its round slot style: the action's icon, count, cooldown and usability, the held trigger layer's
-action, and the game's pressed look when you press them. **Move / size** resizes the game's gamepad
+action, and the game's pressed look when you press them. A paddle with nothing in the layer on screen
+isn't drawn: it shows up when you hold the trigger of a layer where it does something. **Move / size** resizes the game's gamepad
 bar with LB / RB once picked up (X then gives back the game's size, B the size it had; out of combat),
 and puts each extra button
 on one of the fixed places around the bar's controls (two columns on the outer side, two rows above and

@@ -742,13 +742,23 @@ function P:UpdateVisibility()
     f:SetShown((self.placing or (on and bar ~= nil and bar:IsVisible())) and true or false)
 end
 
+-- A button with nothing in the layer on screen isn't drawn (reported: next
+-- to buttons hidden for having nothing at all, others showed an empty
+-- circle for having something in another layer only). Faded out, not
+-- hidden: it keeps its place for the party wheel opened on it and for
+-- Move / size. The sticks keep the game's function they show.
 function P:Refresh(cooldown)
     local f = self.frame
     if not (f and f:IsShown()) then return end
     local layer = P.HeldLayer()
     for _, id in ipairs(P.EXTRA) do
         local b = f.buttons[id]
-        if b:IsShown() then self:UpdateButton(b, cooldown, layer) end
+        if b:IsShown() then
+            self:UpdateButton(b, cooldown, layer)
+            local empty = not self.placing and not STICKS[id] and not b.action
+            b:SetAlpha(empty and 0 or 1)
+            b:EnableMouse(not empty)
+        end
     end
 end
 
