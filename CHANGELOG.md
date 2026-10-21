@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.19.1
+
+- **Mouseover cast on the paddles** (reported: a heal on a back paddle never went on the raid frame
+  under the cursor, while the game's own D-pad and face buttons did). Spells and items on the
+  addon's buttons (paddles, free buttons, replaced game buttons) now follow the game's mouseover
+  cast like its own buttons: with it on, a heal goes on the friendly unit under the cursor (gamepad
+  cursor, gyro mouse...), a harmful spell on the enemy there, the setting's modifier held if one is
+  set; with nobody there, on your target or yourself as before. Works in combat. Macros keep their
+  own options.
+- **No more empty circles on the bar** (reported): a paddle with nothing in the layer on screen is no
+  longer drawn as an empty circle next to the hidden ones; it shows up when you hold the trigger of a
+  layer where it does something. Move / size still shows them all.
+
 ## 1.19.0
 
 - **Let go of the stick to use** (asked, Wheels › Opening, off by default): aiming with the right
