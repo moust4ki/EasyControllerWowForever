@@ -416,7 +416,15 @@ M.IsBoundAction = bound
 -- ("Target allies" on X): that function takes its trigger layers too
 -- (reported: RT + X targeted an ally instead of casting the right bar's
 -- spell). They work again once X alone holds a spell, a wheel or Nothing.
+-- L3 / R3 too (reported: Jump on L3 alone, a spell on LT + L3 jumped, Autorun
+-- on R3 alone, Quick phrases on LT + R3 ran Autorun): a game function the
+-- player put there alone, replacing the game's or on a free stick
+local STICK = { L3 = true, R3 = true }
+
 function M:CommandAlone(input)
+    if STICK[input.id] then
+        return bound(self:GetReplaced(input.id, "") or self:Get(input.id, ""))
+    end
     if not (input.bar and self:ReplaceOn() and self:OwnKeys()) then return false end
     return bound(self:GetReplaced(input.id, ""))
 end
