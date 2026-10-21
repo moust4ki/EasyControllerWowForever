@@ -276,7 +276,9 @@ from button to button, up to the layers, down to the actions under the controlle
   (L3: autorun, R3: ping, LB / RB: targeting), the game takes its trigger layers too: the controller
   sends the button without the trigger. Put a spell, a wheel or **Nothing** (first in the Game list)
   on the button alone, and the game's function on another button if you want it: then its trigger
-  layers take what you put there. LT + LB and RT + RB stay the game's class actions.
+  layers take what you put there. The same when you put a game function on L3 / R3 alone yourself
+  (Jump, Autorun...): its trigger layers are locked and say why. LT + LB and RT + RB stay the game's
+  class actions.
 - **The free inputs get the missing functions**: L3 / R3, trigger combinations nothing is bound to
   and the back paddles. Press A on one and pick in the lists on the right, LB / RB
   to change list:

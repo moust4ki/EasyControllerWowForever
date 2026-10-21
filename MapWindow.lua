@@ -110,14 +110,17 @@ function W:Cell(input, layer)
             return { state = "off", name = M:ActionName(shown) or L.MAP_GAME,
                 why = format(L.MAP_SHARED_LOCKED, K.ComboMarkup(input.id, base, 14), M:ActionName(M:Get(input.id, base)) or "") }
         end
-        -- A face / D-pad button given a game function alone: the same
+        -- A face / D-pad button given a game function alone: the same. L3 /
+        -- R3: freed with Nothing alone, as when the game's (given back, the
+        -- game's autorun or ping would hold the layers still)
         if M:CommandAlone(input) then
-            local kept = M:GetReplaced(input.id, layer)
+            local stick = not input.bar
+            local kept = M:GetReplaced(input.id, layer) or (stick and M:Get(input.id, layer)) or nil
             local slotName, slotIcon = M:NativeInfo(input, layer)
-            local alone = M:ActionName(M:GetReplaced(input.id, "")) or L.MAP_GAME
-            return { state = "off", name = kept and M:ActionName(kept) or slotName or L.MAP_GAME,
-                icon = kept and M:ActionIcon(kept) or slotIcon, action = kept, pick = true, lockedAlone = "command",
-                why = format(L.MAP_STICK_HELD, input.id, alone, input.id) }
+            local alone = M:ActionName(M:GetReplaced(input.id, "") or M:Get(input.id, "")) or L.MAP_GAME
+            return { state = "off", name = kept and M:ActionName(kept) or (not stick and slotName) or L.MAP_GAME,
+                icon = kept and M:ActionIcon(kept) or (not stick and slotIcon) or nil, action = kept, pick = true,
+                lockedAlone = stick and "held" or "command", why = format(L.MAP_STICK_HELD, input.id, alone, input.id) }
         end
         -- L3 / R3 alone still the game's: its layers wait for it to be freed
         if M:StickHeld(input) then
