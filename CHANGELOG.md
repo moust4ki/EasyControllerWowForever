@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.19.2
+
+- **L3 / R3 with a game function alone: their trigger layers locked** (reported: Jump on L3 alone,
+  a spell on LT + L3 jumped instead, in water kept swimming up; Autorun on R3 alone, Quick phrases
+  on LT + R3 ran Autorun). With a trigger held, the game passes the stick on without the trigger,
+  and a game function (Jump, Autorun, Ping...) can only be a key binding: those layers could never
+  work. They are now locked and say why, as the D-pad and A / B / X / Y already were; put a spell,
+  a wheel or Nothing on the stick alone to use them.
+
 ## 1.19.1
 
 - **Mouseover cast on the paddles** (reported: a heal on a back paddle never went on the raid frame

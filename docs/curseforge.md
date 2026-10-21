@@ -52,6 +52,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Let go of the stick to use** (1.19.0, asked): aiming with the right stick, push it toward an item and let it go, the item is used, no A needed, like the Party/Healer wheel: the consumables, the usable items and your own wheels. Easier while moving, your thumb stays on the stick. Sliding round the rim uses nothing on the way, only the last item aimed when you let go; A and B still work. **Wheels › Opening**, under Stick that aims (Right): off by default, so a press confirms and nothing is used by accident while you aim.
 - **Mouseover cast on the paddles** (1.19.1): spells and items on the addon's buttons now follow the game's mouseover cast like its own buttons: a heal goes on the raid frame or the friend under the cursor (gamepad cursor, gyro mouse...), a harmful spell on the enemy there; with nobody there, your target or yourself as before.
 - **No more empty circles on the bar** (1.19.1): a paddle with nothing in the layer on screen is no longer drawn; it shows up when you hold the trigger of a layer where it does something.
+- **L3 / R3 trigger layers locked when they can't work** (1.19.2): with a game function (Jump, Autorun, Ping...) on L3 or R3 alone, their trigger layers are now locked and say why (the game passes the stick on without the trigger); put a spell, a wheel or Nothing on the stick alone to use them.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
