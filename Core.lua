@@ -90,12 +90,16 @@ local DEFAULTS = {
     -- Consumables wheel: its kinds, and the variants beside the best of each
     wheel = {
         enabled = true, variants = true, locked = true,
-        -- Every wheel: hold its key to show it, let go to use (off: press)
+        -- Every wheel, aimed with the right stick: hold its key to show it,
+        -- the stick lights, let go of the key to use (off: pressed, a flick
+        -- of the stick let go uses)
         hold = false,
-        -- The stick that aims them: "left" or "right" (a party spell's: the right)
-        aimStick = "left",
-        -- Aimed with the right stick: letting it go uses what it aims at
-        -- (asked; off: a press confirms, nothing used by accident)
+        -- The sticks while a wheel is open: "walk" (not taken: you walk, the
+        -- camera turns as you aim), "strafe" (taken: the camera still, the
+        -- left stick walks digitally), "still" (taken: you stand still)
+        sticks = "strafe",
+        -- Pressed: a flick of the right stick let go uses what it aims at
+        -- (asked; off: the stick lights, A uses, B closes)
         stickRelease = false,
         -- The usable items' wheel: the items hidden from it ({ [item ID] =
         -- true }, false once shown again); the hearthstone by default

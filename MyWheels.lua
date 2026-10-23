@@ -281,7 +281,7 @@ function G:Render(page, focused)
                 local w = cell.wheel
                 c:SetAlpha(1)
                 c.name:SetText(w.name)
-                c.count:SetText(format("%d/%d", MW:Count(w), 8))
+                c.count:SetText(format("%d/%d", MW:Count(w), SLOTS))
                 for n, d in ipairs(c.dots) do
                     local kind = (w.slots[n] or ""):match("^(%a+):")
                     local filled = KIND_COLOR[kind] and KC[KIND_COLOR[kind]]
@@ -670,7 +670,7 @@ function E:Fill(e)
     if not (w and e and e.action) then return end
     MW:SetSlot(self.id, self.slot, e.action)
     C:Toast(format(L.TOAST_PAIR, positions()[self.slot] or "", e.name or ""))
-    self.slot = self.slot % 8 + 1
+    self.slot = MW.NextSlot(self.slot, 1)
 end
 
 function E:Empty()
@@ -702,6 +702,11 @@ function E:Button(i)
             if UIFrameFadeIn then UIFrameFadeIn(self.frame.buttons[3], 0.15, 0.3, 1) end
         end
     end
+end
+
+-- The slot after (`step` 1) or before (-1) `slot`, around the wheel
+function MW.NextSlot(slot, step)
+    return (slot - 1 + step) % SLOTS + 1
 end
 
 -- Around the wheel: the nearest slot that way (none down: the buttons)
@@ -763,7 +768,7 @@ function E:Press(name)
         return true
     end
     if name == "LB" or name == "RB" then
-        self.slot = (self.slot - 1 + (name == "LB" and -1 or 1)) % 8 + 1
+        self.slot = MW.NextSlot(self.slot, name == "LB" and -1 or 1)
     elseif DIRS[name] then
         local to = self:Nearest(name)
         if to then
@@ -809,15 +814,15 @@ function E:Render()
     if not (f and w) then return end
     f:Show()
     f.name:SetText(w.name)
-    f.count:SetText(format("%d / %d", MW:Count(w), 8))
+    f.count:SetText(format("%d / %d", MW:Count(w), SLOTS))
     local pos = positions()
     for i, s in ipairs(f.slots) do
+        local label = f.labels[i]
         local action = w.slots[i]
         local focus = self.zone == "slots" and i == self.slot
         local target = self.zone == "picker" and i == self.slot
         s:SetLook({ icon = action and CK.Mapping:ActionIcon(action), discColor = action and KC.iconBg or nil,
             plus = not action, glow = focus, dash = target })
-        local label = f.labels[i]
         label:SetText(action and (CK.Mapping:ActionName(action) or action) or pos[i] or "")
         local c = (focus or target) and KC.focus or (action and KC.cream or KC.grey)
         label:SetTextColor(c[1], c[2], c[3])
