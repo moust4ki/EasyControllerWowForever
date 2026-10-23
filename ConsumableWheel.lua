@@ -313,7 +313,7 @@ end
 -- Pressed, a flick of the right stick let go uses what it aims at (Wheels >
 -- Opening, asked; off by default: the stick lights, A uses, B closes)
 function W.LetGo()
-    return CK.db ~= nil and not W.Held() and settings().stickRelease == true
+    return CK.db ~= nil and not W.Held() and not W.Scroll() and settings().stickRelease == true
 end
 
 -- The stick only lights a section (kept when it goes back to the middle):
@@ -330,8 +330,19 @@ end
 -- you stand still
 W.STICK_MODES = { "walk", "strafe", "still" }
 function W.StickMode()
+    -- (chosen with the mouse wheel: no stick is taken)
+    if W.Scroll() then return "walk" end
     local mode = CK.db and settings().sticks
     return (mode == "walk" or mode == "still") and mode or "strafe"
+end
+
+-- What chooses in an open wheel (Wheels > Opening, asked): the right stick
+-- ("stick"), or the mouse wheel ("scroll": a notch down lights the next
+-- filled section clockwise, up counter-clockwise (asked: that way round
+-- felt more natural); the sticks are left alone, the
+-- left one walks, the right one turns the camera as always)
+function W.Scroll()
+    return CK.db ~= nil and settings().select == "scroll"
 end
 
 -- Its name in the texts
@@ -601,6 +612,8 @@ local AIMED = [[
     local aimWid = owner:GetAttribute("wheel") or "c"
     local stick = state and state.sticks and state.sticks[owner:GetAttribute("ck-stick") or 2]
     local n = owner:GetAttribute("ck-" .. aimWid .. "-" .. (owner:GetAttribute("page") or 1) .. "-n") or 0
+    -- (chosen with the mouse wheel: the right stick turns the camera, never read)
+    if owner:GetAttribute("ck-scroll") then n = 0 end
     if n > 0 and stick and stick.len and stick.len > ]] .. AIM .. [[ then
         local bestDot = -2
         for i = 1, n do
@@ -614,6 +627,27 @@ local AIMED = [[
 -- an empty section, a member not there: not
 local FILLED = [[
     local filled = slot > 0 and owner:GetFrameRef("slot" .. slot):IsShown()
+]]
+
+-- The mouse wheel ("scroll"): a notch lights the next filled section,
+-- "DOWN" clockwise, "UP" counter-clockwise, round the wheel (nothing lit
+-- yet: from the top, or from the last section back)
+local STEP = [[
+    if down == false or not owner:IsShown() then return false end
+    local wid = owner:GetAttribute("wheel") or "c"
+    local n = owner:GetAttribute("ck-" .. wid .. "-" .. (owner:GetAttribute("page") or 1) .. "-n") or 0
+    if n < 1 then return false end
+    local dir = button == "UP" and -1 or 1
+    local cur = owner:GetAttribute("ck-aim") or 0
+    if cur < 1 then cur = dir == 1 and 0 or n + 1 end
+    for i = 1, n do
+        cur = (cur - 1 + dir) % n + 1
+        if owner:GetFrameRef("slot" .. cur):IsShown() then
+            owner:SetAttribute("ck-aim", cur)
+            return false
+        end
+    end
+    return false
 ]]
 
 local HIDE = [[
@@ -679,11 +713,19 @@ local SHOW = [[
     else
         walker:ClearBindings()
     end
-    for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
-        owner:SetAttribute("ck-held-" .. key, 0)
-        owner:SetAttribute("ck-seen-" .. key, nil)
+    if owner:GetAttribute("ck-scroll") then
+        -- Chosen with the mouse wheel: its notches, the right stick left alone
         for prefix in gmatch(owner:GetAttribute("ck-prefixes"), "([^,]*),") do
-            owner:SetBindingClick(true, prefix .. key, "ControllerKeyboardWheelLetGo", key)
+            owner:SetBindingClick(true, prefix .. "MOUSEWHEELUP", "ControllerKeyboardWheelStep", "UP")
+            owner:SetBindingClick(true, prefix .. "MOUSEWHEELDOWN", "ControllerKeyboardWheelStep", "DOWN")
+        end
+    else
+        for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
+            owner:SetAttribute("ck-held-" .. key, 0)
+            owner:SetAttribute("ck-seen-" .. key, nil)
+            for prefix in gmatch(owner:GetAttribute("ck-prefixes"), "([^,]*),") do
+                owner:SetBindingClick(true, prefix .. key, "ControllerKeyboardWheelLetGo", key)
+            end
         end
     end
 ]]
@@ -972,6 +1014,9 @@ function W:Build()
     close:SetAttribute("type", "click")
     local page = keyButton("ControllerKeyboardWheelPage", wheel, PAGE, DONE)
     page:SetAttribute("type", "click")
+    -- The mouse wheel's notches ("scroll"): they light the next section
+    local step = keyButton("ControllerKeyboardWheelStep", wheel, STEP, nil)
+    step:SetAttribute("type", "click")
     -- The right stick's direction keys: their presses and releases light a
     -- section, a flick let go uses it (pressed)
     local letGo = keyButton("ControllerKeyboardWheelLetGo", wheel, LET_GO, DONE, "AnyDown", "AnyUp")
@@ -1610,6 +1655,8 @@ function W:Fill()
     wheel:SetAttribute("ck-hold", W.Held() or nil)
     -- Pressed: a flick let go uses (option)
     wheel:SetAttribute("ck-letgo", W.LetGo() or nil)
+    -- Chosen with the mouse wheel (option)
+    wheel:SetAttribute("ck-scroll", W.Scroll() or nil)
     self.lists = {}
     -- The consumables: by kind, 8 a page
     local items = settings().enabled and self:Scan() or {}
@@ -1726,6 +1773,9 @@ local function helpText(pressed, held, use)
     local h = function(key) return CK:GlyphMarkup(key, 14) end
     -- (B or R3, the right stick pressed in)
     local close = format("%s%s %s", h("B"), h("RS"), L.WHEEL_CLOSE)
+    if W.Scroll() then
+        return format("%s   %s   %s", L.WHEEL_SCROLL_CHOOSE, W.Held() and held or (h("A") .. " " .. use), close)
+    end
     if W.Held() then
         return format("%s %s   %s   %s", h("RS"), L.WHEEL_AIM, held, close)
     elseif not W.LetGo() then
@@ -1839,7 +1889,7 @@ end
 function W:AimedSection(n)
     local state = C_GamePad and C_GamePad.GetDeviceMappedState and C_GamePad.GetDeviceMappedState()
     local stick = state and state.sticks and state.sticks[aimStick(self.frame)]
-    if stick and stick.len and stick.len > AIM then
+    if stick and stick.len and stick.len > AIM and not W.Scroll() then
         local best, bestDot = nil, -2
         for i = 1, n do
             local x, y = slotDir(i, n)
@@ -1884,7 +1934,8 @@ function W:Track()
         self.ticked = nil
         -- A wheel of the player's: its name
         view.name:SetText(mine and CK.MyWheels and CK.MyWheels:Name(mine) or L.WHEEL_NOTHING)
-        view.count:SetText(format(W.Held() and L.WHEEL_NOTHING_HINT_HOLD
+        view.count:SetText(W.Scroll() and (W.Held() and L.WHEEL_SCROLL_HINT_HOLD or L.WHEEL_SCROLL_HINT)
+            or format(W.Held() and L.WHEEL_NOTHING_HINT_HOLD
             or (W.LetGo() and L.WHEEL_NOTHING_HINT or L.MYWHEEL_NOTHING_HINT), W.StickWords()))
         return
     end
@@ -2189,7 +2240,8 @@ function W:TrackParty()
     pv.name:SetText(list[1] and W.EntryName(list[1]) or "")
     if not i then
         self.ticked = nil
-        pv.count:SetText(W.Held() and L.PARTY_HINT_HOLD or (W.LetGo() and L.PARTY_HINT or L.PARTY_HINT_A))
+        pv.count:SetText(W.Scroll() and (W.Held() and L.WHEEL_SCROLL_HINT_HOLD or L.WHEEL_SCROLL_HINT)
+            or W.Held() and L.PARTY_HINT_HOLD or (W.LetGo() and L.PARTY_HINT or L.PARTY_HINT_A))
         return
     end
     -- Turned to the section, as the game's flyouts turn theirs (angles
@@ -2426,14 +2478,20 @@ end
 -- is left, and at logout (on again at the next login)
 function W:SyncStickKeys()
     if InCombatLockdown() then return end
-    self:StickKeys(self:PartyOpen() or self:WheelBound())
+    self:StickKeys(self:NeedStickKeys())
+end
+
+-- The direction keys wanted: a wheel on a button, chosen with the right
+-- stick (the mouse wheel needs none)
+function W:NeedStickKeys()
+    return not W.Scroll() and (self:PartyOpen() or self:WheelBound())
 end
 
 function W:RestoreSettings()
     if InCombatLockdown() then return end
     local s = settings()
     -- (kept while a party spell's wheel is open, or a wheel is on a button)
-    if s.stickButtonsWas ~= nil and not self:PartyOpen() and not self:WheelBound() then
+    if s.stickButtonsWas ~= nil and not self:NeedStickKeys() then
         setCVar("GamePadStickAxisButtons", s.stickButtonsWas)
         s.stickButtonsWas = nil
     end
@@ -2549,7 +2607,7 @@ function W:Init()
         -- for the fight (the game refuses the setting in combat)
         if event == "PLAYER_REGEN_DISABLED" then
             W:PlacePartyKeys()
-            if W:WheelBound() then W:StickKeys(true) end
+            if W:NeedStickKeys() then W:StickKeys(true) end
         end
         if event == "PLAYER_REGEN_DISABLED" or event == "BAG_UPDATE_COOLDOWN" or event == "SPELL_UPDATE_COOLDOWN" then
             W:Paint()

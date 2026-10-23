@@ -8,7 +8,7 @@ local env = setmetatable({}, { __index = function(_, k) local g = _G[k]; if g ~=
 local CK = { L = setmetatable({}, { __index = function(_, k) return k end }) }
 -- The snippets are the file's locals: handed out at its end
 local file = assert(io.open("ConsumableWheel.lua")):read("*a")
-local chunk = assert(loadstring(file .. "\nCK._snips = { TOGGLE = TOGGLE, USE = USE, LET_GO = LET_GO, DONE = DONE, CLOSE = CLOSE }", "ConsumableWheel.lua"))
+local chunk = assert(loadstring(file .. "\nCK._snips = { TOGGLE = TOGGLE, USE = USE, LET_GO = LET_GO, DONE = DONE, CLOSE = CLOSE, STEP = STEP }", "ConsumableWheel.lua"))
 setfenv(chunk, env)
 chunk("EasyController", CK)
 local SN = CK._snips
@@ -217,5 +217,33 @@ local ctoggle = handle("ControllerKeyboardWheelToggle"); ctoggle:SetAttribute("c
 owner:SetAttribute("ck-hold", nil)
 run(SN.TOGGLE, ctoggle, "LeftButton", true)
 check("paged wheel: LB / RB taken", owner.bindings["PADLSHOULDER"] ~= nil and owner.bindings["PADRSHOULDER"] ~= nil)
+run(SN.TOGGLE, ctoggle, "LeftButton", true)
+
+-- THE MOUSE WHEEL ("scroll"): wheel "1" holds slots 1 and 3
+owner:SetAttribute("ck-scroll", true); owner:SetAttribute("ck-move", "walk")
+local stepB = handle("step")
+run(SN.TOGGLE, toggle, "LeftButton", true); run(SN.TOGGLE, toggle, "LeftButton", false)
+check("scroll: the mouse wheel taken, the stick's keys not", owner.bindings["MOUSEWHEELUP"] ~= nil
+    and owner.bindings["SHIFT-MOUSEWHEELDOWN"] ~= nil and owner.bindings["PADRSTICKUP"] == nil)
+check("scroll: no movement bindings (the sticks stay the game's)", walker.bindings["PADLSTICKUP"] == nil)
+run(SN.STEP, stepB, "DOWN", true)
+check("scroll: first notch down lights the top (slot 1)", owner:GetAttribute("ck-aim") == 1)
+run(SN.STEP, stepB, "DOWN", true)
+check("scroll: next notch down skips the empty slot 2, lights 3", owner:GetAttribute("ck-aim") == 3)
+run(SN.STEP, stepB, "DOWN", true)
+check("scroll: and round the wheel back to 1", owner:GetAttribute("ck-aim") == 1)
+run(SN.STEP, stepB, "UP", true)
+check("scroll: up goes counter-clockwise (3)", owner:GetAttribute("ck-aim") == 3)
+setStick(0, 1)
+r = { run(SN.USE, handle("use"), "LeftButton", true) }
+check("scroll: A uses the lit slot 3, the right stick (up) ignored", r[1] == "s3")
+run(SN.DONE, letgo); setStick(0, 0)
+owner:SetAttribute("ck-hold", true)
+run(SN.TOGGLE, toggle, "LeftButton", true)
+run(SN.STEP, stepB, "UP", true)
+check("scroll: nothing lit, first notch up lights the last filled (3)", owner:GetAttribute("ck-aim") == 3)
+r = run(SN.TOGGLE, toggle, "LeftButton", false)
+check("scroll, held: the button's release uses the lit slot", r == "s3")
+run(SN.DONE, letgo)
 assert(not FAILED, "some checks failed")
 print("ALL PASSED")

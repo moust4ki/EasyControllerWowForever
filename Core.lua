@@ -101,6 +101,9 @@ local DEFAULTS = {
         -- Pressed: a flick of the right stick let go uses what it aims at
         -- (asked; off: the stick lights, A uses, B closes)
         stickRelease = false,
+        -- What chooses in an open wheel: "stick" (the right stick) or
+        -- "scroll" (the mouse wheel; the sticks left alone)
+        select = "stick",
         -- The usable items' wheel: the items hidden from it ({ [item ID] =
         -- true }, false once shown again); the hearthstone by default
         usableHidden = { [6948] = true },
