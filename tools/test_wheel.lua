@@ -98,7 +98,10 @@ run(SN.TOGGLE, toggle, "LeftButton", true)
 check("press opens wheel 1", owner:IsShown() and owner:GetAttribute("wheel") == "1")
 check("slot 1 & 3 shown, 5 hidden", slots[1].shown and slots[3].shown and not slots[5].shown and not slots[2].shown)
 check("opener key RB not taken by the wheel; LB neither (one page)", owner.bindings["PADRSHOULDER"] == nil and owner.bindings["PADLSHOULDER"] == nil)
-check("R3 closes", owner.bindings["PADRSTICK"] == "ControllerKeyboardWheelClose" and owner.bindings["SHIFT-PADRSTICK"] ~= nil)
+check("R3 closes", owner.bindings["PADRSTICK"] == "ControllerKeyboardWheelClose")
+check("the crossbar keeps its trigger layers (LT + A, RT + B, LT + R3)", owner.bindings["SHIFT-PAD1"] == nil
+    and owner.bindings["ALT-PAD2"] == nil and owner.bindings["SHIFT-PADRSTICK"] == nil)
+check("choosing keeps every modifier (the right stick's direction keys)", owner.bindings["SHIFT-PADRSTICKUP"] ~= nil)
 check("A, B and stick keys taken", owner.bindings["PAD1"] and owner.bindings["PAD2"] and owner.bindings["PADRSTICKRIGHT"])
 check("strafe: the left stick's direction keys bound to movement (walker)", walker.bindings["PADLSTICKUP"] == "MOVEFORWARD"
     and walker.bindings["SHIFT-PADLSTICKLEFT"] == "STRAFELEFT")
@@ -216,7 +219,8 @@ owner:SetAttribute("ck-c-1-1-t", "item"); owner:SetAttribute("ck-c-1-1", "item:2
 local ctoggle = handle("ControllerKeyboardWheelToggle"); ctoggle:SetAttribute("ck-wheel", "c")
 owner:SetAttribute("ck-hold", nil)
 run(SN.TOGGLE, ctoggle, "LeftButton", true)
-check("paged wheel: LB / RB taken", owner.bindings["PADLSHOULDER"] ~= nil and owner.bindings["PADRSHOULDER"] ~= nil)
+check("paged wheel: LB / RB taken (without a modifier)", owner.bindings["PADLSHOULDER"] ~= nil and owner.bindings["PADRSHOULDER"] ~= nil
+    and owner.bindings["SHIFT-PADLSHOULDER"] == nil)
 run(SN.TOGGLE, ctoggle, "LeftButton", true)
 
 -- THE MOUSE WHEEL ("scroll"): wheel "1" holds slots 1 and 3

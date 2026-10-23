@@ -548,7 +548,8 @@ end
 
 ---------------------------------------------------------------------------
 -- The secure part. The wheel frame owns the keys it takes while open (A,
--- B, LB / RB and the right stick's direction keys, with every modifier a
+-- B, R3, LB / RB without a modifier, so the crossbar's trigger layers stay
+-- the game's; the right stick's direction keys with every modifier a
 -- trigger may add), but those of the key that opened it ("ck-keys" of its
 -- button): pressed again it closes the wheel, its release is seen. Its
 -- snippets read the right stick from the game's gamepad state when a key
@@ -674,25 +675,28 @@ local SHOW = [[
     owner:Show()
     local skip = self:GetAttribute("ck-keys") or ","
     local paged = (owner:GetAttribute("ck-" .. (owner:GetAttribute("wheel") or "c") .. "-pages") or 1) > 1
-    for prefix in gmatch(owner:GetAttribute("ck-prefixes"), "([^,]*),") do
-        if not strfind(skip, ",PAD1,", 1, true) then
-            owner:SetBindingClick(true, prefix .. "PAD1", "ControllerKeyboardWheelUse")
-        end
-        if not strfind(skip, ",PAD2,", 1, true) then
-            owner:SetBindingClick(true, prefix .. "PAD2", "ControllerKeyboardWheelClose")
-        end
-        -- LB / RB turn the pages: taken only when the wheel has some (else
-        -- they stay the game's: its targeting modifiers)
-        if paged and not strfind(skip, ",PADLSHOULDER,", 1, true) then
-            owner:SetBindingClick(true, prefix .. "PADLSHOULDER", "ControllerKeyboardWheelPage", "LB")
-        end
-        if paged and not strfind(skip, ",PADRSHOULDER,", 1, true) then
-            owner:SetBindingClick(true, prefix .. "PADRSHOULDER", "ControllerKeyboardWheelPage", "RB")
-        end
-        -- R3 closes (asked): the thumb never leaves the right stick
-        if not strfind(skip, ",PADRSTICK,", 1, true) then
-            owner:SetBindingClick(true, prefix .. "PADRSTICK", "ControllerKeyboardWheelClose")
-        end
+    -- The wheel's own keys without a modifier only: with a trigger held
+    -- (LT = Shift, RT = Alt...) A, B, R3, LB / RB stay the crossbar's, so
+    -- a fight or a heal goes on with a wheel open. What chooses (the right
+    -- stick's direction keys, the mouse wheel) and walks keeps every
+    -- modifier: held to show on a trigger's layer, that trigger stays held
+    if not strfind(skip, ",PAD1,", 1, true) then
+        owner:SetBindingClick(true, "PAD1", "ControllerKeyboardWheelUse")
+    end
+    if not strfind(skip, ",PAD2,", 1, true) then
+        owner:SetBindingClick(true, "PAD2", "ControllerKeyboardWheelClose")
+    end
+    -- LB / RB turn the pages: taken only when the wheel has some (else
+    -- they stay the game's: its targeting modifiers)
+    if paged and not strfind(skip, ",PADLSHOULDER,", 1, true) then
+        owner:SetBindingClick(true, "PADLSHOULDER", "ControllerKeyboardWheelPage", "LB")
+    end
+    if paged and not strfind(skip, ",PADRSHOULDER,", 1, true) then
+        owner:SetBindingClick(true, "PADRSHOULDER", "ControllerKeyboardWheelPage", "RB")
+    end
+    -- R3 closes (asked): the thumb never leaves the right stick
+    if not strfind(skip, ",PADRSTICK,", 1, true) then
+        owner:SetBindingClick(true, "PADRSTICK", "ControllerKeyboardWheelClose")
     end
     owner:SetBindingClick(true, "ESCAPE", "ControllerKeyboardWheelClose")
     -- "strafe" (Wheels > Opening): the left stick walks while the wheel has
