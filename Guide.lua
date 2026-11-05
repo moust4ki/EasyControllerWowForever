@@ -781,9 +781,10 @@ local function barHigh()
     local bar = GamepadMainActionBarFrame
     if not (bar and bar.GetCenter) then return false end
     local _, y = bar:GetCenter()
+    y = CK.Plain(y)
     local h = UIParent:GetHeight()
     if not (y and h and h > 0) then return false end
-    y = y * (bar:GetEffectiveScale() or 1) / (UIParent:GetEffectiveScale() or 1)
+    y = y * (CK.Plain(bar:GetEffectiveScale()) or 1) / (UIParent:GetEffectiveScale() or 1)
     return y > h / 2
 end
 

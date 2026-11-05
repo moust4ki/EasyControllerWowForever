@@ -1419,9 +1419,12 @@ function W.ButtonCenter(comboId)
         f = extra and extra[inputId]
     end
     if not (f and f.IsVisible and f:IsVisible() and f.GetCenter) then return nil end
+    -- (secret, the game's build of 2 November 2026: unknown, where it was
+    -- last seen is kept)
     local x, y = f:GetCenter()
+    x, y = CK.Plain(x), CK.Plain(y)
     if not (x and y) then return nil end
-    local scale = (f:GetEffectiveScale() or 1) / (UIParent:GetEffectiveScale() or 1)
+    local scale = (CK.Plain(f:GetEffectiveScale()) or 1) / (UIParent:GetEffectiveScale() or 1)
     return x * scale, y * scale
 end
 

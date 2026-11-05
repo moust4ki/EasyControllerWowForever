@@ -599,15 +599,22 @@ function T:DrawActive(layer, bar)
     local top, on = barFrame("top"), barFrame(bar)
     local focus = top and top.BackgroundFocus
     if focus and focus.IsShown and focus:IsShown() and on and on.IsVisible and on:IsVisible() and focus.GetAtlas and focus:GetAtlas() then
+        local plain = CK.Plain
         local tx, ty = top:GetCenter()
         local fx, fy = focus:GetCenter()
         local w, h = focus:GetSize()
-        v.focus:SetAtlas(focus:GetAtlas())
-        v.focus:ClearAllPoints()
-        v.focus:SetPoint("CENTER", on, "CENTER", (fx or 0) - (tx or 0), (fy or 0) - (ty or 0))
-        v.focus:SetSize(w or 0, h or 0)
-        v.focus:Show()
-        self:HideGame(focus, keep)
+        tx, ty, fx, fy, w, h = plain(tx), plain(ty), plain(fx), plain(fy), plain(w), plain(h)
+        -- (secret, the game's build of 2 November 2026: the game's own left)
+        if tx and ty and fx and fy and w and h then
+            v.focus:SetAtlas(focus:GetAtlas())
+            v.focus:ClearAllPoints()
+            v.focus:SetPoint("CENTER", on, "CENTER", fx - tx, fy - ty)
+            v.focus:SetSize(w, h)
+            v.focus:Show()
+            self:HideGame(focus, keep)
+        else
+            v.focus:Hide()
+        end
     else
         v.focus:Hide()
     end
@@ -620,7 +627,7 @@ function T:Halo(layer)
     local v = self.view
     local unit = GamepadMainActionBarFrame and GamepadMainActionBarFrame.PageUnit
     local icon = layer and unit and unit[GAME_TRIGGER_ICON[layer] or ""]
-    if not (icon and icon.IsVisible and icon:IsVisible() and icon:GetCenter()) then layer = nil end
+    if not (icon and icon.IsVisible and icon:IsVisible() and CK.Plain((icon:GetCenter()))) then layer = nil end
     local sides = layer and (layer == "LTRT" and { "L", "R" } or { layer == "RT" and "R" or "L" }) or {}
     local fresh = layer ~= self.haloLayer
     self.haloLayer = layer
@@ -643,11 +650,13 @@ function T:Halo(layer)
         else
             -- At the icon, at its scale and strata: the glow under it, the
             -- flash over it (LT + RT: one at each end of the two icons)
-            local scale = (icon:GetEffectiveScale() or 1) / (UIParent:GetEffectiveScale() or 1)
+            local scale = (CK.Plain(icon:GetEffectiveScale()) or 1) / (UIParent:GetEffectiveScale() or 1)
             local w, height = icon:GetSize()
+            w, height = CK.Plain(w), CK.Plain(height)
             local x = #sides == 2 and (i == 1 and -1 or 1) * math.max(0, ((w or 0) - (height or 0)) / 2) or 0
             local strata = icon.GetFrameStrata and icon:GetFrameStrata()
-            local level = icon.GetFrameLevel and icon:GetFrameLevel() or 1
+            if issecretvalue and issecretvalue(strata) then strata = nil end
+            local level = icon.GetFrameLevel and CK.Plain(icon:GetFrameLevel()) or 1
             for _, f in ipairs({ h.back, h.front }) do
                 f:SetScale(scale)
                 if strata then f:SetFrameStrata(strata) end
@@ -687,7 +696,8 @@ function T:Draw()
     -- At the game's bar's scale (its size, Home > Gamepad): our buttons,
     -- counts and rings as big as its own, its offsets ours
     local main = GamepadMainActionBarFrame
-    local k = main and main.GetEffectiveScale and main:GetEffectiveScale() / (UIParent:GetEffectiveScale() or 1)
+    local k = main and main.GetEffectiveScale and CK.Plain(main:GetEffectiveScale())
+    k = k and k / (UIParent:GetEffectiveScale() or 1)
     if k and k > 0 and math.abs((v:GetScale() or 1) - k) > 0.001 then v:SetScale(k) end
     if frame and not compact and gameTop then
         v.trigger:Hide()
@@ -734,17 +744,17 @@ function T:DrawTrigger(layer)
     local game = unit and unit[GAME_TRIGGER_ICON[layer] or ""]
     local top = barFrame("top")
     local anchor, y = nil, 0
-    if game and game.GetCenter and game:GetCenter() then
+    if game and game.GetCenter and CK.Plain((game:GetCenter())) then
         anchor = game
-    elseif top and top.GetCenter and top:GetCenter() then
+    elseif top and top.GetCenter and CK.Plain((top:GetCenter())) then
         anchor, y = top, -35
     end
     if not anchor then
         t:Hide()
         return
     end
-    local scale = anchor.GetEffectiveScale and anchor:GetEffectiveScale()
-    local mine = self.view:GetEffectiveScale()
+    local scale = anchor.GetEffectiveScale and CK.Plain(anchor:GetEffectiveScale())
+    local mine = CK.Plain(self.view:GetEffectiveScale())
     if scale and mine and mine > 0 then t:SetScale(scale / mine) end
     t:ClearAllPoints()
     t:SetPoint("CENTER", anchor, "CENTER", 0, y)
