@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.19.4
+
+- **Move / size works again with the game's latest build** (reported: errors over and over while
+  placing the bar). Since its build of 2 November the game hides the exact place and size of its
+  gamepad bar's buttons from addons; the addon no longer computes with them. In Move / size the
+  D-pad goes by the addon's own places when the game's are hidden; the bar's size, the trigger
+  toggle's background, the party wheels' places and the guide leave things as they were instead
+  of erroring.
+
 ## 1.19.3
 
 - **The game fixed its Edit Mode bug**: the gamepad bar no longer leaves your own Edit Mode layouts

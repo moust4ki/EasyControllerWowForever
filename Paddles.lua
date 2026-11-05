@@ -1049,18 +1049,26 @@ end
 -- Edit Mode's bar: its size only, its place kept (its anchors' offsets in
 -- its new scale, as Edit Mode does it itself)
 function P:ScaleEditModeBar(bar)
-    local k, old = self:BarScale(), bar:GetScale() or 1
-    if math.abs(old - k) < 0.001 then return end
+    local plain = CK.Plain
+    local k, old = self:BarScale(), plain(bar:GetScale())
+    -- (its size or place secret: left as it is)
+    if not old or math.abs(old - k) < 0.001 then return end
     if InCombatLockdown() then
         self.pendingBar = true
         return
     end
-    self.pendingBar = false
-    bar:SetScaleBase(k)
+    local points = {}
     for i = 1, bar:GetNumPoints() do
         local point, relativeTo, relativePoint, x, y = bar:GetPoint(i)
-        if point then bar:SetPointBase(point, relativeTo, relativePoint, (x or 0) * old / k, (y or 0) * old / k) end
+        if point then
+            x, y = x == nil and 0 or plain(x), y == nil and 0 or plain(y)
+            if not (x and y) then return end
+            points[#points + 1] = { point, relativeTo, relativePoint, x * old / k, y * old / k }
+        end
     end
+    self.pendingBar = false
+    bar:SetScaleBase(k)
+    for _, p in ipairs(points) do bar:SetPointBase(unpack(p)) end
     if CK.ConsumableWheel and CK.ConsumableWheel.PlacePartyKeys then CK.ConsumableWheel:PlacePartyKeys() end
 end
 
@@ -1078,7 +1086,7 @@ function P:ApplyBarOffset()
     -- The game's own place (MainActionBarFrame.xml), read once
     if not self.barPoint then
         local point, relativeTo, relativePoint, px, py = bar:GetPoint(1)
-        if point and relativeTo == UIParent and type(px) == "number" then
+        if point and relativeTo == UIParent and CK.Plain(px) and CK.Plain(py) then
             self.barPoint = { point, relativePoint, px, py }
         else
             self.barPoint = { "BOTTOM", "BOTTOM", 0, 110 }
@@ -1156,15 +1164,17 @@ end
 
 -- The bar's buttons on the screen (the game's frame is much larger than
 -- them: reported, a big rectangle that didn't say what it moved): their
--- bounds, in UIParent's units, the stance bar's in its place
+-- bounds, in UIParent's units, the stance bar's in its place. None when
+-- the game keeps them secret (its build of 2 November 2026)
 function P:BarBounds()
+    local plain = CK.Plain
     local ui = UIParent:GetEffectiveScale() or 1
     local l, r, t, b
     local function add(f)
         if not (f and f.IsVisible and f:IsVisible() and f.GetLeft) then return end
-        local fl, fr, ft, fb = f:GetLeft(), f:GetRight(), f:GetTop(), f:GetBottom()
+        local fl, fr, ft, fb = plain(f:GetLeft()), plain(f:GetRight()), plain(f:GetTop()), plain(f:GetBottom())
         if not (fl and fr and ft and fb) then return end
-        local k = (f:GetEffectiveScale() or 1) / ui
+        local k = (plain(f:GetEffectiveScale()) or 1) / ui
         fl, fr, ft, fb = fl * k, fr * k, ft * k, fb * k
         l, r = l and math.min(l, fl) or fl, r and math.max(r, fr) or fr
         t, b = t and math.max(t, ft) or ft, b and math.min(b, fb) or fb
@@ -1209,8 +1219,17 @@ function P:UpdatePlaceTag()
     tag:Show()
 end
 
+-- Without the places on the screen (the game's secret, its build of
+-- 2 November 2026: the extra buttons, anchored to its bar, too), the D-pad
+-- goes by the places the addon gives: the bar's middle at 0, its buttons
+-- about 540 x 150, each extra button at its place from its side's anchor
+-- (200 from the middle)
+local logical = false
+local LOGICAL_BAR_W, LOGICAL_BAR_H, LOGICAL_ANCHOR_X = 270, 75, 200
+
 -- The bar's buttons' bounds on the screen, in pixels (its gold frame's)
 local function barRect()
+    if logical then return -LOGICAL_BAR_W, LOGICAL_BAR_W, LOGICAL_BAR_H, -LOGICAL_BAR_H end
     local l, r, t, b = P:BarBounds()
     if not l then return nil end
     local k = UIParent:GetEffectiveScale() or 1
@@ -1221,6 +1240,12 @@ end
 -- game frame, an Edit Mode system, is much larger than them: its centre far
 -- from them, the bar never reached from the extra buttons, reported)
 local function screenCenter(id)
+    if logical then
+        if id == "BAR" then return 0, 0 end
+        if not SIDE[id] then return nil end
+        local x, y = P:Position(id)
+        return SIDE[id] * LOGICAL_ANCHOR_X + x, y
+    end
     if id == "BAR" then
         local l, r, t, b = barRect()
         if l then return (l + r) / 2, (t + b) / 2 end
@@ -1228,9 +1253,21 @@ local function screenCenter(id)
     local f = id == "BAR" and GamepadMainActionBarFrame or P.frame.buttons[id]
     if not f then return nil end
     local x, y = f:GetCenter()
-    if not x then return nil end
-    local scale = f:GetEffectiveScale()
+    x, y = CK.Plain(x), CK.Plain(y)
+    if not (x and y) then return nil end
+    local scale = CK.Plain(f:GetEffectiveScale()) or 1
     return x * scale, y * scale
+end
+
+-- Every element shown has its place on the screen (none secret), the bar
+-- its buttons' bounds
+local function screenPlaces(order)
+    if GamepadMainActionBarFrame and not P:BarBounds() then return false end
+    for _, id in ipairs(order) do
+        local shown = id == "BAR" or (P.frame.buttons[id] and P.frame.buttons[id]:IsShown())
+        if shown and not screenCenter(id) then return false end
+    end
+    return true
 end
 
 -- Where an element is, seen from a point: the bar, its buttons' nearest
@@ -1248,13 +1285,16 @@ end
 
 -- The nearest element in a D-pad direction
 function P:SelectToward(dir)
+    local order = GamepadMainActionBarFrame and P.PLACE_ORDER or P.EXTRA
+    -- The places on the screen, else the addon's own
+    logical = false
+    logical = not screenPlaces(order)
     local fx, fy = screenCenter(self.placeSelected)
     if not fx then return end
     -- From the bar: from its buttons' edge nearest each element
     local rect = self.placeSelected == "BAR" and { barRect() }
     local dx, dy = DIRS[dir][1], DIRS[dir][2]
     local best, bestScore
-    local order = GamepadMainActionBarFrame and P.PLACE_ORDER or P.EXTRA
     for _, id in ipairs(order) do
         local x, y = seenFrom(id, fx, fy)
         if rect and rect[1] and x then
@@ -1273,6 +1313,7 @@ function P:SelectToward(dir)
             end
         end
     end
+    logical = false
     if best then self:SelectForPlacement(best) end
 end
 

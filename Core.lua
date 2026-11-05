@@ -162,6 +162,15 @@ local function copyDefaults(src, dst)
     end
 end
 
+-- A number the addon may compute with, else nil. Since the game's build of
+-- 2 November 2026 the places and sizes of some of its frames (the gamepad
+-- bar's buttons) can be secret values for addons: any sum with one stops
+-- the code (reported: errors while placing the bar).
+function CK.Plain(v)
+    if type(v) ~= "number" or (issecretvalue and issecretvalue(v)) then return nil end
+    return v
+end
+
 -- Entries a saved file may hold broken (edited by hand, an old bug): left
 -- out, so a wrong one never stops the addon. The account's settings at
 -- load, each character's profile when it is put in use (Profiles.lua).

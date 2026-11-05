@@ -44,6 +44,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **No more empty circles on the bar** (1.19.1): a paddle with nothing in the layer on screen is no longer drawn; it shows up when you hold the trigger of a layer where it does something.
 - **L3 / R3 trigger layers locked when they can't work** (1.19.2): with a game function (Jump, Autorun, Ping...) on L3 or R3 alone, their trigger layers are now locked and say why (the game passes the stick on without the trigger); put a spell, a wheel or Nothing on the stick alone to use them.
 - **Compact is safe again** (1.19.3): the game fixed its Edit Mode bug that dropped the gamepad bar from your own layouts; the warnings about it are gone.
+- **Move / size fixed for the game's latest build** (1.19.4): the game now hides the exact place of its bar's buttons from addons; placing the bar and the extra buttons no longer throws errors.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
