@@ -1093,25 +1093,6 @@ function P:ApplyBarOffset()
     if CK.ConsumableWheel and CK.ConsumableWheel.PlacePartyKeys then CK.ConsumableWheel:PlacePartyKeys() end
 end
 
--- The game's bug since its patch of 9 October 2026: launched with its
--- gamepad bar in a layout of the player's, Edit Mode takes the bar out of
--- that layout (and saves it so) and hides it: no bar, not in Edit Mode
--- either, a /reload changes nothing; the next launch puts it back (its
--- settings by default, compact off). Said once in the chat, with what to do
-function P:CheckEditModeBar()
-    if self.editModeWarned then return end
-    local bar = GamepadMainActionBarFrame
-    if not (P.EditModeBar(bar) and EditModeManagerFrame) then return end
-    -- (its layouts not in use yet: nothing to tell)
-    if EditModeManagerFrame.layoutInfo == nil then return end
-    local ok, gamepadUI = pcall(function() return InputUtil and InputUtil.IsGamepadUIEnabled and InputUtil.IsGamepadUIEnabled() end)
-    if not (ok and gamepadUI) then return end
-    -- Edit Mode gave it its place: its layout holds it
-    if bar.systemInfo ~= nil then return end
-    self.editModeWarned = true
-    CK:Print(L.EDITMODE_BAR_LOST, LAYOUT_STYLE_GAMEPAD or "Gamepad")
-end
-
 function P:MoveBar(dx, dy)
     -- (placed in the game's Edit Mode)
     if P.EditModeBar() then return end
@@ -1557,17 +1538,12 @@ function P:Init()
     events:RegisterEvent("ADDON_LOADED")
     events:RegisterEvent("PLAYER_REGEN_ENABLED")
     events:RegisterEvent("PLAYER_ENTERING_WORLD")
-    events:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
     events:SetScript("OnEvent", function(_, event, name)
         if event == "PLAYER_REGEN_ENABLED" then
             watchKeys()
             if P.pendingBar then P:ApplyBarOffset() end
-        elseif event == "EDIT_MODE_LAYOUTS_UPDATED" then
-            -- Once Edit Mode has put its layout in use
-            C_Timer.After(1, function() P:CheckEditModeBar() end)
         elseif event == "PLAYER_ENTERING_WORLD" then
             P:ApplyBarOffset()
-            C_Timer.After(5, function() P:CheckEditModeBar() end)
         elseif name == "Blizzard_GamepadActionBars" then
             P:ApplyBarOffset()
             -- The game's gamepad bars may load later (gamepad interface turned on)
