@@ -616,16 +616,16 @@ function G:BuildScreen3(s, f)
     s.toggle.enabled = mappingOn
     image(f, "ck_onb_toggle", 540, 214, 256, 128)
     s.toggleGlow = glow(f, "ck_onb_toggle_glow", 540, 214, 256, 128)
-    -- Edit Mode's compact bar: the warning, the button turning it on (asked)
-    local warn = frameAt(f, "Frame", 24, 364, 772, 150)
-    box(warn, KC.warn, 0.06, KC.warn, 0.55)
-    text(warn, 16, KC.warn, 16, 14):SetText(L.GUIDE_EDITMODE_TITLE)
-    help(warn, 14, KC.cream2, 16, 40, 500):SetText(format(L.GUIDE_EDITMODE_TEXT, LAYOUT_STYLE_GAMEPAD or "Gamepad"))
-    s.compact = button(s, warn, L.GUIDE_COMPACT_ON, 532, 44, 224, 38, false, function()
+    -- Edit Mode's compact bar: what it is, the button turning it on (asked)
+    local compact = frameAt(f, "Frame", 24, 364, 772, 150)
+    box(compact, KC.yours, 0.06, KC.info, 0.45)
+    text(compact, 16, KC.info, 16, 14):SetText(L.GUIDE_EDITMODE_TITLE)
+    help(compact, 14, KC.cream2, 16, 40, 500):SetText(L.GUIDE_EDITMODE_TEXT)
+    s.compact = button(s, compact, L.GUIDE_COMPACT_ON, 532, 44, 224, 38, false, function()
         G:SetCompact(not P().CompactBar())
     end)
     s.compact.shown = function() return G:CanSetCompact() end
-    s.compactNote = help(warn, 12, KC.grey, 532, 90, 224)
+    s.compactNote = help(compact, 12, KC.grey, 532, 90, 224)
     s.compactNote:SetText(L.GUIDE_COMPACT_RELOAD)
     function s.first() return s.slider end
     function s.render()
@@ -642,8 +642,7 @@ end
 -- a copy of it is made ("Easy Controller"), as Edit Mode does. Saved with
 -- the game's own functions, then the interface reloaded: no Edit Mode frame
 -- or method is used from here (its taint would spread to the bar), the
--- reload applies the layout as the game loads it. The game's bug (patch of
--- 9 October: that bar dropped at the next launch) is said on the screen.
+-- reload applies the layout as the game loads it.
 ---------------------------------------------------------------------------
 local COMPACT_LAYOUT = "Easy Controller"
 

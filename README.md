@@ -242,8 +242,7 @@ first: Later), LB / RB change step; each choice is the panel's own setting, save
    bottom if the bar is up there; A keeps, B puts the size back); Triggers: press to switch; Edit
    Mode's compact bar: its button saves a copy of the game's Gamepad layout (*Easy Controller*) with
    compact on, with the game's own functions (no Edit Mode frame touched), then reloads the
-   interface, the guide coming back at that step. The game's bug (its patch of 9 October) drops that
-   bar at the next launch: said on the screen.
+   interface, the guide coming back at that step.
 4. **The chat keyboard**: on or off, daisywheel or split keyboard, their layout and suggestions.
 5. **The wheels**: the consumables and usable items wheels, each on or off; *Choose its key* waits for
    the button pressed next, LT / RT held for their layers (B alone cancels; A, X and Y alone stay the
