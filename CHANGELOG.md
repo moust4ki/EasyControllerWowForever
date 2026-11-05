@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.19.3
+
+- **The game fixed its Edit Mode bug**: the gamepad bar no longer leaves your own Edit Mode layouts
+  (with Compact on) at the next launch. The warnings about it are gone: the chat message, the
+  guide's note (step 3, its compact bar now a plain explanation) and the description's.
+
 ## 1.19.2
 
 - **L3 / R3 with a game function alone: their trigger layers locked** (reported: Jump on L3 alone,
