@@ -6,9 +6,9 @@ local L = CK.L
 -- (soul shards, powders, candles, poisons...) and any item the player adds.
 -- Each shows its count; under its "low" threshold it glows, stronger and
 -- faster down to its "critical" one, where the glow is red. One bar of
--- buttons, placed freely (mouse drag while unlocked, or the D-pad), growing
--- in one of 4 directions, and a click opens the bags. Nothing of the game's
--- is changed.
+-- buttons, placed freely (mouse drag while unlocked, or the D-pad) from the
+-- game's gamepad bar and at its scale, growing in one of 4 directions, and
+-- a click opens the bags. Nothing of the game's is changed.
 local S = {}
 CK.Supplies = S
 
@@ -211,6 +211,8 @@ function S:BuildBar()
     bar.ring:SetPoint("BOTTOMRIGHT", 8, -8)
     CK.UIKit.nineSlice(bar.ring, "ck_select", 128, 32, 10, 10, "OVERLAY")
     bar.ring:Hide()
+    -- Dragged with the mouse; the game's bar's scale followed
+    bar:SetScript("OnUpdate", function(_, dt) S:OnUpdate(dt) end)
     self.bar = bar
     self:Place()
 end
@@ -250,12 +252,9 @@ function S:Button(i)
     click:SetScript("OnEnter", function(self) tooltip(self, b) end)
     click:SetScript("OnLeave", function() GameTooltip:Hide() end)
     click:SetScript("OnDragStart", function()
-        if not settings().locked and not InCombatLockdown() then bar:StartMoving() end
+        if not settings().locked and not InCombatLockdown() then S:StartDrag() end
     end)
-    click:SetScript("OnDragStop", function()
-        bar:StopMovingOrSizing()
-        S:SavePosition()
-    end)
+    click:SetScript("OnDragStop", function() S.drag = nil end)
     b.click = click
     bar.buttons[i] = b
     return b
@@ -282,39 +281,148 @@ for _, d in ipairs(S.DIRECTIONS) do DIRECTION[d.key] = d end
 -- Before 1.2: "row" and "column"
 local OLD_LAYOUT = { row = "right", column = "down" }
 
+---------------------------------------------------------------------------
+-- Its place, from the game's gamepad bar (asked: the same place on a PC and
+-- on a handheld or a TV of another resolution, and the size following the
+-- bar's). Saved as where its first button's middle is from the bar's bottom
+-- middle (where the game anchors its bar), in the bar's units: it follows
+-- the bar wherever Edit Mode puts it, grows with it, and that first button
+-- stays put whatever the count, the size or the direction. The bar's place
+-- is never read (secret to addons since the game's build of 2 November
+-- 2026), it is only anchored to: moved by steps, and by the mouse's own way.
+---------------------------------------------------------------------------
+local DEFAULT_Y = 220   -- the default place: above the game's bar's bottom middle
+local NO_BAR_Y = 110    -- no gamepad bar: where its bottom middle usually is
+-- From the edge the bar grows from, toward its first button's middle
+local EDGE = { LEFT = { 1, 0 }, RIGHT = { -1, 0 }, TOP = { 0, -1 }, BOTTOM = { 0, 1 } }
+
+local function gameBar() return GamepadMainActionBarFrame end
+
+-- The game's bar's scale, for ours (1 without it)
+local function barScale()
+    local gb = gameBar()
+    local k = gb and gb.GetEffectiveScale and CK.Plain(gb:GetEffectiveScale())
+    local u = CK.Plain(UIParent:GetEffectiveScale())
+    if k and u and k > 0 and u > 0 then return k / u end
+    return 1
+end
+S.BarScale = barScale
+
+local function layoutOf()
+    local s = settings()
+    return DIRECTION[s.layout] or DIRECTION.right, SIZES[s.size] or SIZES[2]
+end
+
+local function savedPlace()
+    local p = settings().barPos
+    if type(p) == "table" and type(p.x) == "number" and type(p.y) == "number" then return p end
+end
+
 function S:Place()
     local bar = self.bar
-    local pos = settings().pos
+    if not bar or InCombatLockdown() then return end
+    local d, size = layoutOf()
+    local k = barScale()
+    if math.abs((bar:GetScale() or 1) - k) > 0.001 then bar:SetScale(k) end
+    self.scale = k
+    local gb = gameBar()
+    local to, baseY = gb or UIParent, gb and 0 or NO_BAR_Y
+    local place = savedPlace()
     bar:ClearAllPoints()
-    if type(pos) == "table" and pos.point then
-        bar:SetPoint(pos.point, UIParent, pos.point, pos.x, pos.y)
+    if place then
+        local e = EDGE[d.anchor]
+        bar:SetPoint(d.anchor, to, "BOTTOM", place.x - e[1] * size / 2, baseY + place.y - e[2] * size / 2)
     else
-        bar:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 330)
+        -- Not moved yet: centred above the bar
+        bar:SetPoint("BOTTOM", to, "BOTTOM", 0, baseY + DEFAULT_Y)
     end
 end
 
--- The bar held by the edge it grows from (UIParent's same point), where its
--- first button is now: that button stays put whatever the count, the size or
--- the direction
-function S:HoldEdge(point)
-    local bar = self.bar
-    local ref = bar.buttons and bar.buttons[1]
-    if not (ref and ref:IsShown() and ref:GetLeft()) then return end
-    local l, b, w, h = ref:GetLeft(), ref:GetBottom(), ref:GetWidth(), ref:GetHeight()
-    local fx = point == "LEFT" and 0 or point == "RIGHT" and 1 or 0.5
-    local fy = point == "BOTTOM" and 0 or point == "TOP" and 1 or 0.5
-    local x = l + w * fx - UIParent:GetWidth() * fx
-    local y = b + h * fy - UIParent:GetHeight() * fy
-    local current, _, _, cx, cy = bar:GetPoint(1)
-    if current == point and math.abs((cx or 0) - x) < 1 and math.abs((cy or 0) - y) < 1 then return end
-    bar:ClearAllPoints()
-    bar:SetPoint(point, UIParent, point, x, y)
-    self:SavePosition()
+-- Where its first button's middle is now, from the game's bar's bottom
+-- middle (the default place: from its size and count, as Place puts it)
+function S:CurrentPlace()
+    local place = savedPlace()
+    if place then return place.x, place.y end
+    local d, size = layoutOf()
+    local length = self.length or size
+    local w, h = d.x ~= 0 and length or size, d.x ~= 0 and size or length
+    local e = EDGE[d.anchor]
+    local fx = d.anchor == "LEFT" and -w / 2 or d.anchor == "RIGHT" and w / 2 or 0
+    local fy = d.anchor == "TOP" and h or d.anchor == "BOTTOM" and 0 or h / 2
+    return fx + e[1] * size / 2, DEFAULT_Y + fy + e[2] * size / 2
 end
 
-function S:SavePosition()
-    local point, _, _, x, y = self.bar:GetPoint(1)
-    settings().pos = { point = point, x = math.floor(x + 0.5), y = math.floor(y + 0.5) }
+function S:MoveTo(x, y)
+    settings().barPos = { x = math.floor(x + 0.5), y = math.floor(y + 0.5) }
+    self:Place()
+end
+
+-- The mouse: its way since the press, in the bar's units
+function S:StartDrag()
+    local x, y = self:CurrentPlace()
+    local cx, cy = GetCursorPosition()
+    self.drag = { x = x, y = y, cx = cx, cy = cy, scale = self.bar:GetEffectiveScale() }
+end
+
+function S:Drag()
+    local d = self.drag
+    if InCombatLockdown() or not (IsMouseButtonDown and IsMouseButtonDown("LeftButton")) then
+        self.drag = nil
+        return
+    end
+    local cx, cy = GetCursorPosition()
+    self:MoveTo(d.x + (cx - d.cx) / d.scale, d.y + (cy - d.cy) / d.scale)
+end
+
+function S:OnUpdate(dt)
+    if self.drag then self:Drag() end
+    self.sinceScale = (self.sinceScale or 0) + dt
+    if self.sinceScale < 0.5 then return end
+    self.sinceScale = 0
+    -- The game's bar resized (Move / size, the interface's scale): ours too
+    if math.abs(barScale() - (self.scale or 1)) > 0.001 then self:Place() end
+end
+
+-- The game's bar's bottom middle on the screen (UIParent's units), when
+-- the game lets addons read it
+local function gameBarBottom()
+    local gb = gameBar()
+    if not gb then return UIParent:GetWidth() / 2, NO_BAR_Y end
+    local plain, k = CK.Plain, barScale()
+    local l, r, b = plain(gb:GetLeft()), plain(gb:GetRight()), plain(gb:GetBottom())
+    if l and r and b then return (l + r) / 2 * k, b * k end
+    local point, rel, relPoint, x, y = gb:GetPoint(1)
+    x, y = plain(x), plain(y)
+    if x and y and rel == UIParent and point == "BOTTOM" and relPoint == "BOTTOM" then
+        return UIParent:GetWidth() / 2 + x * k, y * k
+    end
+end
+
+-- A place saved before 1.20, from the screen's edges: where its first
+-- button was then, from the game's bar, when the bar's place can be read;
+-- else the default place
+function S:ConvertOldPlace(length)
+    local s = settings()
+    local old = s.pos
+    s.pos = nil
+    if type(old) ~= "table" or type(old.point) ~= "string" or type(old.x) ~= "number" or type(old.y) ~= "number" then
+        return
+    end
+    local d, size = layoutOf()
+    local P, W, H = old.point, UIParent:GetWidth(), UIParent:GetHeight()
+    local w, h = d.x ~= 0 and length or size, d.x ~= 0 and size or length
+    local fx = P:find("LEFT") and 0 or P:find("RIGHT") and 1 or 0.5
+    local fy = P:find("BOTTOM") and 0 or P:find("TOP") and 1 or 0.5
+    -- The bar then (scale 1), its first button at the edge it grows from
+    local left, bottom = fx * W + old.x - fx * w, fy * H + old.y - fy * h
+    local ax = d.anchor == "LEFT" and left or d.anchor == "RIGHT" and left + w or left + w / 2
+    local ay = d.anchor == "BOTTOM" and bottom or d.anchor == "TOP" and bottom + h or bottom + h / 2
+    local e = EDGE[d.anchor]
+    local cx, cy = ax + e[1] * size / 2, ay + e[2] * size / 2
+    local ok, bx, by = pcall(gameBarBottom)
+    if not (ok and bx and by) then return end
+    local k = barScale()
+    s.barPos = { x = math.floor((cx - bx) / k + 0.5), y = math.floor((cy - by) / k + 0.5) }
 end
 
 function S:Enabled()
@@ -388,7 +496,15 @@ function S:Refresh()
     self:BuildBar()
     local bar = self.bar
     local d = DIRECTION[s.layout] or DIRECTION.right
-    self:HoldEdge(d.anchor)
+    local length = math.max(1, #list * (size + 8) - 8)
+    self.length = length
+    if s.pos ~= nil and not savedPlace() then self:ConvertOldPlace(length) end
+    -- The default place (centred above the game's bar) kept from its first
+    -- drawing on: its first button stays put as resources come and go
+    if not savedPlace() then
+        local x, y = self:CurrentPlace()
+        s.barPos = { x = math.floor(x + 0.5), y = math.floor(y + 0.5) }
+    end
     for i, item in ipairs(list) do
         local b = self:Button(i)
         resize(b, size)
@@ -404,8 +520,8 @@ function S:Refresh()
         bar.buttons[i]:Hide()
         bar.buttons[i].click:Hide()
     end
-    local length = math.max(1, #list * (size + 8) - 8)
     if d.x ~= 0 then bar:SetSize(length, size) else bar:SetSize(size, length) end
+    self:Place()
     bar:SetShown(#list > 0 or self.moving or false)
     self.layout = layout
 end
@@ -420,7 +536,7 @@ function S:StartPlacement()
     self:BuildBar()
     self.moving = true
     -- Where it was: B puts it back
-    self.placeFrom = settings().pos
+    self.placeFrom = savedPlace()
     if not self.banner then
         local banner = CK.NewFrame("Frame", nil, UIParent)
         banner:SetSize(560, 58)
@@ -457,16 +573,14 @@ end
 function S:PlacementPress(name)
     if InCombatLockdown() then return end
     if MOVES[name] then
-        local point, _, _, x, y = self.bar:GetPoint(1)
-        self.bar:ClearAllPoints()
-        self.bar:SetPoint(point, UIParent, point, x + MOVES[name][1] * STEP, y + MOVES[name][2] * STEP)
-        self:SavePosition()
+        local x, y = self:CurrentPlace()
+        self:MoveTo(x + MOVES[name][1] * STEP, y + MOVES[name][2] * STEP)
     elseif name == "X" then
-        settings().pos = nil
+        settings().barPos = nil
         self:Place()
     elseif name == "A" or name == "B" then
         if name == "B" then
-            settings().pos = self.placeFrom
+            settings().barPos = self.placeFrom
             self:Place()
         end
         self:StopPlacement()
@@ -477,6 +591,7 @@ end
 
 function S:ResetPosition()
     settings().pos = nil
+    settings().barPos = nil
     if self.bar then self:Place() end
 end
 

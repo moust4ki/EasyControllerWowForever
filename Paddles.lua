@@ -375,9 +375,12 @@ P.atlasOr = atlasOr
 -- so square edges never show in the round slot), { atlas = "..." } or
 -- { glyph = "A" } (the gamepad button's own picture)
 function P.SetIcon(tex, icon)
+    if tex.SetRotation then tex:SetRotation(0) end
     if type(icon) == "table" then
         if icon.atlas and C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(icon.atlas) then
             tex:SetAtlas(icon.atlas)
+            -- Turned (radians): the autorun arrow points up, forward
+            if icon.turn and tex.SetRotation then tex:SetRotation(icon.turn) end
         elseif icon.glyph then
             CK:SetGlyph(tex, icon.glyph)
         elseif icon.texture then

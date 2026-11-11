@@ -1106,7 +1106,7 @@ function G:BindLayer()
 end
 
 -- The wait shown: by the guide, or by the panel's row that asked (`host`:
--- { render = fn, refused = fn(why) }; the minimap labels' button)
+-- { render = fn, refused = fn(why) })
 function G:BindRender()
     local host = self.bindHost
     if host then return host.render() end

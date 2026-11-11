@@ -35,7 +35,8 @@ BINDING_NAME_CONTROLLERKEYBOARD_CONFIG = L.BINDING_CONFIG
 _G["BINDING_NAME_CLICK ControllerKeyboardWheelToggle:LeftButton"] = L.WHEEL_NAME
 _G["BINDING_NAME_CLICK ControllerKeyboardUsableToggle:LeftButton"] = L.USABLE_WHEEL_NAME
 _G["BINDING_NAME_CLICK ControllerKeyboardPhrasesToggle:LeftButton"] = L.PHRASES_NAME
-_G["BINDING_NAME_CLICK ControllerKeyboardMinimapLabels:LeftButton"] = L.MML_NAME
+BINDING_NAME_CONTROLLERKEYBOARD_AH_SCAN = L.AH_BINDING
+BINDING_NAME_CONTROLLERKEYBOARD_AH_POST = L.AH_POST_BINDING
 
 ---------------------------------------------------------------------------
 -- Saved variables
@@ -141,11 +142,10 @@ local DEFAULTS = {
     glyphStyle = "auto",
     -- The gamepad UI's centre dot (Reticle.lua): "game", "color", "cycle", "hidden"
     reticle = { mode = "game", color = 1 },
-    -- Labels beside the minimap's dots (MinimapLabels.lua): on for a new
-    -- install (asked; off for an update, see InitDB); "always" (its button
-    -- hides them) or "hold" (shown while its button is held); text size, at
-    -- most that many, herbs and ore in the skill's colours, creatures' level
-    minimapLabels = { enabled = true, mode = "always", size = 10, max = 12, skill = true, level = true },
+    -- Auction house prices (AuctionPrices.lua): off unless turned on; the
+    -- gold coin in the bags on the items better sold there. The prices
+    -- themselves: ControllerKeyboardPrices, for every character
+    auction = { enabled = false, marks = true },
     gameGlyphs = true,
     debug = false,
 }
@@ -247,6 +247,27 @@ function CK.CleanEntries(s)
     end
 end
 
+-- The minimap labels are gone (1.20: the game no longer lets addons move
+-- the minimap's hover point, so its dots can't be read): their settings
+-- and the buttons given to them ("wheel:minimap", in the settings and in
+-- every profile) dropped, those buttons free again
+local function dropAction(t, action, depth)
+    if type(t) ~= "table" or depth > 8 then return end
+    for k, v in pairs(t) do
+        if v == action then
+            t[k] = nil
+        elseif type(v) == "table" then
+            dropAction(v, action, depth + 1)
+        end
+    end
+end
+
+function CK.DropMinimapLabels(db)
+    db.settings.minimapLabels = nil
+    dropAction(db.settings, "wheel:minimap", 0)
+    dropAction(db.profiles, "wheel:minimap", 0)
+end
+
 function CK:InitDB()
     -- No saved settings yet: a new install (the first launch guide)
     local fresh = type(ControllerKeyboardDB) ~= "table"
@@ -261,11 +282,9 @@ function CK:InitDB()
         local d = db.settings.dicts
         db.settings.lang = (d.frFR and d.enUS) and "fren" or (d.enUS and "en") or "fr"
     end
-    -- The minimap's labels (1.17.0): on for a new install, off for those who
-    -- had the addon before (an update never changes their minimap)
-    if not fresh and db.settings.minimapLabels == nil then db.settings.minimapLabels = { enabled = false } end
     copyDefaults(DEFAULTS, db.settings)
     CK.CleanEntries(db.settings)
+    CK.DropMinimapLabels(db)
     -- The first launch guide (Guide.lua): shown to a new install only
     if type(db.onboarding) ~= "table" then db.onboarding = { seen = not fresh, version = 1 } end
     -- v2: auto-open no longer requires the gamepad to be the active input
