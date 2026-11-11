@@ -5,7 +5,7 @@
 ## Notes-frFR: Le jeu à la manette simplifié sur WoW Forever : clavier de chat avec prédiction, mappage manette et palettes arrière, roues, objets de quête, meilleurs objets.
 ## Author: moust4ki
 ## Version: 1.19.4
-## SavedVariables: ControllerKeyboardDB
+## SavedVariables: ControllerKeyboardDB, ControllerKeyboardPrices
 ## X-Website: https://github.com/moust4ki/EasyControllerWowForever
 ## X-Curse-Project-ID: 1712492
 
@@ -42,11 +42,10 @@ Vibration.lua
 Supplies.lua
 Upgrades.lua
 Automation.lua
+AuctionPrices.lua
 ConsumableWheel.lua
 ConfigKit.lua
 Phrases.lua
-MinimapNodes.lua
-MinimapLabels.lua
 ConfigWindow.lua
 MyWheels.lua
 MapWindow.lua

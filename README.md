@@ -176,33 +176,6 @@ fields, the game's confirmation popups, settings and key bindings, nor in combat
 - The phrases are the account's, the same for every character. Keyboard › Quick phrases: the bubble
   on or off, and back to the default phrases. Out of combat only.
 
-## Minimap labels
-
-With a gamepad there is no mouse to hover the minimap's dots (a hunter's tracking, herbs, ore...):
-each one is named beside it, small (Comfort › Minimap; on by default on a new install, off after an
-update).
-
-- Creatures in white, with their level in the game's colours once one of that name was seen up close
-  (nameplate, target, the mouse; the level is an option); a quest's creatures to kill (an objective
-  of the log naming them, not done yet) in gold. Players in their class colour, enemy players (PvP)
-  in red. Herbs and ore in the colours of your Herbalism or Mining, as the game colours a gathering
-  (`MinimapNodes.lua`: WoW Forever's own nodes in the five languages). The rest in white.
-- Quest areas are never named (the minimap's tooltip lists their title and objectives there), nor
-  your own pet.
-- The nearest dots first, at most 12 (setting), the same names closer than a few units on one label
-  ("Boar x3"), never two labels over each other; too wide for the circle at its height, a label goes
-  on several lines (3 at most), toward its dot. The text size is yours, smaller when zoomed out.
-- Shown always (its button hides and shows them) or only while its button is held. Its button:
-  Comfort › Minimap › Its button (A, then the button, LT / RT held for their layers, as in the guide)
-  or the Gamepad tab (Macros › Minimap labels), or a key binding.
-- How: WoW Forever's minimap can be told where its hover point is (`Minimap:UpdateMouseoverAtPoint`,
-  made for the gamepad's soft cursor), and `C_TooltipInfo.GetMinimapMouseover` gives the names
-  there. A grid of points over the minimap is read twice a second; the points reading one name side
-  by side are one dot, their middle its place. In between, each label follows its dot from the
-  player's map position and facing; while moving, the minimap's answers trail a moment, measured on
-  the dots already placed and taken off the new ones. A mouse over the minimap: not read (its
-  tooltip stays the game's). Refused by the game: off for the session, said once.
-
 ## Configuration panel
 
 **RB + D-pad down** opens the addon's own panel (only watched, never bound: the game's own buttons stay as they are;
@@ -224,7 +197,7 @@ second A.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
 - **Comfort** (named Alerts before): the vibrations, the bag counters, the quest items, the better items and the
-  minimap labels below.
+  auction house prices below.
 - **Profiles**: this character's profiles and the talents' ones (see Profiles).
 
 ### First launch guide
@@ -474,6 +447,10 @@ before):
 - the bar is **placed freely**: dragged with the mouse while unlocked, or moved with the D-pad
   ("Move with the D-pad"), growing right, left, down or up, in 3 sizes; a click opens the bags
   (through the game's own backpack button);
+- its place is kept **from the game's gamepad bar** and it takes the bar's size (1.20, asked: the same
+  place on a PC and on a handheld or a TV of another resolution): it follows the bar wherever Edit
+  Mode puts it, and grows with it. A place saved before is converted once (when the game lets addons
+  read the bar's place; else the default place, centred above the bar);
 - low supplies and little room left can vibrate (Comfort › Vibrations).
 
 ## Consumables wheel
@@ -616,6 +593,43 @@ Home › Automation (both off until you turn them on):
 - **Repair at merchants**: once the grey items are sold, a merchant who repairs repairs everything,
   and a line in the chat says what it cost (or that the money was short). **With the guild's money**
   makes the guild pay first, when it allows you and has enough.
+
+## Auction house prices
+
+Comfort › Auction house (off until you turn it on; asked):
+
+- **Scan prices**, a button under the auction house window (reachable with the gamepad), or its key
+  binding (*Scan the auction house prices*, under AddOns; the Gamepad tab's Game list offers it too),
+  reads the whole auction house in one go (`C_AuctionHouse.ReplicateItems`, the old "getAll", which
+  the game allows once every 15 minutes or so; the button counts the minutes down and shows the
+  progress). The answer is read 500 auctions a frame, never all at once, so the game doesn't freeze.
+- For each item, for all the characters of the account (its own saved variables,
+  `ControllerKeyboardPrices`), by realm and faction: its lowest buyout for one, how many are listed,
+  when it was seen, and each day's lowest over the last 14 days. Random suffixes ("of the Bear") have
+  a price of their own; battle pets are left out.
+- **Item tooltips**, every item (grey, white, green, trade goods, food...):
+  - *Auction house (seen 2 h ago, 140 listed)*: its lowest price; greyed with its age when it wasn't
+    listed at the last scan; *never seen* without one;
+  - *Usual (14-day median)*: the median of each day's lowest, once seen on two days;
+  - *Merchant*: what the merchant pays (*won't buy it* for an item without a price);
+  - **» Sell at the auction house** when its lowest price less the 5 % cut and the 1 silver posting
+    fee (asked: counted) beats the merchant's, else **» Merchant**. The stack in the bags is one
+    auction, one fee: a single cheap cloth goes to the merchant, a stack of it to the auction house.
+    An item bound to the player (soulbound, binds when picked up): the merchant only.
+  - Prices for one; **Shift held (LT on the gamepad)**: for the whole stack (a line says so on a
+    stack).
+- **Gold coin in the bags** (on by default with the module): a small coin on the items better sold
+  at the auction house.
+- **Post all (12)** (asked), left of the scan button, or its key binding (*Post the next auction*):
+  the items of the gold coin, **one press each** (the game asks a press for every post, an addon
+  can't post them all in one go). Each one's lowest price is checked again just before (a search the
+  addon sends by itself), then it is posted for 24 h at **1 silver under it** (the game takes whole
+  silver only; the same price when the lowest is yours; the last price seen when none is listed).
+  One no longer worth it at that price (the cut and the deposit counted) is left in the bags and
+  said. The game warns about a price (far from the usual one): the next press confirms. The button
+  tells where it is (*Post 3/12: 2s each*), its tooltip which item.
+- The game gives no answer in a minute (asked too soon): said in the chat. The window closed during
+  the scan or the posting: stopped, nothing kept from the scan.
 
 ## Prediction
 
