@@ -521,6 +521,13 @@ holds changes out of combat only.
   are greyed there (the game forbids them in combat). Its content is updated out of combat only (a
   rule of the game).
 - Moving from slot to slot can vibrate (Comfort › Vibrations).
+- **Mini wheel** (asked; the editor's *Mini wheel: no / yes* button, one wheel at a time): the wheel
+  turned small, like the game's flyouts (the hunter's aspects, the pet's) and the Party/Healer
+  wheel. Put on a button from the Gamepad tab, it opens **on that button**, its filled slots around
+  it in as many sections, its picture in the middle; **aimed with the right stick**, let go: that
+  slot is used (a short press leaves it open: aim, then A; B or its button again closes it), in
+  combat too. The aimed slot's name in the banner, cooldowns and counts on the slots, a spell red
+  when the target is too far. Only from a button: its key binding opens nothing.
 
 ### Party spells
 
@@ -613,15 +620,23 @@ Comfort › Auction house (off until you turn it on; asked):
   - *Usual (14-day median)*: the median of each day's lowest, once seen on two days;
   - *Merchant*: what the merchant pays (*won't buy it* for an item without a price);
   - **» Sell at the auction house** when its lowest price less the 5 % cut and the 1 silver posting
-    fee (asked: counted) beats the merchant's, else **» Merchant**. The stack in the bags is one
+    fee (asked: counted) beats the merchant's, else **» Merchant** (also for an item never seen there). The stack in the bags is one
     auction, one fee: a single cheap cloth goes to the merchant, a stack of it to the auction house.
     An item bound to the player (soulbound, binds when picked up): the merchant only.
   - Prices for one; **Shift held (LT on the gamepad)**: for the whole stack (a line says so on a
     stack).
-- **Gold coin in the bags** (on by default with the module): a small coin on the items better sold
-  at the auction house.
+- **Marks in the bags** (on by default with the module; asked): on each item, written in its
+  corner, where it sells best: **AH** in green for the auction house, **Vendor** in yellow for the
+  merchant (bound to you, or worth less at the auction house), **?** for an
+  item never seen at the auction house (the merchant until a scan finds it). Words, not pictures:
+  the game's own picture for the auction house is a pile of coins, too close to the merchant's, and
+  grey items keep the game's own coin (they are never marked). Nothing written: the merchant doesn't
+  buy it.
+- **Ignored items** (asked): *Ignore an item from your bags* picks one to leave out (your arrows,
+  a fish bowl you keep...): never marked in the bags nor posted, its tooltip keeps the prices and
+  says it is ignored; untick it in the list to take it back. By item, every random suffix of it.
 - **Post all (12)** (asked), left of the scan button, or its key binding (*Post the next auction*):
-  the items of the gold coin, **one press each** (the game asks a press for every post, an addon
+  the items marked AH, **one press each** (the game asks a press for every post, an addon
   can't post them all in one go). Each one's lowest price is checked again just before (a search the
   addon sends by itself), then it is posted for 24 h at **1 silver under it** (the game takes whole
   silver only; the same price when the lowest is yours; the last price seen when none is listed).

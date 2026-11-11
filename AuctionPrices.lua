@@ -29,7 +29,6 @@ local HISTORY_DAYS = 14      -- days of lowest prices kept for the usual price
 local WAIT_INFO = 4          -- seconds given to the items not loaded yet
 local ANSWER_WAIT = 60       -- seconds for the game's answer
 local CAGED_PET = 82800      -- battle pets: one item for every pet, left out
-local COIN = "Interface\\MoneyFrame\\UI-GoldIcon"
 local GOLD, GREY = { 1, 0.82, 0 }, { 0.6, 0.6, 0.6 }
 local GREEN, YELLOW = { 0.25, 0.9, 0.25 }, { 1, 0.82, 0 }
 
@@ -38,6 +37,68 @@ local function secret(v) return issecretvalue ~= nil and issecretvalue(v) or fal
 
 function AP:On()
     return CK.db ~= nil and settings().enabled == true
+end
+
+---------------------------------------------------------------------------
+-- Items the player ignores (asked: arrows, a fish bowl...): never marked in
+-- the bags nor posted; their tooltip keeps the prices and says so. By item
+-- ID (every random suffix of it)
+---------------------------------------------------------------------------
+local function itemIDOf(item)
+    if type(item) == "number" then return item end
+    if type(item) ~= "string" or secret(item) then return nil end
+    return tonumber(item:match("item:(%d+)"))
+end
+
+function AP:Ignored(item)
+    local id = itemIDOf(item)
+    local list = CK.db and settings().ignored
+    return id ~= nil and type(list) == "table" and list[id] == true
+end
+
+function AP:SetIgnored(id, on)
+    local s = settings()
+    s.ignored = type(s.ignored) == "table" and s.ignored or {}
+    s.ignored[id] = on and true or nil
+    self:RefreshMarks()
+    if self.UpdatePostButton then self:UpdatePostButton() end
+end
+
+local function nameAndIcon(id)
+    local name = C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)
+    local icon = C_Item.GetItemIconByID and C_Item.GetItemIconByID(id)
+    return name or ("item:" .. id), icon
+end
+
+-- Those ignored, by name: { id, name, icon }
+function AP:IgnoredList()
+    local list = {}
+    for id, on in pairs(settings().ignored or {}) do
+        if on == true and type(id) == "number" then
+            local name, icon = nameAndIcon(id)
+            list[#list + 1] = { id = id, name = name, icon = icon }
+        end
+    end
+    table.sort(list, function(a, b) return a.name < b.name end)
+    return list
+end
+
+-- The items of the bags not ignored yet, one of each, by name: { id, name,
+-- icon, count }
+function AP:BagItemsToIgnore()
+    local list, seen = {}, {}
+    for bag = 0, NUM_TOTAL_EQUIPPED_BAG_SLOTS or NUM_BAG_SLOTS or 4 do
+        for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
+            local id = C_Container.GetContainerItemID(bag, slot)
+            if id and not seen[id] and not self:Ignored(id) then
+                seen[id] = true
+                local name, icon = nameAndIcon(id)
+                list[#list + 1] = { id = id, name = name, icon = icon, count = C_Item.GetItemCount and C_Item.GetItemCount(id) or 1 }
+            end
+        end
+    end
+    table.sort(list, function(a, b) return a.name < b.name end)
+    return list
 end
 
 local function money(amount)
@@ -249,9 +310,12 @@ function AP:AddLines(tooltip, data)
     -- auction, one fee); an item bound to the player: the merchant, if he
     -- buys it
     local whole = stackOf(tooltip)
-    if price and vendor and AP.Net(price, whole) > vendor * whole then
+    if self:Ignored(link) then
+        tooltip:AddLine(L.AH_IGNORED_LINE, GREY[1], GREY[2], GREY[3])
+    elseif price and vendor and AP.Net(price, whole) > vendor * whole then
         tooltip:AddLine(L.AH_SELL_AUCTION, GREEN[1], GREEN[2], GREEN[3])
-    elseif vendor and vendor > 0 and (price or boundHere) then
+    elseif vendor and vendor > 0 then
+        -- (never seen at the auction house: the merchant until then)
         tooltip:AddLine(L.AH_SELL_MERCHANT, YELLOW[1], YELLOW[2], YELLOW[3])
     end
     -- A stack, prices for one: how to see the whole stack's
@@ -290,22 +354,58 @@ function AP:ModifierChanged(key)
 end
 
 ---------------------------------------------------------------------------
--- Bags: a gold coin on the items better sold at the auction house (a
--- texture of ours on each item button, kept in our own table)
+-- Bags: where each item sells best, written on its button (asked: "AH" in
+-- green for the auction house, "Vendor" in yellow for the merchant, "?" for
+-- an item never seen at the auction house: the merchant until then; the
+-- same words in every language; pictures were unclear, the game's
+-- auctioneer's being a pile of coins like the merchant's coin). A text of
+-- ours on each item button, kept in our own table.
 ---------------------------------------------------------------------------
 local marks = setmetatable({}, { __mode = "k" })
 local bagFrames = {}
+-- (asked: two colours apart; the tooltip's advice ones)
+local MARK_COLOR = { auction = GREEN, merchant = YELLOW, unknown = GREY }
+local POOR = Enum and Enum.ItemQuality and Enum.ItemQuality.Poor or 0
+
+local function markText(advice)
+    if advice == "auction" then return L.AH_MARK end
+    if advice == "merchant" then return L.AH_MARK_VENDOR end
+    return "?"
+end
 
 local function markFor(button)
     local mark = marks[button]
     if not mark then
-        mark = button:CreateTexture(nil, "OVERLAY", nil, 3)
-        mark:SetSize(13, 13)
+        mark = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
         mark:SetPoint("TOPLEFT", 2, -2)
-        mark:SetTexture(COIN)
         marks[button] = mark
     end
     return mark
+end
+
+-- Where a bag slot sells best: "auction", "merchant" (bound to the player,
+-- or worth less there), "unknown" (never seen at the auction house: the
+-- merchant until then), or nil (nothing in it, its data not loaded yet, the
+-- merchant doesn't buy it)
+function AP:SlotAdvice(bag, slot)
+    local ok, info = pcall(C_Container.GetContainerItemInfo, bag, slot)
+    if not (ok and type(info) == "table") then return nil end
+    -- Grey items: the game marks them itself (its coin, sold at merchants)
+    if info.quality == POOR then return nil end
+    local link = info.hyperlink or C_Container.GetContainerItemLink(bag, slot)
+    if type(link) ~= "string" or secret(link) or self:Ignored(link) then return nil end
+    local count = type(info.stackCount) == "number" and not secret(info.stackCount) and info.stackCount or 1
+    local vendor = sellPrice(link)
+    if not vendor then return nil end
+    local merchant = vendor > 0 and "merchant" or nil
+    if info.isBound == true or bindsOnPickup(link) then return merchant end
+    local price = self:Price(link)
+    if price then
+        if AP.Net(price, count) > vendor * count then return "auction" end
+        return merchant
+    end
+    -- Never seen there: the merchant, unsure
+    return merchant and "unknown" or nil
 end
 
 -- A bag slot worth an auction: its link and count (nil: no)
@@ -314,7 +414,7 @@ function AP:SlotWorthIt(bag, slot)
     if not (ok and type(info) == "table") or info.isBound == true then return nil end
     local link = info.hyperlink or C_Container.GetContainerItemLink(bag, slot)
     local count = type(info.stackCount) == "number" and not secret(info.stackCount) and info.stackCount or 1
-    if type(link) ~= "string" or secret(link) or bindsOnPickup(link) then return nil end
+    if type(link) ~= "string" or secret(link) or bindsOnPickup(link) or self:Ignored(link) then return nil end
     if self:Verdict(link, count) ~= "auction" then return nil end
     return link, count, info.itemID
 end
@@ -324,10 +424,13 @@ function AP:UpdateMarks(frame)
     local on = self:On() and settings().marks
     for _, button in frame:EnumerateValidItems() do
         local bag, slot = button.GetBagID and button:GetBagID(), button:GetID()
-        local show = false
-        if on and bag then show = self:SlotWorthIt(bag, slot) ~= nil end
-        if show then
-            markFor(button):Show()
+        local advice = on and bag and self:SlotAdvice(bag, slot)
+        if advice then
+            local mark = markFor(button)
+            local c = MARK_COLOR[advice]
+            mark:SetText(markText(advice))
+            mark:SetTextColor(c[1], c[2], c[3])
+            mark:Show()
         elseif marks[button] then
             marks[button]:Hide()
         end

@@ -140,6 +140,33 @@ function MW:Bound(id)
     end
 end
 
+-- A mini wheel (asked): opened small on its button, like the game's flyouts
+-- (the hunter's aspects) or a party spell's wheel, aimed with the right
+-- stick, let go to use. Only from a button (Gamepad tab): its key binding
+-- opens nothing
+function MW:IsMini(id)
+    local w = self:Get(id)
+    return w ~= nil and w.mini == true
+end
+
+function MW:SetMini(id, on)
+    local w = self:Get(id)
+    if not w or InCombatLockdown() then return end
+    w.mini = on and true or nil
+    -- Its button opens the other wheel now: bound again
+    changed()
+    CK.Mapping:Apply()
+    CK.Paddles:Apply()
+end
+
+-- A mini wheel on a button (the right stick's keys kept on for a fight)
+function MW:MiniBound()
+    for _, w in ipairs(self:List()) do
+        if w.mini and self:Bound(w.id) then return true end
+    end
+    return false
+end
+
 -- "RT + X" with the glyphs, or nil
 function MW:BoundText(id, size)
     local input, layer = self:Bound(id)
@@ -446,6 +473,9 @@ local function slotPoint(i)
     return CX + RADIUS * math.sin(a), CY - RADIUS * math.cos(a)
 end
 
+-- The buttons under the wheel: Rename, Assign a button, Mini wheel, Delete
+local BUTTONS, MINI, DELETE = 4, 3, 4
+
 function E:Build(parent)
     local f = CK.NewFrame("Frame", nil, parent)
     f:SetAllPoints()
@@ -534,17 +564,17 @@ function E:Build(parent)
     bind.chip.text:SetPoint("CENTER", 0, 0)
     f.bind = bind
 
-    -- Rename, Assign a button, Delete
+    -- Rename, Assign a button, Mini wheel (yes / no), Delete
     local row = CK.NewFrame("Frame", nil, f)
     row:SetPoint("TOPLEFT", 0, -(WHEEL_H + 8))
     row:SetSize(ZONE_W, 32)
     f.buttonRow = row
     f.buttons = {}
-    for i = 1, 3 do
+    for i = 1, BUTTONS do
         local b = K.Button(row, 15)
         b:SetScript("OnClick", function()
             if MW.renaming then return end
-            if i ~= 3 then C:Disarm() end
+            if i ~= DELETE then C:Disarm() end
             E.zone, E.btn = "buttons", i
             E:Button(i)
         end)
@@ -689,7 +719,13 @@ function E:Button(i)
         local id = self.id
         MW:CloseEditor()
         CK.MapPage:StartAssign(id)
-    elseif i == 3 then
+    elseif i == MINI then
+        if CK:BlockedByCombat() then return end
+        local on = not MW:IsMini(self.id)
+        MW:SetMini(self.id, on)
+        C:Toast(on and (MW:Bound(self.id) and L.TOAST_MINI_ON or L.TOAST_MINI_ON_NOBUTTON) or L.TOAST_MINI_OFF)
+        C:Render()
+    elseif i == DELETE then
         if C:IsArmed("delwheel") then
             C:Disarm()
             local id = self.id
@@ -699,7 +735,7 @@ function E:Button(i)
         else
             C:Arm("delwheel")
             C:Render()
-            if UIFrameFadeIn then UIFrameFadeIn(self.frame.buttons[3], 0.15, 0.3, 1) end
+            if UIFrameFadeIn then UIFrameFadeIn(self.frame.buttons[DELETE], 0.15, 0.3, 1) end
         end
     end
 end
@@ -749,7 +785,7 @@ function E:Press(name)
     end
     if self.zone == "buttons" then
         if name == "LEFT" or name == "RIGHT" then
-            self.btn = math.max(1, math.min(3, self.btn + (name == "LEFT" and -1 or 1)))
+            self.btn = math.max(1, math.min(BUTTONS, self.btn + (name == "LEFT" and -1 or 1)))
         elseif name == "UP" then
             self.zone, self.slot = "slots", 5
         elseif name == "A" then
@@ -830,14 +866,15 @@ function E:Render()
     chip.text:SetTextColor(bc[1], bc[2], bc[3])
     chip:SetWidth(chip.text:GetStringWidth() + 16)
     f.bind:SetWidth(f.bind.label:GetStringWidth() + 8 + chip:GetWidth())
-    -- Rename, Assign a button, Delete (armed: wider, asking again)
+    -- Rename, Assign a button, Mini wheel, Delete (armed: wider, asking again)
     local armed = C:IsArmed("delwheel")
-    local labels = { L.V_RENAME, L.LBL_ASSIGN_BUTTON, armed and L.LBL_PRESS_DELETE or L.LBL_DELETE }
+    local labels = { L.V_RENAME, L.LBL_ASSIGN_BUTTON, MW:IsMini(w.id) and L.LBL_MINI_YES or L.LBL_MINI_NO,
+        armed and L.LBL_PRESS_DELETE or L.LBL_DELETE }
     for i, b in ipairs(f.buttons) do
         b.label:SetText(labels[i])
-        b:SetState({ focus = self.zone == "buttons" and self.btn == i, armed = i == 3 and armed })
+        b:SetState({ focus = self.zone == "buttons" and self.btn == i, armed = i == DELETE and armed })
     end
-    K.LayoutRow(f.buttonRow, f.buttons, { 1, 1.3, armed and 1.5 or 0.9 }, 8)
+    K.LayoutRow(f.buttonRow, f.buttons, armed and { 0.6, 1.2, 0.9, 1.9 } or { 0.85, 1.5, 1.2, 0.8 }, 8)
     -- The picker: always there, faded while the wheel has the focus
     local picker = self.picker
     picker:Show()

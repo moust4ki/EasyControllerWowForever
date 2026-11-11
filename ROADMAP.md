@@ -65,6 +65,13 @@ A new Alerts › Inventory section.
 
 ## Set aside
 
+- **Tap / hold on the D-pad and A / B / X / Y** (asked 2026-11-11): a tap casts the slot's spell, a
+  button held casts another. Blocked: the game's secure code (the only one that casts in combat)
+  has no clock (no GetTime in its restricted environment, no timer), and the addon can't hand it
+  one in combat (an unprotected frame can't be read there, a protected one can't be written). The
+  state driver manager's 0.2 s ticks are too coarse to tell a tap from a hold. To look at again if
+  the game adds a press-and-hold for any spell (today only its empowered spells,
+  `IsPressHoldReleaseSpell`).
 - **Chat keyboard, writing in the chat box**: let the game send the message natively when the text
   is unchanged. Writing in the game's chat box can block its gamepad UI and freeze the client; the
   secure macro sending stays.
