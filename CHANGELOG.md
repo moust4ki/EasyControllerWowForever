@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.20.1
+
+- **Mini wheels** (asked): one option per wheel of yours (its editor: *Mini wheel*) turns it into a
+  small wheel like the game's flyouts (the hunter's aspects, the pet's) and the Party/Healer wheel.
+  On a button from the Gamepad tab, it opens on that button, its slots around it, aimed with the
+  right stick; let go, that slot is used (a short press: aim, then A), in combat too. Only from a
+  button: its key binding opens nothing.
+- **Clearer marks in the bags** (asked: the coin read as "merchant"): each item says where it sells
+  best, written in its corner: **AH** in green for the auction house, **Vendor** in yellow for
+  the merchant (bound to you, or worth less at the auction house), **?** for an item
+  never seen at the auction house (the merchant until a scan finds it; its tooltip says Merchant
+  too). Words, not pictures: the game's auction house picture is a pile of coins, and grey items
+  keep the game's own coin (they are never marked). Nothing written: the merchant doesn't buy it.
+- **Ignored items** (asked: arrows, a fish bowl...): Comfort › Auction house › *Ignore an item
+  from your bags*. An ignored item is never marked nor posted; its tooltip keeps the prices and says
+  it is ignored. Untick it in the list to take it back.
+
 ## 1.20.0
 
 - **Auction house prices** (Comfort › Auction house, off by default; asked): a **Scan prices**
