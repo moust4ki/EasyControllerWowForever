@@ -748,7 +748,7 @@ local function inventoryRows(b)
 end
 
 -- Auction house prices (AuctionPrices.lua)
-local function auctionRows(b)
+local function auctionRows(b, page)
     local AP = CK.AuctionPrices
     local s = settings().auction
     b.header(L.SEC_AUCTION)
@@ -766,6 +766,35 @@ local function auctionRows(b)
             AP:RefreshMarks()
         end })
     b.info(AP:StatusText())
+    -- Items left out (asked: arrows, a fish bowl...): untick to take one back
+    b.header(L.AH_H_IGNORED)
+    for _, e in ipairs(AP:IgnoredList()) do
+        b.check({ id = "ah_ign_" .. e.id, label = e.name, tip = L.TIP_AH_IGNORED_ITEM,
+            get = function() return AP:Ignored(e.id) end,
+            set = function(v)
+                AP:SetIgnored(e.id, v)
+                if not v then Config:Toast(format(L.TOAST_AH_UNIGNORED, e.name)) end
+            end })
+    end
+    b.button({ id = "ah_ign_add", label = L.LBL_AH_IGNORE_ADD, tip = L.TIP_AH_IGNORE_ADD, verb = L.V_OPEN,
+        func = function()
+            page:OpenPicker({
+                kicker = L.SEC_AUCTION, title = L.LBL_AH_IGNORE_ADD, rows = 9,
+                lists = { { label = L.LIST_BAGS, entries = function()
+                    local entries = { { header = L.HDR_YOUR_BAGS } }
+                    for _, item in ipairs(AP:BagItemsToIgnore()) do
+                        entries[#entries + 1] = { action = item.id, name = item.name, icon = item.icon, sub = tostring(item.count) }
+                    end
+                    if #entries == 1 then entries = {} end
+                    return entries
+                end } },
+                onChoose = function(e)
+                    AP:SetIgnored(e.action, true)
+                    page.picker:Close()
+                    Config:Toast(format(L.TOAST_AH_IGNORED, e.name))
+                end,
+            })
+        end })
 end
 
 Config.pages.alerts = Config.NewRailPage({

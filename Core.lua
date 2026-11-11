@@ -145,7 +145,7 @@ local DEFAULTS = {
     -- Auction house prices (AuctionPrices.lua): off unless turned on; the
     -- gold coin in the bags on the items better sold there. The prices
     -- themselves: ControllerKeyboardPrices, for every character
-    auction = { enabled = false, marks = true },
+    auction = { enabled = false, marks = true, ignored = {} },
     gameGlyphs = true,
     debug = false,
 }
