@@ -38,13 +38,11 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.19
-- **Let go of the stick to use** (1.19.0, asked): aiming with the right stick, push it toward an item and let it go, the item is used, no A needed, like the Party/Healer wheel: the consumables, the usable items and your own wheels. Easier while moving, your thumb stays on the stick. Sliding round the rim uses nothing on the way, only the last item aimed when you let go; A and B still work. **Wheels › Opening**, under Stick that aims (Right): off by default, so a press confirms and nothing is used by accident while you aim.
-- **Mouseover cast on the paddles** (1.19.1): spells and items on the addon's buttons now follow the game's mouseover cast like its own buttons: a heal goes on the raid frame or the friend under the cursor (gamepad cursor, gyro mouse...), a harmful spell on the enemy there; with nobody there, your target or yourself as before.
-- **No more empty circles on the bar** (1.19.1): a paddle with nothing in the layer on screen is no longer drawn; it shows up when you hold the trigger of a layer where it does something.
-- **L3 / R3 trigger layers locked when they can't work** (1.19.2): with a game function (Jump, Autorun, Ping...) on L3 or R3 alone, their trigger layers are now locked and say why (the game passes the stick on without the trigger); put a spell, a wheel or Nothing on the stick alone to use them.
-- **Compact is safe again** (1.19.3): the game fixed its Edit Mode bug that dropped the gamepad bar from your own layouts; the warnings about it are gone.
-- **Move / size fixed for the game's latest build** (1.19.4): the game now hides the exact place of its bar's buttons from addons; placing the bar and the extra buttons no longer throws errors.
+## What's new in 1.20
+- **Auction house prices** (asked, Comfort › Auction house, off by default): a **Scan prices** button under the auction house window (or its key binding) reads the whole auction house in one go (the game allows it about once every 15 minutes). Each item's lowest price, how many are listed and its usual price (the median of the last 14 days) are kept for all your characters on that realm. Every item tooltip shows them with the merchant's price and where to sell: the auction house when its price less its 5 % cut and the 1 silver posting fee beats the merchant's, else the merchant. Prices for one, Shift (LT) for the whole stack. An item no longer listed keeps its last price, greyed, with its age. A small gold coin marks in your bags what sells better at the auction house, and **Post all** puts them up for 24 h, one press each, 1 silver under the lowest price, checked again just before.
+- **Bag counters follow the gamepad bar** (asked): their place is kept from the game's gamepad bar and they take its size, so they stay put on a PC, a handheld or a TV of another resolution, wherever Edit Mode puts the bar.
+- **Minimap labels removed**: the game's latest build no longer lets addons read the minimap's dots, so their names can't be written beside them any more.
+- **Autorun's arrow points up** on L3.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -58,7 +56,6 @@ Every feature you don't need can be turned off to save even more resources.
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
-- **Minimap labels**: every dot of the minimap named beside it (tracking, herbs, ore, treasure, your group), colour-coded: quest creatures, enemy players, your gathering skill
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health as a ring around their portrait and in %
 - **Your own wheels** of spells, items and macros
 - **Consumables wheel**, usable in combat
@@ -72,6 +69,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Bag counters** (arrows, soul shards, reagents, bag space…) that glow when you run low
 - **Better items**: highlights upgrade items in your bags
 - **At merchants**: auto-sell junk and auto-repair
+- **Auction house prices**: scan the whole auction house in one press, then every item tooltip tells its lowest price, its usual price over 14 days, the merchant's, and whether to sell it there or to the merchant; a gold coin in your bags on what sells better at the auction house, posted one press each
 - **OLED burn-in prevention** for the centre dot
 - **Xbox / PlayStation (DualSense) / Nintendo Switch** button icons, in the addon and in the game's own interface (or Auto: your controller's)
 - **Configuration panel** driven entirely with the gamepad (RB + D-pad down)
@@ -149,30 +147,13 @@ binding or `/ec phrases`.
 - Y opens the keyboard with the phrase, to add to it (keyboard module off: the window's field, A sends).
 - The same phrases on every character; one option puts the default ones back. Not in combat.
 
-## Minimap labels
-
-With a gamepad there is no mouse to hover the minimap's dots: their names are written beside them,
-small, read from the minimap itself twice a second (tracked creatures and humanoids, herbs, ore,
-the dwarves' treasure, your group, quest givers…).
-
-- **Colours**: creatures in white, with their level in the game's colours once one of that name was
-  seen up close (nameplate, target; the level is an option); a quest's creatures to kill in gold;
-  players in their class colour, enemy players (PvP) in red; herbs and ore in the colours of your
-  Herbalism or Mining (red: too low, then orange, yellow, green, grey).
-- **Readable**: the nearest first, at most 12 (a setting), the same names close together on one
-  label ("Boar x3"), never two over each other, on several lines rather than past the minimap's
-  edge, the text size yours (smaller when zoomed out). Quest areas are never named.
-- **Shown always** (its button hides them) **or while its button is held**; its button picked in
-  Comfort › Minimap (A, then the button) or in the Gamepad tab (Macros › Minimap labels).
-- On by default on a new install; after an update, turn it on in Comfort › Minimap.
-
 ## Modules
 
 **Configuration panel**
 RB + D-pad down (or `/ec config`) opens the addon's own panel, driven with the gamepad or the mouse:
 Home (every module and its state, the panel's shortcut, the look, the gamepad bar and extra buttons,
 automation at merchants), Gamepad (your controller drawn button by button), Wheels, Keyboard, Comfort
-(vibrations, bag counters, quest items, better items, minimap labels) and Profiles. Sections on the left, settings in the
+(vibrations, bag counters, quest items, better items, auction house prices) and Profiles. Sections on the left, settings in the
 middle, what the selected one does on the right, and a help bar showing only the buttons that work
 there.
 
@@ -234,7 +215,7 @@ and the addon's windows get the sticks while they are open.
 A round button per resource: free bag slots, your ammunition, your class reagents (soul shards,
 powders, candles, symbols, seeds, poisons…) and any item you add from your bags. Under its low
 threshold it glows, stronger and redder down to the critical one; thresholds are yours to set.
-Place the bar anywhere (mouse or D-pad), lock it; a click opens your bags. The count sits on a pill:
+Place the bar anywhere (mouse or D-pad), lock it; it keeps its place from the game's gamepad bar and takes its size, the same on every screen; a click opens your bags. The count sits on a pill:
 dark above the low threshold, orange at low, red at critical.
 
 **Vibrations**

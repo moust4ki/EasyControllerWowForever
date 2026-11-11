@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.20.0
+
+- **Auction house prices** (Comfort › Auction house, off by default; asked): a **Scan prices**
+  button under the auction house window (or its key binding) reads the whole auction house in one go
+  (the game allows it about once every 15 minutes; the button counts down and shows the progress).
+  Each item's lowest price, how many are listed and its usual price (the median of the last 14 days)
+  are kept for all the characters of your account on that realm. Every item tooltip shows them with
+  the merchant's price and where to sell: the auction house when its price less its 5 % cut and the
+  1 silver posting fee beats the merchant's, else the merchant (always the merchant for an item
+  bound to you); *never seen* without a price. Prices for one, Shift (LT) for the whole stack. An
+  item no longer listed keeps its last price, greyed, with its age. A small gold coin marks in the
+  bags the items better sold at the auction house (an option).
+- **Post all** (asked), next to it (or its key binding): those items posted for 24 h, one press each
+  (the game asks a press for every post), at 1 silver under the lowest price, checked again just
+  before; one no longer worth it is left in the bags.
+- **Bag counters placed from the gamepad bar** (asked: the same place on a PC and on a handheld or a
+  TV of another resolution, without placing them again): their place is now kept from the game's
+  gamepad bar and they take its size; they follow it wherever Edit Mode puts it. A place saved
+  before is converted once (when the game lets addons read the bar's place; else the default place,
+  centred above the bar). Dragged with the mouse and moved with the D-pad as before.
+- **Minimap labels removed** (reported broken): the game's latest build no longer lets addons
+  move the minimap's hover point (checked in game: every point given answers for the mouse only),
+  so its dots can't be read any more. Their settings are dropped, and a button given to them is
+  free again.
+- **Autorun's arrow points up** (reported): the L3 icon showed the ping's arrow pointing down.
+
 ## 1.19.4
 
 - **Move / size works again with the game's latest build** (reported: errors over and over while
