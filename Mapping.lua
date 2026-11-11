@@ -1602,6 +1602,8 @@ function M:Apply()
     unbindAll(owner, self.bound, false)
     unbindAll(takeOwner, self.taken, true)
     self.padRouted = {}
+    -- The keys each wheel is on, noted again as they are bound
+    if CK.ConsumableWheel and CK.ConsumableWheel.ForgetKeys then CK.ConsumableWheel:ForgetKeys() end
     if self:Enabled() then
         -- The pad's buttons with something of ours: their routers
         for _, input in ipairs(M.INPUTS) do
@@ -1632,7 +1634,7 @@ function M:Apply()
     -- The panel's shortcut held: its second button left to the game
     if self.suspended then self:Suspend(self.suspended) end
     self:UpdateMarks()
-    -- The stick's direction keys, while a party spell is on a button
+    -- The stick's direction keys, while a wheel is on a button
     if CK.ConsumableWheel and CK.ConsumableWheel.SyncStickKeys then CK.ConsumableWheel:SyncStickKeys() end
     self.applying = false
 end
