@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.21.1
+
+- **Post all: 1 copper under the lowest price** (reported: cheap items went up at 1 silver while
+  others sold them around 50 copper). The addon followed retail's whole silver rule, but WoW
+  Forever's auction house takes copper: an item at 50c is now posted at 49c, no longer rounded up
+  to 1s. Auctions already posted keep their price: cancel and post again the ones that don't sell.
+
 ## 1.21.0
 
 - **Disenchanting in the tooltips** (asked): green, blue and purple armour and weapons show what

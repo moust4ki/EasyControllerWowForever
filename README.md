@@ -646,8 +646,9 @@ Comfort › Auction house (off until you turn it on; asked):
 - **Post all (12)** (asked), left of the scan button, or its key binding (*Post the next auction*):
   the items marked AH, **one press each** (the game asks a press for every post, an addon
   can't post them all in one go). Each one's lowest price is checked again just before (a search the
-  addon sends by itself), then it is posted for 24 h at **1 silver under it** (the game takes whole
-  silver only; the same price when the lowest is yours; the last price seen when none is listed).
+  addon sends by itself), then it is posted for 24 h at **1 copper under it** (WoW Forever's auction
+  house takes copper; the same price when the lowest is yours; the last price seen when none is
+  listed).
   One no longer worth it at that price (the cut and the deposit counted) is left in the bags and
   said. The game warns about a price (far from the usual one): the next press confirms. The button
   tells where it is (*Post 3/12: 2s each*), its tooltip which item.
