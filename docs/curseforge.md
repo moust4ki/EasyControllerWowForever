@@ -38,14 +38,8 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.20
-- **Mini wheels** (1.20.1, asked): any wheel of yours can open small on its button, like the hunter's aspects: aim with the right stick, let go to use. One option per wheel, in its editor.
-- **Clearer marks in your bags** (1.20.1, asked): each item says where it sells best, written in its corner: AH in green for the auction house, Vendor in yellow for the merchant (bound items included), ? when never seen at the auction house. Grey items keep the game's own coin.
-- **Ignore items** (1.20.1, asked): leave out your arrows, a fish bowl you keep… (Comfort › Auction house): never marked nor posted.
-- **Auction house prices** (asked, Comfort › Auction house, off by default): a **Scan prices** button under the auction house window (or its key binding) reads the whole auction house in one go (the game allows it about once every 15 minutes). Each item's lowest price, how many are listed and its usual price (the median of the last 14 days) are kept for all your characters on that realm. Every item tooltip shows them with the merchant's price and where to sell: the auction house when its price less its 5 % cut and the 1 silver posting fee beats the merchant's, else the merchant. Prices for one, Shift (LT) for the whole stack. An item no longer listed keeps its last price, greyed, with its age. Marks in your bags tell where each item sells best (AH, Vendor, ? when never seen at the auction house), and **Post all** puts the auction house ones up for 24 h, one press each, 1 silver under the lowest price, checked again just before.
-- **Bag counters follow the gamepad bar** (asked): their place is kept from the game's gamepad bar and they take its size, so they stay put on a PC, a handheld or a TV of another resolution, wherever Edit Mode puts the bar.
-- **Minimap labels removed**: the game's latest build no longer lets addons read the minimap's dots, so their names can't be written beside them any more.
-- **Autorun's arrow points up** on L3.
+## What's new in 1.21
+- **Disenchanting in the tooltips** (asked): on green, blue and purple gear, what disenchanting gives, the chances, each result's price at your last auction house scan and the average. If you can disenchant, the tooltip says **» Disenchant** (and your bags show **DE**) when it's worth more than selling the item.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -72,7 +66,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Bag counters** (arrows, soul shards, reagents, bag space…) that glow when you run low
 - **Better items**: highlights upgrade items in your bags
 - **At merchants**: auto-sell junk and auto-repair
-- **Auction house prices**: scan the whole auction house in one press, then every item tooltip tells its lowest price, its usual price over 14 days, the merchant's, and whether to sell it there or to the merchant; a mark on each item of your bags telling where it sells best, the auction house ones posted one press each
+- **Auction house prices**: scan the whole auction house in one press, then every item tooltip tells its lowest price, its usual price over 14 days, the merchant's, what disenchanting it gives and is worth, and whether to sell it there, to the merchant or disenchant it; a mark on each item of your bags telling where it sells best, the auction house ones posted one press each
 - **OLED burn-in prevention** for the centre dot
 - **Xbox / PlayStation (DualSense) / Nintendo Switch** button icons, in the addon and in the game's own interface (or Auto: your controller's)
 - **Configuration panel** driven entirely with the gamepad (RB + D-pad down)
