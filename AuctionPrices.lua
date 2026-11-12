@@ -22,7 +22,7 @@ CK.AuctionPrices = AP
 local SCAN_EVERY = 15 * 60   -- the game's limit for a whole scan
 local CUT = 0.95             -- what the seller gets: the auction house takes 5 %
 local POST_FEE = 100         -- what posting one auction costs (1 silver; asked: counted)
-local SILVER = 100           -- auction prices go by whole silver (the game's rule)
+local SILVER = 100           -- the price step where copper is refused (retail's rule)
 local DURATION = 2           -- auctions posted for 24 h (1: 12 h, 3: 48 h)
 local CHUNK = 500            -- auctions read a frame (never the whole list at once)
 local HISTORY_DAYS = 14      -- days of lowest prices kept for the usual price
@@ -807,9 +807,11 @@ end
 -- the bag slots worth an auction (the gold coin's), one press each: the
 -- game asks a press for every post. Each one's lowest price is checked
 -- again first (a search, sent by itself), then it is posted for 24 h at 1
--- silver under it (whole silver: the game's rule; at the same price as the
+-- silver under it (whole silver: retail's rule; at the same price as the
 -- player's own lowest; the last price seen when none is listed), never at
--- a loss against the merchant with the deposit counted.
+-- a loss against the merchant with the deposit counted. Where the auction
+-- house takes copper (Forever does), 1 copper under instead: at 1 silver
+-- under, a 50c item went up at 1s, twice the others' price (reported).
 ---------------------------------------------------------------------------
 local NUM_BAGS = NUM_TOTAL_EQUIPPED_BAG_SLOTS or NUM_BAG_SLOTS or 4
 local COMMODITY = Enum and Enum.ItemCommodityStatus and Enum.ItemCommodityStatus.Commodity or 2
@@ -883,19 +885,27 @@ local function lowestNow(e)
     end
 end
 
+-- The game's price step: 1 copper where the auction house takes copper,
+-- whole silver otherwise
+local function priceStep()
+    local copper = C_AuctionHouse.SupportsCopperValues
+    return copper and copper() == true and 1 or SILVER
+end
+
 -- The search's answer: its price, or the next one when no longer worth it
 function AP:Searched(itemID)
     local p = self.posting
     local e = p and p.stage == "search" and p.queue[p.index]
     if not e or (itemID and itemID ~= e.id) then return end
     local low, ours = lowestNow(e)
+    local step = priceStep()
     local price
     if low then
-        price = ours and low or (low - SILVER)
+        price = ours and low or (low - step)
     else
         price = self:Price(e.link)
     end
-    price = price and math.max(SILVER, math.floor(price / SILVER) * SILVER)
+    price = price and math.max(step, math.floor(price / step) * step)
     local deposit
     if e.commodity and C_AuctionHouse.CalculateCommodityDeposit then
         deposit = C_AuctionHouse.CalculateCommodityDeposit(e.id, DURATION, e.count)

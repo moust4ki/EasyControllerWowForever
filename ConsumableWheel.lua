@@ -928,7 +928,7 @@ function W:Build()
         W:TakeSticks(view, true)
         W.hold:Hide()
         W:Paint()
-        W:Log("open")
+        W:Log("open " .. tostring(wheel:GetAttribute("wheel")))
     end)
     -- Closed with a stick still pushed: held until it is let go, so the
     -- character doesn't walk off (or stand up from eating)
@@ -1488,6 +1488,11 @@ function W:MiniToggle(n, comboId)
         t:SetAttribute("type", "click")
         for i, b in ipairs(self.buttons) do t:SetAttribute("*clickbutton-s" .. i, b) end
         t.ckCombo, t.ckMini = comboId, n
+        -- For /ec wheel: its key's presses and releases (its secure code's
+        -- note of them)
+        t:HookScript("OnAttributeChanged", function(_, name, value)
+            if name == "ck-down" then W:Log("mini key " .. n .. " " .. (value and "down" or "up")) end
+        end)
         self.miniToggles[key] = t
         self.frame:SetAttribute("ck-pstick", stickIndex("Camera", 2))
     end
