@@ -765,6 +765,12 @@ local function auctionRows(b, page)
             s.marks = v
             AP:RefreshMarks()
         end })
+    b.check({ id = "ah_de", label = L.LBL_AH_DE, indent = true, tip = L.TIP_AH_DE,
+        get = function() return s.disenchant ~= false end,
+        set = function(v)
+            s.disenchant = v
+            AP:RefreshMarks()
+        end })
     b.info(AP:StatusText())
     -- Items left out (asked: arrows, a fish bowl...): untick to take one back
     b.header(L.AH_H_IGNORED)

@@ -632,6 +632,14 @@ Comfort › Auction house (off until you turn it on; asked):
   the game's own picture for the auction house is a pile of coins, too close to the merchant's, and
   grey items keep the game's own coin (they are never marked). Nothing written: the merchant doesn't
   buy it.
+- **Disenchanting** (asked; *Disenchanting in tooltips*, on with the module): on green, blue and purple
+  armour and weapons, what disenchanting gives, with the chances, the count and each result's price
+  at your last scan, then the average (Ø). The game tells addons none of it: WoW Forever's own table,
+  by the level the item requires (uncommon armour 75 % dust, 20 % essence, 5 % shard, weapons the
+  other way round; rare: a shard, a Nexus Crystal one time in 200 from 51; epic: 2 to 4 shards up
+  to 50, then a Nexus Crystal). For a character who knows Disenchant: **» Disenchant** (and **DE**
+  in purple in the bags) when the results less the cut are worth more than selling the item (bound
+  items too); those items are left out of Post all.
 - **Ignored items** (asked): *Ignore an item from your bags* picks one to leave out (your arrows,
   a fish bowl you keep...): never marked in the bags nor posted, its tooltip keeps the prices and
   says it is ignored; untick it in the list to take it back. By item, every random suffix of it.

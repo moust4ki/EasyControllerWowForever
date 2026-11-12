@@ -31,6 +31,7 @@ local ANSWER_WAIT = 60       -- seconds for the game's answer
 local CAGED_PET = 82800      -- battle pets: one item for every pet, left out
 local GOLD, GREY = { 1, 0.82, 0 }, { 0.6, 0.6, 0.6 }
 local GREEN, YELLOW = { 0.25, 0.9, 0.25 }, { 1, 0.82, 0 }
+local PURPLE = { 0.75, 0.45, 1 }
 
 local function settings() return CK.db.settings.auction end
 local function secret(v) return issecretvalue ~= nil and issecretvalue(v) or false end
@@ -223,6 +224,113 @@ function AP:Verdict(item, n)
     return AP.Net(price, n) > vendor * n and "auction" or "merchant", price, vendor
 end
 
+---------------------------------------------------------------------------
+-- Disenchanting (asked): what an item gives, the chances, and what that is
+-- worth at the auction house (the last scan's prices). The game tells
+-- addons none of it: WoW Forever's own table (wow-professions.com, Forever
+-- disenchanting guide), by the level the item requires. Uncommon armour:
+-- 75 % dust, 20 % essence, 5 % shard (no shard below 11: 80 / 20); weapons
+-- the other way round. Rare: a shard (a Nexus Crystal one time in 200 from
+-- 51). Epic: 2 to 4 shards up to 50, then a Nexus Crystal.
+---------------------------------------------------------------------------
+local DUST, ESSENCE, SHARD, CRYSTAL = 1, 2, 3, 4   -- (their colours: white, green, blue, purple)
+local NEXUS, FIRST_SHARD = 20725, 10978
+local DE_BANDS = {
+    -- { up to that level, { dust, from, to }, { essence, from, to }, shard, a Nexus Crystal for rares }
+    { 10, { 10940, 1, 2 }, { 10938, 1, 2 } },
+    { 15, { 10940, 2, 3 }, { 10939, 1, 2 }, 10978 },
+    { 20, { 10940, 4, 6 }, { 10998, 1, 2 }, 10978 },
+    { 25, { 11083, 1, 2 }, { 11082, 1, 2 }, 11084 },
+    { 30, { 11083, 2, 5 }, { 11134, 1, 2 }, 11138 },
+    { 35, { 11137, 1, 2 }, { 11135, 1, 2 }, 11139 },
+    { 40, { 11137, 2, 5 }, { 11174, 1, 2 }, 11177 },
+    { 45, { 11176, 1, 2 }, { 11175, 1, 2 }, 11178 },
+    { 50, { 11176, 2, 5 }, { 16202, 1, 2 }, 14343 },
+    { 55, { 16204, 1, 2 }, { 16203, 1, 2 }, 14344, true },
+    { 60, { 16204, 2, 5 }, { 16203, 1, 3 }, 14344, true },
+}
+AP.DE_BANDS = DE_BANDS
+local ITEM_CLASS = Enum and Enum.ItemClass or {}
+local ARMOR, WEAPON = ITEM_CLASS.Armor or 4, ITEM_CLASS.Weapon or 2
+local DISENCHANT_SPELL = 13262
+
+-- What disenchanting it gives: { { id, chance (0 to 1), from, to, colour } },
+-- nil when it can't be (not armour nor a weapon, not green, blue or purple)
+function AP.DisenchantResults(item)
+    local _, _, quality, ilvl, level, _, _, _, _, _, _, classID = itemInfo(item)
+    if secret(quality) or secret(classID) or secret(level) then return nil end
+    if classID ~= ARMOR and classID ~= WEAPON then return nil end
+    if quality ~= 2 and quality ~= 3 and quality ~= 4 then return nil end
+    level = type(level) == "number" and level or 0
+    -- (no level asked: by its item level)
+    if level < 1 and type(ilvl) == "number" and not secret(ilvl) then level = math.max(1, ilvl - 5) end
+    local band = DE_BANDS[#DE_BANDS]
+    for _, b in ipairs(DE_BANDS) do
+        if level <= b[1] then
+            band = b
+            break
+        end
+    end
+    local dust, essence, shard, nexus = band[2], band[3], band[4], band[5]
+    if quality == 2 then
+        local main, side, mainColor, sideColor = dust, essence, DUST, ESSENCE
+        if classID == WEAPON then main, side, mainColor, sideColor = essence, dust, ESSENCE, DUST end
+        local list = {
+            { id = main[1], chance = shard and 0.75 or 0.8, from = main[2], to = main[3], color = mainColor },
+            { id = side[1], chance = 0.2, from = side[2], to = side[3], color = sideColor },
+        }
+        if shard then list[3] = { id = shard, chance = 0.05, from = 1, to = 1, color = SHARD } end
+        return list
+    elseif quality == 3 then
+        shard = shard or FIRST_SHARD
+        if nexus then
+            return { { id = shard, chance = 0.995, from = 1, to = 1, color = SHARD },
+                { id = NEXUS, chance = 0.005, from = 1, to = 1, color = CRYSTAL } }
+        end
+        return { { id = shard, chance = 1, from = 1, to = 1, color = SHARD } }
+    end
+    if level > 50 then return { { id = NEXUS, chance = 1, from = 1, to = 1, color = CRYSTAL } } end
+    return { { id = shard or FIRST_SHARD, chance = 1, from = 2, to = 4, color = SHARD } }
+end
+
+-- What disenchanting it is worth at the auction house: each result's lowest
+-- price by its chance and its average count; whether every price is known;
+-- the results. Nil when it can't be disenchanted
+function AP:DisenchantValue(item)
+    local list = AP.DisenchantResults(item)
+    if not list then return nil end
+    local total, known = 0, true
+    for _, r in ipairs(list) do
+        local price = self:Price(r.id)
+        if price then total = total + r.chance * (r.from + r.to) / 2 * price else known = false end
+    end
+    return math.floor(total + 0.5), known, list
+end
+
+-- The character can disenchant (knows the spell)
+function AP.CanDisenchant()
+    local ok, known = pcall(function()
+        if IsPlayerSpell then return IsPlayerSpell(DISENCHANT_SPELL) end
+        if IsSpellKnown then return IsSpellKnown(DISENCHANT_SPELL) end
+        return C_SpellBook and C_SpellBook.IsSpellKnown and C_SpellBook.IsSpellKnown(DISENCHANT_SPELL)
+    end)
+    return ok and known == true
+end
+
+-- Disenchanting it beats selling it (n of it: the stack under it, one
+-- auction): the materials' worth less the cut, against the merchant's and
+-- the auction house's (unknown there, or bound: the merchant's only). Only
+-- for a character who can disenchant
+function AP:DisenchantBest(item, n, vendor, price)
+    if settings().disenchant == false or not AP.CanDisenchant() then return false end
+    local value, known = self:DisenchantValue(item)
+    if not (value and known) then return false end
+    n = n or 1
+    local best = (vendor or 0) * n
+    if price then best = math.max(best, AP.Net(price, n)) end
+    return value * n * CUT > best
+end
+
 -- "5 min", "3 h", "2 d"
 function AP.Age(seen)
     local s = math.max(0, GetServerTime() - (seen or 0))
@@ -306,12 +414,17 @@ function AP:AddLines(tooltip, data)
     elseif vendor == 0 then
         tooltip:AddDoubleLine(L.AH_MERCHANT, L.AH_NO_MERCHANT, GOLD[1], GOLD[2], GOLD[3], GREY[1], GREY[2], GREY[3])
     end
+    -- Disenchanting (asked): its results, their chances, counts and prices,
+    -- and what it is worth on average
+    if settings().disenchant ~= false then self:AddDisenchantLines(tooltip, link) end
     -- Where to sell what is under the tooltip (the stack in the bags: one
     -- auction, one fee); an item bound to the player: the merchant, if he
-    -- buys it
+    -- buys it; disenchanted when it is worth more so (a disenchanter)
     local whole = stackOf(tooltip)
     if self:Ignored(link) then
         tooltip:AddLine(L.AH_IGNORED_LINE, GREY[1], GREY[2], GREY[3])
+    elseif self:DisenchantBest(link, whole, vendor, price) then
+        tooltip:AddLine(L.AH_SELL_DISENCHANT, PURPLE[1], PURPLE[2], PURPLE[3])
     elseif price and vendor and AP.Net(price, whole) > vendor * whole then
         tooltip:AddLine(L.AH_SELL_AUCTION, GREEN[1], GREEN[2], GREEN[3])
     elseif vendor and vendor > 0 then
@@ -323,6 +436,43 @@ function AP:AddLines(tooltip, data)
         tooltip:AddLine(format(L.AH_SHIFT_HINT, whole), GREY[1], GREY[2], GREY[3])
     end
     return true
+end
+
+-- The results' colours (white dust, green essence, blue shard, purple
+-- crystal), the game's own when it has them
+local RESULT_COLORS = { [DUST] = { 1, 1, 1 }, [ESSENCE] = { 0.12, 1, 0 }, [SHARD] = { 0, 0.44, 0.87 },
+    [CRYSTAL] = { 0.64, 0.21, 0.93 } }
+local RESULT_QUALITY = { [DUST] = 1, [ESSENCE] = 2, [SHARD] = 3, [CRYSTAL] = 4 }
+local function resultColor(color)
+    local c = ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[RESULT_QUALITY[color]]
+    if c and c.r then return c.r, c.g, c.b end
+    local own = RESULT_COLORS[color] or RESULT_COLORS[DUST]
+    return own[1], own[2], own[3]
+end
+
+--   Disenchant results:
+--     Dream Dust                       75% (1-2 x 18s 81c)
+--     Greater Nether Essence           20% (1-2 x 85s 95c)
+--     Large Radiant Shard               5% (1 x 1g 89s 87c)
+--                                               Ø 56s 44c
+function AP:AddDisenchantLines(tooltip, link)
+    local value, known, list = self:DisenchantValue(link)
+    if not list then return end
+    tooltip:AddLine(L.AH_DE_HEADER, GOLD[1], GOLD[2], GOLD[3])
+    for _, r in ipairs(list) do
+        local name = C_Item.GetItemNameByID and C_Item.GetItemNameByID(r.id)
+        if not name and C_Item.RequestLoadItemDataByID then C_Item.RequestLoadItemDataByID(r.id) end
+        local icon = C_Item.GetItemIconByID and C_Item.GetItemIconByID(r.id)
+        local left = "  " .. (icon and ("|T" .. icon .. ":0|t ") or "") .. (name or ("item:" .. r.id))
+        local pct = r.chance >= 0.01 and format("%d%%", math.floor(r.chance * 100 + 0.5)) or format("%.1f%%", r.chance * 100)
+        local count = r.from == r.to and tostring(r.from) or (r.from .. "-" .. r.to)
+        local price = self:Price(r.id)
+        local cr, cg, cb = resultColor(r.color)
+        tooltip:AddDoubleLine(left, format(L.AH_DE_EACH, pct, count, price and money(price) or "?"),
+            cr, cg, cb, GOLD[1], GOLD[2], GOLD[3])
+    end
+    tooltip:AddDoubleLine(" ", format(L.AH_DE_AVG, money(value) .. (known and "" or " + ?")),
+        1, 1, 1, GOLD[1], GOLD[2], GOLD[3])
 end
 
 function AP:HookTooltips()
@@ -364,12 +514,13 @@ end
 local marks = setmetatable({}, { __mode = "k" })
 local bagFrames = {}
 -- (asked: two colours apart; the tooltip's advice ones)
-local MARK_COLOR = { auction = GREEN, merchant = YELLOW, unknown = GREY }
+local MARK_COLOR = { auction = GREEN, merchant = YELLOW, unknown = GREY, disenchant = PURPLE }
 local POOR = Enum and Enum.ItemQuality and Enum.ItemQuality.Poor or 0
 
 local function markText(advice)
     if advice == "auction" then return L.AH_MARK end
     if advice == "merchant" then return L.AH_MARK_VENDOR end
+    if advice == "disenchant" then return L.AH_MARK_DE end
     return "?"
 end
 
@@ -384,9 +535,10 @@ local function markFor(button)
 end
 
 -- Where a bag slot sells best: "auction", "merchant" (bound to the player,
--- or worth less there), "unknown" (never seen at the auction house: the
--- merchant until then), or nil (nothing in it, its data not loaded yet, the
--- merchant doesn't buy it)
+-- or worth less there), "disenchant" (worth more disenchanted, for a
+-- disenchanter; bound or not), "unknown" (never seen at the auction house:
+-- the merchant until then), or nil (nothing in it, its data not loaded yet,
+-- the merchant doesn't buy it)
 function AP:SlotAdvice(bag, slot)
     local ok, info = pcall(C_Container.GetContainerItemInfo, bag, slot)
     if not (ok and type(info) == "table") then return nil end
@@ -398,8 +550,10 @@ function AP:SlotAdvice(bag, slot)
     local vendor = sellPrice(link)
     if not vendor then return nil end
     local merchant = vendor > 0 and "merchant" or nil
-    if info.isBound == true or bindsOnPickup(link) then return merchant end
-    local price = self:Price(link)
+    local boundHere = info.isBound == true or bindsOnPickup(link)
+    local price = not boundHere and self:Price(link) or nil
+    if self:DisenchantBest(link, count, vendor, price) then return "disenchant" end
+    if boundHere then return merchant end
     if price then
         if AP.Net(price, count) > vendor * count then return "auction" end
         return merchant
@@ -416,6 +570,8 @@ function AP:SlotWorthIt(bag, slot)
     local count = type(info.stackCount) == "number" and not secret(info.stackCount) and info.stackCount or 1
     if type(link) ~= "string" or secret(link) or bindsOnPickup(link) or self:Ignored(link) then return nil end
     if self:Verdict(link, count) ~= "auction" then return nil end
+    -- (worth more disenchanted: kept for that)
+    if self:DisenchantBest(link, count, sellPrice(link), self:Price(link)) then return nil end
     return link, count, info.itemID
 end
 
