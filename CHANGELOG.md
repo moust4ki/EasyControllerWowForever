@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.21.0
+
+- **Disenchanting in the tooltips** (asked): green, blue and purple armour and weapons show what
+  disenchanting gives (WoW Forever's table, by the level the item requires), with the chances, the
+  counts, each result's price at your last auction house scan and the average. For a character who
+  can disenchant, **» Disenchant** (and **DE** in the bags) when it is worth more than selling the
+  item; such items are kept out of Post all. An option in Comfort › Auction house.
+
 ## 1.20.1
 
 - **Mini wheels** (asked): one option per wheel of yours (its editor: *Mini wheel*) turns it into a
