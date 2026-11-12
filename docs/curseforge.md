@@ -39,6 +39,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.21
+- **Post all: 1 copper under the lowest price** (1.21.1, reported): cheap items were posted at 1 silver while others sold them around 50 copper. WoW Forever's auction house takes copper, so an item at 50c now goes up at 49c.
 - **Disenchanting in the tooltips** (asked): on green, blue and purple gear, what disenchanting gives, the chances, each result's price at your last auction house scan and the average. If you can disenchant, the tooltip says **» Disenchant** (and your bags show **DE**) when it's worth more than selling the item.
 
 ## Features
