@@ -66,7 +66,8 @@ local outMarks, tintedMarks = {}, {}
 R.outMarks = outMarks
 
 local function spellOutOfRange(action)
-    local id = type(action) == "string" and tonumber(action:match("^spell:(%d+)$") or "")
+    -- Its highest rank (that option on)
+    local id = type(action) == "string" and CK.Mapping.BestRank(action:match("^spell:(%d+)$"))
     if not (id and C_Spell and C_Spell.IsSpellInRange and UnitExists("target")) then return false end
     local ok, inRange = pcall(function() return C_Spell.IsSpellInRange(id, "target") == false end)
     return ok and inRange or false

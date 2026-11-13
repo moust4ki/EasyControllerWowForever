@@ -81,7 +81,12 @@ local DEFAULTS = {
         -- A trigger pressed alone switches its bar (Toggle.lua); back to the
         -- top bar when leaving combat
         triggerToggle = false, toggleCombatRelease = true,
+        -- Spells used at the highest rank of the spell book, on the game's
+        -- action bars too (Mapping.lua)
+        highestRank = false,
     },
+    -- Ranks kept at the one chosen, the highest rank on: { [spell ID] = true }
+    rankPins = {},
     -- Vibrations: one switch and intensity, then each event { on, pattern }
     -- (Vibration.lua fills the events)
     vibration = { enabled = true, intensity = 0.6, events = {} },
@@ -244,6 +249,11 @@ function CK.CleanEntries(s)
     local hiddenItems = tbl(s.wheel, "usableHidden")
     for k, v in pairs(hiddenItems) do
         if type(k) ~= "number" or type(v) ~= "boolean" then hiddenItems[k] = nil end
+    end
+    -- Ranks kept (the highest rank on): { [spell ID] = true }
+    local pins = tbl(s, "rankPins")
+    for k, v in pairs(pins) do
+        if type(k) ~= "number" or v ~= true then pins[k] = nil end
     end
 end
 

@@ -719,15 +719,336 @@ end
 
 -- What a secure button casts for a spell: its name, with its rank when the
 -- spell book lists ranks ("Name(Rank 3)", the rank chosen stays the one
--- cast); its ID only while the name is not known. Some spells (Ghost Wolf,
--- shapeshift forms) don't cast by ID, a macro casting them by name did.
+-- cast, or the highest one with that option, see below); its ID only while
+-- the name is not known. Some spells (Ghost Wolf, shapeshift forms) don't
+-- cast by ID, a macro casting them by name did.
 function M.SpellCast(id)
-    id = tonumber(id)
+    id = M.BestRank(id)
     local name = id and C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
     if not name then return id end
     local sub = C_Spell.GetSpellSubtext and C_Spell.GetSpellSubtext(id)
     if type(sub) == "string" and sub:find("%d") then return name .. "(" .. sub .. ")" end
     return name
+end
+
+---------------------------------------------------------------------------
+-- The highest rank (Home > Gamepad, off by default): a spell put on a
+-- button, a paddle or a wheel keeps the rank chosen (its ID, saved as it
+-- is); used, shown or cast, it is the highest rank of the same name in the
+-- spell book, following what the character learns. A rank is the number in
+-- the spell's subtext ("Rank 3", in any language) and both subtexts must
+-- read the same apart from it. A spell without one (forms, professions'
+-- "Journeyman") stays as it is, and so do the ranks with names of their own
+-- (Create Healthstone (Lesser)). A rank kept on purpose
+-- (settings.rankPins[ID]: picked below the highest, or Y in the lists)
+-- never changes. Every action bar of the game too (a rank learned at a
+-- trainer, the game keeps the old one there): its slots get the highest
+-- rank, out of combat, as the game's editor does it; never a lower one.
+---------------------------------------------------------------------------
+-- "name\0shape" -> { id, rank } of the highest rank known; nil: to read
+local bookBest
+-- Spell ID -> what BestRank gives for it (asked at every range and
+-- cooldown update), emptied with the book, a rank kept, the option
+local resolved = {}
+
+function M.HighestRank()
+    local f = CK.db and settings().features
+    return f and f.highestRank == true or false
+end
+
+local function pins()
+    local s = settings()
+    if type(s.rankPins) ~= "table" then s.rankPins = {} end
+    return s.rankPins
+end
+
+function M.RankKept(id)
+    return CK.db ~= nil and pins()[id] == true
+end
+
+-- A spell's rank and its subtext's shape ("Rank #"); nil without a rank
+local function rankOf(id)
+    local sub = C_Spell and C_Spell.GetSpellSubtext and C_Spell.GetSpellSubtext(id)
+    local rank = type(sub) == "string" and tonumber(sub:match("%d+"))
+    if not rank then return nil end
+    return rank, (sub:gsub("%d+", "#"))
+end
+
+-- The player's spell book (not the pet's): spells learned only (the book
+-- can show the ones of higher levels, not learned yet), not passive, not
+-- of the other talents. Nil while it can't be read yet
+local function readBook()
+    local SB = C_SpellBook
+    if not (SB and SB.GetNumSpellBookSkillLines and SB.GetSpellBookSkillLineInfo and SB.GetSpellBookItemInfo) then
+        return nil
+    end
+    local bank = Enum and Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player or 0
+    local spellType = Enum and Enum.SpellBookItemType and Enum.SpellBookItemType.Spell
+    local best, any = {}, false
+    for line = 1, SB.GetNumSpellBookSkillLines() or 0 do
+        local info = SB.GetSpellBookSkillLineInfo(line)
+        if info and info.itemIndexOffset and info.numSpellBookItems then
+            for i = info.itemIndexOffset + 1, info.itemIndexOffset + info.numSpellBookItems do
+                local item = SB.GetSpellBookItemInfo(i, bank)
+                local id = item and item.spellID
+                if id and item.name and not item.isPassive and not item.isOffSpec then
+                    any = true
+                    -- An item type of a spell learned (not a future one),
+                    -- and the game not saying it isn't known: a rank of a
+                    -- level reached but not trained may show as a spell
+                    -- (all ranks shown). Without the item types: the
+                    -- game's answer only
+                    local ok, known = false, nil
+                    if SB.IsSpellKnown then ok, known = pcall(SB.IsSpellKnown, id) end
+                    local learned
+                    if spellType then
+                        learned = item.itemType == spellType and not (ok and known == false)
+                    else
+                        learned = ok and known and true or false
+                    end
+                    local rank, shape = rankOf(id)
+                    local key = rank and (item.name .. "\0" .. shape)
+                    local b = key and best[key]
+                    if learned and rank and (not b or rank > b.rank) then
+                        best[key] = { id = id, rank = rank }
+                    end
+                end
+            end
+        end
+    end
+    return any and best or nil
+end
+
+-- What is used for a spell ID: the highest rank of its name in the book
+-- (option on, not kept), else the ID itself. The highest known: a rank
+-- higher than the book's (a profile from another character) comes down to it
+function M.BestRank(id)
+    id = tonumber(id)
+    if not id or not M.HighestRank() or M.RankKept(id) then return id end
+    local cached = resolved[id]
+    if cached then return cached end
+    bookBest = bookBest or readBook()
+    if not bookBest then return id end
+    -- Remembered too without a name or a rank (the book read: until the
+    -- next change, a name not loaded yet is asked again then)
+    local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+    local rank, shape = rankOf(id)
+    local b = name and rank and bookBest[name .. "\0" .. shape]
+    resolved[id] = b and b.id or id
+    return resolved[id]
+end
+
+-- For a slot of the game's bars: the highest rank when it is higher than
+-- this one, else the ID (a slot is never put at a lower rank)
+function M.SlotRank(id)
+    id = tonumber(id)
+    local best = M.BestRank(id)
+    if not (id and best) or best == id then return id end
+    local have, top = rankOf(id), rankOf(best)
+    return have and top and top > have and best or id
+end
+
+-- For a profile's slot put back: the same, and a rank this character
+-- doesn't know (a profile copied from a higher character) at the highest
+-- one it knows instead of an empty slot
+function M.RestoreRank(id)
+    id = tonumber(id)
+    local SB = C_SpellBook
+    local ok, known = false, nil
+    if id and M.HighestRank() and SB and SB.IsSpellKnown then ok, known = pcall(SB.IsSpellKnown, id) end
+    if ok and known == false then return M.BestRank(id) end
+    return M.SlotRank(id)
+end
+
+-- A rank kept, or following the highest again
+function M:KeepRank(id, on)
+    pins()[id] = on and true or nil
+    wipe(resolved)
+    self:RanksChanged(true)
+end
+
+-- A spell picked in a list (option on): below the highest the book holds,
+-- it is kept at that rank (chosen on purpose: a healer's lower rank). Its
+-- ID when kept, else nil
+function M.NotePick(action)
+    local id = type(action) == "string" and tonumber(action:match("^spell:(%d+)$")
+        or action:match("^wheel:party:(%d+)$") or "")
+    if not id or not M.HighestRank() or M.RankKept(id) or M.BestRank(id) == id then return nil end
+    pins()[id] = true
+    wipe(resolved)
+    return id
+end
+
+-- The highest ranks as one line, to tell when they changed
+local function bookSignature()
+    bookBest = bookBest or readBook()
+    local parts = {}
+    for key, b in pairs(bookBest or {}) do parts[#parts + 1] = key .. "=" .. b.id end
+    table.sort(parts)
+    return table.concat(parts, ",")
+end
+
+-- The book read again at its next use (a spell learned, a talent...)
+function M.ForgetBook()
+    bookBest = nil
+    wipe(resolved)
+end
+
+-- Every action slot of the game: its bars (the slots before its gamepad
+-- bar's first, 1 to 180), its gamepad bars' pages and stance bars (each slot
+-- the game says is one of theirs), and the slots the profiles keep. While
+-- the game shows a bar of its own (a vehicle, a possess, an override, a
+-- temporary form), the slots it fills then (121-180) are left out
+local STANDARD_SLOTS = 180
+local GAMEPAD_SPAN = 256
+local TEMP_FIRST, TEMP_LAST = 121, 180
+local TEMP_BARS = { "HasOverrideActionBar", "HasVehicleActionBar", "IsPossessBarVisible", "HasTempShapeshiftActionBar" }
+
+local function tempBarShown()
+    for _, name in ipairs(TEMP_BARS) do
+        local f = (C_ActionBar and C_ActionBar[name]) or _G[name]
+        if f then
+            local ok, on = pcall(f)
+            if ok and on then return true end
+        end
+    end
+    return false
+end
+
+function M.ActionSlots()
+    local list, seen = {}, {}
+    local function add(slot)
+        if type(slot) == "number" and slot > 0 and not seen[slot] then
+            seen[slot] = true
+            list[#list + 1] = slot
+        end
+    end
+    local G = C_GamepadUI
+    local ok, first = false, nil
+    if G and G.GetFirstGamepadActionStorageSlotIndex then ok, first = pcall(G.GetFirstGamepadActionStorageSlotIndex) end
+    first = ok and type(first) == "number" and first > 1 and first or STANDARD_SLOTS + 1
+    local temp = tempBarShown()
+    for slot = 1, first - 1 do
+        if not (temp and slot >= TEMP_FIRST and slot <= TEMP_LAST) then add(slot) end
+    end
+    if G and G.IsValidGamepadActionStorageSlotIndex then
+        for slot = first, first + GAMEPAD_SPAN - 1 do
+            local valid, yes = pcall(G.IsValidGamepadActionStorageSlotIndex, slot)
+            if valid and yes then add(slot) end
+        end
+    end
+    local Slots = CK.Profiles and CK.Profiles.Slots
+    for _, slot in ipairs(Slots and Slots:List() or {}) do add(slot) end
+    table.sort(list)
+    return list
+end
+
+-- Polestar's ranks kept (its own upgrader, slots 1-180: a spell kept at
+-- its rank, a slot the player filled with a lower one): never undone here
+local function polestarKept(slot, id)
+    local db = _G.PolestarCharDB
+    local q = type(db) == "table" and type(db.qol) == "table" and db.qol
+    if not q then return false end
+    return (type(q.keptRanks) == "table" and q.keptRanks[id] == true)
+        or (type(q.keptSlots) == "table" and q.keptSlots[slot] == id) or false
+end
+
+-- The game's action bars: each slot holding a lower rank gets the highest,
+-- out of combat, never with something on the cursor, never a slot the game
+-- keeps (its message), never a rank kept (ours or Polestar's). -> slots
+-- changed
+function M:UpgradeBars()
+    if not M.HighestRank() then return 0 end
+    if InCombatLockdown() then
+        self.barsPending = true
+        return 0
+    end
+    self.barsPending = nil
+    if GetCursorInfo() then
+        -- Something held: once it is put down
+        if not self.barsRetry then
+            self.barsRetry = true
+            C_Timer.After(3, function()
+                M.barsRetry = nil
+                M:UpgradeBars()
+            end)
+        end
+        return 0
+    end
+    local done = 0
+    for _, slot in ipairs(M.ActionSlots()) do
+        local kind, id = GetActionInfo(slot)
+        local best = kind == "spell" and C_ActionBar.HasAction(slot) and M.SlotRank(id)
+        if best and best ~= id and not polestarKept(slot, id) and not self:SlotKept(slot) then
+            ClearCursor()
+            pcall(C_Spell.PickupSpell, best)
+            if GetCursorInfo() then
+                PlaceAction(slot)
+                -- The lower rank comes back on the cursor
+                ClearCursor()
+            end
+            local _, now = GetActionInfo(slot)
+            if now == best then done = done + 1 end
+        end
+    end
+    if done > 0 then CK:Print(L.RANK_BAR_UPGRADED, done) end
+    return done
+end
+
+-- The highest ranks changed (or the option, or a rank kept): what uses
+-- them set again, out of combat (once it ends). force: even if the book's
+-- highest ranks are the same
+function M:RanksChanged(force)
+    if InCombatLockdown() then
+        -- Once it ends: forced if any call asked it
+        self.ranksPending = force and "force" or (self.ranksPending or true)
+        return
+    end
+    self.ranksPending = nil
+    local sig = bookSignature()
+    if not force and sig == self.ranksSig then
+        -- The same ranks: only a bar upgrade left waiting by a fight
+        if self.barsPending then self:UpgradeBars() end
+        return
+    end
+    self.ranksSig = sig
+    self:Apply()
+    CK.Paddles:Apply()
+    if CK.ConsumableWheel then CK.ConsumableWheel:Fill() end
+    self:UpgradeBars()
+end
+
+-- /ec ranks: the option, and each ranked spell of the buttons, the wheels
+-- and the game's action bars with the rank it is used at ("=": the same;
+-- kept ones said)
+function M.DiagnoseRanks()
+    bookBest = bookBest or readBook()
+    local names = 0
+    for _ in pairs(bookBest or {}) do names = names + 1 end
+    CK:Print(L.RANK_DIAG, tostring(M.HighestRank()), names)
+    local function line(where, id)
+        id = tonumber(id)
+        if not (id and rankOf(id)) then return end
+        local best = M.BestRank(id)
+        DEFAULT_CHAT_FRAME:AddMessage(format("  %s: %s -> %s%s", where, M.SpellName(id) or id,
+            best == id and "=" or (M.SpellName(best) or best), M.RankKept(id) and ("  " .. L.RANK_KEPT) or ""))
+    end
+    local s = settings()
+    for _, list in ipairs({ s.mapping, s.replaced }) do
+        for combo, action in pairs(list) do
+            line(combo, action:match("^spell:(%d+)$") or action:match("^wheel:party:(%d+)$"))
+        end
+    end
+    for _, w in ipairs(type(s.myWheels) == "table" and s.myWheels.list or {}) do
+        for i = 1, 8 do
+            local action = w.slots and w.slots[i]
+            if action then line(w.name .. " " .. i, action:match("^spell:(%d+)$")) end
+        end
+    end
+    for _, slot in ipairs(M.ActionSlots()) do
+        local kind, id = GetActionInfo(slot)
+        if kind == "spell" then line(L.V_SLOT .. " " .. slot, id) end
+    end
 end
 
 -- A spell for the party's wheel: one the game says helps (heals, buffs),
@@ -769,7 +1090,7 @@ function M:ActionName(action)
     if kind == "cmd" then
         return CK.Paddles:CommandName(value)
     elseif kind == "spell" then
-        return M.SpellName(tonumber(value)) or value
+        return M.SpellName(M.BestRank(value)) or value
     elseif kind == "item" then
         local id = tonumber(value)
         return C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(id) or value
@@ -781,7 +1102,7 @@ function M:ActionName(action)
         local n = tonumber(value)
         if value == "phrases" then return L.PHRASES_NAME end
         local spell = M.PartySpell(action)
-        if spell then return format(L.PARTY_ACTION, M.SpellName(spell) or tostring(spell)) end
+        if spell then return format(L.PARTY_ACTION, M.SpellName(M.BestRank(spell)) or tostring(spell)) end
         if value == "usable" then return L.USABLE_WHEEL_NAME end
         if not n then return L.WHEEL_NAME end
         return CK.MyWheels and CK.MyWheels:Name(n) or L.MYWHEEL_GONE
@@ -798,7 +1119,7 @@ function M:ActionIcon(action)
     if kind == "cmd" then
         return COMMAND_ICONS[value] or COMMAND_ICON
     elseif kind == "spell" then
-        return C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(tonumber(value))
+        return C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(M.BestRank(value))
     elseif kind == "item" then
         return C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(tonumber(value))
     elseif kind == "macro" then
@@ -811,7 +1132,7 @@ function M:ActionIcon(action)
         if value == "phrases" then return CK.Phrases and CK.Phrases.ICON end
         if value == "usable" then return M.USABLE_ICON end
         local spell = M.PartySpell(action)
-        if spell then return C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spell) end
+        if spell then return C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(M.BestRank(spell)) end
         return n and CK.MyWheels and CK.MyWheels:Icon(n) or M.WHEEL_ICON
     end
 end
@@ -894,8 +1215,17 @@ function M:Catalog(tab, forSlot, noBound)
                             list[#list + 1] = { header = info.name }
                             first = false
                         end
-                        list[#list + 1] = { action = (party and "wheel:party:" or "spell:") .. item.spellID, icon = item.iconID,
+                        local entry = { action = (party and "wheel:party:" or "spell:") .. item.spellID, icon = item.iconID,
                             name = M.SpellName(item.spellID, item.subName) or item.name }
+                        -- The highest rank on: a rank is kept (said beside
+                        -- it) or follows the highest, Y switches
+                        if M.HighestRank() and rankOf(item.spellID) then
+                            local id, kept = item.spellID, M.RankKept(item.spellID)
+                            entry.sub = kept and L.RANK_KEPT or nil
+                            entry.yVerb = kept and L.V_FOLLOW_RANK or L.V_KEEP_RANK
+                            entry.onY = function() M:KeepRank(id, not kept) end
+                        end
+                        list[#list + 1] = entry
                     end
                 end
             end
@@ -2045,4 +2375,30 @@ function M:Init()
             end)
         end, M)
     end
+    -- The spell book changed (a rank learned at a trainer, a talent...): the
+    -- highest ranks read again, a moment after the last change (they come
+    -- in bursts at a trainer); in combat, once it ends
+    local book = CreateFrame("Frame")
+    book:RegisterEvent("PLAYER_ENTERING_WORLD")
+    book:RegisterEvent("SPELLS_CHANGED")
+    pcall(book.RegisterEvent, book, "LEARNED_SPELL_IN_SKILL_LINE")
+    book:RegisterEvent("PLAYER_REGEN_ENABLED")
+    local waiting
+    book:SetScript("OnEvent", function(_, event)
+        if event == "PLAYER_REGEN_ENABLED" then
+            if M.ranksPending then
+                M:RanksChanged(M.ranksPending == "force")
+            elseif M.barsPending then
+                M:UpgradeBars()
+            end
+            return
+        end
+        M.ForgetBook()
+        if waiting or not M.HighestRank() then return end
+        waiting = true
+        C_Timer.After(event == "PLAYER_ENTERING_WORLD" and 3 or 1, function()
+            waiting = false
+            M:RanksChanged()
+        end)
+    end)
 end

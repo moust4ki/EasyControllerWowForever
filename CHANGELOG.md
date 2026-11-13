@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+- **Highest rank of spells** (Home › Gamepad › Spell ranks, off by default): the spells on the free
+  buttons, the back paddles, the replaced game buttons and your wheels (the party wheels too) are cast
+  at the highest rank of your spell book, and follow what you learn: a new rank from a trainer is
+  used at once (once the fight ends, in combat). Their names, icons, cooldowns and range follow it.
+  What you put there is kept as you chose it (off: every spell back at its own rank). Spells without
+  a rank (forms, professions) and the ranks with names of their own (Create Healthstone (Lesser))
+  stay as they are.
+- **Every action bar of the game too**, with the same option (a rank learned at a trainer, the game
+  keeps the old one on its bars): the spells on its gamepad bar, its other bars and the stance bars are
+  put at their highest rank, out of combat, as the game's bar editor does, never at a lower one; a
+  line in the chat says how many. A profile put in use places its spells at their highest rank too.
+- **A rank kept** (for a cheaper heal): a lower rank picked while a higher one is known is kept at
+  that rank, on the addon's buttons and on the game's bars; it shows *(rank kept)* in the lists,
+  where **Y** keeps a rank or lets it follow the highest again. A rank or a slot Polestar keeps is
+  left as it is too.
+- `/ec ranks` lists the spells of your buttons, wheels and action bars with the rank each is used at.
+
 ## 1.21.1
 
 - **Post all: 1 copper under the lowest price** (reported: cheap items went up at 1 silver while

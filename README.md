@@ -310,7 +310,23 @@ whether or not the key a paddle sends comes with the triggers' modifiers (Steam 
 may come without them). A game function (run / walk, map...) is a key binding and needs a key of its
 own: the trigger must be a modifier in the game's gamepad settings, so the key changes with it (turn
 on **RT as a modifier** in Home › Gamepad), or the layers share it. Spells are cast by their name
-(with the rank you chose), like a macro: shapeshift forms such as Ghost Wolf cast too.
+(with the rank you chose, or the highest one, see below), like a macro: shapeshift forms such as
+Ghost Wolf cast too.
+
+**Highest rank of spells** (Home › Gamepad › Spell ranks, off by default): the spells on the free
+buttons, the paddles, the replaced game buttons and your wheels are cast at the highest rank of your
+spell book, and so are the spells on every action bar of the game (its gamepad bar, its other bars,
+the stance bars): they follow what you learn (a new rank from a trainer is used at once, or once the
+fight ends). What you put on the addon's buttons and wheels is kept as you chose it: turned off,
+every one is back at its own rank. The game's bars are changed in their slots, out of combat, as its
+bar editor does, never to a lower rank; a line in the chat says how many, and a profile put in use
+places its spells at their highest rank too. A rank is the number in the spell's rank text ("Rank
+3"); spells without one (forms, professions) and spells whose ranks have names of their own (Create
+Healthstone (Lesser)) stay as they are. To keep a lower rank (a cheaper heal), pick it in the
+Gamepad tab's lists or a wheel's while a higher one is known: it shows *(rank kept)* there, where Y
+keeps a rank or lets it follow the highest again (a lower rank put on a bar with the game's own
+editor is raised). A rank or a slot that Polestar keeps (its own upgrader's) is left as it is too.
+`/ec ranks` lists each spell with the rank it is used at.
 
 L3 / R3 can be shown too (Home › Gamepad), with what the game does with them (autorun, ping...) or what
 you put on them. Spells are listed with their rank.
@@ -723,6 +739,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec phrases` | the quick phrases window |
 | `/ec profile [name]` | this character's settings and the others'; with a name, put that profile in use |
 | `/ec binds` | the game's buttons replaced, and what each key runs now |
+| `/ec ranks` | the spells of your buttons, wheels and action bars, and the rank each is used at |
 | `/ec glyphs` | list the game's gamepad button icons |
 | `/ec debug` | print received buttons and sticks |
 

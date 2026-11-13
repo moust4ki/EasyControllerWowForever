@@ -62,7 +62,8 @@ function MW:Entries(id)
     for i = 1, SLOTS do
         local kind, value = ((w and w.slots[i]) or ""):match("^(%a+):(.+)$")
         if kind == "spell" or kind == "item" then
-            entries[i] = { kind = kind, id = tonumber(value) }
+            -- A spell: its highest rank (that option on)
+            entries[i] = { kind = kind, id = kind == "spell" and CK.Mapping.BestRank(value) or tonumber(value) }
         elseif kind == "macro" and GetMacroInfo(value) then
             entries[i] = { kind = "macro", name = value }
         end
@@ -698,8 +699,12 @@ end
 function E:Fill(e)
     local w = self:Wheel()
     if not (w and e and e.action) then return end
+    -- A rank below the highest (that option on): kept
+    local kept = CK.Mapping.NotePick(e.action)
     MW:SetSlot(self.id, self.slot, e.action)
-    C:Toast(format(L.TOAST_PAIR, positions()[self.slot] or "", e.name or ""))
+    -- That rank elsewhere (buttons, the game's bar) kept too
+    if kept then CK.Mapping:RanksChanged(true) end
+    C:Toast(format(L.TOAST_PAIR, positions()[self.slot] or "", e.name or "") .. (kept and ("  " .. L.RANK_KEPT) or ""))
     self.slot = self.slot % 8 + 1
 end
 

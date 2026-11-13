@@ -1408,10 +1408,12 @@ function W:ApplyPage()
     end
 end
 
--- A party spell's wheel: one page, you then the party's members
+-- A party spell's wheel: one page, you then the party's members (the
+-- spell's highest rank, that option on)
 local function partyPages(id)
     local list = {}
-    for i, unit in ipairs(PARTY_UNITS) do list[i] = { kind = "spell", id = id, unit = unit, party = true } end
+    local spell = CK.Mapping.BestRank(id)
+    for i, unit in ipairs(PARTY_UNITS) do list[i] = { kind = "spell", id = spell, unit = unit, party = true } end
     return { [1] = list }
 end
 
