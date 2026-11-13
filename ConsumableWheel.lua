@@ -29,7 +29,8 @@ local L = CK.L
 --
 -- The same wheel also shows the player's own wheels (MyWheels.lua): each has
 -- a key of its own, 8 slots on one page, spells, items or macros. The open
--- wheel is the "wheel" attribute: "c" (consumables) or "1" to "8".
+-- wheel is the "wheel" attribute: "c" (consumables), "u" (usable items),
+-- "t" (professions, ProfessionsWheel.lua) or "1" to "8".
 --
 -- And the party spells' wheels ("p" and the spell's ID): a spell put on a
 -- key from the Gamepad tab's Party list opens a small wheel like the game's
@@ -383,6 +384,7 @@ function W:Diagnose()
     local hiddenCount = 0
     for _, c in ipairs(self:UsableCandidates()) do if c.hidden then hiddenCount = hiddenCount + 1 end end
     CK:Print(L.USABLE_DIAG, wheel and wheel:GetAttribute("ck-u-total") or 0, hiddenCount)
+    CK.ProfessionsWheel:Diagnose(wheel)
     local seen = {}
     for bag = 0, NUM_BAG_SLOTS or 4 do
         for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
@@ -849,6 +851,11 @@ function W:Build()
     usable:SetAttribute("ck-wheel", "u")
     usable:SetAttribute("type", "click")
     self.usableToggle = usable
+    -- The professions' wheel's key
+    local professions = keyButton("ControllerKeyboardProfessionsToggle", wheel, TOGGLE, nil, "AnyDown", "AnyUp")
+    professions:SetAttribute("ck-wheel", "t")
+    professions:SetAttribute("type", "click")
+    self.professionsToggle = professions
     -- The key of each wheel of the player's
     self.myToggles = {}
     for n = 1, W.MY_MAX do
@@ -1007,6 +1014,7 @@ function W:Build()
         close:SetAttribute("*clickbutton-s" .. i, b)
         page:SetAttribute("*clickbutton-s" .. i, b)
         self.toggle:SetAttribute("*clickbutton-s" .. i, b)
+        self.professionsToggle:SetAttribute("*clickbutton-s" .. i, b)
         for _, t in ipairs(self.myToggles) do t:SetAttribute("*clickbutton-s" .. i, b) end
 
         self.buttons[i] = b
@@ -1367,8 +1375,9 @@ local function store(wheel, wid, pages, unitOf)
             local e = list[i]
             local key = "ck-" .. wid .. "-" .. page .. "-" .. i
             wheel:SetAttribute(key .. "-t", e and e.kind or nil)
+            -- (a spell by its ID when its name is shared: ProfessionsWheel.lua)
             wheel:SetAttribute(key, e and (e.kind == "item" and ("item:" .. e.id)
-                or e.kind == "spell" and CK.Mapping.SpellCast(e.id) or e.name) or nil)
+                or e.kind == "spell" and (e.byId and e.id or CK.Mapping.SpellCast(e.id)) or e.name) or nil)
             wheel:SetAttribute(key .. "-u", e and unitOf and unitOf(e) or nil)
             if e then total = total + 1 end
         end
@@ -1562,6 +1571,16 @@ function W:Fill()
     end
     store(wheel, "u", upages)
     self.lists.u = upages
+    -- The professions (ProfessionsWheel.lua): this character's, in their
+    -- order, 8 a page
+    local tpages = {}
+    for n, e in ipairs(CK.ProfessionsWheel:Scan()) do
+        local page = math.floor((n - 1) / SEGMENTS) + 1
+        tpages[page] = tpages[page] or {}
+        tpages[page][(n - 1) % SEGMENTS + 1] = e
+    end
+    store(wheel, "t", tpages)
+    self.lists.t = tpages
     -- The player's own: one page, each slot where it was put
     for n = 1, W.MY_MAX do
         -- Its filled slots in their order, one after the other: the wheel has
@@ -1806,9 +1825,11 @@ function W:Track()
     local mine = tonumber(self.paintedWheel)
     if not item then
         self.ticked = nil
-        -- A wheel of the player's: its name
-        view.name:SetText(mine and CK.MyWheels and CK.MyWheels:Name(mine) or L.WHEEL_NOTHING)
-        view.count:SetText(format(mine and L.MYWHEEL_NOTHING_HINT or L.WHEEL_NOTHING_HINT, W.StickWords()))
+        -- A wheel of the player's, the professions': its name
+        local own = mine and CK.MyWheels and CK.MyWheels:Name(mine)
+            or (self.paintedWheel == "t" and L.PROF_WHEEL_NAME)
+        view.name:SetText(own or L.WHEEL_NOTHING)
+        view.count:SetText(format((mine or own) and L.MYWHEEL_NOTHING_HINT or L.WHEEL_NOTHING_HINT, W.StickWords()))
         return
     end
     self:PlaceOverlay(view.highlight, "sel", i, self.paintedCount or SEGMENTS)
@@ -1817,7 +1838,9 @@ function W:Track()
         local count = C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0
         view.count:SetText(format("%s  -  %d", item.cat and L["WHEEL_CAT_" .. item.cat:upper()] or L.WHEEL_KIND_ITEM, count))
     else
-        view.count:SetText(item.kind == "spell" and L.WHEEL_KIND_SPELL or L.WHEEL_KIND_MACRO)
+        -- (the professions' wheel: a profession or a tracking)
+        view.count:SetText(item.kind == "spell" and (item.cat and L["WHEEL_CAT_" .. item.cat:upper()] or L.WHEEL_KIND_SPELL)
+            or L.WHEEL_KIND_MACRO)
     end
     if CK.Vibration and self.frame:IsShown() and i ~= self.ticked then
         self.ticked = i
@@ -2527,6 +2550,7 @@ function W:Toggle(which, comboId)
     if spell then return self:PartyToggle(spell, comboId) end
     self:Build()
     if which == "usable" then return self.usableToggle end
+    if which == "professions" then return self.professionsToggle end
     local n = tonumber(which)
     -- A mini wheel: its own key, on that button
     if n and CK.MyWheels and CK.MyWheels:IsMini(n) then return self:MiniToggle(n, comboId) end
@@ -2543,13 +2567,21 @@ function W:Init()
     -- when it ends (Fill waits for it)
     if not InCombatLockdown() then self:Build() end
     local f = CreateFrame("Frame")
+    -- (a profession learned or forgotten: LEARNED_SPELL_IN_SKILL_LINE,
+    -- SPELLS_CHANGED, registered as the client has them; not
+    -- SKILL_LINES_CHANGED: every weapon skill point in a fight)
     for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "BAG_UPDATE_DELAYED", "PLAYER_REGEN_ENABLED", "PLAYER_LEVEL_UP",
         "PLAYER_REGEN_DISABLED", "BAG_UPDATE_COOLDOWN", "GET_ITEM_INFO_RECEIVED", "SPELLS_CHANGED", "UPDATE_MACROS",
-        "SPELL_UPDATE_COOLDOWN", "GROUP_ROSTER_UPDATE", "PLAYER_LOGOUT", "UI_ERROR_MESSAGE" }) do
+        "SPELL_UPDATE_COOLDOWN", "GROUP_ROSTER_UPDATE", "PLAYER_LOGOUT", "UI_ERROR_MESSAGE",
+        "LEARNED_SPELL_IN_SKILL_LINE" }) do
         pcall(f.RegisterEvent, f, event)
     end
     local queued
     f:SetScript("OnEvent", function(_, event, ...)
+        -- The spell book changed: the professions' wheel reads it again
+        if event == "SPELLS_CHANGED" or event == "LEARNED_SPELL_IN_SKILL_LINE" or event == "PLAYER_ENTERING_WORLD" then
+            CK.ProfessionsWheel:Invalidate()
+        end
         -- For /ec wheel: the game refusing a party spell just cast (too far,
         -- out of sight, a stronger buff...)
         if event == "UI_ERROR_MESSAGE" then

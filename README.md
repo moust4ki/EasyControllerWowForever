@@ -194,7 +194,7 @@ second A.
   interface takes too), the game's button icons, font, the centre dot for OLED screens; automation at
   merchants.
 - **Gamepad**: the mapping below.
-- **Wheels**: your own wheels, the consumables wheel, where they open.
+- **Wheels**: your own wheels, the consumables, usable items and professions wheels, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
 - **Comfort** (named Alerts before): the vibrations, the bag counters, the quest items, the better items and the
   auction house prices below.
@@ -499,6 +499,23 @@ and uses like the consumables wheel, in combat too (what is in it is updated out
 **Wheels › Usable items** lists what it holds now, each ticked when shown: untick one to hide it from
 the wheel (it stays in your bags), tick it to show it again. The hearthstone is hidden by default.
 *Use the wheel* at the top turns the wheel itself off (its key then does nothing).
+
+### Professions wheel
+
+The same wheel, **filled by itself with the profession windows your character's spell book
+offers**: the crafting ones first (Alchemy, Blacksmithing, Cooking, Engineering, Enchanting, First Aid,
+Tailoring, Leatherworking), then Smelting and the windows WoW Forever gives the gathering professions
+(Herbalism, Mining, Skinning, Fishing: taught by their trainers, their recipes made there). Fishing's
+own cast (the line in the water) isn't in it. Only what this character knows, **always in that
+order**, 8 a page (LB / RB for more); a profession learned or forgotten comes in or goes out by itself
+(once a fight is over, if it happens in one). Where two spells share a name (Fishing's window and its
+cast, the gathering spells and their windows), the wheel holds the window and casts it by its own ID.
+Its own key: the Gamepad tab's Macros list (*Professions wheel*), or *Escape > Key Bindings >
+AddOns*. It opens, aims and uses like the consumables wheel, in combat too. **Wheels › Professions**:
+*Use the wheel* (off: its key does nothing), **Find Herbs and Find Minerals** (off by default: a
+switch, not a window, which the minimap's tracking button does too; on, they come last), and what the
+wheel holds now. Nothing learned: the wheel stays closed. `/ec wheel` lists it too, with the
+professions the game gives.
 
 ### Your own wheels
 

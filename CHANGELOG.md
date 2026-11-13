@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **Professions wheel** (asked): a wheel that fills itself with the profession windows your
+  character's spell book offers: the crafting ones first (Alchemy, Blacksmithing, Cooking,
+  Engineering, Enchanting, First Aid, Tailoring, Leatherworking), then Smelting and the gathering
+  professions' own windows (Herbalism, Mining, Skinning, Fishing); Fishing's cast is left out. Find
+  Herbs and Find Minerals can come last (an option, off: a switch, not a window). Only what the
+  character knows, always in that order, 8 a page (LB / RB); a profession learned or forgotten comes
+  in or goes out by itself (after the fight if it happens in one). A name two spells share (Fishing's
+  window and its cast...) always opens the window. Its key: the Gamepad tab's
+  Macros list (*Professions wheel*) or *Escape > Key Bindings > AddOns*; **Wheels › Professions**
+  turns it on or off and shows what it holds. Nothing learned: its key does nothing. It opens, aims
+  and uses like the other wheels, in combat too; `/ec wheel` lists it.
+
 ## 1.21.1
 
 - **Post all: 1 copper under the lowest price** (reported: cheap items went up at 1 silver while
