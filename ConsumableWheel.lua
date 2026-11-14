@@ -74,6 +74,8 @@ local BANNER_W, BANNER_H = 360, 64
 -- fifth of a turn (member 1 on the left)
 local PARTY_UNITS = { "player", "party1", "party2", "party3", "party4" }
 local PARTY_RADIUS, PARTY_SLOT, PARTY_CENTER, PARTY_BASE = 62, 38, 44, 196
+-- A D-pad wheel's glyphs: outside their slot, inside the round base
+local DPAD_GLYPH_R = 90
 -- Each member's health as a ring around their portrait (asked): its size,
 -- its arcs (one a 40th of the health), how far it reaches past the portrait
 local HP_RING, HP_ARCS = 50, 40
@@ -93,6 +95,18 @@ local function isMini(wid) return type(wid) == "string" and wid:sub(1, 1) == "m"
 W.isMini = isMini
 local function isSmall(wid) return isParty(wid) or isMini(wid) end
 W.isSmall = isSmall
+-- A D-pad wheel ("d" and the wheel's number; asked): a mini wheel of 4
+-- slots in a cross, on its button too, but no stick: while it is open the
+-- D-pad is its keys, a direction uses its slot at once (on its release,
+-- the opening key's own release left alone). Its slots keep their place
+-- (up, right, down, left), an empty one shows nothing. The sticks stay the
+-- character's: walking on while choosing.
+local function isDpad(wid) return type(wid) == "string" and wid:sub(1, 1) == "d" end
+W.isDpad = isDpad
+-- The D-pad: each direction's slot (the cross's order: up, then clockwise)
+local DPAD_SLOTS = { UP = 1, RIGHT = 2, DOWN = 3, LEFT = 4 }
+local DPAD_KEYS = { UP = "PADDUP", RIGHT = "PADDRIGHT", DOWN = "PADDDOWN", LEFT = "PADDLEFT" }
+local DPAD_GLYPHS = { "DPAD_UP", "DPAD_RIGHT", "DPAD_DOWN", "DPAD_LEFT" }
 -- The right stick's direction keys (sent with the game's
 -- GamePadStickAxisButtons setting): letting the stick go casts
 local PARTY_STICK_KEYS = "PADRSTICKUP,PADRSTICKDOWN,PADRSTICKLEFT,PADRSTICKRIGHT,"
@@ -473,7 +487,7 @@ local PREFIXES = ",SHIFT-,CTRL-,ALT-,CTRL-SHIFT-,ALT-SHIFT-,ALT-CTRL-,ALT-CTRL-S
 local APPLY_PAGE = [[
     local wid = owner:GetAttribute("wheel") or "c"
     local party = strsub(wid, 1, 1) == "p"
-    local small = party or strsub(wid, 1, 1) == "m"
+    local small = party or strsub(wid, 1, 1) == "m" or strsub(wid, 1, 1) == "d"
     local key = "ck-" .. wid .. "-" .. (owner:GetAttribute("page") or 1) .. "-"
     local n = owner:GetAttribute(key .. "n") or 0
     local radius = owner:GetAttribute(small and "ck-pradius" or "ck-radius")
@@ -519,6 +533,8 @@ local AIMED = [[
     local stick = state and state.sticks
         and state.sticks[owner:GetAttribute(aimSmall and "ck-pstick" or "ck-stick") or 1]
     local n = owner:GetAttribute("ck-" .. aimWid .. "-" .. (owner:GetAttribute("page") or 1) .. "-n") or 0
+    -- A D-pad wheel: no stick aims it
+    if strsub(aimWid, 1, 1) == "d" then n = 0 end
     if n > 0 and stick and stick.len and stick.len > ]] .. AIM .. [[ then
         local bestDot = -2
         for i = 1, n do
@@ -552,7 +568,16 @@ local SHOW = [[
     -- A party spell's wheel or a mini wheel, or another one let go to use
     -- (option): the right stick's direction keys, to see it let go
     local first = strsub(owner:GetAttribute("wheel") or "c", 1, 1)
-    if first == "p" or first == "m" or owner:GetAttribute("ck-letgo") then
+    -- A D-pad wheel: the D-pad, a direction's press then its release
+    owner:SetAttribute("ck-dpress", nil)
+    if first == "d" then
+        for prefix in gmatch(owner:GetAttribute("ck-prefixes"), "([^,]*),") do
+            for dir in gmatch("UP,RIGHT,DOWN,LEFT,", "([^,]+),") do
+                owner:SetBindingClick(true, prefix .. owner:GetAttribute("ck-dkey-" .. dir), "ControllerKeyboardWheelDpad", dir)
+            end
+        end
+    end
+    if first == "p" or first == "m" or (owner:GetAttribute("ck-letgo") and first ~= "d") then
         owner:SetAttribute("ck-aim", 0)
         owner:SetAttribute("ck-aimlen", 0)
         for key in gmatch(owner:GetAttribute("ck-pstickkeys"), "([^,]+),") do
@@ -585,12 +610,16 @@ local HIDE = [[
 -- puts it back where the wheels go ("ck-home-*", set by Place).
 local TOGGLE = [[
     local wid = self:GetAttribute("ck-wheel") or "c"
-    -- (a party spell's wheel, or a mini wheel: the same small wheel)
-    local party = strsub(wid, 1, 1) == "p" or strsub(wid, 1, 1) == "m"
+    -- (a party spell's wheel, a mini wheel, a D-pad wheel: the same small
+    -- wheel, on its button)
+    local dpad = strsub(wid, 1, 1) == "d"
+    local party = strsub(wid, 1, 1) == "p" or strsub(wid, 1, 1) == "m" or dpad
     local release = (button and strsub(button, 1, 4) == "ckup") or (not down and self:GetAttribute("ck-down"))
     self:SetAttribute("ck-down", down and true or false)
     if release then
         if owner:GetAttribute("wheel") == wid then owner:SetAttribute("ck-open-held", nil) end
+        -- A D-pad wheel: its key let go leaves it open (the D-pad chooses)
+        if dpad then return false end
         if not ((party or owner:GetAttribute("ck-hold")) and owner:IsShown() and owner:GetAttribute("wheel") == wid) then
             return false
         end
@@ -630,8 +659,9 @@ local TOGGLE = [[
         end
         owner:SetAttribute("wheel", wid)
         -- Its key held (a party spell's wheel): if it is A, B, LB or RB, the
-        -- wheel's own keys while open, its release goes to them (OPENER_UP)
-        owner:SetAttribute("ck-open-held", party and true or nil)
+        -- wheel's own keys while open, its release goes to them (OPENER_UP);
+        -- a D-pad wheel's release uses nothing
+        owner:SetAttribute("ck-open-held", (party and not dpad) and true or nil)
         owner:SetAttribute("ck-used-down", nil)
         ]] .. SHOW .. [[
     end
@@ -749,6 +779,25 @@ local LET_GO = [[
     return "s" .. slot, true
 ]]
 
+-- A D-pad wheel: a direction (its name comes as the click's button) uses its
+-- slot on its release, if its press came while the wheel was open: the
+-- release of the key that opened it (LT + D-pad up...) uses nothing. On the
+-- release, so the D-pad's press and release both stay ours (a release
+-- alone to the game's own binding after the wheel closed: never). An empty
+-- direction: nothing, the wheel stays open
+local DPAD = [[
+    if not (owner:IsShown() and strsub(owner:GetAttribute("wheel") or "c", 1, 1) == "d") then return false end
+    if down then
+        owner:SetAttribute("ck-dpress", button)
+        return false
+    end
+    if owner:GetAttribute("ck-dpress") ~= button then return false end
+    owner:SetAttribute("ck-dpress", nil)
+    local slot = owner:GetAttribute("ck-dslot-" .. tostring(button)) or 0
+    if slot < 1 or not owner:GetFrameRef("slot" .. slot):IsShown() then return false end
+    return "s" .. slot, true
+]]
+
 -- After a use (A, or a click on a slot): the wheel closes
 local DONE = HIDE
 
@@ -833,6 +882,11 @@ function W:Build()
         wheel:SetAttribute("ck-kx-" .. key, d[1])
         wheel:SetAttribute("ck-ky-" .. key, d[2])
     end
+    -- A D-pad wheel: each direction's key and slot
+    for dir, slot in pairs(DPAD_SLOTS) do
+        wheel:SetAttribute("ck-dkey-" .. dir, DPAD_KEYS[dir])
+        wheel:SetAttribute("ck-dslot-" .. dir, slot)
+    end
     wheel:SetAttribute("ck-home-w", WHEEL_SIZE)
     wheel:SetAttribute("ck-home-h", 600)
     self.frame = wheel
@@ -884,6 +938,12 @@ function W:Build()
         end
     end)
     self.letGo = letGo
+    -- A D-pad wheel's directions: a press, then its release uses
+    local dpad = keyButton("ControllerKeyboardWheelDpad", wheel, DPAD, DONE, "AnyDown", "AnyUp")
+    dpad:SetAttribute("type", "click")
+    dpad:SetAttribute("useOnKeyDown", false)
+    dpad:HookScript("OnClick", function(_, button, down) W:Log("D-pad " .. tostring(button) .. (down and " down" or " up")) end)
+    self.dpad = dpad
 
     -- What is drawn: the game's radial menu art, under the slots' buttons
     local view = CK.NewFrame("Frame", nil, wheel)
@@ -925,14 +985,18 @@ function W:Build()
     view.pages:SetPoint("TOP", view.help, "BOTTOM", 0, -4)
     view:SetScript("OnUpdate", function() W:Track() end)
     view:SetScript("OnShow", function()
-        W:TakeSticks(view, true)
+        -- (a D-pad wheel's: the character's, walking on while choosing)
+        W:TakeSticks(view, not isDpad(wheel:GetAttribute("wheel")))
         W.hold:Hide()
         W:Paint()
         W:Log("open " .. tostring(wheel:GetAttribute("wheel")))
     end)
     -- Closed with a stick still pushed: held until it is let go, so the
-    -- character doesn't walk off (or stand up from eating)
-    view:SetScript("OnHide", function() W:HoldSticks() end)
+    -- character doesn't walk off (or stand up from eating). Not after a
+    -- D-pad wheel: the character was walking
+    view:SetScript("OnHide", function()
+        if not isDpad(wheel:GetAttribute("wheel")) then W:HoldSticks() end
+    end)
     -- Closed (its keys let go in its secure code, which our binding hooks
     -- don't see): the replaced buttons it held back are bound again
     wheel:HookScript("OnHide", function()
@@ -1004,6 +1068,7 @@ function W:Build()
         SecureHandlerSetFrameRef(wheel, "slot" .. i, b)
         use:SetAttribute("*clickbutton-s" .. i, b)
         letGo:SetAttribute("*clickbutton-s" .. i, b)
+        dpad:SetAttribute("*clickbutton-s" .. i, b)
         close:SetAttribute("*clickbutton-s" .. i, b)
         page:SetAttribute("*clickbutton-s" .. i, b)
         self.toggle:SetAttribute("*clickbutton-s" .. i, b)
@@ -1105,6 +1170,16 @@ function W:BuildParty(wheel)
         local s = CK.Paddles:CreateSlot(pv, PARTY_SLOT)
         s:Hide()
         pv.minis[i] = s
+    end
+    -- A D-pad wheel's: each direction's glyph, outside its slot (written
+    -- when drawn: the controller's own)
+    pv.dglyphs = {}
+    for i = 1, #DPAD_GLYPHS do
+        local x, y = slotDir(i, #DPAD_GLYPHS)
+        local g = pv:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        g:SetPoint("CENTER", pv, "CENTER", DPAD_GLYPH_R * x, DPAD_GLYPH_R * y)
+        g:Hide()
+        pv.dglyphs[i] = g
     end
     -- Above it: the banner (the spell, the member aimed), the help
     pv.banner = pv:CreateTexture(nil, "BACKGROUND")
@@ -1357,12 +1432,14 @@ function W:BuildSeated()
     self.seated, self.seatedEvents = f, events
 end
 
--- A wheel's pages ({ page = { [slot] = entry } }) into its attributes
+-- A wheel's pages ({ page = { [slot] = entry } }) into its attributes. A
+-- page's `n`: its sections, kept even where empty (a D-pad wheel's 4: each
+-- slot in its place); else as many as it holds
 local function store(wheel, wid, pages, unitOf)
     local total = 0
     for page = 1, PAGES do
         local list = pages[page] or {}
-        wheel:SetAttribute("ck-" .. wid .. "-" .. page .. "-n", #list)
+        wheel:SetAttribute("ck-" .. wid .. "-" .. page .. "-n", list.n or #list)
         for i = 1, SEGMENTS do
             local e = list[i]
             local key = "ck-" .. wid .. "-" .. page .. "-" .. i
@@ -1394,7 +1471,7 @@ function W:ApplyPage()
             b:SetPoint("CENTER", wheel, "CENTER", PARTY_RADIUS * PARTY_DIRS[i][1], PARTY_RADIUS * PARTY_DIRS[i][2])
         elseif i <= n then
             local x, y = slotDir(i, n)
-            local radius = isMini(wid) and PARTY_RADIUS or ICON_RADIUS
+            local radius = (isMini(wid) or isDpad(wid)) and PARTY_RADIUS or ICON_RADIUS
             b:ClearAllPoints()
             b:SetPoint("CENTER", wheel, "CENTER", radius * x, radius * y)
         end
@@ -1474,17 +1551,21 @@ end
 -- A mini wheel's key on a button ("UP:LT", its input and layer: where it
 -- opens), like a party spell's: made the first time a key gets it (the
 -- Gamepad tab's bindings, out of combat). Only on a button: its key binding
--- opens nothing (asked: it isn't a key binding, it is a button)
+-- opens nothing (asked: it isn't a key binding, it is a button). A D-pad
+-- wheel's too: the same key, its wheel "d"
 function W:MiniToggle(n, comboId)
     self:Build()
     comboId = comboId or ""
     self.miniToggles = self.miniToggles or {}
     local key = n .. "|" .. comboId
     local t = self.miniToggles[key]
+    -- (its type may have changed since)
+    local wid = (CK.MyWheels and CK.MyWheels:IsDpad(n) and "d" or "m") .. n
+    if t then t:SetAttribute("ck-wheel", wid) end
     if not t then
         t = keyButton("ControllerKeyboardMiniWheel" .. n .. "_" .. comboId:gsub("[^%w]", ""), self.frame, TOGGLE, nil,
             "AnyDown", "AnyUp")
-        t:SetAttribute("ck-wheel", "m" .. n)
+        t:SetAttribute("ck-wheel", wid)
         t:SetAttribute("type", "click")
         for i, b in ipairs(self.buttons) do t:SetAttribute("*clickbutton-s" .. i, b) end
         t.ckCombo, t.ckMini = comboId, n
@@ -1563,28 +1644,38 @@ function W:Fill()
     store(wheel, "u", upages)
     self.lists.u = upages
     -- The player's own: one page, each slot where it was put
+    local MW = CK.MyWheels
     for n = 1, W.MY_MAX do
-        -- Its filled slots in their order, one after the other: the wheel has
-        -- as many sections
-        local entries, list = CK.MyWheels and CK.MyWheels:Entries(n) or {}, {}
-        for slot = 1, SEGMENTS do
-            if entries[slot] then list[#list + 1] = entries[slot] end
+        local style = MW and MW:Style(n) or "wheel"
+        local entries, list = MW and MW:Entries(n) or {}, {}
+        if style == "dpad" then
+            -- A D-pad wheel: its cross (up, right, down, left), each in its
+            -- place, the 4 sections kept
+            for i, slot in ipairs(MW.CROSS) do list[i] = entries[slot] end
+            list.n = #MW.CROSS
+        else
+            -- Its filled slots in their order, one after the other: the
+            -- wheel has as many sections
+            for slot = 1, SEGMENTS do
+                if entries[slot] then list[#list + 1] = entries[slot] end
+            end
         end
         local own = { [1] = list }
-        for _, e in pairs(own[1]) do
-            if e.kind == "item" and not e.cat then
+        for i = 1, SEGMENTS do
+            local e = list[i]
+            if e and e.kind == "item" and not e.cat then
                 local ok, cat = pcall(W.Category, e.id)
                 e.cat = ok and cat or nil
             end
         end
-        -- A mini wheel: its own name ("m3"), opened by its button only (its
-        -- key binding's wheel left empty: opens nothing)
-        local mini = CK.MyWheels and CK.MyWheels:IsMini(n)
+        -- A mini wheel, a D-pad wheel: its own name ("m3", "d3"), opened by
+        -- its button only (its key binding's wheel left empty: opens nothing)
         local bandage = function(e) return e.cat == "bandage" and "player" or nil end
-        store(wheel, tostring(n), mini and {} or own, bandage)
-        store(wheel, "m" .. n, mini and own or {}, bandage)
-        self.lists[tostring(n)] = mini and {} or own
-        self.lists["m" .. n] = mini and own or {}
+        for wid, kind in pairs({ [tostring(n)] = "wheel", ["m" .. n] = "stick", ["d" .. n] = "dpad" }) do
+            local pages = style == kind and own or {}
+            store(wheel, wid, pages, bandage)
+            self.lists[wid] = pages
+        end
     end
     -- The party spells' (their names follow the spell book's ranks), and
     -- where each key's button is
@@ -1672,6 +1763,7 @@ function W:Paint()
     -- A party spell's wheel, a mini wheel: drawn by their own frame
     if isParty(self.paintedWheel) then return self:PaintParty() end
     if isMini(self.paintedWheel) then return self:PaintMini() end
+    if isDpad(self.paintedWheel) then return self:PaintDpad() end
     if self.pview then self.pview:Hide() end
     self.view:SetAlpha(1)
     local list = self:PageItems()
@@ -1797,6 +1889,8 @@ function W:Track()
         self:RangeMini()
         return self:TrackMini()
     end
+    -- A D-pad wheel: nothing aimed, only the range
+    if isDpad(self.paintedWheel) then return self:RangeMini() end
     local i = self:Aimed()
     if i == self.aimed then return end
     self.aimed = i
@@ -2024,6 +2118,7 @@ function W:PaintParty()
     -- Its stick let go casts: the stick's direction keys on
     if open then self:StickKeys(true) end
     for _, s in ipairs(pv.minis) do s:Hide() end
+    for _, g in ipairs(pv.dglyphs) do g:Hide() end
     local list = self:PageItems()
     local spell = list[1]
     CK.Paddles.SetIcon(pv.center.icon, spell and W.EntryIcon(spell))
@@ -2155,15 +2250,16 @@ end
 ---------------------------------------------------------------------------
 local function miniCount(list) return math.min(SEGMENTS, #list) end
 
-function W:PaintMini()
+-- A mini or D-pad wheel's base: shown on its button (out of combat: the
+-- secure code put it there in combat), no member drawn, the wheel's
+-- picture in the middle
+function W:PaintSmallBase()
     local pv = self.pview
-    if not pv then return end
     self.view:SetAlpha(0)
     pv:Show()
-    local open = self.frame:IsShown()
     local opener = self.frame:GetAttribute("ck-opener")
     local t = opener and _G[opener]
-    if open and t and not InCombatLockdown() then
+    if self.frame:IsShown() and t and not InCombatLockdown() then
         self:PlaceParty(t)
         local x, y = t:GetAttribute("ck-ax"), t:GetAttribute("ck-ay")
         if x and y then
@@ -2171,8 +2267,6 @@ function W:PaintMini()
             self.frame:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
         end
     end
-    -- Its stick let go uses: the stick's direction keys on
-    if open then self:StickKeys(true) end
     for _, seg in ipairs(pv.members) do
         seg.slot:Hide()
         seg.label:Hide()
@@ -2182,36 +2276,76 @@ function W:PaintMini()
     local id = tonumber((self.paintedWheel or ""):sub(2))
     CK.Paddles.SetIcon(pv.center.icon, id and CK.MyWheels and CK.MyWheels:Icon(id))
     pv.center.cooldown:Clear()
+end
+
+-- One of its slots: the item at section `i` of `n`, or hidden
+local function paintSmallSlot(s, item, i, n, combat)
+    s:SetShown(item ~= nil)
+    if not item then return end
+    local x, y = slotDir(i, n)
+    s:ClearAllPoints()
+    s:SetPoint("CENTER", W.pview, "CENTER", PARTY_RADIUS * x, PARTY_RADIUS * y)
+    CK.Paddles.SetIcon(s.icon, W.EntryIcon(item))
+    s.count:SetText(item.kind == "item" and (C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0) or "")
+    s.icon:SetDesaturated(entryUnusable(item, combat))
+    s.pressed:Hide()
+    pcall(function()
+        local start, duration = entryCooldown(item)
+        if start and duration and duration > 0 then
+            s.cooldown:SetCooldown(start, duration)
+        else
+            s.cooldown:Clear()
+        end
+    end)
+end
+
+function W:PaintMini()
+    local pv = self.pview
+    if not pv then return end
+    self:PaintSmallBase()
+    -- Its stick let go uses: the stick's direction keys on
+    if self.frame:IsShown() then self:StickKeys(true) end
+    for _, g in ipairs(pv.dglyphs) do g:Hide() end
     local combat = InCombatLockdown()
     local list = self:PageItems()
     local n = miniCount(list)
-    for i, s in ipairs(pv.minis) do
-        local item = i <= n and list[i] or nil
-        s:SetShown(item ~= nil)
-        if item then
-            local x, y = slotDir(i, n)
-            s:ClearAllPoints()
-            s:SetPoint("CENTER", pv, "CENTER", PARTY_RADIUS * x, PARTY_RADIUS * y)
-            CK.Paddles.SetIcon(s.icon, W.EntryIcon(item))
-            s.count:SetText(item.kind == "item" and (C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0) or "")
-            s.icon:SetDesaturated(entryUnusable(item, combat))
-            s.pressed:Hide()
-            pcall(function()
-                local start, duration = entryCooldown(item)
-                if start and duration and duration > 0 then
-                    s.cooldown:SetCooldown(start, duration)
-                else
-                    s.cooldown:Clear()
-                end
-            end)
-        end
-    end
+    for i, s in ipairs(pv.minis) do paintSmallSlot(s, i <= n and list[i] or nil, i, n, combat) end
     self:RangeMini(true)
     local h = function(key) return CK:GlyphMarkup(key, 14) end
     pv.help:SetText(format("%s %s   %s %s", h("RS"), L.MINI_USE, h("B"), L.WHEEL_CLOSE))
     -- Not "nothing aimed" (nil): the banner is written, even the first time
     self.aimed = false
     self:TrackMini()
+end
+
+-- A D-pad wheel's drawing: the mini wheel's, its 4 slots in a cross (each
+-- in its place, an empty one not shown), each direction's glyph outside
+-- it; nothing aimed (a direction uses at once)
+function W:PaintDpad()
+    local pv = self.pview
+    if not pv then return end
+    self:PaintSmallBase()
+    pv.indicator:Hide()
+    pv.arrow:Hide()
+    local combat = InCombatLockdown()
+    local list = self:PageItems()
+    local n = #DPAD_GLYPHS
+    for i, s in ipairs(pv.minis) do
+        local item = i <= n and list[i] or nil
+        paintSmallSlot(s, item, i, n, combat)
+        local g = pv.dglyphs[i]
+        if g then
+            g:SetText(CK:GlyphMarkup(DPAD_GLYPHS[i], 20))
+            g:SetShown(item ~= nil)
+        end
+    end
+    self:RangeMini(true)
+    local id = tonumber((self.paintedWheel or ""):sub(2))
+    pv.name:SetText(id and CK.MyWheels and CK.MyWheels:Name(id) or "")
+    pv.count:SetText(L.DPAD_HINT)
+    local h = function(key) return CK:GlyphMarkup(key, 14) end
+    pv.help:SetText(format("%s %s   %s %s", h("DPAD"), L.DPAD_USE, h("B"), L.WHEEL_CLOSE))
+    self.aimed, self.ticked = nil, nil
 end
 
 -- Its spells too far for the target: in the range's red (five times a
@@ -2528,8 +2662,8 @@ function W:Toggle(which, comboId)
     self:Build()
     if which == "usable" then return self.usableToggle end
     local n = tonumber(which)
-    -- A mini wheel: its own key, on that button
-    if n and CK.MyWheels and CK.MyWheels:IsMini(n) then return self:MiniToggle(n, comboId) end
+    -- A mini wheel, a D-pad wheel: its own key, on that button
+    if n and CK.MyWheels and CK.MyWheels:Style(n) ~= "wheel" then return self:MiniToggle(n, comboId) end
     return n and self.myToggles[n] or self.toggle
 end
 
