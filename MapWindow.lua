@@ -865,12 +865,20 @@ function W:ChooseIn(input, layer)
         lists = lists, current = current, rows = 10,
         onChoose = function(e)
             self.picker:Close()
+            -- A rank below the highest (that option on): kept, before it
+            -- is set (its binding casts that rank)
+            local kept = M.NotePick(e.action)
             if self:Put(input, layer, e.action) then
                 if input.paddle and not P:Identified(input.id) then
                     C:Toast(format(L.TOAST_PADDLE_NOT_SET, input.id), true)
                 else
-                    C:Toast(format(L.TOAST_PAIR, K.ComboMarkup(input.id, layer, 14), e.name or ""))
+                    C:Toast(format(L.TOAST_PAIR, K.ComboMarkup(input.id, layer, 14), e.name or "")
+                        .. (kept and ("  " .. L.RANK_KEPT) or ""))
                 end
+                -- That rank elsewhere (wheels, the game's bar) kept too
+                if kept then M:RanksChanged(true) end
+            elseif kept then
+                M:KeepRank(kept, false)
             end
             C:Render()
         end,
@@ -1142,6 +1150,16 @@ local function displayRows(b)
         disabled = not (on and f.triggerToggle), tip = L.TIP_TOGGLE_COMBAT,
         get = function() return f.toggleCombatRelease == true end,
         set = function(v) f.toggleCombatRelease = v end })
+    -- The highest rank of the spells on the buttons, paddles and wheels,
+    -- and on every action bar of the game (Mapping.lua)
+    b.header(L.HDR_SPELL_RANKS)
+    b.check({ id = "d_rank", label = L.LBL_HIGHEST_RANK, tip = L.TIP_HIGHEST_RANK,
+        get = function() return f.highestRank == true end,
+        set = function(v)
+            f.highestRank = v
+            M.ForgetBook()
+            M:RanksChanged(true)
+        end })
     b.header(L.HDR_NEXT_TO_BAR)
     b.check({ id = "d_extra", label = L.LBL_EXTRA_BUTTONS, disabled = not on, tip = L.FEAT_EXTRA_DISPLAY,
         get = function() return f.extraDisplay end,

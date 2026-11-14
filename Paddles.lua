@@ -530,7 +530,8 @@ function P.ApplyCooldown(cd, action)
             end)
         end
     elseif kind == "spell" and C_Spell then
-        local id = tonumber(value)
+        -- Its highest rank's (that option on)
+        local id = CK.Mapping.BestRank(value)
         if C_Spell.GetSpellCooldownDuration and cd.SetCooldownFromDurationObject then
             ok = pcall(function() cd:SetCooldownFromDurationObject(C_Spell.GetSpellCooldownDuration(id)) end)
         end
@@ -681,7 +682,7 @@ function P:UpdateButton(b, cooldown, layer, state)
         if slot and hasAction(slot) then
             out = Range.InRange(slot) == false
         else
-            local spell = action and tonumber(action:match("^spell:(%d+)$") or "")
+            local spell = action and CK.Mapping.BestRank(action:match("^spell:(%d+)$"))
             if spell and C_Spell and C_Spell.IsSpellInRange and UnitExists("target") then
                 out = C_Spell.IsSpellInRange(spell, "target") == false
             end

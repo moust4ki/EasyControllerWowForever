@@ -455,16 +455,25 @@ function Slots:Snapshot(record)
 end
 
 -- A profile's actions placed again (out of combat); what its record doesn't
--- know is left as it is
+-- know is left as it is. A spell: its highest rank, the highest rank option
+-- on, and a rank this character doesn't know at the highest one it knows
+-- (the record keeps the rank it had: a set put in use again never brings
+-- a lower one back)
 function Slots:Restore(record)
     if InCombatLockdown() or type(record) ~= "table" then return end
     self.expect = {}
     self.expectUntil = GetTime() + 3
+    local M = CK.Mapping
     for _, slot in ipairs(self:List()) do
         local want = record[slot]
-        if want ~= nil and not same(Slots.Content(slot), want) and not kept(slot) then
-            self.expect[slot] = want
-            local ok = place(slot, want)
+        local put = want
+        if type(want) == "table" and want.t == "spell" and M and M.RestoreRank then
+            local best = M.RestoreRank(want.id)
+            if best and best ~= want.id then put = { t = "spell", id = best } end
+        end
+        if want ~= nil and not same(Slots.Content(slot), put) and not kept(slot) then
+            self.expect[slot] = put
+            local ok = place(slot, put)
             if type(want) == "table" then want.pending = (not ok) or nil end
         end
     end

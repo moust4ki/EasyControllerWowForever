@@ -407,10 +407,11 @@ end
 -- The lists picker: in place of the detail panel, the same width. A kicker
 -- and a title, its lists' tabs (LB / RB), then the entries with their
 -- sections. def = { kicker, title, lists = { { label, entries = function()
--- return { { header } or { action, name, icon, sub } } end } }, onChoose =
--- function(entry), onBack = function(), marked = function(entry) (a cyan
--- diamond: already there), rows = 10, text = "..." (a notice under the
--- title, the entries below it) }
+-- return { { header } or { action, name, icon, sub, onY, yVerb } } end } },
+-- onChoose = function(entry), onBack = function(), marked = function(entry)
+-- (a cyan diamond: already there), rows = 10, text = "..." (a notice under
+-- the title, the entries below it) }. An entry's onY: what Y does on it
+-- (yVerb its hint), the list read again after, in place
 ---------------------------------------------------------------------------
 local PICK_ROW, PICK_HEAD = 32, 28
 
@@ -575,6 +576,22 @@ function K.Picker(parent, width)
         if e and not e.header and self.def.onChoose then self.def.onChoose(e) end
     end
 
+    function p:Aimed()
+        local e = self.def and self.index and self.entries and self.entries[self.index]
+        return e and not e.header and e or nil
+    end
+
+    -- Y on an entry that has it; its list read again, the same entry aimed
+    function p:PressY()
+        local e = self:Aimed()
+        if not (e and e.onY) then return end
+        e.onY()
+        if not self.def then return end
+        local list = self.def.lists[self.list]
+        self.entries = list and list.entries() or {}
+        self:Move(0)
+    end
+
     function p:Press(name)
         if name == "UP" or name == "DOWN" then
             self:Move(name == "UP" and -1 or 1)
@@ -586,12 +603,16 @@ function K.Picker(parent, width)
             self:Choose()
         elseif name == "B" then
             if self.def.onBack then self.def.onBack() end
+        elseif name == "Y" then
+            self:PressY()
         end
         return true
     end
 
     function p:Hints()
         local hints = { K.H({ "DPAD" }, L.V_MOVE), K.H({ "A" }, self.def.chooseVerb or L.V_CHOOSE, "A") }
+        local e = self:Aimed()
+        if e and e.onY then hints[#hints + 1] = K.H({ "Y" }, e.yVerb, "Y") end
         if #self.def.lists > 1 then hints[#hints + 1] = K.H({ "LB", "RB" }, L.V_LIST, "RB") end
         hints[#hints + 1] = K.H({ "B" }, L.V_BACK, "B")
         return hints

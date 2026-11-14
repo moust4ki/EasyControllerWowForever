@@ -255,6 +255,8 @@ local function slash(msg)
         CK.Vibration:TraceFishing()
     elseif cmd == "binds" then
         CK.Mapping:Diagnose()
+    elseif cmd == "ranks" then
+        CK.Mapping.DiagnoseRanks()
     elseif cmd == "debug" then
         s.debug = not s.debug
         CK.seenSticks = nil
