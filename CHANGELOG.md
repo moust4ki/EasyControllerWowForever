@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.22.2
+
+- **Fixed: a recipe's tooltip showed the prices of the item it makes** (reported: a pattern's
+  tooltip had the crafted bracers' auction price, usual price, merchant price and disenchanting,
+  while Post all priced the pattern itself, much higher). The game gives that tooltip the crafted
+  item's link: the recipe's own prices now, no disenchanting.
+
 ## 1.22.1
 
 - **Fixed: a wheel on a trigger layer opening in the middle of the screen in combat** (reported: a
