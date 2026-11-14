@@ -132,9 +132,7 @@ function QI:HookTooltips()
         -- The game shows (and resizes) the tooltip after the post-calls
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip, data)
             if tooltip ~= GameTooltip and tooltip ~= ItemRefTooltip then return end
-            local link = data and (data.hyperlink or (data.id and ("item:" .. data.id)))
-            if not link and tooltip.GetItem then link = select(2, tooltip:GetItem()) end
-            addLine(tooltip, link)
+            addLine(tooltip, CK.TooltipItemLink(tooltip, data))
         end)
     elseif GameTooltip and GameTooltip.HookScript then
         GameTooltip:HookScript("OnTooltipSetItem", function(tooltip)

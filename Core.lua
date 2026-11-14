@@ -171,6 +171,24 @@ function CK.Plain(v)
     return v
 end
 
+-- The item an item tooltip shows: its link (its random suffix kept), else
+-- its ID. A recipe's gives the item it makes as its link, the recipe as its
+-- ID (reported: a pattern's tooltip had the crafted bracers' auction
+-- prices, the pattern posted at its own): the ID then
+function CK.TooltipItemLink(tooltip, data)
+    local function plain(v) return not (issecretvalue and issecretvalue(v)) and v or nil end
+    local id = type(data) == "table" and CK.Plain(data.id) or nil
+    local link = type(data) == "table" and plain(data.hyperlink) or nil
+    if type(link) ~= "string" then link = nil end
+    if link and id and tonumber(link:match("item:(%d+)")) ~= id then link = nil end
+    if not link and id then link = "item:" .. id end
+    if not link and tooltip and tooltip.GetItem then
+        local ok, _, shown = pcall(tooltip.GetItem, tooltip)
+        if ok and type(shown) == "string" and plain(shown) then link = shown end
+    end
+    return link
+end
+
 -- The game's gamepad UI on (its gamepad bars shown); true when the game
 -- can't tell. Our buttons beside its bar go with it (reported: the bag
 -- counter stayed on screen with the gamepad UI turned off)
