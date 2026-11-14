@@ -741,7 +741,8 @@ function P:UpdateVisibility()
         local input = CK.Mapping.BY_ID[id]
         f.buttons[id]:SetShown(CK.Mapping:InputEnabled(input) and (self.placing or show) or false)
     end
-    local on = enabled() and settings().features.extraDisplay
+    -- (the gamepad UI off: hidden, as the bag counter)
+    local on = enabled() and settings().features.extraDisplay and CK.GamepadUI()
     f:SetShown((self.placing or (on and bar ~= nil and bar:IsVisible())) and true or false)
 end
 

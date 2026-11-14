@@ -476,7 +476,11 @@ function S:Refresh()
     end
 
     local size = SIZES[s.size] or SIZES[2]
-    local layout = table.concat({ tostring(s.enabled), #list, size, s.layout }, ":")
+    -- Shown with the game's gamepad bar, the gamepad UI on (reported: the bag
+    -- counter stayed with the gamepad UI off); always while it is moved
+    local gb = GamepadMainActionBarFrame
+    local withBar = CK.GamepadUI() and not (gb and gb.IsShown and not gb:IsShown())
+    local layout = table.concat({ tostring(s.enabled), #list, size, s.layout, tostring(withBar) }, ":")
     if InCombatLockdown() then
         if self.bar then
             for i, item in ipairs(list) do
@@ -522,7 +526,7 @@ function S:Refresh()
     end
     if d.x ~= 0 then bar:SetSize(length, size) else bar:SetSize(size, length) end
     self:Place()
-    bar:SetShown(#list > 0 or self.moving or false)
+    bar:SetShown((#list > 0 and withBar) or self.moving or false)
     self.layout = layout
 end
 
@@ -656,6 +660,25 @@ function S:Init()
             queued = false
             S:Refresh()
         end)
+    end)
+    -- The game's gamepad bar shown or hidden, its gamepad UI turned on or
+    -- off (no event of the game's says it: looked at twice a second): ours
+    -- and the extra buttons follow (in combat: once it ends)
+    local gb = GamepadMainActionBarFrame
+    if gb and gb.HookScript then
+        gb:HookScript("OnShow", function() S:Refresh() end)
+        gb:HookScript("OnHide", function() S:Refresh() end)
+    end
+    local was, since = CK.GamepadUI(), 0
+    f:SetScript("OnUpdate", function(_, dt)
+        since = since + dt
+        if since < 0.5 then return end
+        since = 0
+        local now = CK.GamepadUI()
+        if now == was then return end
+        was = now
+        S:Refresh()
+        if CK.Paddles and CK.Paddles.UpdateVisibility then CK.Paddles:UpdateVisibility() end
     end)
     self:Refresh()
 end
