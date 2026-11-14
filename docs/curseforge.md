@@ -39,6 +39,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.22
+- **Fixed: a wheel on LT or RT opening in the middle of the screen in combat** (1.22.1, reported) with the compact gamepad bar: it opens on its button.
 - **Mini wheels on the D-pad** (asked): a new type of wheel, 4 slots in a cross on its button; a D-pad direction uses its slot at once. The sticks stay yours (keep walking while you choose) and it works in combat from the first press.
 - **Type** (asked): the wheel editor's Mini wheel button becomes Type, a chooser with the three types (Wheel, Mini wheel: stick, Mini wheel: D-pad) and what each does. New wheel asks it first.
 - **Fixed: jumping by itself in water, and Y (inspect) doing nothing** (reported) once a wheel or a spell of the addon's was on a layer of A or Y.
