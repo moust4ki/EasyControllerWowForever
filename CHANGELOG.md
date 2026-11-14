@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.22.0
+
+- **Mini wheels on the D-pad** (asked): a third type of wheel of your own, **4 slots in a cross** (up,
+  right, down, left). It opens on its button like a mini wheel; a **D-pad direction uses its slot**
+  at once (on the direction's release: LT + D-pad up can open it), an empty direction does nothing,
+  B or its button again closes it. Each slot keeps its place, its D-pad glyph beside it. The sticks
+  stay yours meanwhile (keep walking while you choose), and no stick setting is needed: it works in
+  combat from the first press.
+- **Type** (asked: the editor's French labels were cut already): the wheel editor's *Mini wheel*
+  button becomes **Type**, a chooser over the wheel with the three types (Wheel, Mini wheel: stick,
+  Mini wheel: D-pad), each with its picture and what it does. **New wheel** asks it first (B cancels
+  the new wheel). A D-pad wheel shows its cross only; turning an 8-slot wheel into one sets its
+  diagonals aside (said), back with an 8-slot type.
+- **Fixed: the character jumping by itself in water, and Y (inspect) doing nothing** (reported), once
+  something of the addon's was on a layer of A or Y (a wheel on LT + A...): the game's button got the
+  press but never the release. Its jump now stops, its inspect and interact act, as without the addon.
+- **Fixed: the bag counters stayed on screen with the gamepad UI turned off** (reported): they show
+  with the game's gamepad UI and its bar only, the extra buttons too.
+
 ## 1.21.1
 
 - **Post all: 1 copper under the lowest price** (reported: cheap items went up at 1 silver while
