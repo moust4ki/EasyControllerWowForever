@@ -382,8 +382,7 @@ end
 -- whether a line was added.
 function AP:AddLines(tooltip, data)
     if not self:On() or (tooltip ~= GameTooltip and tooltip ~= ItemRefTooltip) then return false end
-    local link = data and (data.hyperlink or (data.id and ("item:" .. data.id)))
-    if not link and tooltip.GetItem then link = select(2, tooltip:GetItem()) end
+    local link = CK.TooltipItemLink(tooltip, data)
     if type(link) ~= "string" or secret(link) or not AP.KeyOf(link) then return false end
     local n = stackOf(tooltip)
     local shift = IsShiftKeyDown and IsShiftKeyDown()
