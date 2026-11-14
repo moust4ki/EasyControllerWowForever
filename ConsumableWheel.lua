@@ -1502,6 +1502,13 @@ end
 -- Where a key's button is on the screen, its centre in UIParent's units: the
 -- game's bar button it takes the place of in that layer, or our extra button
 -- (back paddles, L3 / R3); nil for a key with none shown
+local function barButtonShown(input, layer)
+    local M = CK.Mapping
+    -- The one shown (in a stance, the stance bar's in its place)
+    local f = M.LAYER_BAR[layer] and (M:LiveBarButton(input, layer) or M:NativeBarButton(input, layer))
+    if f and f.IsVisible and f:IsVisible() then return f end
+end
+
 function W.ButtonCenter(comboId)
     local M = CK.Mapping
     local inputId, layer = (comboId or ""):match("^(%w+):(%a*)$")
@@ -1509,8 +1516,17 @@ function W.ButtonCenter(comboId)
     if not input then return nil end
     local f
     if input.bar then
-        -- The one shown (in a stance, the stance bar's in its place)
-        f = M.LAYER_BAR[layer] and (M:LiveBarButton(input, layer) or M:NativeBarButton(input, layer))
+        f = barButtonShown(input, layer)
+        -- The compact bar: only the bar of the trigger held is shown, every
+        -- one in the same place. A trigger's bar is hidden until it is held,
+        -- so its button was never seen before a fight and its wheel opened in
+        -- the middle of the screen (reported: a D-pad wheel on LT + up). The
+        -- same button of the bar shown now is where it will be
+        if not f and CK.Paddles.CompactBar and CK.Paddles.CompactBar() then
+            for _, other in ipairs(M.LAYERS) do
+                f = f or barButtonShown(input, other)
+            end
+        end
     else
         local extra = CK.Paddles.frame and CK.Paddles.frame.buttons
         f = extra and extra[inputId]
