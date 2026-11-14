@@ -38,9 +38,11 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.21
-- **Post all: 1 copper under the lowest price** (1.21.1, reported): cheap items were posted at 1 silver while others sold them around 50 copper. WoW Forever's auction house takes copper, so an item at 50c now goes up at 49c.
-- **Disenchanting in the tooltips** (asked): on green, blue and purple gear, what disenchanting gives, the chances, each result's price at your last auction house scan and the average. If you can disenchant, the tooltip says **» Disenchant** (and your bags show **DE**) when it's worth more than selling the item.
+## What's new in 1.22
+- **Mini wheels on the D-pad** (asked): a new type of wheel, 4 slots in a cross on its button; a D-pad direction uses its slot at once. The sticks stay yours (keep walking while you choose) and it works in combat from the first press.
+- **Type** (asked): the wheel editor's Mini wheel button becomes Type, a chooser with the three types (Wheel, Mini wheel: stick, Mini wheel: D-pad) and what each does. New wheel asks it first.
+- **Fixed: jumping by itself in water, and Y (inspect) doing nothing** (reported) once a wheel or a spell of the addon's was on a layer of A or Y.
+- **Fixed: the bag counters stayed on screen with the gamepad UI turned off** (reported).
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -55,7 +57,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health as a ring around their portrait and in %
-- **Your own wheels** of spells, items and macros, big or as **mini wheels** on their button (like the hunter's aspects)
+- **Your own wheels** of spells, items and macros, big or as **mini wheels** on their button (like the hunter's aspects), aimed with the right stick or **4 in a cross on the D-pad**
 - **Consumables wheel**, usable in combat
 - **Usable items wheel**: every item of your bags you can use (sleeping bag, battle standard, quest items to use somewhere...), the consumables aside, on or off
 - **Hold to show** a wheel, let go to use (option), aimed with the left or the right stick
@@ -171,6 +173,8 @@ opens an editor: the wheel with its slots around it and the lists beside it (spe
 a choice fills the slot and goes on to the next one. Name it with the gamepad keyboard, give it a
 button straight from the editor ("Assign a button") or from the Gamepad tab's Macros list. Each wheel
 shows its filled slots only, in as many sections, and works like the consumables wheel, in combat too.
+Each wheel has a type: a big wheel in the middle of the screen, a mini wheel on its button aimed with
+the right stick, or a mini wheel of 4 slots in a cross chosen with the D-pad.
 
 **Healer/Buff mode**
 The Gamepad tab's **Party/Healer** list holds your spells for allies (heals, buffs). Put one on a button and

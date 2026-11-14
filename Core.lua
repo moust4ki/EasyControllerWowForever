@@ -171,6 +171,18 @@ function CK.Plain(v)
     return v
 end
 
+-- The game's gamepad UI on (its gamepad bars shown); true when the game
+-- can't tell. Our buttons beside its bar go with it (reported: the bag
+-- counter stayed on screen with the gamepad UI turned off)
+function CK.GamepadUI()
+    local util = InputUtil
+    if util and util.IsGamepadUIEnabled then
+        local ok, on = pcall(util.IsGamepadUIEnabled)
+        if ok and on == false then return false end
+    end
+    return true
+end
+
 -- Entries a saved file may hold broken (edited by hand, an old bug): left
 -- out, so a wrong one never stops the addon. The account's settings at
 -- load, each character's profile when it is put in use (Profiles.lua).

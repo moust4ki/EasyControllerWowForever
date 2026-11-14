@@ -451,6 +451,8 @@ before):
   place on a PC and on a handheld or a TV of another resolution): it follows the bar wherever Edit
   Mode puts it, and grows with it. A place saved before is converted once (when the game lets addons
   read the bar's place; else the default place, centred above the bar);
+- shown **with the game's gamepad UI** only (1.22, reported: it stayed on screen with the gamepad UI
+  turned off), and with its bar (hidden in its Edit Mode); the extra buttons too;
 - low supplies and little room left can vibrate (Comfort › Vibrations).
 
 ## Consumables wheel
@@ -521,13 +523,24 @@ holds changes out of combat only.
   are greyed there (the game forbids them in combat). Its content is updated out of combat only (a
   rule of the game).
 - Moving from slot to slot can vibrate (Comfort › Vibrations).
-- **Mini wheel** (asked; the editor's *Mini wheel: no / yes* button, one wheel at a time): the wheel
-  turned small, like the game's flyouts (the hunter's aspects, the pet's) and the Party/Healer
-  wheel. Put on a button from the Gamepad tab, it opens **on that button**, its filled slots around
-  it in as many sections, its picture in the middle; **aimed with the right stick**, let go: that
-  slot is used (a short press leaves it open: aim, then A; B or its button again closes it), in
-  combat too. The aimed slot's name in the banner, cooldowns and counts on the slots, a spell red
-  when the target is too far. Only from a button: its key binding opens nothing.
+- **Three types** (asked; the editor's **Type** button opens a chooser over the wheel, each type
+  with its picture and what it does; **New wheel** asks it first, B cancelling the new wheel, then
+  its slots): *Wheel* (above), *Mini wheel: stick* and *Mini wheel: D-pad*. Changes out of combat only.
+- **Mini wheel: stick** (asked): the wheel turned small, like the game's flyouts (the hunter's
+  aspects, the pet's) and the Party/Healer wheel. Put on a button from the Gamepad tab, it opens
+  **on that button**, its filled slots around it in as many sections, its picture in the middle;
+  **aimed with the right stick**, let go: that slot is used (a short press leaves it open: aim, then
+  A; B or its button again closes it), in combat too. The aimed slot's name in the banner, cooldowns
+  and counts on the slots, a spell red when the target is too far. Only from a button: its key
+  binding opens nothing.
+- **Mini wheel: D-pad** (asked): **4 slots in a cross** (up, right, down, left), opened on its
+  button like the stick one, but chosen with the **D-pad**: a direction uses its slot at once and
+  closes it (on the direction's release; the release of the button that opened it uses nothing, so
+  LT + D-pad up can open it). Each slot keeps its place, an empty direction does nothing; B or its
+  button again closes it. The sticks stay yours meanwhile: keep walking while you choose. No stick
+  setting needed, so it works in combat from the first press. Each direction's glyph beside its
+  slot. In the editor only the cross is shown (the D-pad's glyph before each name); turning an
+  8-slot wheel into a D-pad one sets its diagonals aside (said, kept), back with an 8-slot type.
 
 ### Party spells
 
