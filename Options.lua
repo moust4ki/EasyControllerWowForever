@@ -885,6 +885,40 @@ local function usableRows(b)
     end
 end
 
+-- The professions' wheel (asked): filled by itself; the tracking spells
+-- as an option; what it holds now
+local function professionRows(b)
+    local W = CK.ConsumableWheel
+    local s = settings().wheel
+    local on = s.professionsEnabled ~= false
+    b.header(L.PROF_WHEEL_NAME)
+    b.check({ id = "prof_on", label = L.LBL_USE_WHEEL, tip = L.PROF_INFO,
+        get = function() return s.professionsEnabled ~= false end,
+        set = function(v)
+            s.professionsEnabled = v
+            W:Fill()
+        end })
+    b.check({ id = "prof_tracking", label = L.LBL_PROF_TRACKING, indent = true, disabled = not on,
+        tip = L.TIP_PROF_TRACKING,
+        get = function() return s.professionsTracking end,
+        set = function(v)
+            s.professionsTracking = v
+            W:Fill()
+        end })
+    b.header(L.PROF_H_CONTENTS)
+    local list = CK.ProfessionsWheel:Find()
+    if #list == 0 then
+        b.info(L.PROF_EMPTY)
+        return
+    end
+    for _, e in ipairs(list) do
+        local icon = W.EntryIcon(e)
+        local name = W.EntryName(e)
+        b.stat({ label = icon and format("|T%s:16:16:0:0|t %s", icon, name) or name,
+            text = L["WHEEL_CAT_" .. e.cat:upper()] })
+    end
+end
+
 -- How every wheel opens: pressed (open, A uses, press again closes) or held
 local function wheelOpenRows(b)
     local s = settings().wheel
@@ -940,6 +974,7 @@ Config.pages.wheels = CK.MyWheels:TabPage(Config.NewRailPage({
         { key = "consumables", label = L.SEC_CONSUMABLES, rows = consumableRows,
             tip = function() return format(L.WHEEL_INFO2, CK.ConsumableWheel.StickWords()) end },
         { key = "usable", label = L.SEC_USABLE, tip = L.USABLE_INFO, rows = usableRows },
+        { key = "professions", label = L.SEC_PROFESSIONS, tip = L.PROF_INFO, rows = professionRows },
         { key = "open", label = L.SEC_WHEEL_OPEN, tip = L.TIP_SEC_WHEEL_OPEN, rows = wheelOpenRows },
         { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_WHEELPOS, rows = wheelPositionRows },
     },

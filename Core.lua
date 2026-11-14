@@ -34,6 +34,7 @@ BINDING_NAME_CONTROLLERKEYBOARD_MAP = L.BINDING_MAP
 BINDING_NAME_CONTROLLERKEYBOARD_CONFIG = L.BINDING_CONFIG
 _G["BINDING_NAME_CLICK ControllerKeyboardWheelToggle:LeftButton"] = L.WHEEL_NAME
 _G["BINDING_NAME_CLICK ControllerKeyboardUsableToggle:LeftButton"] = L.USABLE_WHEEL_NAME
+_G["BINDING_NAME_CLICK ControllerKeyboardProfessionsToggle:LeftButton"] = L.PROF_WHEEL_NAME
 _G["BINDING_NAME_CLICK ControllerKeyboardPhrasesToggle:LeftButton"] = L.PHRASES_NAME
 BINDING_NAME_CONTROLLERKEYBOARD_AH_SCAN = L.AH_BINDING
 BINDING_NAME_CONTROLLERKEYBOARD_AH_POST = L.AH_POST_BINDING
@@ -103,6 +104,11 @@ local DEFAULTS = {
         usableHidden = { [6948] = true },
         -- The usable items' wheel itself (off: its key does nothing)
         usableEnabled = true,
+        -- The professions' wheel (ProfessionsWheel.lua): itself (off: its
+        -- key does nothing); the tracking of herbs and minerals (off: a
+        -- switch, not a window)
+        professionsEnabled = true,
+        professionsTracking = false,
         -- Eating or drinking: a stick nudged doesn't stand the character up
         staySeated = true,
         -- Bandaging: the same (its own option)

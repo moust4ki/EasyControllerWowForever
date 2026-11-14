@@ -43,6 +43,7 @@ Supplies.lua
 Upgrades.lua
 Automation.lua
 AuctionPrices.lua
+ProfessionsWheel.lua
 ConsumableWheel.lua
 ConfigKit.lua
 Phrases.lua
