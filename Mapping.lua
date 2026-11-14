@@ -1182,11 +1182,15 @@ local ROUTE = [[
 local header
 local routers = {}      -- paddle -> its secure button
 
--- A wheel on a layer gets the key's release too (its hold option)
-local function setRelease(r, layer, b, action)
-    local wheel = b and type(action) == "string" and action:find("^wheel:") and b
-    r:SetAttribute("ck-up-" .. layer, wheel and true or nil)
-    r:SetAttribute("*clickbutton-ckup" .. layer, wheel or nil)
+-- A wheel on a layer gets the key's release too (its hold option); the
+-- game's bar button too, through its relay (`bar`): its jump stops on the
+-- release, its inspect acts there (reported: in water the character kept
+-- rising, Y inspected nothing, once a wheel was on A or Y)
+local function setRelease(r, layer, b, action, bar)
+    local wheel = type(action) == "string" and action:find("^wheel:")
+    local up = b and (wheel or bar) and b
+    r:SetAttribute("ck-up-" .. layer, up and true or nil)
+    r:SetAttribute("*clickbutton-ckup" .. layer, up or nil)
 end
 M.routers = routers
 
@@ -1335,6 +1339,22 @@ M.relayBars = {}        -- relay's name -> the bar button it presses ("bar:right
 -- storage id on the action page; the stance bar's in a stance. Anything
 -- else (spells, items, flyouts, the game's own functions) keeps the click.
 local RELAY_SLOT = [[
+    -- The release (the router's "ckup" click, or a key's own release for a
+    -- relay on a key): the game's button that got the press gets it too, as
+    -- its own binding gives it (its jump stops there, its inspect acts
+    -- there: reported, the character kept rising in water, Y inspected
+    -- nothing). A macro run from its slot: nothing
+    local onKey = self:GetAttribute("ck-onkey")
+    if strsub(tostring(button), 1, 4) == "ckup" or (onKey and not down) then
+        local text = self:GetAttribute("ck-uptext")
+        self:SetAttribute("ck-uptext", nil)
+        if not text then return false end
+        self:SetAttribute("useOnKeyDown", false)
+        self:SetAttribute("type", "macro")
+        self:SetAttribute("macrotext", text)
+        return
+    end
+    if onKey then self:SetAttribute("useOnKeyDown", true) end
     local b = self:GetFrameRef("ck-native")
     -- In a stance (stealth, a form, a warrior's stance): the stance bar's
     -- button, as the game shows its stance bar (a bonus bar on). Not the
@@ -1350,11 +1370,13 @@ local RELAY_SLOT = [[
         local page = b:GetAttribute("actionpage") or GetActionBarPage() or 1
         slot = id + (page - 1) * 12
     end
+    self:SetAttribute("ck-uptext", nil)
     if slot and GetActionInfo(slot) == "macro" then
         self:SetAttribute("type", "action")
         self:SetAttribute("action", slot)
     else
         self:SetAttribute("type", "macro")
+        self:SetAttribute("ck-uptext", self:GetAttribute(inStance and "ck-up-stance" or "ck-up-native"))
     end
 ]]
 
@@ -1368,8 +1390,9 @@ end
 
 -- The game's bar button "/click"ed down, as its own binding presses it (a
 -- macro: the stance bar's in a stance, see StanceMacro), or its slot run
--- when it holds a macro (RELAY_SLOT). Clicked by a router (once per press),
--- or by a key bound to it (on the press).
+-- when it holds a macro (RELAY_SLOT); then released, on the key's release.
+-- Clicked by a router (the press, then a "ckup" click on the release), or
+-- by a key bound to it (its press and its release).
 local function newRelay(id, macro, onKey)
     local key = (onKey and "key:" or "router:") .. id
     local r = relays[key]
@@ -1377,8 +1400,9 @@ local function newRelay(id, macro, onKey)
         local n = 0
         for _ in pairs(relays) do n = n + 1 end
         r = CK.NewFrame("Button", "ControllerKeyboardBarRelay" .. (n + 1), nil, "SecureActionButtonTemplate")
-        if onKey then r:RegisterForClicks("AnyDown") else r:RegisterForClicks("AnyDown", "AnyUp") end
+        r:RegisterForClicks("AnyDown", "AnyUp")
         r:SetAttribute("useOnKeyDown", onKey and true or false)
+        r:SetAttribute("ck-onkey", onKey and true or nil)
         header = header or CK.NewFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
         SecureHandlerWrapScript(r, "OnClick", header, RELAY_SLOT)
         r:Hide()
@@ -1387,16 +1411,20 @@ local function newRelay(id, macro, onKey)
     local P = CK.Paddles
     local native = P:NativeButton(id)
     local stance = M:StanceMacro(id) and P:StanceButton(id) or nil
-    local function click(b)
+    local function click(b, down)
         local name = b and b:GetName()
-        return name and ("/click " .. name .. " LeftButton true") or nil
+        return name and ("/click " .. name .. " LeftButton " .. (down and "true" or "false")) or nil
     end
-    -- The click for each case, chosen on the press (RELAY_SLOT)
-    local nativeText = click(native) or macro
+    -- The click for each case, chosen on the press (RELAY_SLOT), and the
+    -- release of the same button
+    local nativeText = click(native, true) or macro
     r:SetAttribute("type", "macro")
     r:SetAttribute("macrotext", nativeText)
     r:SetAttribute("ck-text-native", nativeText)
-    r:SetAttribute("ck-text-stance", click(stance))
+    r:SetAttribute("ck-text-stance", click(stance, true))
+    r:SetAttribute("ck-up-native", click(native, false))
+    r:SetAttribute("ck-up-stance", click(stance, false))
+    r:SetAttribute("ck-uptext", nil)
     setRef(r, "ck-native", native)
     setRef(r, "ck-stance", stance)
     M.relayMacros[r:GetName()] = macro
@@ -1536,7 +1564,7 @@ function M:ApplyPad(input, targets, replaced)
             r:SetAttribute("*clickbutton-ck" .. layer, b)
             r:SetAttribute("ck-has-" .. layer, true)
         end
-        setRelease(r, layer, b, t and t.action)
+        setRelease(r, layer, b, t and t.action, t and t.bar)
     end
     local o, record = owner, self.bound
     if replaced then o, record = takeOwner, self.taken end
