@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.22.1
+
+- **Fixed: a wheel on a trigger layer opening in the middle of the screen in combat** (reported: a
+  D-pad wheel on LT + up), with the game's compact gamepad bar. That bar shows only the layer of the
+  trigger held, every layer in the same place, so the button of an LT or RT key was never on screen
+  before a fight. D-pad wheels, mini wheels and party spells now open on their button there too.
+
 ## 1.22.0
 
 - **Mini wheels on the D-pad** (asked): a third type of wheel of your own, **4 slots in a cross** (up,
