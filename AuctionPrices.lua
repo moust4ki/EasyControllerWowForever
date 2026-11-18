@@ -372,11 +372,22 @@ local function stackOf(tooltip)
     return n
 end
 
+-- The merchant's advice, with what the auction house would bring after its
+-- cut and the posting fee (asked: "AH 1s58, merchant 1s: why the
+-- merchant?"), for what the lines above are for: one (its share of the
+-- stack's auction) or, Shift held, the whole stack. A loss: said so
+local function merchantAdvice(price, whole, n)
+    if not price then return L.AH_SELL_MERCHANT end
+    local net = AP.Net(price, whole)
+    if net <= 0 then return L.AH_SELL_MERCHANT_LOSS end
+    return format(L.AH_SELL_MERCHANT_NET, money(math.floor(net * n / whole + 0.5)))
+end
+
 -- Its lines, every item (grey, white, green, trade goods, food...):
 --   Auction house (seen 2 h ago, 140 listed)        1g 20s
 --   Usual (14-day median)                           1g 05s
 --   Merchant                                           13c
---   → Sell at the auction house  (or → Merchant)
+--   → Sell at the auction house  (or → Merchant (AH after fees: 8c))
 -- for one, or with Shift (LT) held for the whole stack. Never seen: "Auction
 -- house: never seen". Bound to the player: the merchant only. Returns
 -- whether a line was added.
@@ -428,7 +439,7 @@ function AP:AddLines(tooltip, data)
         tooltip:AddLine(L.AH_SELL_AUCTION, GREEN[1], GREEN[2], GREEN[3])
     elseif vendor and vendor > 0 then
         -- (never seen at the auction house: the merchant until then)
-        tooltip:AddLine(L.AH_SELL_MERCHANT, YELLOW[1], YELLOW[2], YELLOW[3])
+        tooltip:AddLine(merchantAdvice(price, whole, n), YELLOW[1], YELLOW[2], YELLOW[3])
     end
     -- A stack, prices for one: how to see the whole stack's
     if whole > 1 and n == 1 and (price or (vendor and vendor > 0)) then

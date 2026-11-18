@@ -718,6 +718,7 @@ local function questRows(b)
                 CK.QuestItems:ScanQuests()
             end
             CK.QuestItems:RefreshBorders()
+            CK.QuestPlates:Apply()
         end })
     if not mods.questItems then return end
     b.check({ id = "q_tip", label = L.LBL_QI_TOOLTIP, indent = true, tip = L.FEAT_QUEST_TOOLTIP,
@@ -732,6 +733,12 @@ local function questRows(b)
         get = function() return f.questSellAlert end, set = function(v) f.questSellAlert = v end })
     b.check({ id = "q_hover", label = L.LBL_QI_HOVER, indent = true, tip = L.FEAT_QUEST_HOVER,
         get = function() return f.questHoverAlert end, set = function(v) f.questHoverAlert = v end })
+    b.check({ id = "q_plates", label = L.LBL_QI_PLATES, indent = true, tip = L.FEAT_QUEST_PLATES,
+        get = function() return f.questPlates ~= false end,
+        set = function(v)
+            f.questPlates = v
+            CK.QuestPlates:Apply()
+        end })
 end
 
 -- Marks in the bags (Upgrades.lua)
