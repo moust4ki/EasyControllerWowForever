@@ -461,7 +461,8 @@ A key of its own opens a wheel of consumables from your bags, drawn in the style
 radial menu and cut in as many sections as the page holds (two items: two halves; five: five
 sections), each name beside its icon; up to 8 per page, **LB / RB** turn the pages (up to 3). Food,
 drink, healing and mana potions, healthstone, mana gem, bandages (used on yourself), buff food,
-elixirs and flasks, scrolls. The best of each kind comes first, then the other variants you carry (an option); each
+elixirs and flasks, scrolls. The best of each kind comes first (by the level it asks for, then its item level;
+bandages by how much they heal), then the other variants you carry (an option); each
 kind can be left out (Wheels › Consumables).
 
 - Give it a key in the Gamepad tab (Macros list: any free button, or a back paddle in any layer) or
@@ -590,6 +591,13 @@ names the quest. In the bags they get the border the game puts on its own quest 
 merchant shows a warning with a reminder of the Buyback tab; with the gamepad bag tooltips turned
 off, selecting one at a merchant warns too.
 
+**Quest mobs** (on with the module; asked): beside the health bar of a mob one of your quests needs,
+a skull and what is left: **3/10** (to kill, or an item it drops), **3/10 · 1/8** when it counts for
+two quests, the skull alone for a single one; nothing once done. The game says it itself: its data
+for the mob holds the quest objective lines it shows on hovering it, so no quest database is needed
+and Forever's own quests count too. In combat, when the game hides that data, a mob shows what
+was last read for its kind, the counts still moving with the quest log. Enemy nameplates must be on.
+
 ## Better items
 
 A green arrow at the bottom right of a bag item that would be better than what you wear in its slot
@@ -635,6 +643,8 @@ Comfort › Auction house (off until you turn it on; asked):
   - **» Sell at the auction house** when its lowest price less the 5 % cut and the 1 silver posting
     fee (asked: counted) beats the merchant's, else **» Merchant** (also for an item never seen there). The stack in the bags is one
     auction, one fee: a single cheap cloth goes to the merchant, a stack of it to the auction house.
+    With a price there, **» Merchant** says what the auction house would bring after those fees
+    (*AH after fees: 50c*, for one or, Shift held, the stack; *a loss after fees* below nothing).
     An item bound to the player (soulbound, binds when picked up): the merchant only.
   - Prices for one; **Shift held (LT on the gamepad)**: for the whole stack (a line says so on a
     stack).

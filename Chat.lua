@@ -253,6 +253,9 @@ local function slash(msg)
         CK.ConsumableWheel:Diagnose()
     elseif cmd == "fish" then
         CK.Vibration:TraceFishing()
+    elseif cmd == "dump" then
+        -- (asked; not in the help) the character and its pet, to a file
+        CK.Export:Dump()
     elseif cmd == "binds" then
         CK.Mapping:Diagnose()
     elseif cmd == "debug" then
@@ -304,6 +307,8 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         safe(function() CK:HookChat() end)
         safe(function() CK:HookLinks() end)
         safe(function() CK.QuestItems:Init() end)
+        safe(function() CK.QuestPlates:Init() end)
+        safe(function() CK.Export:Init() end)
         safe(function() CK.Mapping:Init() end)
         safe(function() CK.Paddles:Init() end)
         safe(function() CK.Config:Init() end)

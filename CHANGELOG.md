@@ -4,6 +4,20 @@
 
 - **Mounts on a button**: a new Mounts list in the Gamepad tab (and for a back paddle's layers) with the mounts of the game's Collections tab that this character has, and a *Random favourite mount* (a second press gets off). A mount casts its spell like any other, in combat too.
 
+## 1.23.0
+
+- **Quest mobs** (asked): beside the health bar of a mob your quests need, a skull and what is left:
+  **3/10** (to kill, or an item it drops), **3/10 · 1/8** when it counts for two quests, the skull
+  alone for a single one; nothing once done. The game tells it itself (the quest lines of the mob's
+  tooltip), so Forever's own quests count too, and the counts follow the quest log in combat. On
+  with Quest items (Comfort › Quest items › *Count on quest mobs*); enemy nameplates must be shown.
+- **The merchant's advice says what the auction house would bring** (reported: "AH 1s58, merchant
+  1s: why the merchant?"): after its 5 % cut and the 1 silver to post, *» Merchant (AH after fees:
+  50c)*, or *a loss after fees*; for one, or for the stack with Shift (LT).
+- **Fixed: Silk Bandages left out of the consumables wheel** (reported): the game gives every
+  bandage the same item level, so the first one in the bags passed for the best. Bandages are now
+  ranked by how much they heal.
+
 ## 1.22.2
 
 - **Fixed: a recipe's tooltip showed the prices of the item it makes** (reported: a pattern's

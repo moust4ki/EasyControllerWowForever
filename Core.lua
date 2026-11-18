@@ -75,6 +75,8 @@ local DEFAULTS = {
     features = {
         drafts = true, linkCapture = true,
         questTooltip = true, questGlow = true, questSellAlert = true, questHoverAlert = true,
+        -- Quest mobs: the count beside their health bar (QuestPlates.lua)
+        questPlates = true,
         extraDisplay = true, showSticks = true, configShortcut = true,
         -- Out of range: the whole spell in red on the gamepad bar (Range.lua)
         rangeTint = false,
