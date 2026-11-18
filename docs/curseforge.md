@@ -38,13 +38,10 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.22
-- **Fixed: a recipe's tooltip showed the prices of the item it makes** (1.22.2, reported): a pattern now shows its own auction and merchant prices.
-- **Fixed: a wheel on LT or RT opening in the middle of the screen in combat** (1.22.1, reported) with the compact gamepad bar: it opens on its button.
-- **Mini wheels on the D-pad** (asked): a new type of wheel, 4 slots in a cross on its button; a D-pad direction uses its slot at once. The sticks stay yours (keep walking while you choose) and it works in combat from the first press.
-- **Type** (asked): the wheel editor's Mini wheel button becomes Type, a chooser with the three types (Wheel, Mini wheel: stick, Mini wheel: D-pad) and what each does. New wheel asks it first.
-- **Fixed: jumping by itself in water, and Y (inspect) doing nothing** (reported) once a wheel or a spell of the addon's was on a layer of A or Y.
-- **Fixed: the bag counters stayed on screen with the gamepad UI turned off** (reported).
+## What's new in 1.23
+- **Quest mobs** (asked): beside the health bar of a mob your quests need, a skull and what is left, **3/10** (to kill, or an item it drops), **3/10 · 1/8** for two quests. The game tells it itself, so Forever's own quests count too. Comfort › Quest items.
+- **The merchant's advice says what the auction house would bring** (reported): after its 5 % cut and the 1 silver to post, *» Merchant (AH after fees: 50c)*, or *a loss after fees*.
+- **Fixed: Silk Bandages left out of the consumables wheel** (reported): bandages are now ranked by how much they heal.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -67,6 +64,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Wheels that fit**: as many sections as items
 - **Stay seated while eating or bandaging**: a nudged stick no longer wastes the meal, the camera still turns
 - **Quest items** marked in your bags, quest links in the chat
+- **Quest mobs**: a skull and what is left (3/10) beside the health bar of the mobs your quests need, items they drop included
 - **Vibrations** on the events you pick
 - **Bag counters** (arrows, soul shards, reagents, bag space…) that glow when you run low
 - **Better items**: highlights upgrade items in your bags
@@ -313,6 +311,8 @@ every 5 minutes, or hide it.
 The items a quest asks to collect (cloth, ore, meat…), which the game does not mark, get the game's
 own quest item border in orange in your bags, and an orange "Quest item (quest name): do not sell"
 line in their tooltip. A warning with a Buyback reminder if you sell one anyway.
+Beside the health bar of a mob your quests need, a skull and what is left to do: 3/10 (to kill, or
+an item it drops), 3/10 · 1/8 for two quests; nothing once done. Enemy nameplates must be shown.
 
 **Better items**
 A green arrow at the bottom right of an item in your bags that would be better than what you wear in
