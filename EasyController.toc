@@ -34,6 +34,8 @@ ConsolePort.lua
 Input.lua
 Fields.lua
 QuestItems.lua
+QuestPlates.lua
+CharacterExport.lua
 QuestLinks.lua
 Paddles.lua
 Mapping.lua

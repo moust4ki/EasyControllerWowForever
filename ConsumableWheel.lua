@@ -416,13 +416,41 @@ function W:Diagnose()
     for _, line in ipairs(log) do DEFAULT_CHAT_FRAME:AddMessage("  |cff9d9a8c" .. line .. "|r") end
 end
 
--- The best first: required level, then item level
--- The best first: required level, then item level. Nil for an item above
--- the player's level (the game won't let it be used)
-local function rank(id)
+-- A bandage's worth: how much it heals, the highest number of its tooltip
+-- ("Heals 400 damage over 8 sec."; the First Aid it asks for is lower).
+-- Classic's data gives every bandage item level 1 and no level: by those, a
+-- Wool Bandage passed for the best and the Silk one was left out
+-- (reported). One the character can't use yet (its First Aid too low: the
+-- game's line in red) after the others
+local function bandageWorth(id)
+    if not (C_TooltipInfo and C_TooltipInfo.GetItemByID) then return 0 end
+    local ok, data = pcall(C_TooltipInfo.GetItemByID, id)
+    local best, red = 0, false
+    for _, line in ipairs(ok and type(data) == "table" and type(data.lines) == "table" and data.lines or {}) do
+        local text = line.leftText
+        if type(text) == "string" and not secret(text) then
+            -- (thousands apart: "2,000", "2 000")
+            text = text:gsub("(%d)\194\160(%d%d%d)", "%1%2"):gsub("(%d)\226\128\175(%d%d%d)", "%1%2")
+                :gsub("(%d)[,%. ](%d%d%d)", "%1%2")
+            for n in text:gmatch("%d+") do best = math.max(best, tonumber(n)) end
+            local c = line.leftColor
+            if type(c) == "table" and type(c.r) == "number" and type(c.g) == "number" and type(c.b) == "number"
+                and not secret(c.r) and c.r > 0.9 and c.g < 0.3 and c.b < 0.3 then
+                red = true
+            end
+        end
+    end
+    return red and best - 1000000 or best
+end
+
+-- The best first: required level, then item level; bandages by how much
+-- they heal. Nil for an item above the player's level (the game won't let
+-- it be used)
+local function rank(id, cat)
     local get = C_Item.GetItemInfo or GetItemInfo
     local _, _, _, itemLevel, minLevel = get(id)
     if minLevel and minLevel > (UnitLevel("player") or 0) then return nil end
+    if cat == "bandage" then return bandageWorth(id) end
     return (minLevel or 0) * 1000 + (itemLevel or 0)
 end
 
@@ -437,7 +465,7 @@ function W:Scan()
             if id and not seen[id] then
                 seen[id] = true
                 local cat = W.Category(id)
-                local value = cat and s.categories[cat] and rank(id)
+                local value = cat and s.categories[cat] and rank(id, cat)
                 if value then
                     byKind[cat] = byKind[cat] or {}
                     table.insert(byKind[cat], { id = id, cat = cat, rank = value })
