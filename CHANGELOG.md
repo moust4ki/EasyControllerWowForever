@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Mounts on a button**: a new Mounts list in the Gamepad tab (and for a back paddle's layers) with the mounts of the game's Collections tab that this character has, and a *Random favourite mount* (a second press gets off). A mount casts its spell like any other, in combat too.
+
 ## 1.23.0
 
 - **Quest mobs** (asked): beside the health bar of a mob your quests need, a skull and what is left:

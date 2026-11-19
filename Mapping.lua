@@ -595,7 +595,7 @@ end
 -- gamepad), and runs that layer's spell, item or macro. A game function is
 -- a key binding: it needs the key to itself, all its layers.
 ---------------------------------------------------------------------------
-local ROUTABLE = { spell = true, item = true, macro = true, wheel = true }
+local ROUTABLE = { spell = true, item = true, macro = true, wheel = true, mount = true }
 
 function M.Routable(action)
     return type(action) == "string" and ROUTABLE[action:match("^(%a+):") or ""] or false
@@ -756,6 +756,20 @@ function M:HasPartySpells()
     return false
 end
 
+-- A mount of the game's Collections tab ("mount:<mount ID>"; "mount:0" is
+-- the random favourite): its name, spell, icon, and whether this character
+-- has it. A press casts its spell, like any spell of ours.
+M.MOUNT_RANDOM = 0
+M.MOUNT_RANDOM_ICON = "Interface\\Icons\\Ability_Mount_RidingHorse"
+
+function M.MountInfo(value)
+    local id = tonumber(value)
+    if not id or id == M.MOUNT_RANDOM or not (C_MountJournal and C_MountJournal.GetMountInfoByID) then return nil end
+    local name, spellID, icon, _, _, _, _, _, _, hidden, collected = C_MountJournal.GetMountInfoByID(id)
+    if not name then return nil end
+    return name, spellID, icon, collected and not hidden
+end
+
 function M:ActionName(action)
     if not action then return nil end
     if action == M.NOTHING then return L.MAP_NO_ACTION end
@@ -775,6 +789,9 @@ function M:ActionName(action)
         return C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(id) or value
     elseif kind == "macro" then
         return value
+    elseif kind == "mount" then
+        if tonumber(value) == M.MOUNT_RANDOM then return L.MOUNT_RANDOM end
+        return (M.MountInfo(value)) or value
     elseif kind == "bar" then
         return CK.Paddles:ActionLabel(action)
     elseif kind == "wheel" then
@@ -804,6 +821,10 @@ function M:ActionIcon(action)
     elseif kind == "macro" then
         local _, icon = GetMacroInfo(value)
         return icon
+    elseif kind == "mount" then
+        if tonumber(value) == M.MOUNT_RANDOM then return M.MOUNT_RANDOM_ICON end
+        local _, _, icon = M.MountInfo(value)
+        return icon
     elseif kind == "bar" then
         return CK.Paddles:ActionIcon(action)
     elseif kind == "wheel" then
@@ -822,11 +843,11 @@ end
 ---------------------------------------------------------------------------
 -- "party": a spell whose key opens the party's wheel (ConsumableWheel.lua),
 -- "wheel:party:<spell ID>"
-M.TABS = { "game", "spells", "party", "items", "macros", "bar" }
+M.TABS = { "game", "spells", "mounts", "party", "items", "macros", "bar" }
 -- The game's slots only take spells, items and macros
 M.SLOT_TABS = { "spells", "items", "macros" }
 -- A paddle's key shared by layers: what a router runs
-M.SHARED_TABS = { "spells", "party", "items", "macros" }
+M.SHARED_TABS = { "spells", "mounts", "party", "items", "macros" }
 
 local function commandEntry(command)
     return { action = "cmd:" .. command, name = CK.Paddles:CommandName(command),
@@ -900,6 +921,17 @@ function M:Catalog(tab, forSlot, noBound)
                 end
             end
         end
+    elseif tab == "mounts" and C_MountJournal and C_MountJournal.GetMountIDs then
+        -- The mounts this character has, as the Collections tab lists them
+        list[#list + 1] = { action = "mount:" .. M.MOUNT_RANDOM, name = L.MOUNT_RANDOM, icon = M.MOUNT_RANDOM_ICON }
+        local owned = {}
+        for _, id in ipairs(C_MountJournal.GetMountIDs()) do
+            local name, _, icon, _, _, _, _, _, _, hidden, collected = C_MountJournal.GetMountInfoByID(id)
+            if name and collected and not hidden then owned[#owned + 1] = { action = "mount:" .. id, name = name, icon = icon } end
+        end
+        table.sort(owned, function(a, b) return a.name < b.name end)
+        if #owned > 0 then list[#list + 1] = { header = L.MAP_TAB_MOUNTS } end
+        for _, e in ipairs(owned) do list[#list + 1] = e end
     elseif tab == "items" and C_Container then
         local seen = {}
         for bag = 0, NUM_BAG_SLOTS or 4 do
@@ -1054,10 +1086,25 @@ end
 local function actionButton(comboId, action)
     local kind, value = action:match("^(%a+):(.+)$")
     local b = secureButton(comboId)
-    b:SetAttribute("type", kind)
-    b:SetAttribute("spell", kind == "spell" and M.SpellCast(value) or nil)
+    -- A mount casts its spell; the random favourite is a macro (the game's
+    -- own call, and a second press gets off)
+    local act, spell, macrotext = kind, nil, nil
+    if kind == "mount" then
+        local _, spellID = M.MountInfo(value)
+        if tonumber(value) == M.MOUNT_RANDOM then
+            act = "macro"
+            macrotext = "/run if IsMounted() then C_MountJournal.Dismiss() else C_MountJournal.SummonByID(0) end"
+        else
+            act, spell = "spell", spellID and M.SpellCast(spellID)
+        end
+    elseif kind == "spell" then
+        spell = M.SpellCast(value)
+    end
+    b:SetAttribute("type", act)
+    b:SetAttribute("spell", spell)
     b:SetAttribute("item", kind == "item" and ("item:" .. value) or nil)
     b:SetAttribute("macro", kind == "macro" and value or nil)
+    b:SetAttribute("macrotext", macrotext)
     -- The game's mouseover cast, as its own buttons
     b:SetAttribute("ck-mo", M.MouseoverKind(kind, value))
     local modifier = GetModifiedClick and GetModifiedClick("MOUSEOVERCAST")
