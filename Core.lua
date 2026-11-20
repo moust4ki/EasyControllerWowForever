@@ -173,6 +173,54 @@ function CK.Plain(v)
     return v
 end
 
+-- A text the game gives, when it is one: not secret, not empty
+local function plainText(v)
+    if issecretvalue and issecretvalue(v) then return nil end
+    if type(v) == "string" and v ~= "" then return v end
+end
+CK.PlainText = plainText
+
+-- The player's realm's number, in its GUID ("Player-6942-000689C3")
+function CK.RealmID()
+    if not UnitGUID then return nil end
+    local ok, guid = pcall(UnitGUID, "player")
+    guid = ok and plainText(guid)
+    return guid and tonumber(guid:match("^Player%-(%d+)%-")) or nil
+end
+
+-- A realm's name seen with its number: kept, for when the game gives none
+function CK.RememberRealm(id, name)
+    local db = CK.db
+    if not (db and type(id) == "number" and plainText(name)) then return end
+    if type(db.realmNames) ~= "table" then db.realmNames = {} end
+    db.realmNames[id] = name
+end
+
+-- The player's realm as the game writes it in full names ("Classic Beta
+-- PvP" -> "ClassicBetaPvP"). The game's build of 2026-11-20 may give no
+-- realm name at all (reported: a character's profile not found at login,
+-- its wheels and buttons gone): then the name last seen with the realm's
+-- number, kept in the account's file. nil when never seen.
+function CK.Realm()
+    local name
+    if GetNormalizedRealmName then
+        local ok, v = pcall(GetNormalizedRealmName)
+        name = ok and plainText(v) or nil
+    end
+    if not name and GetRealmName then
+        local ok, v = pcall(GetRealmName)
+        v = ok and plainText(v)
+        name = v and plainText((v:gsub("[%s%-]", ""))) or nil
+    end
+    local id = CK.RealmID()
+    if name then
+        CK.RememberRealm(id, name)
+        return name
+    end
+    local names = id and CK.db and CK.db.realmNames
+    return type(names) == "table" and plainText(names[id]) or nil
+end
+
 -- The item an item tooltip shows: its link (its random suffix kept), else
 -- its ID. A recipe's gives the item it makes as its link, the recipe as its
 -- ID (reported: a pattern's tooltip had the crafted bracers' auction

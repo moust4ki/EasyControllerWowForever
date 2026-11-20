@@ -56,12 +56,10 @@ end
 -- The realm as the game writes it in a character's full name ("Classic Beta
 -- PvP" -> "ClassicBetaPvP"), the same at every login: a key that changed
 -- would give the character a new profile
+-- (the name the game gives, else the one last seen with the realm's number:
+-- see CK.Realm)
 local function realmKey()
-    local realm = GetNormalizedRealmName and GetNormalizedRealmName()
-    if type(realm) == "string" and realm ~= "" then return realm end
-    realm = GetRealmName and GetRealmName()
-    if type(realm) ~= "string" or realm == "" then return nil end
-    return (realm:gsub("[%s%-]", ""))
+    return CK.Realm()
 end
 
 -- The character's full name: WoW Forever gives a first name and a surname
@@ -72,16 +70,70 @@ local function fullName()
     if not UnitName then return nil end
     -- (both values: "UnitName and UnitName(...)" would keep the first only)
     local name, surname = UnitName("player")
-    if not (type(name) == "string" and name ~= "") then return nil end
-    if type(surname) == "string" and surname ~= "" then return name .. " " .. surname, name end
+    name, surname = CK.PlainText(name), CK.PlainText(surname)
+    if not name then return nil end
+    if surname then return name .. " " .. surname, name end
     return name, name
+end
+
+-- The character's GUID ("Player-6942-000689C3"), nil when hidden
+local function playerGUID()
+    if not UnitGUID then return nil end
+    local ok, guid = pcall(UnitGUID, "player")
+    return ok and CK.PlainText(guid) or nil
+end
+
+-- No realm name from the game (its build of 2026-11-20; reported: the
+-- hunter's wheels and buttons gone, "character not known" in Profiles):
+-- this character's profile found by its GUID (kept in it since 1.23.1), else
+-- by its full name when a single profile has it, else by its full name and
+-- class (the same name on two realms, both of its class: neither)
+local function findKey(full)
+    local profiles = CK.db and CK.db.profiles
+    if type(profiles) ~= "table" then return nil end
+    local guid = playerGUID()
+    local named = {}
+    for k, p in pairs(profiles) do
+        if type(k) == "string" and type(p) == "table" and type(p.data) == "table" then
+            if guid and p.guid == guid then return k end
+            if p.name == full and k:sub(1, #full + 1) == full .. "-" and (p.guid == nil or guid == nil) then
+                named[#named + 1] = k
+            end
+        end
+    end
+    if #named == 1 then return named[1] end
+    local class = UnitClass and select(2, UnitClass("player"))
+    local same
+    for _, k in ipairs(named) do
+        if class and profiles[k].class == class then
+            if same then return nil end
+            same = k
+        end
+    end
+    return same
 end
 
 -- The key, the full name, the first name
 function Pr:Key()
     local full, first = fullName()
+    if not full then return nil end
     local realm = realmKey()
-    if not (full and realm) then return nil end
+    if not realm then
+        local key = findKey(full)
+        if key then
+            realm = key:sub(#full + 2)
+            -- (the realm's name for this number from now on: the auction
+            -- prices' book, a character never seen on it)
+            if not realm:match("^%d+$") then CK.RememberRealm(CK.RealmID(), realm) end
+        end
+    end
+    if not realm then
+        -- A character never seen, the realm's name never seen: its number
+        -- (its profile moved to its name once the game gives it, by its GUID)
+        local id = CK.RealmID()
+        realm = id and tostring(id)
+    end
+    if not realm then return nil end
     return full .. "-" .. realm, full, first, realm
 end
 
@@ -215,6 +267,18 @@ function Pr:Init()
     end
     local name = full
     local p = db.profiles[key]
+    local guid = playerGUID()
+    if not p and guid then
+        -- Kept under another key (the realm's number, the game giving no
+        -- realm name then): the same character
+        for k, other in pairs(db.profiles) do
+            if other.guid == guid then
+                p, db.profiles[k] = other, nil
+                db.profiles[key] = p
+                break
+            end
+        end
+    end
     if not p and full == first then
         -- Saved under the realm with its spaces (a login where the game gave
         -- no other name): the same character
@@ -227,6 +291,15 @@ function Pr:Init()
         end
     end
     local legacy = full ~= first and db.profiles[first .. "-" .. realm]
+    if full ~= first and not legacy and realm:match("^%d+$") then
+        -- (the realm's name not known: the one profile of the first name)
+        for k, other in pairs(db.profiles) do
+            if other.name == first and k:sub(1, #first + 1) == first .. "-" then
+                if legacy then legacy = nil break end
+                legacy = other
+            end
+        end
+    end
     if not p and legacy then
         -- Saved by the first name alone (up to 1.11.6), shared by every
         -- character with that first name: each one starts from a copy of
@@ -252,7 +325,14 @@ function Pr:Init()
     p.mode = "character"
     p.firstNameOnly = nil
     p.name = name
-    p.realm = (GetRealmName and GetRealmName()) or ""
+    -- (the realm's name as shown, kept when the game gives none)
+    local shown
+    if GetRealmName then
+        local ok, v = pcall(GetRealmName)
+        shown = ok and CK.PlainText(v) or nil
+    end
+    p.realm = shown or (type(p.realm) == "string" and p.realm) or ""
+    p.guid = guid or p.guid
     p.class = select(2, UnitClass("player"))
     self:InitSets(p)
     -- With the talents (option): the one of the talents in use
