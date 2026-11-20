@@ -39,6 +39,8 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.23
+- **Fixed: every character's wheels and buttons gone after the game's update of November 20** (1.23.1, reported): the game no longer gives addons the realm's name. Nothing was lost: each character finds its own settings again, and the auction prices too.
+- **Fixed: no global cooldown on traps in the wheels** (1.23.1, reported): every spell's slot shows it now.
 - **Quest mobs** (asked): beside the health bar of a mob your quests need, a skull and what is left, **3/10** (to kill, or an item it drops), **3/10 · 1/8** for two quests. The game tells it itself, so Forever's own quests count too. Comfort › Quest items.
 - **The merchant's advice says what the auction house would bring** (reported): after its 5 % cut and the 1 silver to post, *» Merchant (AH after fees: 50c)*, or *a loss after fees*.
 - **Fixed: Silk Bandages left out of the consumables wheel** (reported): bandages are now ranked by how much they heal.

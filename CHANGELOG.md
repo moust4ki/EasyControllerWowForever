@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.23.1
+
+- **Fixed: every character's wheels and buttons gone after the game's update of November 20**
+  (reported: "character not known" in Profiles). The game no longer gives addons the realm's name,
+  and each character's settings were kept under its name and realm: none was found, the shared
+  settings showed instead. Nothing was lost: each character finds its own again, by its name, then
+  by the character itself; the auction prices too.
+- **Fixed: no global cooldown on traps in the wheels** (reported): during it the game refuses a
+  trap ("not ready yet") but its slot showed nothing. Every spell's slot now shows it.
+
 ## 1.23.0
 
 - **Quest mobs** (asked): beside the health bar of a mob your quests need, a skull and what is left:

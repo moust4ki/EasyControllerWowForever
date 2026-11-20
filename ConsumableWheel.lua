@@ -1086,10 +1086,23 @@ function W:Build()
         b:SetScript("OnLeave", function() GameTooltip:Hide() end)
         SecureHandlerWrapScript(b, "OnClick", wheel, "return nil, true", DONE)
         b:HookScript("OnClick", function()
-            -- For /ec wheel: the member a party spell went to
+            -- For /ec wheel: the member a party spell went to, and the
+            -- game's refusal of any use (a trap in combat, a cooldown...)
             local unit = W.isParty(wheel:GetAttribute("wheel")) and b:GetAttribute("unit")
-            W:Log("use " .. i .. (unit and (" on " .. unit) or ""))
-            if unit then W.castAt = GetTime() end
+            local spell = b:GetAttribute("spell")
+            -- (a spell's cooldown and the global one then: "cd 0+0, gcd 12.3+1.5")
+            local cd = ""
+            local entry = W:PageItems()[i]
+            if entry and entry.kind == "spell" then
+                pcall(function()
+                    local start, duration = W.EntryCooldown(entry)
+                    local gs, gd = W.GlobalCooldown()
+                    cd = format(", cd %s+%s, gcd %s+%s", tostring(CK.Plain(start)), tostring(CK.Plain(duration)),
+                        tostring(CK.Plain(gs)), tostring(CK.Plain(gd)))
+                end)
+            end
+            W:Log("use " .. i .. (spell and (" " .. tostring(spell)) or "") .. (unit and (" on " .. unit) or "") .. cd)
+            W.castAt = GetTime()
             W:NoteMeal(i)
         end)
         b:Hide()
@@ -1779,6 +1792,34 @@ local function entryCooldown(e)
         return start, duration
     end
 end
+W.EntryCooldown = entryCooldown
+
+-- The global cooldown running now (the game's own spell for it): start,
+-- duration; nil when none
+local GCD_SPELL = 61304
+local function globalCooldown()
+    local get = C_Spell and C_Spell.GetSpellCooldown or GetSpellCooldown
+    if not get then return nil end
+    local start, duration = get(GCD_SPELL)
+    if type(start) == "table" then start, duration = start.startTime, start.duration end
+    if type(start) == "number" and type(duration) == "number" and duration > 0 then return start, duration end
+end
+W.GlobalCooldown = globalCooldown
+
+-- A slot's cooldown drawn: its own, or the global cooldown when a spell's
+-- own is shorter or none (asked: the traps showed none while the game
+-- refused them for it, "Le sort n'est pas encore utilisable")
+local function paintCooldown(cd, e)
+    pcall(function()
+        local start, duration = entryCooldown(e)
+        if not (start and duration and duration > 0) then start, duration = nil, nil end
+        if e.kind == "spell" then
+            local gs, gd = globalCooldown()
+            if gs and (not start or start + duration < gs + gd) then start, duration = gs, gd end
+        end
+        if start then cd:SetCooldown(start, duration) else cd:Clear() end
+    end)
+end
 
 -- Greyed: an item not in the bags (or food in combat), a spell the game
 -- says can't be cast now
@@ -1829,14 +1870,7 @@ function W:Paint()
             -- Its name in the game's colours: gold, grey when it can't be used
             local color = unusable and DISABLED_FONT_COLOR or NORMAL_FONT_COLOR
             if color then seg.label:SetTextColor(color:GetRGB()) end
-            pcall(function()
-                local start, duration = entryCooldown(item)
-                if start and duration and duration > 0 then
-                    seg.slot.cooldown:SetCooldown(start, duration)
-                else
-                    seg.slot.cooldown:Clear()
-                end
-            end)
+            paintCooldown(seg.slot.cooldown, item)
         else
             seg.disabled:Hide()
         end
@@ -2166,14 +2200,7 @@ function W:PaintParty()
     local list = self:PageItems()
     local spell = list[1]
     CK.Paddles.SetIcon(pv.center.icon, spell and W.EntryIcon(spell))
-    pcall(function()
-        local start, duration = entryCooldown(spell)
-        if start and duration and duration > 0 then
-            pv.center.cooldown:SetCooldown(start, duration)
-        else
-            pv.center.cooldown:Clear()
-        end
-    end)
+    if spell then paintCooldown(pv.center.cooldown, spell) else pv.center.cooldown:Clear() end
     for i, seg in ipairs(pv.members) do
         local ok = pcall(paintMember, seg, list[i])
         if not ok then
@@ -2333,14 +2360,7 @@ local function paintSmallSlot(s, item, i, n, combat)
     s.count:SetText(item.kind == "item" and (C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0) or "")
     s.icon:SetDesaturated(entryUnusable(item, combat))
     s.pressed:Hide()
-    pcall(function()
-        local start, duration = entryCooldown(item)
-        if start and duration and duration > 0 then
-            s.cooldown:SetCooldown(start, duration)
-        else
-            s.cooldown:Clear()
-        end
-    end)
+    paintCooldown(s.cooldown, item)
 end
 
 function W:PaintMini()
@@ -2728,8 +2748,8 @@ function W:Init()
     end
     local queued
     f:SetScript("OnEvent", function(_, event, ...)
-        -- For /ec wheel: the game refusing a party spell just cast (too far,
-        -- out of sight, a stronger buff...)
+        -- For /ec wheel: the game refusing what a wheel just used (too far,
+        -- out of sight, a stronger buff, a trap in combat, not ready...)
         if event == "UI_ERROR_MESSAGE" then
             if W.castAt and GetTime() - W.castAt < 1.5 then
                 local _, message = ...

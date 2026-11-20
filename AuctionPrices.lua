@@ -115,12 +115,25 @@ end
 -- items = { [key] = { lowest price for one (copper), server time seen, how
 -- many listed then, { [day] = that day's lowest } (the last 14 days) } } }
 ---------------------------------------------------------------------------
-local function realmKey()
-    local realm = GetNormalizedRealmName and GetNormalizedRealmName() or (GetRealmName and GetRealmName())
+-- (the realm's name the game gives, else the one last seen with its number,
+-- else, with no name at all (the game's build of 2026-11-20), the only
+-- book kept for this faction)
+local function realmKey(realms)
+    local realm = CK.Realm()
     local faction = UnitFactionGroup and UnitFactionGroup("player")
-    if secret(realm) then realm = nil end
     if secret(faction) then faction = nil end
-    return tostring(realm or "?") .. "-" .. tostring(faction or "?")
+    faction = tostring(faction or "?")
+    if not realm and type(realms) == "table" then
+        local only
+        for k in pairs(realms) do
+            if type(k) == "string" and k:sub(-#faction - 1) == "-" .. faction and k:sub(1, 2) ~= "?-" then
+                if only then only = nil break end
+                only = k
+            end
+        end
+        if only then return only end
+    end
+    return tostring(realm or "?") .. "-" .. faction
 end
 
 function AP:Book()
@@ -128,7 +141,7 @@ function AP:Book()
     local all = ControllerKeyboardPrices
     all.version = all.version or 1
     all.realms = type(all.realms) == "table" and all.realms or {}
-    local key = realmKey()
+    local key = realmKey(all.realms)
     local book = all.realms[key]
     if type(book) ~= "table" then
         book = {}
