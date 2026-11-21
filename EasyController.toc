@@ -26,6 +26,7 @@ Predict.lua
 Glyphs.lua
 Reticle.lua
 Range.lua
+QuietErrors.lua
 Message.lua
 UI.lua
 Wheel.lua

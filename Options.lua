@@ -571,6 +571,18 @@ Config.pages.keyboard = Config.NewRailPage({
 ---------------------------------------------------------------------------
 -- Alerts: vibrations, supplies, quest items
 ---------------------------------------------------------------------------
+-- The game's red messages and their voice (QuietErrors.lua)
+local function errorRows(b)
+    local f = settings().features
+    b.header(L.SEC_ERRORS)
+    b.check({ id = "e_quiet", label = L.LBL_QUIET_ERRORS, tip = L.TIP_QUIET_ERRORS,
+        get = function() return f.quietErrors == true end,
+        set = function(v)
+            f.quietErrors = v
+            CK.QuietErrors:Apply()
+        end })
+end
+
 local function vibrationRows(b)
     local V = CK.Vibration
     local s = V:Settings()
@@ -814,6 +826,7 @@ Config.pages.alerts = Config.NewRailPage({
     key = "alerts",
     sections = {
         { key = "vibrations", label = L.SEC_VIBRATIONS, tip = L.TIP_SEC_VIBRATIONS, rows = vibrationRows },
+        { key = "errors", label = L.SEC_ERRORS, tip = L.TIP_SEC_ERRORS, rows = errorRows },
         { key = "supplies", label = L.SEC_SUPPLIES, tip = L.SUP_INFO, rows = suppliesRows },
         { key = "quest", label = L.SEC_QUESTITEMS, tip = L.TIP_SEC_QUESTITEMS, rows = questRows },
         { key = "inventory", label = L.SEC_INVENTORY, tip = L.TIP_SEC_INVENTORY, rows = inventoryRows },
