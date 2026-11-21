@@ -38,13 +38,8 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.23
-- **A spell that lacks mana is blue in the wheels, not greyed** (1.23.2, reported), as on the game's bars; back to normal as soon as the mana is, even with the wheel open.
-- **Fixed: every character's wheels and buttons gone after the game's update of November 20** (1.23.1, reported): the game no longer gives addons the realm's name. Nothing was lost: each character finds its own settings again, and the auction prices too.
-- **Fixed: no global cooldown on traps in the wheels** (1.23.1, reported): every spell's slot shows it now.
-- **Quest mobs** (asked): beside the health bar of a mob your quests need, a skull and what is left, **3/10** (to kill, or an item it drops), **3/10 · 1/8** for two quests. The game tells it itself, so Forever's own quests count too. Comfort › Quest items.
-- **The merchant's advice says what the auction house would bring** (reported): after its 5 % cut and the 1 silver to post, *» Merchant (AH after fees: 50c)*, or *a loss after fees*.
-- **Fixed: Silk Bandages left out of the consumables wheel** (reported): bandages are now ranked by how much they heal.
+## What's new in 1.24
+- **Hide the errors of each key press** (asked; an option, Comfort › Errors): no more red messages at the top of the screen nor their voice when a key can't act (*Not enough energy*, *Ability is not ready yet*, *Out of range*...). The ones that ask you to act stay: bags full, quest log full, pet dead, not enough money, auction house, mail, trade, loot, pick pocketing.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -58,6 +53,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
+- **No error spam** (option): the red "Not enough energy" messages and their voice gone, the useful ones kept
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health as a ring around their portrait and in %
 - **Your own wheels** of spells, items and macros, big or as **mini wheels** on their button (like the hunter's aspects), aimed with the right stick or **4 in a cross on the D-pad**
 - **Consumables wheel**, usable in combat
@@ -304,6 +300,13 @@ lit once). Its icons press in on each press. Optionally back to the top bar afte
 Turn it on in Home › Gamepad: when the target is out of range (too far, or too close for a hunter's
 shots), the whole spell turns red, in the button's own shape, on the gamepad bar and on the extra
 buttons, instead of the game's small red dot only.
+
+**No error spam**
+Turn it on in Comfort › Errors: the game's red messages at the top of the screen and their voice,
+when a key can't act (Not enough energy, Ability is not ready yet, Out of range…), are neither shown
+nor heard. The ones that ask you to act stay, with their voice: bags full, quest log full, pet dead,
+not enough money, the auction house, the mail, a trade, loot, pick pocketing. Quest progress (the
+yellow messages) is not touched.
 
 **OLED burn-in prevention**
 The gamepad UI's dot in the middle of the screen is always lit at the same place, which can burn into

@@ -83,6 +83,9 @@ local DEFAULTS = {
         -- A trigger pressed alone switches its bar (Toggle.lua); back to the
         -- top bar when leaving combat
         triggerToggle = false, toggleCombatRelease = true,
+        -- The game's red messages and their voice hidden, the useful ones
+        -- kept (QuietErrors.lua)
+        quietErrors = false,
     },
     -- Vibrations: one switch and intensity, then each event { on, pattern }
     -- (Vibration.lua fills the events)
