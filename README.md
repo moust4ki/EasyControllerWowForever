@@ -523,6 +523,8 @@ holds changes out of combat only.
 - It works **in combat**: the wheel and the keys it takes are secure, run by the game. Food and drink
   are greyed there (the game forbids them in combat). Its content is updated out of combat only (a
   rule of the game).
+- A spell that **lacks mana is blue**, as on the game's bars; one the game refuses for another reason
+  is greyed; one too far for your target is red. Every wheel, again while it is open.
 - Moving from slot to slot can vibrate (Comfort › Vibrations).
 - **Three types** (asked; the editor's **Type** button opens a chooser over the wheel, each type
   with its picture and what it does; **New wheel** asks it first, B cancelling the new wheel, then

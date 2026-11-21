@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.23.2
+
+- **A spell that lacks mana is blue in the wheels, not greyed** (reported: spells greyed in a mini
+  wheel "while I can use them", low on mana), as on the game's bars. Greyed is kept for a spell the
+  game refuses for another reason, red for one too far, and every wheel shows it again while it is
+  open: the mana back, blue no more.
+
 ## 1.23.1
 
 - **Fixed: every character's wheels and buttons gone after the game's update of November 20**
