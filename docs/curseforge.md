@@ -39,6 +39,7 @@ Every feature you don't need can be turned off to save even more resources.
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
 ## What's new in 1.23
+- **A spell that lacks mana is blue in the wheels, not greyed** (1.23.2, reported), as on the game's bars; back to normal as soon as the mana is, even with the wheel open.
 - **Fixed: every character's wheels and buttons gone after the game's update of November 20** (1.23.1, reported): the game no longer gives addons the realm's name. Nothing was lost: each character finds its own settings again, and the auction prices too.
 - **Fixed: no global cooldown on traps in the wheels** (1.23.1, reported): every spell's slot shows it now.
 - **Quest mobs** (asked): beside the health bar of a mob your quests need, a skull and what is left, **3/10** (to kill, or an item it drops), **3/10 · 1/8** for two quests. The game tells it itself, so Forever's own quests count too. Comfort › Quest items.
