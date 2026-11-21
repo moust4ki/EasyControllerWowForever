@@ -1821,18 +1821,49 @@ local function paintCooldown(cd, e)
     end)
 end
 
--- Greyed: an item not in the bags (or food in combat), a spell the game
--- says can't be cast now
-local function entryUnusable(e, combat)
+-- Whether a slot can be used now: nil (yes); "mana", a spell the game says
+-- lacks mana (blue, as on the game's bars; reported: spells greyed in a
+-- mini wheel "while I can use them", low on mana); "off", greyed: an item
+-- not in the bags (or food in combat), a spell the game says can't be cast
+-- now
+local function entryState(e, combat)
     if e.kind == "item" then
         local count = C_Item.GetItemCount and C_Item.GetItemCount(e.id) or 0
-        return count == 0 or (combat and OUT_OF_COMBAT[e.cat] or false)
+        return (count == 0 or (combat and OUT_OF_COMBAT[e.cat])) and "off" or nil
     end
     if e.kind == "spell" then
         local usable = C_Spell and C_Spell.IsSpellUsable or IsUsableSpell
-        return usable and not usable(e.id) or false
+        if not usable then return nil end
+        local ok, state = pcall(function()
+            local can, noMana = usable(e.id)
+            if can then return nil end
+            return noMana and "mana" or "off"
+        end)
+        return ok and state or nil
     end
-    return false
+    return nil
+end
+
+-- The game's bars' blue for a spell that lacks mana (ActionButton's)
+local MANA_BLUE = { 0.5, 0.5, 1 }
+
+-- A slot's icon: greyed ("off"), blue ("mana"), red when too far (the
+-- range's red, over the rest)
+local function tintIcon(icon, state, far)
+    icon:SetDesaturated(state == "off")
+    local red = CK.Range and CK.Range.RED or { 0.9, 0.15, 0.15 }
+    local c = far and red or (state == "mana" and MANA_BLUE) or nil
+    if c then icon:SetVertexColor(c[1], c[2], c[3]) else icon:SetVertexColor(1, 1, 1) end
+end
+
+-- A big wheel's section: its icon, its veil and its name's colour (gold,
+-- grey when it can't be used)
+local function paintUsable(seg, item, combat)
+    local state = entryState(item, combat)
+    tintIcon(seg.slot.icon, state, false)
+    seg.disabled:SetShown(state == "off")
+    local color = state == "off" and DISABLED_FONT_COLOR or NORMAL_FONT_COLOR
+    if color then seg.label:SetTextColor(color:GetRGB()) end
 end
 
 ---------------------------------------------------------------------------
@@ -1864,12 +1895,7 @@ function W:Paint()
             CK.Paddles.SetIcon(seg.slot.icon, W.EntryIcon(item))
             seg.slot.count:SetText(item.kind == "item" and (C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0) or "")
             seg.label:SetText(W.EntryName(item) or "")
-            local unusable = entryUnusable(item, combat)
-            seg.slot.icon:SetDesaturated(unusable)
-            seg.disabled:SetShown(unusable)
-            -- Its name in the game's colours: gold, grey when it can't be used
-            local color = unusable and DISABLED_FONT_COLOR or NORMAL_FONT_COLOR
-            if color then seg.label:SetTextColor(color:GetRGB()) end
+            paintUsable(seg, item, combat)
             paintCooldown(seg.slot.cooldown, item)
         else
             seg.disabled:Hide()
@@ -1969,6 +1995,7 @@ function W:Track()
     end
     -- A D-pad wheel: nothing aimed, only the range
     if isDpad(self.paintedWheel) then return self:RangeMini() end
+    self:UsableBig()
     local i = self:Aimed()
     if i == self.aimed then return end
     self.aimed = i
@@ -2358,7 +2385,7 @@ local function paintSmallSlot(s, item, i, n, combat)
     s:SetPoint("CENTER", W.pview, "CENTER", PARTY_RADIUS * x, PARTY_RADIUS * y)
     CK.Paddles.SetIcon(s.icon, W.EntryIcon(item))
     s.count:SetText(item.kind == "item" and (C_Item.GetItemCount and C_Item.GetItemCount(item.id) or 0) or "")
-    s.icon:SetDesaturated(entryUnusable(item, combat))
+    tintIcon(s.icon, entryState(item, combat), false)
     s.pressed:Hide()
     paintCooldown(s.cooldown, item)
 end
@@ -2420,7 +2447,7 @@ function W:RangeMini(now)
     local t = GetTime()
     if not now and self.rangedAt and t - self.rangedAt < RANGE_EVERY then return end
     self.rangedAt = t
-    local red = CK.Range and CK.Range.RED or { 0.9, 0.15, 0.15 }
+    local combat = InCombatLockdown()
     local list = self:PageItems()
     for i, s in ipairs(pv.minis) do
         local item = list[i]
@@ -2432,12 +2459,23 @@ function W:RangeMini(now)
                 end)
                 far = ok and inRange == false
             end
-            if far then
-                s.icon:SetVertexColor(red[1], red[2], red[3])
-            else
-                s.icon:SetVertexColor(1, 1, 1)
-            end
+            -- (whether it can be used, again: the mana back, blue no more)
+            tintIcon(s.icon, entryState(item, combat), far)
         end
+    end
+end
+
+-- A big wheel's sections: whether each can be used, again while it is
+-- open, five times a second (the mana back: blue no more)
+function W:UsableBig(now)
+    local t = GetTime()
+    if not now and self.usableAt and t - self.usableAt < RANGE_EVERY then return end
+    self.usableAt = t
+    local combat = InCombatLockdown()
+    local list = self:PageItems()
+    for i, seg in ipairs(self.segments or {}) do
+        local item = list[i]
+        if item and seg.slot:IsShown() then paintUsable(seg, item, combat) end
     end
 end
 
