@@ -826,11 +826,11 @@ Config.pages.alerts = Config.NewRailPage({
     key = "alerts",
     sections = {
         { key = "vibrations", label = L.SEC_VIBRATIONS, tip = L.TIP_SEC_VIBRATIONS, rows = vibrationRows },
-        { key = "errors", label = L.SEC_ERRORS, tip = L.TIP_SEC_ERRORS, rows = errorRows },
         { key = "supplies", label = L.SEC_SUPPLIES, tip = L.SUP_INFO, rows = suppliesRows },
         { key = "quest", label = L.SEC_QUESTITEMS, tip = L.TIP_SEC_QUESTITEMS, rows = questRows },
         { key = "inventory", label = L.SEC_INVENTORY, tip = L.TIP_SEC_INVENTORY, rows = inventoryRows },
         { key = "auction", label = L.SEC_AUCTION, tip = L.TIP_SEC_AUCTION, rows = auctionRows },
+        { key = "errors", label = L.SEC_ERRORS, tip = L.TIP_SEC_ERRORS, rows = errorRows },
     },
 })
 
