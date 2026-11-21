@@ -196,8 +196,8 @@ second A.
 - **Gamepad**: the mapping below.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
-- **Comfort** (named Alerts before): the vibrations, the bag counters, the quest items, the better items and the
-  auction house prices below.
+- **Comfort** (named Alerts before): the vibrations, the bag counters, the quest items, the better items, the
+  auction house prices and the error messages below.
 - **Profiles**: this character's profiles and the talents' ones (see Profiles).
 
 ### First launch guide
@@ -415,6 +415,15 @@ controller.
 Home › Gamepad › Red when out of range: the whole spell turns red on the gamepad bar and on the
 extra buttons when the target is out of range (too far, or too close for a hunter's shots), instead of
 the game's small red dot only.
+
+### Error messages
+
+Comfort › Errors › Hide the errors of each key press (off until you turn it on; asked): the game's
+red messages at the top of the screen and their voice, at each press of a key that can't act (Not
+enough energy, Ability is not ready yet, Out of range...), are neither shown nor heard. The ones that
+ask you to act stay, with their voice: bags full, quest log full, pet dead, not enough money, the
+auction house, the mail, a trade, loot, pick pocketing. The yellow messages (quest progress) don't
+change.
 
 ## Vibrations
 

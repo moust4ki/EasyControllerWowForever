@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.24.0
+
+- **Hide the errors of each key press** (asked; an option, off until you turn it on: Comfort ›
+  Errors): the game's red messages at the top of the screen and their voice when a key can't act
+  (*Not enough energy*, *Ability is not ready yet*, *Out of range*...) are neither shown nor heard
+  any more. The ones that ask you to act stay, with their voice: bags full, quest log full, pet
+  dead, not enough money, the auction house, the mail, a trade, loot, pick pocketing. The yellow
+  messages (quest progress) don't change.
+
 ## 1.23.2
 
 - **A spell that lacks mana is blue in the wheels, not greyed** (reported: spells greyed in a mini
