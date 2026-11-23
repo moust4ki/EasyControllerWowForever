@@ -253,6 +253,9 @@ local function slash(msg)
         CK.ConsumableWheel:Diagnose()
     elseif cmd == "fish" then
         CK.Vibration:TraceFishing()
+    elseif cmd == "ranks" or cmd == "rangs" then
+        -- Every lower rank placed: the highest known (also in the spellbook's menu)
+        CK.SpellRanks:Upgrade()
     elseif cmd == "dump" then
         -- (asked; not in the help) the character and its pet, to a file
         CK.Export:Dump()
@@ -310,6 +313,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         safe(function() CK.QuestPlates:Init() end)
         safe(function() CK.Export:Init() end)
         safe(function() CK.QuietErrors:Init() end)
+        safe(function() CK.SpellRanks:Init() end)
         safe(function() CK.Mapping:Init() end)
         safe(function() CK.Paddles:Init() end)
         safe(function() CK.Config:Init() end)

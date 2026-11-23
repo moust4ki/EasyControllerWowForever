@@ -55,4 +55,5 @@ MapWindow.lua
 Options.lua
 Guide.lua
 Profiles.lua
+SpellRanks.lua
 Chat.lua

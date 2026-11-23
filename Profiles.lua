@@ -351,6 +351,7 @@ local function reread()
     if CK.ConsumableWheel then CK.ConsumableWheel:Fill() end
     if CK.Supplies then CK.Supplies:Refresh() end
 end
+Pr.Reread = reread
 
 -- The names of the spells in the character's spell book (by name: a lower
 -- rank still counts); nil while the book is not read yet
