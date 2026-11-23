@@ -575,10 +575,16 @@ Config.pages.keyboard = Config.NewRailPage({
 local function errorRows(b)
     local f = settings().features
     b.header(L.SEC_ERRORS)
-    b.check({ id = "e_quiet", label = L.LBL_QUIET_ERRORS, tip = L.TIP_QUIET_ERRORS,
-        get = function() return f.quietErrors == true end,
+    b.check({ id = "e_text", label = L.LBL_ERROR_TEXT, tip = L.TIP_ERROR_TEXT,
+        get = function() return f.hideErrorText == true end,
         set = function(v)
-            f.quietErrors = v
+            f.hideErrorText = v
+            CK.QuietErrors:Apply()
+        end })
+    b.check({ id = "e_voice", label = L.LBL_ERROR_VOICE, tip = L.TIP_ERROR_VOICE,
+        get = function() return f.muteErrorVoice == true end,
+        set = function(v)
+            f.muteErrorVoice = v
             CK.QuietErrors:Apply()
         end })
 end
