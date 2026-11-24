@@ -38,8 +38,9 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.24
-- **Hide the errors of each key press** (asked; an option, Comfort › Errors): no more red messages at the top of the screen nor their voice when a key can't act (*Not enough energy*, *Ability is not ready yet*, *Out of range*...). The ones that ask you to act stay: bags full, quest log full, pet dead, not enough money, auction house, mail, trade, loot, pick pocketing.
+## What's new in 1.25
+- **Highest ranks in one press** (asked): a button at the bottom left of the spellbook, *Use the highest ranks* (also `/ec ranks`). Each spell of a lower rank you placed becomes the highest rank you know: the gamepad bar (every page, the stance bars), your buttons, paddles, wheels and party spells, in all your profiles. Never by itself; not in combat.
+- **Errors: the red text and the voice apart** (asked): Comfort › Errors now has *Hide the red messages* and *Silence the error voice*, each on its own. With 1.24's option on, both are on.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -53,7 +54,8 @@ Every feature you don't need can be turned off to save even more resources.
 - **Chat keyboard** with smartphone-style word prediction, also in the game's fields (Auction House search...): daisywheel or split keyboard
 - **Quick phrases**: ready-made phrases sent in one press, on the channel you pick, all editable
 - **Red when out of range**: the whole spell, in the button's own shape, not just a dot
-- **No error spam** (option): the red "Not enough energy" messages and their voice gone, the useful ones kept
+- **No error spam** (options): the red "Not enough energy" messages hidden, their voice silenced, or both, the useful ones kept
+- **Highest ranks in one press**: a button in the spellbook puts every lower rank you placed at the highest rank you know, bars, buttons and wheels of all your profiles
 - **Healer/Buff mode**: one button, a heal or a buff on anyone in your party, picked with the right stick like the hunter's aspects, your target kept, each member's health as a ring around their portrait and in %
 - **Your own wheels** of spells, items and macros, big or as **mini wheels** on their button (like the hunter's aspects), aimed with the right stick or **4 in a cross on the D-pad**
 - **Consumables wheel**, usable in combat
@@ -302,11 +304,18 @@ shots), the whole spell turns red, in the button's own shape, on the gamepad bar
 buttons, instead of the game's small red dot only.
 
 **No error spam**
-Turn it on in Comfort › Errors: the game's red messages at the top of the screen and their voice,
-when a key can't act (Not enough energy, Ability is not ready yet, Out of range…), are neither shown
-nor heard. The ones that ask you to act stay, with their voice: bags full, quest log full, pet dead,
-not enough money, the auction house, the mail, a trade, loot, pick pocketing. Quest progress (the
-yellow messages) is not touched.
+Two options in Comfort › Errors, for when a key can't act (Not enough energy, Ability is not ready
+yet, Out of range…): **Hide the red messages** at the top of the screen, and **Silence the error
+voice**. Turn on one or both. The ones that ask you to act stay whole, text and voice: bags full,
+quest log full, pet dead, not enough money, the auction house, the mail, a trade, loot, pick
+pocketing. Quest progress (the yellow messages) is not touched.
+
+**Highest ranks in one press**
+A button at the bottom left of the game's spellbook, **Use the highest ranks** (or `/ec ranks`):
+each spell of a lower rank you placed becomes the highest rank you know, on the gamepad bar (every
+page, the stance bars), your buttons, paddles, replaced buttons, wheels and party spells, in all your
+profiles. The chat lists what changed. Never by itself: a lower rank kept for its mana stays until
+you press it. Not in combat.
 
 **OLED burn-in prevention**
 The gamepad UI's dot in the middle of the screen is always lit at the same place, which can burn into
@@ -415,6 +424,7 @@ Install with the CurseForge app, or extract the zip into
 - `/ec phrases`: the quick phrases window
 - `/ec profile`: this character's settings, and what each character holds
 - `/ec profile <name>`: put that profile of this character in use
+- `/ec ranks`: your spells at the highest rank you know (also a button in the spellbook)
 - `/ec help`: all commands
 - Options: RB + D-pad down, `/ec config`, or *Escape > Options > AddOns > Easy Controller - Forever*
 

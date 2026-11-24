@@ -646,7 +646,7 @@ CK.L = {
         "/ec wheel - what the consumables wheel holds, and why an item is not in it",
         "/ec fish - list the game's events for a minute (to find the fish bite)",
         "/ec binds - the game's buttons replaced, and what each key runs now",
-        "/ec ranks - replace your spells with the highest rank you know (also in the spellbook's menu)",
+        "/ec ranks - replace your spells with the highest rank you know (also a button at the bottom of the spellbook)",
         "/ec debug - print received buttons",
         "Options: Escape > Options > AddOns > Easy Controller - Forever",
     },

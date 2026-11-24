@@ -369,6 +369,17 @@ secondary another. `/ec profile <name>` too. Switching happens out of combat (in
 ends); an action that can't be placed now is kept for later. They're the character's only; its
 bag counters and consumables wheel categories are shared by its profiles.
 
+### Highest ranks
+
+A button at the bottom left of the game's spellbook, **Use the highest ranks** (or `/ec ranks`;
+asked): each spell of a lower rank you placed becomes the highest rank you know, by the rank's number
+(the spellbook lists every rank, its IDs not in order). Where: the game's gamepad bar (every page,
+the stance bars), the addon's buttons, paddles, replaced buttons, wheels and party spells, in all the
+character's profiles. The chat lists each spell changed (*Arcane Shot: Rank 1, Rank 2 › Rank 3*).
+Never by itself: a lower rank kept on purpose (its mana) stays until you press it. Not in combat.
+It is the addon's own button, not an entry in the game's settings menu: an addon's entry there makes
+the game's gamepad focus fail when the menu closes ("blocked" window).
+
 ### Triggers: press to switch
 
 Home › Gamepad › **Triggers: press to switch** (off by default): no need to hold a trigger to use its
@@ -418,12 +429,17 @@ the game's small red dot only.
 
 ### Error messages
 
-Comfort › Errors › Hide the errors of each key press (off until you turn it on; asked): the game's
-red messages at the top of the screen and their voice, at each press of a key that can't act (Not
-enough energy, Ability is not ready yet, Out of range...), are neither shown nor heard. The ones that
-ask you to act stay, with their voice: bags full, quest log full, pet dead, not enough money, the
-auction house, the mail, a trade, loot, pick pocketing. The yellow messages (quest progress) don't
-change.
+Comfort › Errors, two options apart (off until you turn them on; asked), for each press of a key that
+can't act (Not enough energy, Ability is not ready yet, Out of range...):
+
+- **Hide the red messages**: the game's red messages at the top of the screen are no longer shown.
+- **Silence the error voice**: your character's voice for them is no longer heard.
+
+With the text alone hidden, the voice still comes, once while the message would be on screen; with
+the voice alone silenced, the message shows as the game shows it. The ones that ask you to act stay
+whole, text and voice: bags full, quest log full, pet dead, not enough money, the auction house, the
+mail, a trade, loot, pick pocketing. The yellow messages (quest progress) don't change. 1.24's single
+option turns on both.
 
 ## Vibrations
 
@@ -757,6 +773,7 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec phrases` | the quick phrases window |
 | `/ec profile [name]` | this character's settings and the others'; with a name, put that profile in use |
 | `/ec binds` | the game's buttons replaced, and what each key runs now |
+| `/ec ranks` | your spells at the highest rank you know (also a button at the bottom of the spellbook) |
 | `/ec glyphs` | list the game's gamepad button icons |
 | `/ec debug` | print received buttons and sticks |
 

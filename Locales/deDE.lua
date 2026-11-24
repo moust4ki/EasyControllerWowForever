@@ -637,7 +637,7 @@ CK.LOCALES.deDE = {
         "/ec wheel - Inhalt des Verbrauchsgüter-Rads und warum ein Gegenstand fehlt",
         "/ec fish - eine Minute lang die Ereignisse des Spiels auflisten (um den Biss zu finden)",
         "/ec binds - ersetzte Spieltasten und was jede Taste jetzt auslöst",
-        "/ec ranks - deine Zauber durch den höchsten bekannten Rang ersetzen (auch im Menü des Zauberbuchs)",
+        "/ec ranks - deine Zauber durch den höchsten bekannten Rang ersetzen (auch ein Knopf unten im Zauberbuch)",
         "/ec debug - empfangene Tasten anzeigen",
         "Optionen: Esc > Optionen > AddOns > Easy Controller - Forever",
     },

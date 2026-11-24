@@ -637,7 +637,7 @@ CK.LOCALES.esES = {
         "/ec wheel - contenido de la rueda de consumibles y por qué falta un objeto",
         "/ec fish - listar los eventos del juego durante un minuto (para encontrar la picada)",
         "/ec binds - los botones del juego reemplazados y lo que lanza cada tecla ahora",
-        "/ec ranks - reemplazar tus hechizos por el rango más alto que conoces (también en el menú del libro de hechizos)",
+        "/ec ranks - reemplazar tus hechizos por el rango más alto que conoces (también un botón abajo en el libro de hechizos)",
         "/ec debug - mostrar los botones recibidos",
         "Opciones: Esc > Opciones > AddOns > Easy Controller - Forever",
     },

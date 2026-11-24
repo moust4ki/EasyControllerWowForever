@@ -637,7 +637,7 @@ CK.LOCALES.itIT = {
         "/ec wheel - contenuto della ruota dei consumabili e perché manca un oggetto",
         "/ec fish - elenca gli eventi del gioco per un minuto (per trovare l'abboccata)",
         "/ec binds - i pulsanti del gioco sostituiti e cosa lancia ora ogni tasto",
-        "/ec ranks - sostituisci i tuoi incantesimi con il grado più alto che conosci (anche nel menu del libro degli incantesimi)",
+        "/ec ranks - sostituisci i tuoi incantesimi con il grado più alto che conosci (anche un pulsante in basso nel libro degli incantesimi)",
         "/ec debug - mostra i pulsanti ricevuti",
         "Opzioni: Esc > Opzioni > AddOns > Easy Controller - Forever",
     },

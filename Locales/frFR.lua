@@ -637,7 +637,7 @@ CK.LOCALES.frFR = {
         "/ec wheel - le contenu de la roue des consommables, et pourquoi un objet n'y est pas",
         "/ec fish - lister les événements du jeu pendant une minute (pour trouver la touche du poisson)",
         "/ec binds - les boutons du jeu remplacés, et ce que chaque touche lance maintenant",
-        "/ec ranks - remplacer vos sorts par le rang le plus élevé que vous connaissez (aussi dans le menu du grimoire)",
+        "/ec ranks - remplacer vos sorts par le rang le plus élevé que vous connaissez (aussi un bouton en bas du grimoire)",
         "/ec debug - afficher les boutons reçus",
         "Options : Échap > Options > AddOns > Easy Controller - Forever",
     },
