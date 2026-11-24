@@ -314,6 +314,7 @@ CK.L = {
     LBL_ERROR_VOICE = "Silence the error voice",
     TIP_ERROR_VOICE = "Your character's voice at each press of a key that can't act (\"Not enough energy\", \"Not ready yet\"…) is no longer heard. The red message stays unless you hide it too. The errors that ask you to act (bags full, pet dead…) keep their voice.",
     RANKS_MENU = "Replace my spells with the highest rank",
+    RANKS_BUTTON = "Use the highest ranks",
     RANKS_TIP = "Each spell of a lower rank you placed becomes the highest rank you know: the gamepad bars (every page, the stance bars), Easy Controller's buttons, paddles, wheels and party spells, in all your profiles. Not in combat.",
     RANKS_DONE = "%d spells moved to their highest rank:",
     RANKS_LINE = "%s: %s › %s (%d)",

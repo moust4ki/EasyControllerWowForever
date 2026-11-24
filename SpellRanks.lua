@@ -1,10 +1,9 @@
 local _, CK = ...
 
 -- Highest ranks (asked: "a button in the spellbook: replace my spells with
--- the highest rank"). One press, in the game's spellbook settings menu (its
--- cog, the one with Hide passives and Show all ranks), or /ec ranks: each
--- spell of a lower rank the character has placed becomes the highest rank
--- it knows. Where: the game's action slots (every gamepad bar page, the
+-- the highest rank"). One press, the addon's button at the bottom of the
+-- game's spellbook, or /ec ranks: each spell of a lower rank the character
+-- has placed becomes the highest rank it knows. Where: the game's action slots (every gamepad bar page, the
 -- stance bars), the addon's buttons, paddles, replaced buttons, wheels and
 -- party spells, in every profile of the character. Never by itself: a lower
 -- rank kept on purpose (its mana) stays until the button is pressed.
@@ -236,20 +235,47 @@ function R:Upgrade()
 end
 
 ---------------------------------------------------------------------------
--- In the game's spellbook settings menu (its tag: MENU_SPELL_BOOK_SETTINGS)
+-- In the game's spellbook: a button of the addon's, at the bottom left of
+-- its pages (where the paging is, on the right). Not an entry in the
+-- game's settings menu (its cog): that menu runs under the gamepad's focus
+-- and an addon's entry in it made the game's own code fail when it closed
+-- (seen in game: ADDON_ACTION_FORBIDDEN SetPreferredGamepadInteractTarget,
+-- and the game's "blocked" window). The game's smart navigation reaches a
+-- button of the spellbook and clicks it behind its own barrier.
 ---------------------------------------------------------------------------
-function R:Init()
-    if self.menu or not (Menu and Menu.ModifyMenu) then return end
-    self.menu = true
-    Menu.ModifyMenu("MENU_SPELL_BOOK_SETTINGS", function(_, root)
-        local L = CK.L
-        root:CreateDivider()
-        local button = root:CreateButton(L.RANKS_MENU, function() R:Upgrade() end)
-        if button and button.SetTooltip then
-            button:SetTooltip(function(tooltip)
-                if GameTooltip_SetTitle then GameTooltip_SetTitle(tooltip, L.RANKS_MENU) end
-                if GameTooltip_AddNormalLine then GameTooltip_AddNormalLine(tooltip, L.RANKS_TIP, true) end
-            end)
-        end
+local BOOK_ADDON = "Blizzard_PlayerSpells"
+
+function R:Button()
+    local book = PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame
+    if self.button or not book then return self.button end
+    local L = CK.L
+    local b = CK.NewFrame("Button", "ControllerKeyboardSpellRanks", book, "UIPanelButtonTemplate")
+    b:SetText(L.RANKS_BUTTON)
+    local label = b.GetFontString and b:GetFontString()
+    local width = label and label:GetStringWidth()
+    b:SetSize(math.max(180, (type(width) == "number" and width or 0) + 40), 26)
+    b:SetPoint("BOTTOMLEFT", book.PagedSpellsFrame or book, "BOTTOMLEFT", 75, 34)
+    b:SetScript("OnClick", function() R:Upgrade() end)
+    b:SetScript("OnEnter", function(btn)
+        GameTooltip:SetOwner(btn, "ANCHOR_TOP")
+        GameTooltip:SetText(L.RANKS_MENU, 1, 1, 1)
+        GameTooltip:AddLine(L.RANKS_TIP, 1, 0.82, 0, true)
+        GameTooltip:Show()
     end)
+    b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    self.button = b
+    return b
+end
+
+-- The spellbook is loaded the first time it is opened: the button made then
+function R:Init()
+    if self.events then return end
+    local f = CreateFrame("Frame")
+    self.events = f
+    f:RegisterEvent("ADDON_LOADED")
+    f:SetScript("OnEvent", function(_, _, name)
+        if name == BOOK_ADDON then R:Button() end
+    end)
+    -- Already loaded (a /reload after opening it)
+    self:Button()
 end

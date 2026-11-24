@@ -305,6 +305,7 @@ CK.LOCALES.esES = {
     LBL_ERROR_VOICE = "Silenciar la voz de los errores",
     TIP_ERROR_VOICE = "La voz de tu personaje en cada pulsación de una tecla que no puede hacer nada («No hay suficiente energía», «Aún no está listo»…) ya no se oye. El mensaje rojo se queda, salvo si también lo ocultas. Los errores que piden actuar (bolsas llenas, mascota muerta…) conservan su voz.",
     RANKS_MENU = "Reemplazar mis hechizos por el rango más alto",
+    RANKS_BUTTON = "Usar los rangos más altos",
     RANKS_TIP = "Cada hechizo de un rango inferior que hayas colocado pasa al rango más alto que conoces: las barras del mando (todas las páginas, las barras de forma), los botones, palancas, ruedas y hechizos de grupo de Easy Controller, en todos tus perfiles. No en combate.",
     RANKS_DONE = "%d hechizos pasados a su rango más alto:",
     RANKS_LINE = "%s: %s › %s (%d)",

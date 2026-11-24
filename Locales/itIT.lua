@@ -305,6 +305,7 @@ CK.LOCALES.itIT = {
     LBL_ERROR_VOICE = "Silenzia la voce degli errori",
     TIP_ERROR_VOICE = "La voce del tuo personaggio a ogni pressione di un tasto che non può fare nulla («Energia insufficiente», «Non ancora pronto»…) non si sente più. Il messaggio rosso resta, a meno che non lo nasconda anche. Gli errori che chiedono di agire (borse piene, famiglio morto…) mantengono la voce.",
     RANKS_MENU = "Sostituisci i miei incantesimi con il grado più alto",
+    RANKS_BUTTON = "Usa i gradi più alti",
     RANKS_TIP = "Ogni incantesimo di grado inferiore che hai piazzato passa al grado più alto che conosci: le barre del controller (tutte le pagine, le barre di forma), i pulsanti, le levette, le ruote e gli incantesimi di gruppo di Easy Controller, in tutti i tuoi profili. Non in combattimento.",
     RANKS_DONE = "%d incantesimi portati al grado più alto:",
     RANKS_LINE = "%s: %s › %s (%d)",

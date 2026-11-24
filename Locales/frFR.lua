@@ -305,6 +305,7 @@ CK.LOCALES.frFR = {
     LBL_ERROR_VOICE = "Couper la voix des erreurs",
     TIP_ERROR_VOICE = "La voix du personnage à chaque appui sur une touche qui ne peut rien faire (« Pas assez d'énergie », « Pas encore prêt »…) ne se fait plus entendre. Le message rouge reste, sauf si vous le cachez aussi. Les erreurs qui demandent d'agir (sacs pleins, familier mort…) gardent leur voix.",
     RANKS_MENU = "Remplacer mes sorts par le rang le plus élevé",
+    RANKS_BUTTON = "Mettre au rang le plus élevé",
     RANKS_TIP = "Chaque sort d'un rang inférieur que vous avez placé passe au rang le plus élevé que vous connaissez : barres de la manette (toutes les pages, barres de forme), boutons, palettes, roues et sorts de groupe d'Easy Controller, dans tous vos profils. Pas en combat.",
     RANKS_DONE = "%d sorts passés au rang le plus élevé :",
     RANKS_LINE = "%s : %s › %s (%d)",
