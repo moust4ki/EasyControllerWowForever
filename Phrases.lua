@@ -1176,6 +1176,10 @@ function P:Close(reason)
     self.closedChat = nil
     self:Unbind()
     if self.frame then self.frame:Hide() end
+    -- Closed as a fight starts (PLAYER_REGEN_DISABLED, bindings still
+    -- allowed): the replaced buttons it let go bound again now, the repair
+    -- after our binding hooks comes once the fight has locked them
+    if reason == "combat" and not InCombatLockdown() and CK.Mapping then CK.Mapping:Repair() end
     local from = self.from
     self.from = nil
     -- A prompt still open (combat): it closes on its own

@@ -38,10 +38,12 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.25.1
-- **Your bars on two computers** (reported): at login, the bars as the game has them now stay (the game keeps them on its servers, the same everywhere). Until now the addon put back its own copy, one per computer: playing on a PC and a handheld, each took back the other's changes. A profile's bars are placed when you switch to it.
-- **No more "blocked" window after binding spells from the spellbook** (reported): the addon's buttons in the game's windows (spellbook, auction house) made the game refuse its own B and interact icon until a /reload. Fixed; their tooltips stay.
-- **A watch for that kind of error**: if it ever comes back, the chat says it once and the details are kept for a bug report.
+## What's new in 1.25.2
+- **Replaced buttons kept in a fight after a game window** (reported): bags or loot opened before a fight and closed during it no longer give your replaced buttons back to the game until the fight ends.
+- **Paddle layers with a bar button** (reported): a paddle whose own action is a bar button (RT + D-pad...) no longer runs it in every layer; RT + paddle and LT + paddle run their own.
+- **A macro's cooldown on the extra buttons** (reported): shown, the trinket of `/use 13` included.
+- **L3 / R3 show your choice** (reported), no longer the game's function.
+- **Korean, Chinese and Russian clients** (reported): the addon writes with the game's own font, no more broken spell names.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)

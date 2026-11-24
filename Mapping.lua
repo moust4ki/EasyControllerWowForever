@@ -497,9 +497,10 @@ end
 -- The other layers of a replaced button get what the game does there, bound
 -- the same way: a key with no binding of its own would fall back to ours
 -- (the game takes the key without its modifiers). The game's menus bind
--- their keys over ours; ours are also taken away while one of them has the
--- focus (out of combat). A slot of the game's bar keeps what it holds,
--- under our function's picture, and gets it back when the button does.
+-- their keys over ours and give them back when they close, in combat too
+-- (ours are only taken away for our own windows). A slot of the game's bar
+-- keeps what it holds, under our function's picture, and gets it back when
+-- the button does.
 ---------------------------------------------------------------------------
 local TRIGGERS = { "PADLTRIGGER", "PADRTRIGGER" }
 
@@ -599,6 +600,15 @@ local ROUTABLE = { spell = true, item = true, macro = true, wheel = true }
 
 function M.Routable(action)
     return type(action) == "string" and ROUTABLE[action:match("^(%a+):") or ""] or false
+end
+
+-- A paddle's router runs the game's bar buttons too, through a relay (as the
+-- pad's routers do). Bound to the key itself, one ran in every layer: Steam
+-- Input sends the paddle's key without the triggers' modifiers (reported:
+-- RT + R4 and LT + R4 ran R4's own, RT + D-pad up)
+local function paddleRoutable(action)
+    return M.Routable(action) or (type(action) == "string" and action:find("^bar:")
+        and CK.Paddles:NativeButton(action) and true) or false
 end
 
 -- What an input runs in a layer: its own action, else (a shared key) the
@@ -1264,15 +1274,21 @@ local function routeKeys(input, key, taken)
         -- nothing, as the Gamepad tab shows it)
         local action = M:EffectiveAction(input, layer)
         local b
-        if M.Routable(action) and not taken[M:ArrivalPrefix(layer)] then
-            b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"), input.id .. ":" .. layer)
-                or actionButton(input.id .. ":" .. layer, action)
-            -- Clicked by the key's button, once per press
-            b:SetAttribute("useOnKeyDown", false)
+        local bar = type(action) == "string" and action:find("^bar:") and true
+        if paddleRoutable(action) and not taken[M:ArrivalPrefix(layer)] then
+            if bar then
+                -- The game's bar button: its relay, pressed then released
+                b = M.BarRelay(action)
+            else
+                b = action:find("^wheel:") and CK.ConsumableWheel:Toggle(action:match("^wheel:(.+)$"), input.id .. ":" .. layer)
+                    or actionButton(input.id .. ":" .. layer, action)
+                -- Clicked by the key's button, once per press
+                b:SetAttribute("useOnKeyDown", false)
+            end
             r:SetAttribute("*clickbutton-ck" .. layer, b)
             r:SetAttribute("ck-has-" .. layer, true)
         end
-        setRelease(r, layer, b, action)
+        setRelease(r, layer, b, action, bar)
     end
     for prefix, isTaken in pairs(taken) do
         if not isTaken then
@@ -1285,8 +1301,8 @@ end
 
 -- Each key a paddle sends. A game function takes the key of its layer (and
 -- of the layers sharing it, a trigger that is no modifier adds nothing to
--- the key); the spells, items, macros and wheels of every layer go to the
--- paddle's router, on all the other keys.
+-- the key); the spells, items, macros, wheels and the game's bar buttons of
+-- every layer go to the paddle's router, on all the other keys.
 function M:ApplyPaddle(input)
     local key = self:InputKey(input)
     if not key then return end
@@ -1298,20 +1314,20 @@ function M:ApplyPaddle(input)
     -- + the paddle sent without Shift did nothing)
     local anyRoutable = false
     for _, layer in ipairs(M.LAYERS) do
-        if M.Routable(self:EffectiveAction(input, layer)) then anyRoutable = true end
+        if paddleRoutable(self:EffectiveAction(input, layer)) then anyRoutable = true end
     end
     local taken, routed = {}, false
     for _, layer in ipairs(M.LAYERS) do
         local prefix = self:ArrivalPrefix(layer)
         if taken[prefix] == nil then
             local action = self:Get(input.id, layer)
-            taken[prefix] = type(action) == "string" and not M.Routable(action)
+            taken[prefix] = type(action) == "string" and not paddleRoutable(action)
                 and not (action == M.NOTHING and anyRoutable)
             if taken[prefix] then bindAction(prefix .. key, input.id .. ":" .. layer, action) end
         end
     end
     for _, layer in ipairs(M.LAYERS) do
-        if M.Routable(self:EffectiveAction(input, layer)) and not taken[self:ArrivalPrefix(layer)] then routed = true end
+        if paddleRoutable(self:EffectiveAction(input, layer)) and not taken[self:ArrivalPrefix(layer)] then routed = true end
     end
     if routed then routeKeys(input, key, taken) end
 end
@@ -1602,10 +1618,15 @@ function M:Repair()
     end
 end
 
+-- A gamepad window of the game has the focus (bags, loot...)
+function M:GameWindow()
+    local manager = GamepadMode and GamepadMode.FrameControlsManager
+    return manager and manager.GetActiveFrame and manager:GetActiveFrame() and true or false
+end
+
 -- No gamepad window has the focus (the game's own HUD bindings are active)
 function M:CoreActive()
-    local manager = GamepadMode and GamepadMode.FrameControlsManager
-    if manager and manager.GetActiveFrame and manager:GetActiveFrame() then return false end
+    if self:GameWindow() then return false end
     -- The chat keyboard, the quick phrases or a wheel open: their keys stay
     -- theirs (reported: D-pad down given the phrases closed them instead of
     -- moving in them, ours set again over theirs)
@@ -1618,8 +1639,13 @@ end
 function M:Apply()
     if InCombatLockdown() or not self:CoreActive() then
         self.pending = true
-        -- A menu of the game, or our panel: its buttons back to it
-        self:Release()
+        -- Our panel, keyboard...: its buttons back to it. Not for a window
+        -- of the game: its binding sets go over ours (the latest priority
+        -- binding wins) and give its keys back when it closes, in combat
+        -- too. Ours taken away out of combat stayed away for the whole fight
+        -- when the window closed in one (reported: B, the main attack, the
+        -- game's own after the bags or the loot until the fight ended)
+        if not self:GameWindow() then self:Release() end
         if CK.Toggle then CK.Toggle:Apply() end
         return
     end
@@ -1813,8 +1839,8 @@ function M:KeepNative(input, layer, combo)
     end
 end
 
--- Our replacements taken away, out of combat: a menu of the game (or our
--- panel) has the focus. Set again when it closes.
+-- Our replacements taken away, out of combat: our panel (or keyboard,
+-- phrases...) has the focus. Set again when it closes.
 function M:Release()
     if InCombatLockdown() or not (takeOwner and next(self.taken)) then return end
     local keys = {}
@@ -2064,12 +2090,13 @@ function M:Init()
         "SetOverrideBindingItem", "SetOverrideBindingMacro", "ClearOverrideBindings" }) do
         if _G[name] then hooksecurefunc(name, changed) end
     end
-    -- The game's gamepad windows rebind the pad when they close
+    -- The game's gamepad windows rebind the pad when they close (ours stay
+    -- under theirs while one is open)
     if EventRegistry and EventRegistry.RegisterCallback then
         EventRegistry:RegisterCallback("Gamepad.RefreshFrameFocus", function()
             C_Timer.After(0, function()
                 if InCombatLockdown() then return end
-                if M:CoreActive() then M:Repair() else M:Release() end
+                if M:CoreActive() then M:Repair() end
             end)
         end, M)
     end

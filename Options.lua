@@ -12,17 +12,24 @@ CK.FONTS = {
     { key = "chat", name = L.FONT_CHAT },
 }
 
+-- The game in a language written with other letters (Korean, Chinese,
+-- Russian): the fonts above are its Latin-only files, its own font
+-- (STANDARD_TEXT_FONT) instead (reported: the Korean spell names broken)
+local NON_LATIN = { koKR = true, zhCN = true, zhTW = true, ruRU = true }
+
 function CK:GetFontPath()
     local key = self.db and self.db.settings.font
+    local standard = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
     for _, font in ipairs(CK.FONTS) do
         if font.key == key then
             if font.key == "chat" then
                 return (ChatFontNormal and ChatFontNormal:GetFont()) or STANDARD_TEXT_FONT
             end
+            if NON_LATIN[GetLocale and GetLocale() or ""] then return standard end
             return font.path
         end
     end
-    return STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+    return standard
 end
 
 local Config = CK.Config

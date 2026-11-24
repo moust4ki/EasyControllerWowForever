@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.25.2
+
+- **Replaced buttons kept in a fight after a game window** (reported): with bags or loot opened
+  before a fight and closed during it, your replaced buttons (B as your attack...) were the game's
+  until the fight ended. The addon took them away while one of the game's gamepad windows had the
+  focus, and the game doesn't let addons bind keys in combat. They now stay yours: the window's own
+  buttons go over them while it is open and hand them back when it closes, in combat too. Closing
+  the quick phrases as a fight starts sets them again at once too.
+- **Paddle layers with a bar button** (reported): a paddle whose own action was one of the game's
+  bar buttons (RT + D-pad up...) ran it in every layer: Steam Input sends the paddle's key without
+  the triggers' modifiers, and that key was bound straight to the button. The bar buttons now go
+  through the paddle's router like spells: RT + paddle runs its RT layer, LT + paddle its LT layer,
+  a layer with nothing runs nothing.
+- **A macro's cooldown on the extra buttons** (reported): a macro on a paddle or a stick showed no
+  cooldown. It now shows the one of what it runs: its spell, or its item (`/use 13`: the trinket you
+  wear), again when you change gear or edit the macro.
+- **L3 / R3 show your choice** (reported): a function put on a stick's click the game uses
+  (autorun, ping) ran, but the stick's button next to the bar and its tooltip kept showing the
+  game's.
+- **Korean, Chinese and Russian clients** (reported: the Korean spell names broken): the addon's
+  fonts are the game's Latin-only files; on those clients it writes with the game's own font.
+
 ## 1.25.1
 
 - **Your bars on two computers** (reported): the addon no longer puts its own copy of the game's

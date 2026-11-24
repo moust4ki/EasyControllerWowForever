@@ -511,12 +511,34 @@ function P.PlaceBadge(b, where, y)
     end
 end
 
+-- What a macro runs now, as the game resolves it for its own bar buttons:
+-- "spell", ID or "item", ID ("/use 13": the trinket worn), else nil
+function P.MacroTarget(name)
+    local spell = GetMacroSpell and GetMacroSpell(name)
+    if spell then return "spell", tostring(spell) end
+    local _, link = GetMacroItem and GetMacroItem(name)
+    local id = type(link) == "string" and link:match("item:(%d+)")
+    if id then return "item", id end
+    -- A line "/use 13": the item worn in that slot
+    local _, _, body = GetMacroInfo(name)
+    for line in (type(body) == "string" and body or ""):gmatch("[^\r\n]+") do
+        local slot = tonumber(line:match("^%s*/use%s+(%d+)%s*$"))
+        id = slot and GetInventoryItemID and GetInventoryItemID("player", slot)
+        if id then return "item", tostring(id) end
+    end
+end
+
 -- Cooldowns can be secret values in combat: hand them over untouched
 function P.ApplyCooldown(cd, action)
     local kind, value = (action or ""):match("^(%a+):(.+)$")
     -- A party spell: its spell's cooldown
     local party = CK.Mapping and CK.Mapping.PartySpell and CK.Mapping.PartySpell(action)
     if party then kind, value = "spell", tostring(party) end
+    -- A macro: its spell's or its item's (reported: none on a paddle)
+    if kind == "macro" then
+        local found, k, v = pcall(P.MacroTarget, value)
+        kind, value = found and k or nil, found and v or nil
+    end
     local ok
     if kind == "bar" then
         local slot = P:NativeSlot(action)
@@ -624,9 +646,13 @@ end
 ---------------------------------------------------------------------------
 -- Drawing
 ---------------------------------------------------------------------------
--- The action shown: the one the held layer runs
+-- The action shown: the one the held layer runs. L3 / R3 the game binds
+-- (autorun, ping): the player's choice replaces the game's button, kept
+-- apart (reported: the stick still showed the game's whatever was chosen)
 function P:ShownAction(id, layer)
-    return CK.Mapping:EffectiveAction(CK.Mapping.BY_ID[id], layer or "")
+    local M, input = CK.Mapping, CK.Mapping.BY_ID[id]
+    if not input.paddle and M:ReplacedActive(input, layer or "") then return M:GetReplaced(id, layer or "") end
+    return M:EffectiveAction(input, layer or "")
 end
 
 local function hasAnyAction(id)
@@ -860,6 +886,9 @@ function P:BuildFrame()
     f:RegisterEvent("SPELL_UPDATE_COOLDOWN")
     f:RegisterEvent("BAG_UPDATE_COOLDOWN")
     f:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
+    -- What a macro runs changes with them (another trinket, the macro edited)
+    f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+    f:RegisterEvent("UPDATE_MACROS")
     f:SetScript("OnEvent", function() P:Refresh(true) end)
     f:Hide()
     self.frame = f
