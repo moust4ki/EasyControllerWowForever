@@ -369,6 +369,12 @@ secondary another. `/ec profile <name>` too. Switching happens out of combat (in
 ends); an action that can't be placed now is kept for later. They're the character's only; its
 bag counters and consumables wheel categories are shared by its profiles.
 
+At login, the bars as the game has them are the profile in use's (1.25.1): the game keeps them on its
+servers, the same on every computer, and a profile's slots are placed only when you switch to it. The
+addon's own settings (buttons, paddles, wheels, the profile in use) are one per computer, in
+`WTF/Account/<account>/SavedVariables/EasyController.lua`: copy that file to play the same way on two
+computers (a PC and a handheld).
+
 ### Highest ranks
 
 A button at the bottom left of the game's spellbook, **Use the highest ranks** (or `/ec ranks`;
@@ -378,7 +384,9 @@ the stance bars), the addon's buttons, paddles, replaced buttons, wheels and par
 character's profiles. The chat lists each spell changed (*Arcane Shot: Rank 1, Rank 2 › Rank 3*).
 Never by itself: a lower rank kept on purpose (its mana) stays until you press it. Not in combat.
 It is the addon's own button, not an entry in the game's settings menu: an addon's entry there makes
-the game's gamepad focus fail when the menu closes ("blocked" window).
+the game's gamepad focus fail when the menu closes ("blocked" window). Its tooltip comes from the
+addon's own code, apart: the game's gamepad navigation runs a button's hover code inside its own,
+which marked the game's bar with the addon's name (1.25.1; the auction house buttons too).
 
 ### Triggers: press to switch
 

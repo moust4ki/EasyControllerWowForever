@@ -337,7 +337,11 @@ function Pr:Init()
     self:InitSets(p)
     -- With the talents (option): the one of the talents in use
     local want = p.auto and p.specSets[self:SpecGroup() or 0]
-    if want and want ~= p.active then swap(p, want) end
+    if want and want ~= p.active then
+        swap(p, want)
+        -- (its slots placed once the world is loaded: Slots:Login)
+        self.switchedAtLogin = true
+    end
     self:Activate()
     -- The modules start after: they read the settings as they are then
     self:DropForeignSpells(false)
@@ -535,6 +539,21 @@ function Slots:Snapshot(record)
     end
 end
 
+-- Its actions kept for later (not placeable then) placed again, each where
+-- its slot is still empty (out of combat)
+function Slots:PlacePending(record)
+    if InCombatLockdown() or type(record) ~= "table" then return end
+    self.expect = {}
+    self.expectUntil = GetTime() + 3
+    for _, slot in ipairs(self:List()) do
+        local want = record[slot]
+        if type(want) == "table" and want.pending and not Slots.Content(slot) and not kept(slot) then
+            self.expect[slot] = want
+            want.pending = (not place(slot, want)) or nil
+        end
+    end
+end
+
 -- A profile's actions placed again (out of combat); what its record doesn't
 -- know is left as it is
 function Slots:Restore(record)
@@ -622,14 +641,36 @@ function Slots:LearnStance()
     if p and p.data and p.sets then self:Seed(p) end
 end
 
--- The world loaded: the profile in use's slots (every record started from
--- what the bars hold the first time)
+-- The world loaded: the bars as the game keeps them are the profile in
+-- use's (every record started from what the bars hold the first time). The
+-- game keeps them on its servers, the same on every computer; the addon's
+-- record is in its saved variables, one per computer. Placed again at login
+-- (until 1.25.1), each computer's record took back the bars changed on the
+-- other (reported 2026-11-24: a PC and a handheld, the last changes lost at
+-- every login). A profile's record placed only when it is put in use; its
+-- actions kept for later placed again where their slot is still empty.
+-- Bars that look not loaded yet (every slot empty, the record not): the
+-- record kept, the slots followed as they come.
 function Slots:Login()
     local p = Pr:Profile()
     if not (p and p.data) then return end
     self:LearnStance()
     self:Seed(p)
-    self:Restore(p.data.slots)
+    local record = p.data.slots
+    -- Put in use at login (its talents, option): its actions placed, as at
+    -- any switch
+    if Pr.switchedAtLogin then
+        Pr.switchedAtLogin = nil
+        self:Restore(record)
+        return
+    end
+    self:PlacePending(record)
+    local any, known = false, false
+    for _, slot in ipairs(self:List()) do
+        if Slots.Content(slot) then any = true end
+        if record[slot] then known = true end
+    end
+    if any or not known then self:Snapshot(record) end
 end
 
 -- The character's sets: { id, name, active, primary, secondary }

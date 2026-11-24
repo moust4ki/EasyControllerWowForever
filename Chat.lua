@@ -306,6 +306,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         local function safe(fn) xpcall(fn, geterrorhandler()) end
         -- This character's profile first: the modules read its settings
         safe(function() CK.Profiles:Init() end)
+        safe(function() CK:WatchTaint() end)
         safe(function() CK.Predict:Load() end)
         safe(function() CK:HookChat() end)
         safe(function() CK:HookLinks() end)
@@ -362,3 +363,35 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         CK:Print("|cffff4040%s|r: %s", event, tostring(arg2))
     end
 end)
+
+---------------------------------------------------------------------------
+-- Taint watch (a diagnosis, kept since 1.25.1): the game's gamepad bar
+-- keeps its active bar in PageUnit.activeBar. Written while an addon's code
+-- runs, it carries that addon's name, and the game then refuses its own
+-- protected actions that read it (B's SpellStopCasting, the interact icon
+-- at each window: ADDON_ACTION_FORBIDDEN, seen 2026-11-24 in taint.log: the
+-- addon's hover scripts on its buttons in the game's windows, see
+-- CK.GameWindowButton). The first time it is written so, the call stack
+-- that wrote it is kept (ControllerKeyboardDB.taintWatch, the last 5) and
+-- said once in the chat. Silent otherwise.
+---------------------------------------------------------------------------
+function CK:WatchTaint()
+    local unit = GamepadMainActionBarFrame and GamepadMainActionBarFrame.PageUnit
+    if self.taintWatched or not (unit and unit.SetActiveActionBar and issecurevariable and debugstack) then return end
+    self.taintWatched = true
+    hooksecurefunc(unit, "SetActiveActionBar", function()
+        if CK.taintSeen then return end
+        local secure, by = issecurevariable(unit, "activeBar")
+        if secure then return end
+        CK.taintSeen = true
+        local stack = debugstack(2, 60, 20) or "?"
+        local db = CK.db
+        if db then
+            if type(db.taintWatch) ~= "table" then db.taintWatch = {} end
+            table.insert(db.taintWatch, 1, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", by = tostring(by),
+                combat = InCombatLockdown() and true or false, stack = stack })
+            while #db.taintWatch > 5 do table.remove(db.taintWatch) end
+        end
+        CK:Print("|cffff4040taint|r: " .. CK.L.TAINT_WATCH, tostring(by))
+    end)
+end

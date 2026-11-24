@@ -994,11 +994,12 @@ function CK:RegisterOptions()
     hint:SetWidth(560)
     hint:SetJustifyH("LEFT")
     hint:SetText(L.CFG_SETTINGS_HINT)
-    local open = CK.NewFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    -- (CK.GameWindowButton: in the game's options, reached by its gamepad
+    -- navigation)
+    local open = CK.GameWindowButton(nil, panel, function() CK.Config:OpenWhenFree() end)
     open:SetSize(240, 26)
     open:SetPoint("TOPLEFT", 16, -120)
     open:SetText(L.CFG_OPEN)
-    open:SetScript("OnClick", function() CK.Config:OpenWhenFree() end)
 
     if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
         local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)

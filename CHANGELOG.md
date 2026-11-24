@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.25.1
+
+- **Your bars on two computers** (reported): the addon no longer puts its own copy of the game's
+  gamepad bar slots back at login. The game keeps them on its servers, the same on every computer,
+  while the addon's copy is one per computer: playing on a PC and on a handheld, each one took back
+  the bars changed on the other at every login. At login, the bars as the game has them are now the
+  profile in use's; a profile's slots are placed when you switch to it (by hand, or by your talents,
+  at login too). Actions kept for later still come back where their slot is empty. The addon's other
+  settings (buttons, paddles, wheels, the profile in use) stay one per computer: copy
+  `WTF/Account/<account>/SavedVariables/EasyController.lua` to keep both alike.
+- **No more "blocked" window after binding spells from the spellbook** (reported): the addon's
+  buttons in the game's windows (*Use the highest ranks* in the spellbook, *Scan prices* and *Post
+  all* at the auction house, the one in the game's options) ran their tooltip inside the game's
+  gamepad navigation, which then marked the game's bar with the addon's name: B and the interact icon
+  refused (ADDON_ACTION_FORBIDDEN, the "blocked" window) until a /reload. Their tooltips now come
+  from the addon's own code, apart, and they are never disabled the game's way (their text greys).
+- **A watch for that kind of error**: should the game's gamepad bar ever be changed from an addon's
+  code again, the chat says it once and what led there is kept in the addon's saved variables, for a
+  bug report. Silent otherwise.
+
 ## 1.25.0
 
 - **Highest ranks in one press** (asked): a button at the bottom left of the game's spellbook, *Use

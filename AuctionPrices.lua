@@ -771,16 +771,16 @@ function AP:UpdateButton()
     if scan then
         local pct = scan.total and scan.total > 0 and math.floor(100 * math.min(scan.index or 0, scan.total) / scan.total) or 0
         b:SetText(format(L.AH_SCANNING, pct))
-        b:Disable()
+        CK.SetUsable(b, false)
         return
     end
     local wait = self:Wait()
     if wait > 0 then
         b:SetText(format(L.AH_SCAN_WAIT, math.ceil(wait / 60)))
-        b:Disable()
+        CK.SetUsable(b, false)
     else
         b:SetText(L.AH_SCAN)
-        b:Enable()
+        CK.SetUsable(b, true)
     end
     self:UpdatePostButton()
 end
@@ -797,19 +797,15 @@ function AP:Button()
     if not frame then return nil end
     local b = self.button
     if not b then
-        b = CK.NewFrame("Button", "ControllerKeyboardAuctionScan", frame, "UIPanelButtonTemplate")
+        -- (CK.GameWindowButton: no hover script, never disabled)
+        b = CK.GameWindowButton("ControllerKeyboardAuctionScan", frame, function() AP:Scan() end, function(tip)
+            tip:SetText(L.AH_SCAN, 1, 1, 1)
+            tip:AddLine(L.AH_SCAN_TIP, GOLD[1], GOLD[2], GOLD[3], true)
+            tip:AddLine(AP:StatusText(), GREY[1], GREY[2], GREY[3], true)
+        end)
         b:SetSize(200, 24)
         -- Outside the window, under its right corner: its tabs are on the left
         b:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -2)
-        b:SetScript("OnClick", function() AP:Scan() end)
-        b:SetScript("OnEnter", function(btn)
-            GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-            GameTooltip:SetText(L.AH_SCAN, 1, 1, 1)
-            GameTooltip:AddLine(L.AH_SCAN_TIP, GOLD[1], GOLD[2], GOLD[3], true)
-            GameTooltip:AddLine(AP:StatusText(), GREY[1], GREY[2], GREY[3], true)
-            GameTooltip:Show()
-        end)
-        b:SetScript("OnLeave", function() GameTooltip:Hide() end)
         -- The minutes left, counted down while it is shown
         local elapsed = 0
         b:SetScript("OnUpdate", function(_, dt)
@@ -991,36 +987,32 @@ function AP:UpdatePostButton()
         local n = #p.queue
         if p.stage == "ready" or p.stage == "confirm" then
             b:SetText(format(p.stage == "confirm" and L.AH_POST_CONFIRM or L.AH_POST_NEXT, p.index, n, money(p.price)))
-            b:Enable()
+            CK.SetUsable(b, true)
         else
             b:SetText(format(L.AH_POST_CHECKING, p.index, n))
-            b:Disable()
+            CK.SetUsable(b, false)
         end
         return
     end
     local n = (self:On() and not self.scanning) and #self:PostQueue() or 0
     b:SetText(format(L.AH_POST_ALL, n))
-    if n > 0 and not self.scanning then b:Enable() else b:Disable() end
+    CK.SetUsable(b, n > 0 and not self.scanning)
 end
 
 function AP:PostButton(frame)
     if self.postButton then return self.postButton end
-    local b = CK.NewFrame("Button", "ControllerKeyboardAuctionPost", frame, "UIPanelButtonTemplate")
-    b:SetSize(200, 24)
-    b:SetPoint("RIGHT", self.button, "LEFT", -6, 0)
-    b:SetScript("OnClick", function() AP:PostPress() end)
-    b:SetScript("OnEnter", function(btn)
-        GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-        GameTooltip:SetText(format(L.AH_POST_ALL, #AP:PostQueue()), 1, 1, 1)
-        GameTooltip:AddLine(L.AH_POST_TIP, GOLD[1], GOLD[2], GOLD[3], true)
+    -- (CK.GameWindowButton: no hover script, never disabled)
+    local b = CK.GameWindowButton("ControllerKeyboardAuctionPost", frame, function() AP:PostPress() end, function(tip)
+        tip:SetText(format(L.AH_POST_ALL, #AP:PostQueue()), 1, 1, 1)
+        tip:AddLine(L.AH_POST_TIP, GOLD[1], GOLD[2], GOLD[3], true)
         local p = AP.posting
         local e = p and p.price and p.queue[p.index]
         if e then
-            GameTooltip:AddLine(format(L.AH_POST_ITEM, e.link, e.count, money(p.price)), 1, 1, 1, true)
+            tip:AddLine(format(L.AH_POST_ITEM, e.link, e.count, money(p.price)), 1, 1, 1, true)
         end
-        GameTooltip:Show()
     end)
-    b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    b:SetSize(200, 24)
+    b:SetPoint("RIGHT", self.button, "LEFT", -6, 0)
     self.postButton = b
     return b
 end

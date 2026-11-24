@@ -306,6 +306,7 @@ CK.LOCALES.deDE = {
     TIP_ERROR_VOICE = "Die Stimme deines Charakters bei jedem Druck auf eine Taste, die nichts tun kann („Nicht genug Energie“, „Noch nicht bereit“…), ist nicht mehr zu hören. Die rote Meldung bleibt, außer du blendest sie auch aus. Fehler, die zum Handeln auffordern (Taschen voll, Begleiter tot…), behalten ihre Stimme.",
     RANKS_MENU = "Meine Zauber durch den höchsten Rang ersetzen",
     RANKS_BUTTON = "Höchste Ränge nutzen",
+    TAINT_WATCH = "die Gamepad-Leiste des Spiels wurde aus dem Code von %s geändert: Das Spiel kann seine eigenen Aktionen (B, das Interaktionssymbol) bis zum /reload verweigern. Details in den gespeicherten Variablen des Addons für eine Fehlermeldung.",
     RANKS_TIP = "Jeder Zauber eines niedrigeren Rangs, den du platziert hast, wird zum höchsten Rang, den du kennst: die Controller-Leisten (alle Seiten, die Gestaltleisten), die Tasten, Paddles, Räder und Gruppenzauber von Easy Controller, in all deinen Profilen. Nicht im Kampf.",
     RANKS_DONE = "%d Zauber auf den höchsten Rang gesetzt:",
     RANKS_LINE = "%s: %s › %s (%d)",
