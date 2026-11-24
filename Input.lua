@@ -215,6 +215,67 @@ function CK.NewFrame(frameType, name, parent, template)
 end
 
 ---------------------------------------------------------------------------
+-- A button of ours inside a game window (the spellbook, the auction house,
+-- the game's options): the gamepad's navigation selects it like the game's
+-- own. It clicks a button behind a barrier, but runs its OnEnter / OnLeave
+-- directly (FocusEnter / FocusExit), and its hook on the selected button's
+-- OnEnable / OnDisable refreshes the game's prompts: the addon's code then
+-- ran inside the game's, and what the game wrote next carried the addon's
+-- name (seen 2026-11-24 in taint.log: its gamepad bar's active bar, then
+-- the game's own B and interact icon refused, ADDON_ACTION_FORBIDDEN, after
+-- binding spells from the spellbook). So: no hover script, never Enable /
+-- Disable (greyed by its text instead, its press checked by its own code),
+-- and its tooltip shown by a watcher of ours while the navigation or the
+-- mouse is on it.
+---------------------------------------------------------------------------
+local function mouseOn(b)
+    if GetMouseFoci then
+        local foci = GetMouseFoci()
+        for _, f in ipairs(type(foci) == "table" and foci or {}) do
+            if f == b then return true end
+        end
+        return false
+    end
+    if GetMouseFocus then return GetMouseFocus() == b end
+    return b:IsMouseOver()
+end
+
+function CK.GameWindowButton(name, parent, onClick, tooltip, anchor)
+    local b = CK.NewFrame("Button", name, parent, "UIPanelButtonTemplate")
+    b:SetScript("OnEnter", nil)
+    b:SetScript("OnLeave", nil)
+    b:SetScript("OnClick", onClick)
+    if not tooltip then return b end
+    local watch = CK.NewFrame("Frame", nil, b)
+    local owned = false
+    local function hide()
+        if owned and GameTooltip:GetOwner() == b then GameTooltip:Hide() end
+        owned = false
+    end
+    watch:SetScript("OnUpdate", function()
+        local nav = SmartNavigation
+        local on = (nav ~= nil and nav.currentButton == b) or mouseOn(b)
+        if on and not owned then
+            owned = true
+            GameTooltip:SetOwner(b, anchor or "ANCHOR_RIGHT")
+            tooltip(GameTooltip)
+            GameTooltip:Show()
+        elseif not on and owned then
+            hide()
+        end
+    end)
+    watch:SetScript("OnHide", hide)
+    return b
+end
+
+-- Its look usable or greyed (never the game's Enable / Disable: above)
+function CK.SetUsable(b, on)
+    b.ckUsable = on and true or false
+    local font = on and GameFontNormal or GameFontDisable
+    if font then b:SetNormalFontObject(font) end
+end
+
+---------------------------------------------------------------------------
 -- Buttons
 --
 -- While the keyboard is open, each pad button is bound (override binding)

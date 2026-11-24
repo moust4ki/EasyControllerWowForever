@@ -38,9 +38,10 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.25
-- **Highest ranks in one press** (asked): a button at the bottom left of the spellbook, *Use the highest ranks* (also `/ec ranks`). Each spell of a lower rank you placed becomes the highest rank you know: the gamepad bar (every page, the stance bars), your buttons, paddles, wheels and party spells, in all your profiles. Never by itself; not in combat.
-- **Errors: the red text and the voice apart** (asked): Comfort › Errors now has *Hide the red messages* and *Silence the error voice*, each on its own. With 1.24's option on, both are on.
+## What's new in 1.25.1
+- **Your bars on two computers** (reported): at login, the bars as the game has them now stay (the game keeps them on its servers, the same everywhere). Until now the addon put back its own copy, one per computer: playing on a PC and a handheld, each took back the other's changes. A profile's bars are placed when you switch to it.
+- **No more "blocked" window after binding spells from the spellbook** (reported): the addon's buttons in the game's windows (spellbook, auction house) made the game refuse its own B and interact icon until a /reload. Fixed; their tooltips stay.
+- **A watch for that kind of error**: if it ever comes back, the chat says it once and the details are kept for a bug report.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -261,7 +262,9 @@ each holds its buttons, replaced buttons, wheels and the game's bar slots (the s
 and the face buttons alone, and the stance and form bars once you've been in them). In the Profiles
 tab, pick the one in use from a list, add one (it starts empty), rename or delete them, or let the
 talents pick: primary talents one profile, secondary another. Also `/ec profile <name>`. Out of
-combat (in combat, once the fight ends).
+combat (in combat, once the fight ends). At login the bars as the game has them stay (the same on
+every computer); the addon's own settings are one per computer: copy
+`WTF/Account/<account>/SavedVariables/EasyController.lua` to play the same way on two of them.
 
 **Back paddles (L4 / R4 / L5 / R5)**
 Steam Deck and other controllers: set each paddle to a keyboard key in Steam Input (F13 to F16 for

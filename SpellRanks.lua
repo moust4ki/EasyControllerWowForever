@@ -241,7 +241,9 @@ end
 -- and an addon's entry in it made the game's own code fail when it closed
 -- (seen in game: ADDON_ACTION_FORBIDDEN SetPreferredGamepadInteractTarget,
 -- and the game's "blocked" window). The game's smart navigation reaches a
--- button of the spellbook and clicks it behind its own barrier.
+-- button of the spellbook and clicks it behind its own barrier; no hover
+-- script of ours (CK.GameWindowButton: the navigation runs those with no
+-- barrier).
 ---------------------------------------------------------------------------
 local BOOK_ADDON = "Blizzard_PlayerSpells"
 
@@ -249,20 +251,15 @@ function R:Button()
     local book = PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame
     if self.button or not book then return self.button end
     local L = CK.L
-    local b = CK.NewFrame("Button", "ControllerKeyboardSpellRanks", book, "UIPanelButtonTemplate")
+    local b = CK.GameWindowButton("ControllerKeyboardSpellRanks", book, function() R:Upgrade() end, function(tip)
+        tip:SetText(L.RANKS_MENU, 1, 1, 1)
+        tip:AddLine(L.RANKS_TIP, 1, 0.82, 0, true)
+    end, "ANCHOR_TOP")
     b:SetText(L.RANKS_BUTTON)
     local label = b.GetFontString and b:GetFontString()
     local width = label and label:GetStringWidth()
     b:SetSize(math.max(180, (type(width) == "number" and width or 0) + 40), 26)
     b:SetPoint("BOTTOMLEFT", book.PagedSpellsFrame or book, "BOTTOMLEFT", 75, 34)
-    b:SetScript("OnClick", function() R:Upgrade() end)
-    b:SetScript("OnEnter", function(btn)
-        GameTooltip:SetOwner(btn, "ANCHOR_TOP")
-        GameTooltip:SetText(L.RANKS_MENU, 1, 1, 1)
-        GameTooltip:AddLine(L.RANKS_TIP, 1, 0.82, 0, true)
-        GameTooltip:Show()
-    end)
-    b:SetScript("OnLeave", function() GameTooltip:Hide() end)
     self.button = b
     return b
 end
