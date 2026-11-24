@@ -271,9 +271,10 @@ from button to button, up to the layers, down to the actions under the controlle
   function from the lists too, in any layer. A slot of the gamepad bar still takes a spell, an item or a
   macro in the slot itself; anything else replaces the button, and what the slot held stays in it,
   under the picture of your function, for when you give the button back (X).
-- The game's menus keep their buttons: the replacements are taken away while one of its gamepad
-  windows has the focus, and set again when it closes. LB / RB with a trigger stay the game's (its
-  class and pet actions read them directly), and so do LT / RT.
+- The game's menus keep their buttons: a gamepad window of the game puts its own over the
+  replacements while it has the focus and hands them back when it closes, in combat too (1.25.2;
+  before, the replacements were taken away and only came back after a fight). LB / RB with a trigger
+  stay the game's (its class and pet actions read them directly), and so do LT / RT.
 - Each layer needs a key of its own, so LT and RT become modifiers (the game's gamepad setting, like
   LT already sending Shift); the other layers of a replaced button keep what the game does there.
 - **LB / RB held with a face button or the D-pad stay the game's**: its targeting bars (a party
@@ -739,7 +740,9 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 - lock position, open automatically, only when the gamepad is active;
 - keyboard size: small (80 %), normal, large (125 %), extra large (150 %) — `/ec scale` for any
   other value; invert the sticks vertical axis, show / hide the mouse buttons row (split keyboard);
-- font (Blizzard fonts: Friz Quadrata, Morpheus, Skurri, Arial Narrow, or the chat font);
+- font (Blizzard fonts: Friz Quadrata, Morpheus, Skurri, Arial Narrow, or the chat font; on a
+  Korean, Chinese or Russian client, the game's own font or the chat font: the others have Latin
+  letters only);
 - button style (Auto, Xbox / PlayStation / Nintendo Switch) and the game's button icons. A style
   picked (here or in the guide) sets the game's own too: the game shows its icons by its controller
   config's label style (Letters, Shapes, Reverse), which the addon writes (`C_GamePad.SetConfig` +
