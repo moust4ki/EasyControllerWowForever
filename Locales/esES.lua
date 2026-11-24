@@ -619,8 +619,9 @@ CK.LOCALES.esES = {
         "/ec learn - aprender las palabras de tus mensajes (actual: %s)",
         "/ec lock - bloquear/desbloquear la posición (actual: %s)",
         "/ec mode wheel|stick - daisywheel o teclado dividido",
-        "/ec layout azerty|qwerty|qwertz|es|it - distribución del teclado dividido",
-        "/ec lang fr|en|de|es|it|both - idioma de las sugerencias y de los acentos",
+        "/ec layout azerty|qwerty|qwertz|es|it|ru - distribución del teclado dividido",
+        "/ec lang fr|en|de|es|it|both|ru - idioma de las sugerencias y de los acentos",
+        "/ec ui ru|en|fr|de|es|it - idioma del addon (tras un /reload)",
         "/ec scale 0.8 - tamaño del teclado",
         "/ec invert - invertir el eje vertical del stick",
         "/ec reset - recolocar el teclado",
@@ -994,6 +995,13 @@ CK.LOCALES.esES = {
     GUIDE_PLACE_SPELLS = "Poner mis hechizos",
     GUIDE_FINISH = "Terminar",
     GUIDE_AGAIN = "Volver a ver esta guía: Inicio › Guía, o /ec welcome",
+    -- El idioma del addon (Inicio › Aspecto)
+    LBL_LANGUAGE = "Idioma",
+    LANG_AUTO = "Automático (%s)",
+    TIP_LANGUAGE = "Los textos de Easy Controller. Automático: el idioma del cliente. Las sugerencias y la distribución del teclado siguen el idioma elegido. Se aplica la próxima vez que se cargue la interfaz (recargar).",
+    LBL_LANG_RELOAD = "Recargar para aplicar el idioma",
+    TIP_LANG_RELOAD = "El idioma elegido se aplica al cargar la interfaz: la recarga ahora.",
+    LANG_UI_RELOAD = "Idioma: %s. Recarga la interfaz (/reload) para aplicarlo.",
 }
 
 -- Latin American Spanish: the same

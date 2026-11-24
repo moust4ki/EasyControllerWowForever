@@ -47,8 +47,10 @@ function K.Text(parent, size, color, layer)
     return fs
 end
 
+-- (the chat's font, or the addon's Cyrillic one when it has no Russian
+-- letters: Options.lua)
 local function chatFont()
-    return (ChatFontNormal and ChatFontNormal:GetFont()) or STANDARD_TEXT_FONT or "Fonts\\ARIALN.TTF"
+    return CK:GetFontPath("chat")
 end
 
 function K.ChatText(parent, size, color, layer)
@@ -61,13 +63,10 @@ function K.ChatText(parent, size, color, layer)
     return fs
 end
 
--- Upper case, accented letters too (string.upper leaves UTF-8 alone): the
--- Latin-1 ones, U+00E0-U+00FE but the division sign
+-- Upper case, the accented and the Russian letters too (string.upper leaves
+-- them alone): Core.lua
 function K.Upper(text)
-    return (text:upper():gsub("\195([\160-\190])", function(c)
-        if c == "\183" then return nil end
-        return "\195" .. string.char(c:byte() - 32)
-    end))
+    return CK.Upper(text)
 end
 
 -- A solid colour texture

@@ -62,6 +62,15 @@ local LAYOUTS = {
         { SHIFT, "z", "x", "c", "v", "b", "n", "m", BACK },
         { LAYER, ",", "è", SPACE, ".", "?", "!" },
     },
+    -- Russian (ЙЦУКЕН, its rows cut at 10 letters): 32 of the 33, the ends of
+    -- its rows and ё along Space. The last one (ъ) and the punctuation, which
+    -- the Latin layouts keep on this layer, are on the 123 layer (CK.ACCENTS.ru)
+    russian = {
+        { "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з" },
+        { "ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж" },
+        { SHIFT, "я", "ч", "с", "м", "и", "т", "ь", BACK },
+        { LAYER, "х", "э", SPACE, "б", "ю", "ё" },
+    },
     symbols = {
         { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" },
         { accent(1), accent(2), accent(3), accent(4), accent(5), accent(6), accent(7), accent(8), accent(9), accent(10) },
@@ -83,6 +92,9 @@ local ROW_X = {
     { { 0, 54 }, { 58, 54 }, { 116, 54 }, { 174, 236 }, { 414, 54 }, { 472, 54 }, { 530, 54 } },
 }
 M.height = 220
+-- The layouts whose letters are not the Latin ones, and the Latin ones the
+-- Latin letters asked come from (a quick second press on 123, Message.lua)
+local LATIN_OF = { russian = "qwerty" }
 local HALF_L, HALF_R = 286, 298       -- the left half ends, the right one starts
 local CENTER_Y = 110
 -- Each half's center, and the cursor's reach around it. Full tilt puts the
@@ -246,7 +258,9 @@ end
 
 function M:ActiveSet()
     if CK.state.layer == "symbols" then return self.sets.symbols end
-    return self.sets[CK.db.settings.kbLayout] or self.sets.azerty
+    local layout = CK.db.settings.kbLayout
+    if CK.state.latin and LATIN_OF[layout] then layout = LATIN_OF[layout] end
+    return self.sets[layout] or self.sets.azerty
 end
 
 function M:Reset()
@@ -340,7 +354,7 @@ function M:Update()
         if key.char then
             key.label:SetText(CK:DisplayChar(key.char))
         elseif key.special == "LAYER" then
-            key.label:SetText(state.layer == "symbols" and L.LETTERS or L.SYMBOLS)
+            key.label:SetText(state.layer == "symbols" and CK:LettersLabel() or L.SYMBOLS)
         else
             key.label:SetText(L[SPECIAL_LABEL[key.special]])
         end

@@ -16,6 +16,7 @@ local FALLBACK = {
     de = { "und", "die", "der", "zu", "für", "ein", "mit" },
     es = { "y", "de", "para", "el", "la", "un", "con" },
     it = { "e", "di", "per", "il", "la", "un", "con" },
+    ru = { "и", "не", "в", "на", "я", "ты", "что" },
 }
 
 local entries = {}         -- word -> { word, norm, dict }
@@ -29,6 +30,13 @@ local function rankScore(rank)
     return 60 - 10 * math.log10(rank)
 end
 
+-- The bucket a normalized word goes to: its first character. Its first byte
+-- would do (it is the letter in the Latin languages), but nearly every
+-- Russian word begins with the same one: a whole dictionary in one bucket
+local function firstChar(s)
+    return s:match("^[^\128-\191][\128-\191]*") or s
+end
+
 local function addEntry(word, dictScore)
     local e = entries[word]
     if e then
@@ -40,7 +48,7 @@ local function addEntry(word, dictScore)
     e = { word = word, norm = norm, dict = dictScore or 0 }
     entries[word] = e
     numEntries = numEntries + 1
-    local key = norm:sub(1, 1)
+    local key = firstChar(norm)
     local bucket = buckets[key]
     if not bucket then
         bucket = {}
@@ -251,7 +259,7 @@ function P:Query(prefix, ctx, n)
 
     local norm = CK.Normalize(prefix)
     local lower = CK.Lower(prefix)
-    local bucket = buckets[norm:sub(1, 1)]
+    local bucket = buckets[firstChar(norm)]
     if not bucket then return out end
 
     local len = #norm
@@ -299,7 +307,8 @@ function P:LearnMessage(msg)
         local tokens = P.Tokenize(sentence)
         for i, token in ipairs(tokens) do
             if #token > 30 then break end
-            if not isElision(token) and #token >= 2 then
+            -- (characters: "я", "в"... are one letter, and two bytes)
+            if not isElision(token) and select(2, token:gsub("[^\128-\191]", "")) >= 2 then
                 words[token] = (words[token] or 0) + 1
                 addEntry(token)
             end

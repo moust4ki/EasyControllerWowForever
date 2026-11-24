@@ -23,9 +23,20 @@ and **quest links** in the chat. Each module can be turned off in the options.
 
 ## Languages
 
-The interface is translated into English, French, German, Spanish and Italian, following the game
+The interface is translated into English, French, German, Spanish, Italian and Russian, following the game
 client's language. Suggestions and keyboard layout also follow it by default: a German client gets
-QWERTZ and the German dictionary.
+QWERTZ and the German dictionary, a Russian client the Russian keyboard and dictionary. The addon's
+language can also be picked on any client (Home › Look › Language, or `/ec ui ru`): it comes with the
+next loading of the interface, a row offers to reload it.
+
+**Russian**: the daisywheel gets the Russian letters (in the alphabet's order), the split keyboard a
+ЙЦУКЕН layout, the suggestions a Russian dictionary with the WoW slang. With the Russian letters, a
+quick second press on **123** swaps them for the Latin ones (a slash command, a name…), and back the
+same way. On a client that isn't Russian, the game's fonts have no Russian letters: the addon then
+writes with a font of its own that has them (Home › Look › Font): **Forum** (the default then),
+**Kurale**, or the game's own `FRIZQT___CYR.TTF` ("Friz Quadrata RU") where the client has it. Forum
+and Kurale are free fonts (SIL Open Font License), shipped in `Fonts/` with their licenses
+([how they look](docs/fonts-cyrillic.png)).
 
 ## Installation
 
@@ -81,9 +92,10 @@ around each group of 4) or characters only.
 
 ### Split keyboard
 
-A full keyboard (AZERTY, QWERTY, QWERTZ, Spanish QWERTY with ñ or Italian QWERTY; option or
-`/ec layout azerty|qwerty|qwertz|es|it`), with a numbers / accents / symbols layer whose accents follow
-the language (é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù), cut in two halves: the **left stick** drives a cursor on
+A full keyboard (AZERTY, QWERTY, QWERTZ, Spanish QWERTY with ñ, Italian QWERTY or Russian ЙЦУКЕН;
+option or `/ec layout azerty|qwerty|qwertz|es|it|ru`), with a numbers / accents / symbols layer whose
+accents follow the language (é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù; Russian: the letter
+the keys have no room for, ъ, and the punctuation), cut in two halves: the **left stick** drives a cursor on
 the left half (columns 1-5), the **right stick** on the right half (columns 6-10). Each stick's
 **tilt is its cursor's position** around the center of its half: released, the cursor is at the
 center; push fully to reach an edge or a corner. The keys near the middle of the keyboard are at the
@@ -190,9 +202,9 @@ left it. Forgetting the learned words, restoring the game's buttons and deleting
 second A.
 
 - **Home**: every module with its state, Y on one jumps to its settings; the panel's shortcut;
-  button glyphs (Auto: your controller's, or Xbox / PlayStation / Nintendo Switch, which the game's own
-  interface takes too), the game's button icons, font, the centre dot for OLED screens; automation at
-  merchants.
+  the addon's language; button glyphs (Auto: your controller's, or Xbox / PlayStation / Nintendo Switch,
+  which the game's own interface takes too), the game's button icons, font, the centre dot for OLED
+  screens; automation at merchants.
 - **Gamepad**: the mapping below.
 - **Wheels**: your own wheels, the consumables wheel, where they open.
 - **Keyboard**: opening, input method and layout, size, sticks, prediction, position.
@@ -716,10 +728,10 @@ Comfort › Auction house (off until you turn it on; asked):
 
 ## Prediction
 
-- **Word completion**: English, French, German, Spanish and Italian dictionaries of 12,000 words
-  each, plus WoW slang (lfg, heal, dungeon…). Defaults to the client's language, changeable in the
-  options (or French + English). Accents are ignored
-  while searching: `ca` suggests "ça", `ete` suggests "été".
+- **Word completion**: English, French, German, Spanish, Italian and Russian dictionaries of 12,000
+  words each, plus WoW slang (lfg, heal, dungeon…). Defaults to the client's language, changeable in the
+  options (or French + English, Russian + English). Accents are ignored
+  while searching: `ca` suggests "ça", `ete` suggests "été", `ещ` suggests "ещё".
 - **Next word, iPhone style**: your usual message starters as soon as the chat opens; after each word,
   the most likely next word from your own 2 and 3 word sequences, plus built-in common French phrases.
 - **Slash commands**: a message starting with `/` suggests `/reload`, `/p`, `/ra`, `/g`, `/w`, then your
@@ -735,14 +747,20 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 - every module on or off (Home › Modules; Gamepad extras at the top of Home › Gamepad), each one's
   settings in its own tab;
 - input method (daisywheel / split keyboard), daisywheel look (groups circled / characters only),
-  keyboard layout (AZERTY, QWERTY, QWERTZ, Spanish, Italian), stick dead zone, stick response
+  keyboard layout (AZERTY, QWERTY, QWERTZ, Spanish, Italian, Russian), stick dead zone, stick response
   (linear, gentle, fast), magnet, cursor lines;
 - lock position, open automatically, only when the gamepad is active;
 - keyboard size: small (80 %), normal, large (125 %), extra large (150 %) — `/ec scale` for any
   other value; invert the sticks vertical axis, show / hide the mouse buttons row (split keyboard);
+- the addon's language: Auto (the client's), English, French, German, Spanish, Italian or Russian.
+  The suggestions and the keyboard layout follow it when the language left wrote with other letters
+  (Russian and the Latin ones). It comes with the next loading of the interface: a row offers the reload;
 - font (Blizzard fonts: Friz Quadrata, Morpheus, Skurri, Arial Narrow, or the chat font; on a
   Korean, Chinese or Russian client, the game's own font or the chat font: the others have Latin
-  letters only);
+  letters only). With the Russian letters: Friz Quadrata RU (the game's own file with them, where the
+  client has it), Forum and Kurale (free fonts, SIL Open Font License, in the addon's `Fonts/`). Russian
+  on a client that isn't Russian (the language picked, the Russian suggestions), the game's fonts
+  give way to Forum automatically;
 - button style (Auto, Xbox / PlayStation / Nintendo Switch) and the game's button icons. A style
   picked (here or in the guide) sets the game's own too: the game shows its icons by its controller
   config's label style (Letters, Shapes, Reverse), which the addon writes (`C_GamePad.SetConfig` +
@@ -754,7 +772,8 @@ In the configuration panel (RB + D-pad down, `/ec config`):
   the game untouched;
 - the gamepad UI's centre dot, for OLED screens: the game's, a colour, a colour changing every 5
   minutes, or hidden;
-- suggestion language (French, English, German, Spanish, Italian, or French + English), learning;
+- suggestion language (French, English, German, Spanish, Italian, Russian, French + English, or
+  Russian + English), learning;
 - reset position, forget learned words.
 
 ## Commands
@@ -765,11 +784,12 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec keyboard` | open the keyboard (also `/ec clavier`, `/ec kb`) |
 | `/ec lock` | lock / unlock the position (unlocking shows the keyboard to place it) |
 | `/ec mode wheel\|stick` | daisywheel or split keyboard |
-| `/ec layout azerty\|qwerty\|qwertz\|es\|it` | split keyboard layout |
+| `/ec layout azerty\|qwerty\|qwertz\|es\|it\|ru` | split keyboard layout |
 | `/ec auto` | open automatically with the chat |
 | `/ec pad` | only open automatically when the gamepad is active |
 | `/ec learn` | turn learning on / off |
-| `/ec lang fr\|en\|de\|es\|it\|both` | suggestion and accent language |
+| `/ec lang fr\|en\|de\|es\|it\|both\|ru` | suggestion and accent language |
+| `/ec ui ru\|en\|fr\|de\|es\|it\|auto` | the addon's language (alone: the one asked for; comes after a `/reload`) |
 | `/ec scale 0.8` | keyboard size |
 | `/ec invert` | invert the sticks vertical axis |
 | `/ec reset` | reset the keyboard position |
@@ -825,9 +845,12 @@ are also available in *Escape > Key Bindings > AddOns*.
 - Translations: `Locales/`, one file per language, named by the game's locale. `enUS.lua` is the
   base (`CK.L`); each other file puts its language in `CK.LOCALES.<locale>`, and `Core.lua` puts the
   client's language over English (a key left out stays English). To add a language, copy
-  `Locales/frFR.lua` as `Locales/<locale>.lua` (`ruRU`, `ptBR`...), change the locale on its
-  `CK.LOCALES.` line, translate the values (keep `%s`, `%d` and the `|c...|r` color codes as they are),
-  and list the file in `EasyController.toc` before `Core.lua`.
+  `Locales/frFR.lua` as `Locales/<locale>.lua`, change the locale on its `CK.LOCALES.` line, translate
+  the values (keep `%s`, `%d` and the `|c...|r` color codes as they are), and list the file in
+  `EasyController.toc` before `Core.lua`. The language picked in the panel (`settings.uiLang`) is put
+  over English in `CK:InitDB` instead: what reads the texts while its file loads would keep the
+  client's, so the panel's pages are defined after it (`CK.DefinePages`, Options.lua), and a text read
+  as a file loads takes its key (`id`, read each time: `nameOf` in Options.lua).
 
 ## Roadmap
 
@@ -849,6 +872,22 @@ OpenSubtitles):
 
 ```bash
 python tools/build_dict.py fr    # or en, de, es, it
+python tools/build_dict.py ru    # Russian: two downloads, see below
+```
+
+The Russian one keeps a word only when [danakt/russian-words](https://github.com/danakt/russian-words)
+(MIT) has it (the subtitle lists are full of film characters' names), past the first 1,000; a word
+the list spells both with е and ё is kept with ё.
+
+Tests (Lua 5.1), from the addon root:
+
+```bash
+luajit tools/test_predict.lua     # or test_upgrades, test_vibration
+luajit tools/test_russian.lua    # the Russian letters: case, keyboards, suggestions, fonts
+luajit tools/test_locales.lua    # every translation against English: its %s, %d, colour codes
+luajit tools/test_syntax.lua     # every file as the game's Lua 5.1 reads it (LuaJIT takes more)
+luajit tools/test_load.lua       # the whole addon without the game, a session per client language
+python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
 CurseForge / release package (`dist/EasyController-<version>.zip`, page description in
@@ -878,10 +917,12 @@ changes.
 ## License
 
 Code under the MIT license (see `LICENSE`). The `Dict_*.lua` word lists (French, English, German,
-Spanish, Italian) are derived from FrequencyWords (Hermit Dave) and remain under the
+Spanish, Italian, Russian) are derived from FrequencyWords (Hermit Dave) and remain under the
 [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) license. `ConsolePort.lua` and
 `textures/consoleport/` come from [ConsolePort](https://github.com/seblindfors/ConsolePort) by
-Sebastian Lindfors, modified, under the Artistic License 2.0 (`LICENSE-ConsolePort.md`).
+Sebastian Lindfors, modified, under the Artistic License 2.0 (`LICENSE-ConsolePort.md`). The fonts of
+`Fonts/` are under the SIL Open Font License 1.1, each with its license there: **Forum** by Denis
+Masharov (`OFL-Forum.txt`), **Kurale** by the Kurale Project Authors (`OFL-Kurale.txt`).
 
 ## AI disclosure
 

@@ -84,7 +84,7 @@ function CK:OpenStandalone()
     self.chatAttrs = { chatType = "SAY" }
     self.editBox = nil
     local state = self.state
-    state.layer, state.shift, state.caps, state.aim = "letters", false, false, nil
+    state.layer, state.shift, state.caps, state.aim, state.latin = "letters", false, false, nil, false
     state.activeRow = "suggestions"
     self:GetMethod():Reset()
     self.frame:Show()
@@ -212,6 +212,7 @@ end
 -- Type one character of the active input method (shift applies once)
 function CK:TypeChar(ch)
     if not ch then return end
+    self.state.layerAt = nil
     self:InsertText(self:DisplayChar(ch))
     if self.state.shift and not self.state.caps then
         self.state.shift = false
@@ -327,9 +328,34 @@ function CK:ToggleShift()
     self:UpdateMethod()
 end
 
+-- A quick second press, a language whose letters are not the Latin ones
+-- (Russian): the Latin letters instead of the language's, as quick back
+-- (CK:OtherLetters). A slash command, a name written in Latin letters...
+-- Nothing typed in between (TypeChar forgets the first press): going to
+-- the symbols for one and coming back at once is no double press
+local DOUBLE_LAYER = 0.3
+
 function CK:ToggleSymbols()
-    self.state.layer = self.state.layer == "letters" and "symbols" or "letters"
+    local state = self.state
+    local back = state.layer == "symbols"
+    if back then
+        if state.layerAt and GetTime() - state.layerAt < DOUBLE_LAYER and self:OtherLetters() then
+            state.latin = not state.latin
+        end
+        state.layerAt = nil
+    else
+        state.layerAt = GetTime()
+    end
+    state.layer = back and "letters" or "symbols"
     self:UpdateMethod()
+end
+
+-- What a press on 123 gives back: the other letters while the Latin ones are
+-- shown in place of the language's, else the language's
+function CK:LettersLabel()
+    if self.state.latin then return "abc" end
+    if self:OtherLetters() then return "абв" end
+    return L.LETTERS
 end
 
 -- Channel row: the keyboard keeps its own channel (the game's chat box is
@@ -680,7 +706,7 @@ function CK:OpenPrompt(title, text, onDone, box)
     self.chatAttrs = { chatType = "SAY" }
     self.editBox = nil
     local state = self.state
-    state.layer, state.shift, state.caps, state.aim = "letters", false, false, nil
+    state.layer, state.shift, state.caps, state.aim, state.latin = "letters", false, false, nil, false
     state.activeRow = "suggestions"
     self:GetMethod():Reset()
     self.frame:Show()
@@ -783,7 +809,7 @@ function CK:Open(eb)
         if i and not self:ChannelAvailable(i) then self.chatAttrs = nil end
     end
     local state = self.state
-    state.layer, state.shift, state.caps, state.aim = "letters", false, false, nil
+    state.layer, state.shift, state.caps, state.aim, state.latin = "letters", false, false, nil, false
     state.activeRow = "suggestions"
     self:GetMethod():Reset()
     self.frame:Show()
