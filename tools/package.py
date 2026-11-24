@@ -2,7 +2,8 @@
 
 The zip holds a single EasyController/ folder with what the game loads:
 the TOC and its files, Bindings.xml, the TGA textures (and ConsolePort's, in
-textures/consoleport), LICENSE (and ConsolePort's), README and CHANGELOG. Design sources and tools are left out.
+textures/consoleport), the fonts (Fonts/: the files and their licenses),
+LICENSE (and ConsolePort's), README and CHANGELOG. Design sources and tools are left out.
 
 Usage:
     python tools/package.py
@@ -15,6 +16,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ADDON = "EasyController"
 EXTRA = ["Bindings.xml", "LICENSE", "LICENSE-ConsolePort.md", "README.md", "CHANGELOG.md"]
+# A copy left by the folder extracted over itself ("ck_bar 2.tga"): never shipped
+COPY = re.compile(r" 2\.[^.]+$")
+
+
+def files_of(folder, suffixes):
+    """The files of a folder with one of these extensions, the copies left out"""
+    return sorted(p.relative_to(ROOT).as_posix() for p in folder.iterdir()
+                  if p.is_file() and p.suffix.lower() in suffixes and not COPY.search(p.name))
+
 
 
 def main():
@@ -25,10 +35,11 @@ def main():
               if line.strip() and not line.startswith("#")]
 
     files = [f"{ADDON}.toc"] + listed + EXTRA
-    files += sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "textures").glob("*.tga"))
+    files += files_of(ROOT / "textures", (".tga",))
     # ConsolePort's keyboard (ConsolePort.lua): its own textures, BLP and TGA
-    files += sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "textures" / "consoleport").glob("*")
-                    if p.suffix.lower() in (".tga", ".blp"))
+    files += files_of(ROOT / "textures" / "consoleport", (".tga", ".blp"))
+    # The addon's fonts, each with its license
+    files += files_of(ROOT / "Fonts", (".ttf", ".txt"))
 
     missing = [f for f in files if not (ROOT / f).is_file()]
     if missing:
@@ -41,6 +52,12 @@ def main():
     absent = sorted(n for n in names if n not in packaged)
     if absent:
         sys.exit("Textures used but not packaged: " + ", ".join(absent))
+    # And every font of ours the code names
+    fonts = set(re.findall(r'"([A-Za-z]+-[A-Za-z]+\.ttf)"', code))
+    shipped = {Path(f).name for f in files if f.startswith("Fonts/")}
+    absent = sorted(n for n in fonts if n not in shipped)
+    if absent:
+        sys.exit("Fonts used but not packaged: " + ", ".join(absent))
 
     dist = ROOT / "dist"
     dist.mkdir(exist_ok=True)

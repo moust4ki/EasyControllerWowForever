@@ -2,40 +2,62 @@ local _, CK = ...
 local L = CK.L
 
 ---------------------------------------------------------------------------
--- Fonts (Blizzard fonts shipped with the game)
+-- Fonts: the game's (shipped with it) and the addon's own (Fonts/: free
+-- ones, under the SIL Open Font License, with the Russian letters). A file
+-- of the game with the Latin letters only, for Russian on screen
+-- (CK:Cyrillic): the game's own font on a client written with other letters
+-- (it has them), the addon's elsewhere. (Reported: the Korean spell names
+-- broken with the Latin-only ones)
 ---------------------------------------------------------------------------
+local OWN = "Interface\\AddOns\\EasyController\\Fonts\\"
 CK.FONTS = {
-    { key = "friz", name = "Friz Quadrata", path = "Fonts\\FRIZQT__.TTF" },
-    { key = "morpheus", name = "Morpheus", path = "Fonts\\MORPHEUS.TTF" },
-    { key = "skurri", name = "Skurri", path = "Fonts\\SKURRI.TTF" },
-    { key = "arialn", name = "Arial Narrow", path = "Fonts\\ARIALN.TTF" },
-    { key = "chat", name = L.FONT_CHAT },
+    { key = "friz", name = "Friz Quadrata", path = "Fonts\\FRIZQT__.TTF", latinOnly = true },
+    { key = "morpheus", name = "Morpheus", path = "Fonts\\MORPHEUS.TTF", latinOnly = true },
+    { key = "skurri", name = "Skurri", path = "Fonts\\SKURRI.TTF", latinOnly = true },
+    { key = "arialn", name = "Arial Narrow", path = "Fonts\\ARIALN.TTF", latinOnly = true },
+    { key = "chat", id = "FONT_CHAT", latinOnly = true },
+    -- With the Russian letters: the game's own file, and the addon's two
+    { key = "frizcyr", id = "FONT_FRIZ_CYR", path = "Fonts\\FRIZQT___CYR.TTF" },
+    { key = "forum", name = "Forum", path = OWN .. "Forum-Regular.ttf" },
+    { key = "kurale", name = "Kurale", path = OWN .. "Kurale-Regular.ttf" },
 }
+-- The addon's font a Latin-only one gives way to
+CK.CYRILLIC_FONT = "forum"
 
--- The game in a language written with other letters (Korean, Chinese,
--- Russian): the fonts above are its Latin-only files, its own font
--- (STANDARD_TEXT_FONT) instead (reported: the Korean spell names broken)
 local NON_LATIN = { koKR = true, zhCN = true, zhTW = true, ruRU = true }
 
-function CK:GetFontPath()
-    local key = self.db and self.db.settings.font
-    local standard = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+local function fontOf(key)
     for _, font in ipairs(CK.FONTS) do
-        if font.key == key then
-            if font.key == "chat" then
-                return (ChatFontNormal and ChatFontNormal:GetFont()) or STANDARD_TEXT_FONT
-            end
-            if NON_LATIN[GetLocale and GetLocale() or ""] then return standard end
-            return font.path
-        end
+        if font.key == key then return font end
     end
-    return standard
+end
+
+-- The file of a font: `key` (one of CK.FONTS), else the one picked
+function CK:GetFontPath(key)
+    local standard = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+    local font = fontOf(key or (self.db and self.db.settings.font))
+    if not font then return standard end
+    local locale = GetLocale and GetLocale() or ""
+    if font.key == "chat" then
+        -- (the chat's own has the client's letters)
+        if not self:Cyrillic() or NON_LATIN[locale] then
+            return (ChatFontNormal and ChatFontNormal:GetFont()) or standard
+        end
+    elseif not font.latinOnly then
+        return font.path
+    elseif not self:Cyrillic() and not NON_LATIN[locale] then
+        return font.path
+    elseif NON_LATIN[locale] then
+        return standard
+    end
+    local own = fontOf(CK.CYRILLIC_FONT)
+    return own and own.path or standard
 end
 
 local Config = CK.Config
 
 local GLYPH_STYLES = {
-    { key = "auto", name = L.GLYPH_AUTO },
+    { key = "auto", id = "GLYPH_AUTO" },
     { key = "xbox", name = "Xbox" },
     { key = "playstation", name = "PlayStation" },
     { key = "switch", name = "Nintendo Switch" },
@@ -48,9 +70,15 @@ local function indexOf(list, key)
     return 1
 end
 
+-- A list item's name: its text when it is one of the language (id: a key of
+-- L, read each time: the language may change after the file is loaded)
+local function nameOf(item)
+    return item.id and L[item.id] or item.name
+end
+
 -- A choice among { key, name } items kept in settings[field]
 local function pick(items, s, field, after)
-    return function() return items[indexOf(items, s[field])].name end, function(d)
+    return function() return nameOf(items[indexOf(items, s[field])]) end, function(d)
         local i = (indexOf(items, s[field]) - 1 + d) % #items + 1
         s[field] = items[i].key
         if after then after() end
@@ -166,11 +194,36 @@ local function shortcutRows(b)
     end
 end
 
+local function reloadUI()
+    local reload = C_UI and C_UI.Reload or ReloadUI
+    reload()
+end
+
 local function lookRows(b)
     local s = settings()
     b.header(L.SEC_LOOK)
+    -- The addon's language: Auto (the client's), or one of them. Its texts
+    -- come with the next loading of the interface (CK:InitDB): a row offers it
+    local languages = { {} }
+    for _, lang in ipairs(CK.UI_LANGUAGES) do languages[#languages + 1] = lang end
+    local function languageIndex()
+        for i, lang in ipairs(languages) do
+            if lang.locale == s.uiLang then return i end
+        end
+        return 1
+    end
+    b.choice({ id = "lang", label = L.LBL_LANGUAGE, tip = L.TIP_LANGUAGE,
+        text = function() return CK:LanguageName(languages[languageIndex()].locale) end,
+        step = function(d)
+            local i = (languageIndex() - 1 + d) % #languages + 1
+            CK:SetUILanguage(languages[i].locale)
+        end })
+    if CK:UILocale() ~= CK.locale then
+        b.button({ id = "lang_reload", label = L.LBL_LANG_RELOAD, indent = true, tip = L.TIP_LANG_RELOAD,
+            verb = L.V_RELOAD, func = reloadUI })
+    end
     -- Picked: the game's own icons too (Glyphs.lua)
-    local text = function() return GLYPH_STYLES[indexOf(GLYPH_STYLES, s.glyphStyle)].name end
+    local text = function() return nameOf(GLYPH_STYLES[indexOf(GLYPH_STYLES, s.glyphStyle)]) end
     local function step(d)
         local i = (indexOf(GLYPH_STYLES, s.glyphStyle) - 1 + d) % #GLYPH_STYLES + 1
         CK:PickGlyphStyle(GLYPH_STYLES[i].key)
@@ -329,50 +382,30 @@ local function guideRows(b)
         func = function() CK.Guide:Open(1) end })
 end
 
-Config.pages.home = Config.NewRailPage({
-    key = "home",
-    sections = {
-        { key = "modules", label = L.SEC_MODULES, tip = L.TIP_SEC_MODULES, rows = moduleRows },
-        { key = "shortcut", label = L.SEC_SHORTCUT, tip = L.TIP_SEC_SHORTCUT, rows = shortcutRows },
-        { key = "look", label = L.SEC_LOOK, tip = L.TIP_SEC_LOOK, rows = lookRows },
-        { key = "gamepad", label = L.TAB_GAMEPAD, tip = L.TIP_SEC_DISPLAY, rows = function(b) CK.MapPage.DisplayRows(b) end },
-        { key = "automation", label = L.SEC_AUTOMATION, tip = L.TIP_SEC_AUTOMATION, rows = automationRows },
-        { key = "guide", label = L.SEC_GUIDE, tip = L.TIP_SEC_GUIDE, rows = guideRows },
-    },
-})
-
-Config.pages.profiles = Config.NewRailPage({
-    key = "profiles",
-    sections = {
-        { key = "profiles", label = L.SEC_PROFILES, tip = L.TIP_SEC_PROFILES, rows = profileRows },
-        { key = "talents", label = L.HDR_PROFILE_TALENTS, tip = L.TIP_PROFILE_AUTO, rows = talentRows },
-    },
-})
-
 ---------------------------------------------------------------------------
 -- Keyboard: opening, input, sticks, prediction, position. Module off:
 -- each section only offers to turn it on.
 ---------------------------------------------------------------------------
 local SIZES = {
-    { scale = 0.8, name = L.SIZE_SMALL }, { scale = 1, name = L.SIZE_NORMAL },
-    { scale = 1.25, name = L.SIZE_LARGE }, { scale = 1.5, name = L.SIZE_XL },
+    { scale = 0.8, id = "SIZE_SMALL" }, { scale = 1, id = "SIZE_NORMAL" },
+    { scale = 1.25, id = "SIZE_LARGE" }, { scale = 1.5, id = "SIZE_XL" },
 }
 local LAYOUTS = {
     { key = "azerty", name = "AZERTY" }, { key = "qwerty", name = "QWERTY" },
     { key = "qwertz", name = "QWERTZ" }, { key = "qwerty_es", name = "QWERTY (español)" },
-    { key = "qwerty_it", name = "QWERTY (italiano)" },
+    { key = "qwerty_it", name = "QWERTY (italiano)" }, { key = "russian", name = "ЙЦУКЕН" },
 }
 local CURVES = {
-    { key = "linear", name = L.CURVE_LINEAR }, { key = "gentle", name = L.CURVE_GENTLE },
-    { key = "fast", name = L.CURVE_FAST },
+    { key = "linear", id = "CURVE_LINEAR" }, { key = "gentle", id = "CURVE_GENTLE" },
+    { key = "fast", id = "CURVE_FAST" },
 }
 local MAGNETS = {
-    { key = "none", name = L.MAGNET_NONE }, { key = "weak", name = L.MAGNET_WEAK },
-    { key = "medium", name = L.MAGNET_MEDIUM }, { key = "strong", name = L.MAGNET_STRONG },
+    { key = "none", id = "MAGNET_NONE" }, { key = "weak", id = "MAGNET_WEAK" },
+    { key = "medium", id = "MAGNET_MEDIUM" }, { key = "strong", id = "MAGNET_STRONG" },
 }
 -- (ConsolePort's keyboard, ConsolePort.lua, no longer offered: kept in the
 -- files, a choice of the past put back on the daisywheel by CK.CleanEntries)
-local METHODS = { { key = "wheel", name = L.METHOD_WHEEL }, { key = "stick", name = L.METHOD_STICK } }
+local METHODS = { { key = "wheel", id = "METHOD_WHEEL" }, { key = "stick", id = "METHOD_STICK" } }
 
 -- The module off: only its box
 local function keyboardOff(b)
@@ -416,7 +449,7 @@ local function inputRows(b)
     local s = settings()
     b.header(L.SEC_INPUT)
     b.choice({ id = "k_method", label = L.OPT_METHOD, tip = L.TIP_METHOD,
-        text = function() return METHODS[indexOf(METHODS, s.inputMethod)].name end,
+        text = function() return nameOf(METHODS[indexOf(METHODS, s.inputMethod)]) end,
         step = function(d)
             local i = (indexOf(METHODS, s.inputMethod) - 1 + d) % #METHODS + 1
             CK:SetInputMethod(METHODS[i].key)
@@ -444,7 +477,7 @@ local function inputRows(b)
     b.choice({ id = "k_size", label = L.OPT_SCALE, tip = L.TIP_SIZE,
         text = function()
             local i, exact = sizeIndex()
-            if exact then return format("%s (%d %%)", SIZES[i].name, SIZES[i].scale * 100 + 0.5) end
+            if exact then return format("%s (%d %%)", nameOf(SIZES[i]), SIZES[i].scale * 100 + 0.5) end
             return percent(s.scale)
         end,
         step = function(d)
@@ -562,18 +595,6 @@ local function keyboardPositionRows(b)
             Config:Toast(L.TOAST_KB_RESET)
         end })
 end
-
-Config.pages.keyboard = Config.NewRailPage({
-    key = "keyboard",
-    sections = {
-        { key = "opening", label = L.SEC_OPENING, tip = L.TIP_SEC_OPENING, rows = openingRows },
-        { key = "input", label = L.SEC_INPUT, tip = L.TIP_SEC_INPUT, rows = inputRows },
-        { key = "sticks", label = L.SEC_STICKS, tip = L.TIP_SEC_STICKS, rows = sticksRows },
-        { key = "prediction", label = L.SEC_PREDICTION, tip = L.TIP_SEC_PREDICTION, rows = predictionRows },
-        { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_KBPOS, rows = keyboardPositionRows },
-        { key = "phrases", label = L.SEC_PHRASES, tip = L.TIP_SEC_PHRASES, rows = phrasesRows },
-    },
-})
 
 ---------------------------------------------------------------------------
 -- Alerts: vibrations, supplies, quest items
@@ -835,18 +856,6 @@ local function auctionRows(b, page)
         end })
 end
 
-Config.pages.alerts = Config.NewRailPage({
-    key = "alerts",
-    sections = {
-        { key = "vibrations", label = L.SEC_VIBRATIONS, tip = L.TIP_SEC_VIBRATIONS, rows = vibrationRows },
-        { key = "supplies", label = L.SEC_SUPPLIES, tip = L.SUP_INFO, rows = suppliesRows },
-        { key = "quest", label = L.SEC_QUESTITEMS, tip = L.TIP_SEC_QUESTITEMS, rows = questRows },
-        { key = "inventory", label = L.SEC_INVENTORY, tip = L.TIP_SEC_INVENTORY, rows = inventoryRows },
-        { key = "auction", label = L.SEC_AUCTION, tip = L.TIP_SEC_AUCTION, rows = auctionRows },
-        { key = "errors", label = L.SEC_ERRORS, tip = L.TIP_SEC_ERRORS, rows = errorRows },
-    },
-})
-
 ---------------------------------------------------------------------------
 -- Wheels: the player's own (a grid of cards, MyWheels.lua, each opening its
 -- editor), the consumables wheel, where every wheel opens
@@ -966,18 +975,6 @@ local function wheelPositionRows(b)
         end })
 end
 
-Config.pages.wheels = CK.MyWheels:TabPage(Config.NewRailPage({
-    key = "wheels",
-    sections = {
-        { key = "mine", label = L.MYWHEEL_H, tip = L.MYWHEEL_INFO, view = CK.MyWheels.Grid },
-        { key = "consumables", label = L.SEC_CONSUMABLES, rows = consumableRows,
-            tip = function() return format(L.WHEEL_INFO2, CK.ConsumableWheel.StickWords()) end },
-        { key = "usable", label = L.SEC_USABLE, tip = L.USABLE_INFO, rows = usableRows },
-        { key = "open", label = L.SEC_WHEEL_OPEN, tip = L.TIP_SEC_WHEEL_OPEN, rows = wheelOpenRows },
-        { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_WHEELPOS, rows = wheelPositionRows },
-    },
-}))
-
 ---------------------------------------------------------------------------
 -- The game's settings panel (Escape > Options > AddOns > Controller
 -- Keyboard) only points to the addon's own panel. Plain buttons: no
@@ -1014,4 +1011,66 @@ function CK:RegisterOptions()
     elseif InterfaceOptions_AddCategory then
         InterfaceOptions_AddCategory(panel)
     end
+end
+
+---------------------------------------------------------------------------
+-- The pages: defined once the settings are read (CK:InitDB), their titles
+-- and tips in the language in use then (the one picked is applied there)
+---------------------------------------------------------------------------
+function CK.DefinePages()
+    Config.pages.home = Config.NewRailPage({
+        key = "home",
+        sections = {
+            { key = "modules", label = L.SEC_MODULES, tip = L.TIP_SEC_MODULES, rows = moduleRows },
+            { key = "shortcut", label = L.SEC_SHORTCUT, tip = L.TIP_SEC_SHORTCUT, rows = shortcutRows },
+            { key = "look", label = L.SEC_LOOK, tip = L.TIP_SEC_LOOK, rows = lookRows },
+            { key = "gamepad", label = L.TAB_GAMEPAD, tip = L.TIP_SEC_DISPLAY, rows = function(b) CK.MapPage.DisplayRows(b) end },
+            { key = "automation", label = L.SEC_AUTOMATION, tip = L.TIP_SEC_AUTOMATION, rows = automationRows },
+            { key = "guide", label = L.SEC_GUIDE, tip = L.TIP_SEC_GUIDE, rows = guideRows },
+        },
+    })
+
+    Config.pages.profiles = Config.NewRailPage({
+        key = "profiles",
+        sections = {
+            { key = "profiles", label = L.SEC_PROFILES, tip = L.TIP_SEC_PROFILES, rows = profileRows },
+            { key = "talents", label = L.HDR_PROFILE_TALENTS, tip = L.TIP_PROFILE_AUTO, rows = talentRows },
+        },
+    })
+
+    Config.pages.keyboard = Config.NewRailPage({
+        key = "keyboard",
+        sections = {
+            { key = "opening", label = L.SEC_OPENING, tip = L.TIP_SEC_OPENING, rows = openingRows },
+            { key = "input", label = L.SEC_INPUT, tip = L.TIP_SEC_INPUT, rows = inputRows },
+            { key = "sticks", label = L.SEC_STICKS, tip = L.TIP_SEC_STICKS, rows = sticksRows },
+            { key = "prediction", label = L.SEC_PREDICTION, tip = L.TIP_SEC_PREDICTION, rows = predictionRows },
+            { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_KBPOS, rows = keyboardPositionRows },
+            { key = "phrases", label = L.SEC_PHRASES, tip = L.TIP_SEC_PHRASES, rows = phrasesRows },
+        },
+    })
+
+    Config.pages.alerts = Config.NewRailPage({
+        key = "alerts",
+        sections = {
+            { key = "vibrations", label = L.SEC_VIBRATIONS, tip = L.TIP_SEC_VIBRATIONS, rows = vibrationRows },
+            { key = "supplies", label = L.SEC_SUPPLIES, tip = L.SUP_INFO, rows = suppliesRows },
+            { key = "quest", label = L.SEC_QUESTITEMS, tip = L.TIP_SEC_QUESTITEMS, rows = questRows },
+            { key = "inventory", label = L.SEC_INVENTORY, tip = L.TIP_SEC_INVENTORY, rows = inventoryRows },
+            { key = "auction", label = L.SEC_AUCTION, tip = L.TIP_SEC_AUCTION, rows = auctionRows },
+            { key = "errors", label = L.SEC_ERRORS, tip = L.TIP_SEC_ERRORS, rows = errorRows },
+        },
+    })
+
+    Config.pages.wheels = CK.MyWheels:TabPage(Config.NewRailPage({
+        key = "wheels",
+        sections = {
+            { key = "mine", label = L.MYWHEEL_H, tip = L.MYWHEEL_INFO, view = CK.MyWheels.Grid },
+            { key = "consumables", label = L.SEC_CONSUMABLES, rows = consumableRows,
+                tip = function() return format(L.WHEEL_INFO2, CK.ConsumableWheel.StickWords()) end },
+            { key = "usable", label = L.SEC_USABLE, tip = L.USABLE_INFO, rows = usableRows },
+            { key = "open", label = L.SEC_WHEEL_OPEN, tip = L.TIP_SEC_WHEEL_OPEN, rows = wheelOpenRows },
+            { key = "position", label = L.SEC_POSITION, tip = L.TIP_SEC_WHEELPOS, rows = wheelPositionRows },
+        },
+    }))
 end

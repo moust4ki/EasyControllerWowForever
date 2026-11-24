@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.26.0
+
+- **Russian** (asked): the addon in Russian on a Russian client, and on any other by picking the
+  language (Home › Look › Language, or `/ec ui ru`: it comes with the next loading of the interface,
+  a row offers the reload). The daisywheel gets the Russian letters, the split keyboard a ЙЦУКЕН
+  layout, the suggestions a Russian dictionary (12,000 words) with the game's slang and the common
+  sequences of the chat; ё is found with or without its dots. With the Russian letters, a quick
+  second press on 123 swaps them for the Latin ones (a slash command, a name), and back the same way.
+- **Fonts with the Russian letters**: on a client that isn't Russian, the game's fonts have none.
+  With Russian on screen (the language picked, the Russian suggestions), they give way to **Forum**, a
+  free font of the addon (SIL Open Font License, `Fonts/`); **Kurale** (the same license) and the
+  game's own "Friz Quadrata RU" (`FRIZQT___CYR.TTF`) are offered too (Home › Look › Font). On a
+  Russian client the game's own font, as before.
+- The panel's pages are defined once the settings are read, in the language picked
+  (`CK.DefinePages`): a text read while a file loads takes its key instead.
+- Tests: `tools/test_russian.lua` (the letters, the keyboards, the suggestions, the fonts),
+  `tools/test_locales.lua` (every translation against English: its `%s`, `%d`, colour codes),
+  `tools/test_syntax.lua` (every file as the game's Lua 5.1 reads it: LuaJIT, the tests run on,
+  takes more) and `tools/test_load.lua` (the whole addon without the game, a session on every
+  client language).
+
 ## 1.25.2
 
 - **Replaced buttons kept in a fight after a game window** (reported): with bags or loot opened

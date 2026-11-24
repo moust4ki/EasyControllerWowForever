@@ -59,10 +59,22 @@ end
 function CK:ApplyFont()
     local path = self:GetFontPath()
     for _, entry in ipairs(fontStrings) do
-        entry.fs:SetFont(path, entry.size, "")
+        entry.fs:SetFont(path, entry.size, entry.flags or "")
     end
     -- The suggestions' widths follow the font
     if self.frame then self:UpdateSuggestions() end
+end
+
+-- A text of ours made on one of the game's fonts (GameFontNormal...), next
+-- to texts of the game: on a client whose fonts have no Russian letters,
+-- Russian on screen (CK:Cyrillic) is written with the addon's font instead,
+-- at its size (it follows the font picked then, like the others). The game's
+-- fonts of a Russian client have the letters: left as they are
+function CK:SetOwnFont(fs)
+    if not (self:Cyrillic() and GetLocale() ~= "ruRU") then return end
+    local _, height, flags = fs:GetFont()
+    fontStrings[#fontStrings + 1] = { fs = fs, size = height or 12, flags = flags }
+    fs:SetFont(self:GetFontPath(), height or 12, flags)
 end
 
 -- 9-slice: the `texCorner` px corners of a texW x texH texture are drawn at
@@ -671,7 +683,7 @@ function CK:UpdateBadge()
     end
 
     local symbols = f.actions.ToggleSymbols
-    symbols.label:SetText(state.layer == "symbols" and L.LETTERS or L.SYMBOLS)
+    symbols.label:SetText(state.layer == "symbols" and self:LettersLabel() or L.SYMBOLS)
     symbols:SetActive(state.layer == "symbols")
     f.actions.ToggleShift:SetActive(state.shift or state.caps)
 end

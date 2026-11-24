@@ -619,8 +619,9 @@ CK.LOCALES.frFR = {
         "/ec learn - apprendre les mots de vos messages (actuel : %s)",
         "/ec lock - verrouiller/déverrouiller la position (actuel : %s)",
         "/ec mode wheel|stick - daisywheel ou clavier 2 sticks",
-        "/ec layout azerty|qwerty|qwertz|es|it - disposition du clavier 2 sticks",
-        "/ec lang fr|en|de|es|it|both - langue des suggestions et des accents",
+        "/ec layout azerty|qwerty|qwertz|es|it|ru - disposition du clavier 2 sticks",
+        "/ec lang fr|en|de|es|it|both|ru - langue des suggestions et des accents",
+        "/ec ui ru|en|fr|de|es|it - langue de l'addon (après un /reload)",
         "/ec scale 0.8 - taille du clavier",
         "/ec invert - inverser l'axe vertical du stick",
         "/ec reset - replacer le clavier",
@@ -994,4 +995,11 @@ CK.LOCALES.frFR = {
     GUIDE_PLACE_SPELLS = "Poser mes sorts",
     GUIDE_FINISH = "Terminer",
     GUIDE_AGAIN = "Relancer ce guide : Accueil › Guide, ou /ec welcome",
+    -- La langue de l'addon (Accueil › Apparence)
+    LBL_LANGUAGE = "Langue",
+    LANG_AUTO = "Auto (%s)",
+    TIP_LANGUAGE = "Les textes d'Easy Controller. Auto : la langue du client. Les suggestions et la disposition du clavier suivent la langue choisie. Appliqué au prochain chargement de l'interface (un rechargement).",
+    LBL_LANG_RELOAD = "Recharger pour appliquer la langue",
+    TIP_LANG_RELOAD = "La langue choisie arrive au chargement de l'interface : le recharge maintenant.",
+    LANG_UI_RELOAD = "Langue : %s. Rechargez l'interface (/reload) pour l'appliquer.",
 }

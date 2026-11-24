@@ -51,8 +51,9 @@ local function parse(text)
     local have, need = t:match("(%d+)[ \t]*/[ \t]*(%d+)")
     if not have then return nil end
     local key = t:gsub("%d+[ \t]*/[ \t]*%d+", ""):gsub("^[ \t:]+", ""):gsub("[ \t:]+$", "")
-    -- (A to Z only: lower() takes the 1st byte of "à" for a capital)
-    key = key:gsub("[A-Z]", string.lower)
+    -- (never lower(): it takes the 1st byte of "à" for a capital. Russian
+    -- too: the client's language may be)
+    key = CK.Lower(key)
     return key, tonumber(have), tonumber(need)
 end
 QP.Parse = parse

@@ -3,8 +3,9 @@
 ## IconTexture: Interface\AddOns\EasyController\textures\ck_icon
 ## Notes: Gamepad play made easy on WoW Forever: chat keyboard with word prediction, gamepad mapping and back paddles, wheels, quest items, better items.
 ## Notes-frFR: Le jeu à la manette simplifié sur WoW Forever : clavier de chat avec prédiction, mappage manette et palettes arrière, roues, objets de quête, meilleurs objets.
+## Notes-ruRU: Играть на геймпаде в WoW Forever стало проще: чат-клавиатура с подсказками, переназначение кнопок и задние захваты, колёса, предметы для заданий, лучшие предметы.
 ## Author: moust4ki
-## Version: 1.25.2
+## Version: 1.26.0
 ## SavedVariables: ControllerKeyboardDB, ControllerKeyboardPrices
 ## X-Website: https://github.com/moust4ki/EasyControllerWowForever
 ## X-Curse-Project-ID: 1712492
@@ -14,6 +15,7 @@ Locales\frFR.lua
 Locales\deDE.lua
 Locales\esES.lua
 Locales\itIT.lua
+Locales\ruRU.lua
 Core.lua
 Dict_frFR.lua
 Dict_frFR_next.lua
@@ -21,6 +23,8 @@ Dict_enUS.lua
 Dict_deDE.lua
 Dict_esES.lua
 Dict_itIT.lua
+Dict_ruRU.lua
+Dict_ruRU_next.lua
 Dict_WoW.lua
 Predict.lua
 Glyphs.lua

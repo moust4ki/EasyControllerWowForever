@@ -270,11 +270,13 @@ local function stepIn(list, current, d)
     return list[(index - 1 + d) % #list + 1]
 end
 
+-- (id: the key of a text of the language, read each time)
 local function nameIn(list, current)
     for _, e in ipairs(list) do
-        if e.key == current then return e.name end
+        if e.key == current then return e.id and L[e.id] or e.name end
     end
-    return list[1].name
+    local first = list[1]
+    return first.id and L[first.id] or first.name
 end
 
 ---------------------------------------------------------------------------
@@ -330,7 +332,7 @@ end
 -- 1. Welcome, your controller
 ---------------------------------------------------------------------------
 local GLYPH_STYLES = {
-    { key = "auto", name = L.GLYPH_AUTO },
+    { key = "auto", id = "GLYPH_AUTO" },
     { key = "xbox", name = "Xbox" },
     { key = "playstation", name = "PlayStation" },
     { key = "switch", name = "Switch" },
@@ -369,7 +371,7 @@ function G:BuildScreen1(s, f)
         r.dot:SetVertexColor(unpack(KC.focus))
         r.label = text(r, 16, KC.cream)
         r.label:SetPoint("LEFT", 40, 0)
-        r.label:SetText(style.name)
+        r.label:SetText(style.id and L[style.id] or style.name)
         -- A, B, X, Y (bottom, right, left, top) in that style
         r.glyphs = {}
         for i, key in ipairs({ "Y", "X", "B", "A" }) do
@@ -840,7 +842,7 @@ end
 local LAYOUTS = {
     { key = "azerty", name = "AZERTY" }, { key = "qwerty", name = "QWERTY" },
     { key = "qwertz", name = "QWERTZ" }, { key = "qwerty_es", name = "QWERTY (español)" },
-    { key = "qwerty_it", name = "QWERTY (italiano)" },
+    { key = "qwerty_it", name = "QWERTY (italiano)" }, { key = "russian", name = "ЙЦУКЕН" },
 }
 
 local function keyboardOn() return settings().modules.keyboard and true or false end

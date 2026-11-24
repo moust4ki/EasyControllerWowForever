@@ -77,7 +77,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **OLED burn-in prevention** for the centre dot
 - **Xbox / PlayStation (DualSense) / Nintendo Switch** button icons, in the addon and in the game's own interface (or Auto: your controller's)
 - **Configuration panel** driven entirely with the gamepad (RB + D-pad down)
-- **Five languages**: English, French, German, Spanish and Italian, one file each, easy to translate into another
+- **Six languages**: English, French, German, Spanish, Italian and Russian, one file each, easy to translate into another; the language can also be picked on any client
 
 Every function can be turned off, and the look matches WoW Forever's gamepad UI. The details of each
 part follow.
@@ -107,12 +107,15 @@ The daisywheel and the split keyboard have a numbers / accents / symbols layer w
 the language (é è à ç… / ä ö ü ß / á é í ó ú ñ ¿ ¡ / à è é ì ò ù). The method can be switched at any
 time in the options.
 
+In Russian, the daisywheel has the Russian letters and the split keyboard a ЙЦУКЕН layout. A quick
+second press on 123 swaps the letters for the Latin ones (a slash command, a name), and back.
+
 ## Keyboard features
 
 - **Smartphone-style prediction**
-  - word completion in English, French, German, Spanish and Italian (12,000 words each, client
-    language by default) plus WoW slang: lfg, heal, dungeon…
-  - accents ignored while searching: `ca` suggests "ça";
+  - word completion in English, French, German, Spanish, Italian and Russian (12,000 words each,
+    client language by default) plus WoW slang: lfg, heal, dungeon…
+  - accents ignored while searching: `ca` suggests "ça", `ещ` suggests "ещё";
   - next word prediction from your own habits and common phrases;
   - suggestions as soon as the chat opens, before you type anything.
 - **Learning**: your words, message starters and word sequences are remembered, locally.
@@ -398,8 +401,13 @@ X, Y, Start and Select stay with the game's gamepad UI.
 
 ## Languages
 
-Interface in English, French, German, Spanish and Italian. Suggestions and keyboard layout follow
-the game client's language by default.
+Interface in English, French, German, Spanish, Italian and Russian. Suggestions and keyboard layout
+follow the game client's language by default; the addon's language can also be picked on any client
+(Home › Look › Language): it comes with the next loading of the interface.
+
+Russian on a client that isn't Russian: the game's fonts have no Russian letters, the addon writes
+with its own font that has them (Forum, a free font shipped with the addon; Kurale and the game's own
+file with them are offered too, Home › Look › Font).
 
 Each language is a file of its own in the addon's `Locales/` folder. To translate it into another
 one, copy `Locales/frFR.lua` as `Locales/<your locale>.lua`, translate its texts and send it on

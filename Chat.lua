@@ -132,7 +132,8 @@ local function onOff(v) return v and L.ON or L.OFF end
 
 local function slash(msg)
     local s = CK.db.settings
-    local cmd, arg = (msg or ""):lower():match("^[ \t\r\n]*([^ \t\r\n]*)[ \t\r\n]*(.-)[ \t\r\n]*$")
+    -- (lower case: the Russian aliases too, a capital letter may be typed)
+    local cmd, arg = CK.Lower(msg or ""):match("^[ \t\r\n]*([^ \t\r\n]*)[ \t\r\n]*(.-)[ \t\r\n]*$")
 
     if cmd == "" then
         -- Alone: the options (asked), like /ec config; over the chat it was
@@ -165,11 +166,28 @@ local function slash(msg)
         s.learn = not s.learn
         CK:Print("learn: %s", onOff(s.learn))
     elseif cmd == "lang" then
-        local key = arg == "both" and "fren" or arg
+        local key = ({ both = "fren", ["ру"] = "ru", ["рус"] = "ru", ["русский"] = "ru" })[arg] or arg
         for _, lang in ipairs(CK.LANGUAGES) do
             if lang.key == key then CK:SetLanguage(key) end
         end
         CK:Print(L.LANG_SET, CK:GetLanguage().name)
+    elseif cmd == "ui" then
+        -- The addon's language (Home › Look): auto, else one of them; alone,
+        -- the one asked for
+        if arg == "" then
+            CK:Print(L.LANG_SET, CK:LanguageName(CK:UILocale()))
+            return
+        end
+        local wanted = ({ auto = "auto", ["авто"] = "auto", ["ру"] = "ruRU", ["рус"] = "ruRU", ["русский"] = "ruRU" })[arg]
+        if not wanted then
+            for _, lang in ipairs(CK.UI_LANGUAGES) do
+                if lang.locale == arg or lang.lang == arg then wanted = lang.locale end
+            end
+            if not wanted then return end
+        end
+        local locale = wanted ~= "auto" and wanted or nil
+        CK:SetUILanguage(locale)
+        CK:Print(L.LANG_UI_RELOAD, CK:LanguageName(locale))
     elseif cmd == "scale" then
         local v = tonumber(arg)
         if v and v >= 0.4 and v <= 2 then
@@ -190,7 +208,7 @@ local function slash(msg)
         CK:Print(L.MODE_SET, ({ stick = L.METHOD_STICK, consoleport = L.METHOD_CONSOLEPORT })[m] or L.METHOD_WHEEL)
     elseif cmd == "layout" then
         local key = ({ azerty = "azerty", qwerty = "qwerty", qwertz = "qwertz",
-            es = "qwerty_es", it = "qwerty_it" })[arg]
+            es = "qwerty_es", it = "qwerty_it", ru = "russian", ["рус"] = "russian", ["йцукен"] = "russian" })[arg]
         if key then
             s.kbLayout = key
             CK:UpdateMethod()
@@ -233,7 +251,7 @@ local function slash(msg)
         if arg ~= "" then
             local found
             for _, set in ipairs(CK.Profiles:Sets()) do
-                if set.name:lower() == arg then found = set end
+                if CK.Lower(set.name) == arg then found = set end
             end
             if found then
                 CK.Profiles:SetActive(found.id)

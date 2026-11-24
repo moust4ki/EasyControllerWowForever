@@ -7,7 +7,8 @@ CK.Dicts = CK.Dicts or {}
 ---------------------------------------------------------------------------
 -- Localisation: English is the base (Locales/enUS.lua), each client
 -- language overrides it (Locales/<locale>.lua, loaded before this file);
--- the other languages are then let go
+-- the one picked in the panel (settings.uiLang) over it once the settings
+-- are read (InitDB)
 ---------------------------------------------------------------------------
 -- Updated while the game was running: a /reload doesn't load the files the
 -- game didn't know when it started (these). The keys' own names meanwhile,
@@ -23,20 +24,95 @@ if not CK.L then
 end
 local L = CK.L
 
-for key, value in pairs(CK.LOCALES and CK.LOCALES[GetLocale()] or {}) do
-    L[key] = value
-end
-CK.LOCALES = nil
+-- Every language's texts (Locales/<locale>.lua), by the game's name of it,
+-- and English as loaded: a language put over English again when it is
+-- changed (the one picked in the panel, InitDB)
+local LOCALES = CK.LOCALES or {}
+local ENGLISH = {}
+for key, value in pairs(L) do ENGLISH[key] = value end
 
-BINDING_HEADER_CONTROLLERKEYBOARD = "Easy Controller - Forever"
-BINDING_NAME_CONTROLLERKEYBOARD_TOGGLE = L.BINDING_TOGGLE
-BINDING_NAME_CONTROLLERKEYBOARD_MAP = L.BINDING_MAP
-BINDING_NAME_CONTROLLERKEYBOARD_CONFIG = L.BINDING_CONFIG
-_G["BINDING_NAME_CLICK ControllerKeyboardWheelToggle:LeftButton"] = L.WHEEL_NAME
-_G["BINDING_NAME_CLICK ControllerKeyboardUsableToggle:LeftButton"] = L.USABLE_WHEEL_NAME
-_G["BINDING_NAME_CLICK ControllerKeyboardPhrasesToggle:LeftButton"] = L.PHRASES_NAME
-BINDING_NAME_CONTROLLERKEYBOARD_AH_SCAN = L.AH_BINDING
-BINDING_NAME_CONTROLLERKEYBOARD_AH_POST = L.AH_POST_BINDING
+-- The game reads these when its key bindings are shown
+local function bindingNames()
+    BINDING_HEADER_CONTROLLERKEYBOARD = "Easy Controller - Forever"
+    BINDING_NAME_CONTROLLERKEYBOARD_TOGGLE = L.BINDING_TOGGLE
+    BINDING_NAME_CONTROLLERKEYBOARD_MAP = L.BINDING_MAP
+    BINDING_NAME_CONTROLLERKEYBOARD_CONFIG = L.BINDING_CONFIG
+    _G["BINDING_NAME_CLICK ControllerKeyboardWheelToggle:LeftButton"] = L.WHEEL_NAME
+    _G["BINDING_NAME_CLICK ControllerKeyboardUsableToggle:LeftButton"] = L.USABLE_WHEEL_NAME
+    _G["BINDING_NAME_CLICK ControllerKeyboardPhrasesToggle:LeftButton"] = L.PHRASES_NAME
+    BINDING_NAME_CONTROLLERKEYBOARD_AH_SCAN = L.AH_BINDING
+    BINDING_NAME_CONTROLLERKEYBOARD_AH_POST = L.AH_POST_BINDING
+end
+
+-- English has no file of its own (it is the base): a language all the same
+-- where one is picked
+local function knownLocale(locale)
+    return locale == "enUS" or LOCALES[locale] ~= nil
+end
+
+-- The texts of `locale` over English (a language without a file of its own,
+-- none: English). CK.locale, what is on screen, follows
+function CK:ApplyLocale(locale)
+    if locale == self.locale then return false end
+    for key in pairs(L) do L[key] = nil end
+    for key, value in pairs(ENGLISH) do L[key] = value end
+    for key, value in pairs(LOCALES[locale or ""] or {}) do L[key] = value end
+    self.locale = locale
+    bindingNames()
+    return true
+end
+
+-- The addon's languages (Home › Look › Language), each in its own words;
+-- the suggestions and the keyboard layout that go with them
+CK.UI_LANGUAGES = {
+    { locale = "enUS", name = "English", lang = "en", layout = "qwerty" },
+    { locale = "frFR", name = "Français", lang = "fr", layout = "azerty" },
+    { locale = "deDE", name = "Deutsch", lang = "de", layout = "qwertz" },
+    { locale = "esES", name = "Español", lang = "es", layout = "qwerty_es" },
+    { locale = "itIT", name = "Italiano", lang = "it", layout = "qwerty_it" },
+    { locale = "ruRU", name = "Русский", lang = "ru", layout = "russian", cyrillic = true },
+}
+local UI_LANGUAGE_OF = {}
+for _, lang in ipairs(CK.UI_LANGUAGES) do UI_LANGUAGE_OF[lang.locale] = lang end
+
+-- A language's name where one is chosen: a picked one in its own words,
+-- the client's after "Auto" (none: the client's own name of its language)
+function CK:LanguageName(locale)
+    for _, lang in ipairs(CK.UI_LANGUAGES) do
+        if lang.locale == locale then return lang.name end
+    end
+    local client = GetLocale()
+    for _, lang in ipairs(CK.UI_LANGUAGES) do
+        if lang.locale == client then client = lang.name break end
+    end
+    return format(L.LANG_AUTO, client)
+end
+
+-- The language asked for: the one picked, else the client's
+function CK:UILocale()
+    local picked = self.db and self.db.settings.uiLang
+    return (picked and knownLocale(picked) and picked) or GetLocale()
+end
+
+-- The language picked (Home › Look, /ec ui): nil, the client's. Its texts
+-- come with the next loading of the interface: those of the windows that
+-- are open were read when they were built. The keyboard's letters follow
+-- at once (suggestions, layout) when the language left wrote with other
+-- ones: Russian and the Latin languages
+function CK:SetUILanguage(locale)
+    local s = self.db.settings
+    s.uiLang = locale and knownLocale(locale) and locale or nil
+    local of = UI_LANGUAGE_OF[self:UILocale()]
+    if of and (of.cyrillic and true or false) ~= (self:GetLanguage().cyrillic and true or false) then
+        s.lang, s.kbLayout = of.lang, of.layout
+        self:ApplyLanguage()
+        CK.Predict:Load()
+        if self.frame then self:UpdateMethod() end
+    end
+    self:ApplyFont()
+end
+
+CK:ApplyLocale(GetLocale())
 
 ---------------------------------------------------------------------------
 -- Saved variables
@@ -50,7 +126,7 @@ local DEFAULTS = {
     openFields = true,
     learn = true,
     -- Suggestions and keyboard layout follow the client's language by default
-    lang = ({ frFR = "fr", deDE = "de", esES = "es", esMX = "es", itIT = "it" })[GetLocale()] or "en",
+    lang = ({ frFR = "fr", deDE = "de", esES = "es", esMX = "es", itIT = "it", ruRU = "ru" })[GetLocale()] or "en",
     maxWords = 8000,
     numSuggestions = 5,
     scale = 1,
@@ -130,7 +206,7 @@ local DEFAULTS = {
     inputMethod = "wheel",   -- "wheel" (daisywheel) or "stick" (split keyboard)
     petalRings = true,       -- daisywheel: a ring around each group of 4 characters
     kbLayout = ({ frFR = "azerty", deDE = "qwertz", esES = "qwerty_es", esMX = "qwerty_es",
-        itIT = "qwerty_it" })[GetLocale()] or "qwerty",
+        itIT = "qwerty_it", ruRU = "russian" })[GetLocale()] or "qwerty",
     deadzone = 0.15,         -- split keyboard: sticks dead zone
     stickCurve = "linear",   -- split keyboard: linear / gentle / fast
     magnet = "medium",       -- split keyboard: none / weak / medium / strong
@@ -270,6 +346,8 @@ function CK.CleanEntries(s)
     -- ConsolePort's keyboard no longer offered (ConsolePort.lua kept in the
     -- files): chosen before, the daisywheel
     if s.inputMethod == "consoleport" then s.inputMethod = "wheel" end
+    -- A language without its file here (an old copy of the folder): the client's
+    if s.uiLang ~= nil and not knownLocale(s.uiLang) then s.uiLang = nil end
     -- Buttons: { ["L3:LT"] = "spell:133" } (older names, "L4" or "PAD2",
     -- are moved by Mapping.lua: kept)
     for _, name in ipairs({ "mapping", "replaced" }) do
@@ -376,7 +454,20 @@ function CK:InitDB()
         db.pos = nil
         db.version = 2
     end
+    -- v3: a Russian client gets the suggestions and the layout of its
+    -- language, as on a new install (the addon had no Russian before, they
+    -- were the English ones), when nothing else was chosen
+    if (tonumber(db.version) or 1) < 3 then
+        if GetLocale() == "ruRU" and db.settings.lang == "en" and db.settings.kbLayout == "qwerty" then
+            db.settings.lang, db.settings.kbLayout = "ru", "russian"
+        end
+        db.version = 3
+    end
     self.db = db
+    -- The language picked (Home › Look) over the client's, then the panel's
+    -- pages, titled in it
+    self:ApplyLocale(self:UILocale())
+    if CK.DefinePages then CK.DefinePages() end
     self:ApplyLanguage()
     for _, key in ipairs({ "words", "commands", "trigrams", "starts", "bigrams" }) do
         if type(db[key]) ~= "table" then db[key] = {} end
@@ -390,9 +481,9 @@ function CK:Print(msg, ...)
 end
 
 ---------------------------------------------------------------------------
--- UTF-8 helpers (French accents)
+-- UTF-8 helpers (French accents, Russian letters)
 ---------------------------------------------------------------------------
-local UTF8_2 = "[\195\197][\128-\191]"
+local UTF8_2 = "[\195\197][\128-\191]"     -- U+00C0-U+017F, 2 bytes
 
 -- The first n characters of a UTF-8 text (never half a letter)
 function CK.Utf8Sub(text, n)
@@ -429,17 +520,30 @@ for b = 65, 90 do
     ASCII_UPPER[string.char(b + 32)] = string.char(b)
 end
 
+-- Russian, U+0410-U+044F: each small letter its capital's number and 32, as
+-- a-z and A-Z. In UTF-8: А-П (D0 90-9F) and а-п (D0 B0-BF) share their first
+-- byte, Р-Я (D0 A0-AF) and р-я (D1 80-8F) don't; Ё (D0 81) and ё (D1 91)
+local CYR_LOWER, CYR_UPPER = {}, {}
+for b = 144, 175 do
+    local upper, lower = string.char(208, b), string.char(208, b + 32)
+    if b >= 160 then lower = string.char(209, b - 32) end
+    CYR_LOWER[upper], CYR_UPPER[lower] = lower, upper
+end
+CYR_LOWER["\208\129"], CYR_UPPER["\209\145"] = "\209\145", "\208\129"
+
 function CK.Lower(s)
-    return (s:gsub("[A-Z]", ASCII_LOWER):gsub(UTF8_2, LOWER))
+    return (s:gsub("[A-Z]", ASCII_LOWER):gsub(UTF8_2, LOWER):gsub("\208[\129\144-\175]", CYR_LOWER))
 end
 
 function CK.Upper(s)
-    return (s:gsub("[a-z]", ASCII_UPPER):gsub(UTF8_2, UPPER))
+    return (s:gsub("[a-z]", ASCII_UPPER):gsub(UTF8_2, UPPER):gsub("\208[\176-\191]", CYR_UPPER)
+        :gsub("\209[\128-\143\145]", CYR_UPPER))
 end
 
--- Lowercase and strip accents: "Été" -> "ete"
+-- Lowercase and strip accents: "Été" -> "ete", "Ёлка" -> "елка" (ё as е: a word
+-- is found, and sorted, with either, as in dictionaries)
 function CK.Normalize(s)
-    return (CK.Lower(s):gsub(UTF8_2, STRIP))
+    return (CK.Lower(s):gsub(UTF8_2, STRIP):gsub("\209\145", "\208\181"))
 end
 
 function CK.FirstChar(s)
@@ -466,16 +570,42 @@ CK.LANGUAGES = {
     { key = "es", name = "Español", dicts = { "esES" }, accents = "es" },
     { key = "it", name = "Italiano", dicts = { "itIT" }, accents = "it" },
     { key = "fren", name = "Français + English", dicts = { "frFR", "enUS" }, accents = "fr" },
+    -- Russian is written with other letters than the Latin ones: the
+    -- daisywheel's letters follow (Wheel.lua), and so does the font the addon
+    -- writes with (Options.lua)
+    { key = "ru", name = "Русский", dicts = { "ruRU" }, accents = "ru", cyrillic = true, letters = "ru" },
+    { key = "ruen", name = "Русский + English", dicts = { "ruRU", "enUS" }, accents = "ru", cyrillic = true,
+        letters = "ru" },
 }
 
--- 12 characters per language: the accents first, then useful punctuation
+-- 12 characters per language: the accents first, then useful punctuation.
+-- Russian has no accents: the one letter its letters have no room for on the
+-- daisywheel (33), then punctuation (the letters of that layer take its keys)
 CK.ACCENTS = {
     fr = { "é", "è", "ê", "à", "â", "ç", "ù", "û", "î", "ô", "ë", "ï" },
     en = { "é", "è", "à", "ç", "'", "?", "!", "-", "&", "$", "ë", "ï" },
     de = { "ä", "ö", "ü", "ß", "?", "!", "'", "-", "€", "&", "§", "_" },
     es = { "á", "é", "í", "ó", "ú", "ñ", "ü", "¿", "¡", "'", "-", "ç" },
     it = { "à", "è", "é", "ì", "ò", "ù", "ó", "í", "ú", "'", "?", "!" },
+    ru = { "ъ", ".", ",", "?", "!", "-", "«", "»", "…", "—", "_", "&" },
 }
+
+-- Russian on screen: the texts (the language picked, else the client's), or
+-- the keyboard's suggestions
+function CK:Cyrillic()
+    local ui = self.db and self.db.settings.uiLang or GetLocale()
+    if ui == "ruRU" then return true end
+    return self:GetLanguage().cyrillic and true or false
+end
+
+-- The input method in use shows letters that are not the Latin ones: the
+-- daisywheel's Russian ones (the language's), the split keyboard's Russian
+-- layout. A quick second press on 123 swaps them for the Latin ones
+-- (Message.lua): a slash command, a name written in Latin letters
+function CK:OtherLetters()
+    if self:GetMethod().key == "stick" then return self.db.settings.kbLayout == "russian" end
+    return self:GetLanguage().letters ~= nil
+end
 
 function CK:GetLanguage()
     local key = self.db and self.db.settings.lang
@@ -501,6 +631,8 @@ function CK:SetLanguage(key)
     self:ApplyLanguage()
     CK.Predict:Load()
     if self.frame then self:UpdateMethod() end
+    -- (Russian: the font may follow, Options.lua)
+    self:ApplyFont()
 end
 
 -- Remove the last UTF-8 character of a string

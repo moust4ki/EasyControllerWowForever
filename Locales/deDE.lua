@@ -619,8 +619,9 @@ CK.LOCALES.deDE = {
         "/ec learn - Wörter aus deinen Nachrichten lernen (aktuell: %s)",
         "/ec lock - Position sperren/entsperren (aktuell: %s)",
         "/ec mode wheel|stick - Daisywheel oder geteilte Tastatur",
-        "/ec layout azerty|qwerty|qwertz|es|it - Layout der geteilten Tastatur",
-        "/ec lang fr|en|de|es|it|both - Sprache der Vorschläge und Akzente",
+        "/ec layout azerty|qwerty|qwertz|es|it|ru - Layout der geteilten Tastatur",
+        "/ec lang fr|en|de|es|it|both|ru - Sprache der Vorschläge und Akzente",
+        "/ec ui ru|en|fr|de|es|it - Sprache des Addons (nach einem /reload)",
         "/ec scale 0.8 - Tastaturgröße",
         "/ec invert - vertikale Stick-Achse umkehren",
         "/ec reset - Tastatur zurücksetzen",
@@ -994,4 +995,11 @@ CK.LOCALES.deDE = {
     GUIDE_PLACE_SPELLS = "Meine Zauber legen",
     GUIDE_FINISH = "Fertig",
     GUIDE_AGAIN = "Diese Einführung erneut: Start › Einführung, oder /ec welcome",
+    -- Die Sprache des Addons (Start › Aussehen)
+    LBL_LANGUAGE = "Sprache",
+    LANG_AUTO = "Auto (%s)",
+    TIP_LANGUAGE = "Die Texte von Easy Controller. Auto: die Sprache des Clients. Vorschläge und Tastaturlayout folgen der gewählten Sprache. Greift beim nächsten Laden der Oberfläche (Neu laden).",
+    LBL_LANG_RELOAD = "Neu laden, um die Sprache zu übernehmen",
+    TIP_LANG_RELOAD = "Die gewählte Sprache kommt beim Laden der Oberfläche: lädt sie jetzt neu.",
+    LANG_UI_RELOAD = "Sprache: %s. Oberfläche neu laden (/reload), um sie zu übernehmen.",
 }

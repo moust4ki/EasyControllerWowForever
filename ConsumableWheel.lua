@@ -167,7 +167,7 @@ local function tooltipText(id)
             if type(text) == "string" and not secret(text) then parts[#parts + 1] = text end
         end
     end
-    return table.concat(parts, "\n"):lower()
+    return CK.Lower(table.concat(parts, "\n"))
 end
 
 -- The kind of an item, or nil (not for the wheel)
@@ -190,12 +190,12 @@ function W.Category(id)
     if subClassID == 5 or spell == n.food or spell == n.drink then
         if spell == n.drink then return "drink" end
         local text = tooltipText(id)
-        if n.wellFed and text:find(n.wellFed:lower(), 1, true) then return "buffFood" end
+        if n.wellFed and text:find(CK.Lower(n.wellFed), 1, true) then return "buffFood" end
         return "food"
     end
     local text = tooltipText(id)
-    if text:find((MANA or "mana"):lower(), 1, true) then return "manaPotion" end
-    if text:find((HEALTH or "health"):lower(), 1, true) then return "healthPotion" end
+    if text:find(CK.Lower(MANA or "mana"), 1, true) then return "manaPotion" end
+    if text:find(CK.Lower(HEALTH or "health"), 1, true) then return "healthPotion" end
     if subClassID == 1 or subClassID == 13 then return "elixir" end
 end
 
@@ -1000,16 +1000,20 @@ function W:Build()
     end)
     view.bottom:SetSize(BANNER_W, BANNER_H)
     view.name = view:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    CK:SetOwnFont(view.name)
     view.name:SetPoint("TOP", view.bottom, "TOP", 0, -12)
     view.name:SetWidth(BANNER_W - 30)
     view.name:SetWordWrap(false)
     view.count = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    CK:SetOwnFont(view.count)
     view.count:SetPoint("TOP", view.name, "BOTTOM", 0, -4)
     view.count:SetWidth(BANNER_W - 30)
     view.count:SetWordWrap(false)
     view.help = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    CK:SetOwnFont(view.help)
     view.help:SetPoint("TOP", view.bottom, "BOTTOM", 0, -4)
     view.pages = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    CK:SetOwnFont(view.pages)
     view.pages:SetPoint("TOP", view.help, "BOTTOM", 0, -4)
     view:SetScript("OnUpdate", function() W:Track() end)
     view:SetScript("OnShow", function()
@@ -1183,6 +1187,7 @@ function W:BuildParty(wheel)
         -- The name against the portrait, outward: beside it on the sides,
         -- above it at the top, under it at the bottom
         seg.label = pv:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        CK:SetOwnFont(seg.label)
         seg.label:SetWordWrap(false)
         if math.abs(d[1]) > 0.8 then
             local right = d[1] > 0
@@ -1228,14 +1233,17 @@ function W:BuildParty(wheel)
     atlas(pv.banner, "gamepad-radial-menu-bottomtext", function(t) t:SetColorTexture(0, 0, 0, 0.5) end)
     pv.banner:SetSize(280, 56)
     pv.name = pv:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    CK:SetOwnFont(pv.name)
     pv.name:SetPoint("TOP", pv.banner, "TOP", 0, -10)
     pv.name:SetWidth(250)
     pv.name:SetWordWrap(false)
     pv.count = pv:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    CK:SetOwnFont(pv.count)
     pv.count:SetPoint("TOP", pv.name, "BOTTOM", 0, -4)
     pv.count:SetWidth(250)
     pv.count:SetWordWrap(false)
     pv.help = pv:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    CK:SetOwnFont(pv.help)
     pv.help:SetPoint("BOTTOM", pv.banner, "TOP", 0, 2)
 end
 

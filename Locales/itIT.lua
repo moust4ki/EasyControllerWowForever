@@ -619,8 +619,9 @@ CK.LOCALES.itIT = {
         "/ec learn - impara le parole dai tuoi messaggi (attuale: %s)",
         "/ec lock - blocca/sblocca la posizione (attuale: %s)",
         "/ec mode wheel|stick - daisywheel o tastiera divisa",
-        "/ec layout azerty|qwerty|qwertz|es|it - layout della tastiera divisa",
-        "/ec lang fr|en|de|es|it|both - lingua dei suggerimenti e degli accenti",
+        "/ec layout azerty|qwerty|qwertz|es|it|ru - layout della tastiera divisa",
+        "/ec lang fr|en|de|es|it|both|ru - lingua dei suggerimenti e degli accenti",
+        "/ec ui ru|en|fr|de|es|it - lingua dell'addon (dopo un /reload)",
         "/ec scale 0.8 - dimensione della tastiera",
         "/ec invert - inverti l'asse verticale dello stick",
         "/ec reset - riposiziona la tastiera",
@@ -994,4 +995,11 @@ CK.LOCALES.itIT = {
     GUIDE_PLACE_SPELLS = "Metti i miei incantesimi",
     GUIDE_FINISH = "Fine",
     GUIDE_AGAIN = "Rivedi questa guida: Home › Guida, o /ec welcome",
+    -- La lingua dell'addon (Home › Aspetto)
+    LBL_LANGUAGE = "Lingua",
+    LANG_AUTO = "Automatico (%s)",
+    TIP_LANGUAGE = "I testi di Easy Controller. Automatico: la lingua del client. Suggerimenti e disposizione della tastiera seguono la lingua scelta. Ha effetto al prossimo caricamento dell'interfaccia (ricarica).",
+    LBL_LANG_RELOAD = "Ricarica per applicare la lingua",
+    TIP_LANG_RELOAD = "La lingua scelta arriva al caricamento dell'interfaccia: la ricarica ora.",
+    LANG_UI_RELOAD = "Lingua: %s. Ricarica l'interfaccia (/reload) per applicarla.",
 }

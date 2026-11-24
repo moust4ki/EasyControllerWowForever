@@ -34,10 +34,25 @@ local LAYOUTS = {
 }
 CK.LAYOUTS = LAYOUTS
 
+-- The letters of a language written with other letters than the Latin ones
+-- (its `letters`, CK.LANGUAGES), in their alphabet's order: Russian, 32 of
+-- its 33 (the 123 layer has the last one, and the punctuation the Latin
+-- letters leave room for here). None while the Latin ones are asked instead
+-- (a quick second press on 123, Message.lua)
+local LETTERS = {
+    ru = {
+        { "а", "б", "в", "г" }, { "д", "е", "ё", "ж" }, { "з", "и", "й", "к" }, { "л", "м", "н", "о" },
+        { "п", "р", "с", "т" }, { "у", "ф", "х", "ц" }, { "ч", "ш", "щ", "ы" }, { "ь", "э", "ю", "я" },
+    },
+}
+
 -- Petals 4 to 6 of the 123 layer hold the accents of the language
 local accentLayouts = {}
 local function layoutFor(layer)
-    if layer ~= "symbols" then return LAYOUTS.letters end
+    if layer ~= "symbols" then
+        local own = not CK.state.latin and LETTERS[CK:GetLanguage().letters or ""]
+        return own or LAYOUTS.letters
+    end
     local accents = CK:Accents()
     local layout = accentLayouts[accents]
     if not layout then
