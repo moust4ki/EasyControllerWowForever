@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.25.0
+
+- **Highest ranks in one press** (asked): a button at the bottom left of the game's spellbook, *Use
+  the highest ranks* (also `/ec ranks`). Each spell of a lower rank you placed becomes the highest
+  rank you know: the game's gamepad bar (every page, the stance bars), the addon's buttons, paddles,
+  replaced buttons, wheels and party spells, in all the character's profiles. The chat lists what
+  changed. Never by itself (a lower rank kept for its mana stays until you press it); not in combat.
+- **Errors: the red text and the voice apart** (asked): Comfort › Errors now has two options, *Hide
+  the red messages* and *Silence the error voice*. Text alone: the message shows, silent. Voice
+  alone: no message, the voice once while it would be on screen. With 1.24's option on, both are on.
+
 ## 1.24.0
 
 - **Hide the errors of each key press** (asked; an option, off until you turn it on: Comfort ›
