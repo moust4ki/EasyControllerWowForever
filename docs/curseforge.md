@@ -38,12 +38,10 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.25.2
-- **Replaced buttons kept in a fight after a game window** (reported): bags or loot opened before a fight and closed during it no longer give your replaced buttons back to the game until the fight ends.
-- **Paddle layers with a bar button** (reported): a paddle whose own action is a bar button (RT + D-pad...) no longer runs it in every layer; RT + paddle and LT + paddle run their own.
-- **A macro's cooldown on the extra buttons** (reported): shown, the trinket of `/use 13` included.
-- **L3 / R3 show your choice** (reported), no longer the game's function.
-- **Korean, Chinese and Russian clients** (reported): the addon writes with the game's own font, no more broken spell names.
+## What's new in 1.26.0
+- **Action bars 4 and 5 in the gamepad UI**: Home › Gamepad › Side bars, none, bar 4, or both, on the right edge as with keyboard and mouse. The game's own slots and key bindings (Action Bar 4 / 5), a mouse click, drag and drop out of combat.
+- **Move the quest tracker** left of them if you want (off by default), and **hide their empty buttons**.
+- **A wider watch for "blocked" errors**: if the window with the gamepad's focus is ever marked by an addon, the chat says it once and the details are kept for a bug report.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -51,6 +49,7 @@ Every feature you don't need can be turned off to save even more resources.
 - **Every free combination usable**: L3 / R3, LT + RB / RT + LB, unused trigger layers, the game's own buttons replaced if you want
 - **Extra buttons**: up to 8 more, for controllers with more buttons or touchpads (Steam Deck, Steam Controller)
 - **Bigger or smaller gamepad buttons**: the game's whole gamepad bar, every layer at once, from 70 % to 150 %
+- **Action bars 4 and 5** in the gamepad UI (option): one or both, the quest tracker moved left of them if you want
 - **Triggers: press to switch** instead of holding them (option), the bar on shown as the game's active one, every press shown on the bar
 - **Stealth, forms and stances**: your buttons and paddles follow the stance bar
 - **Profiles**: each character its own buttons, wheels and bag counters, automatically, and up to 5 sets of them, picked by hand or by your talents
@@ -307,6 +306,14 @@ lit once). Its icons press in on each press. Optionally back to the top bar afte
 Turn it on in Home › Gamepad: when the target is out of range (too far, or too close for a hunter's
 shots), the whole spell turns red, in the button's own shape, on the gamepad bar and on the extra
 buttons, instead of the game's small red dot only.
+
+**Action bars 4 and 5**
+The game hides its bars 2 to 8 in its gamepad UI. Home › Gamepad › Side bars brings back none, bar 4,
+or bars 4 and 5, on the right edge where the game puts them with keyboard and mouse. The game's own
+slots for them (the same as with keyboard and mouse), its key bindings (Key Bindings › Action Bar 4 /
+5, for a keyboard next to the controller) and a mouse click; drag and drop out of combat. Options:
+**Move the quest tracker** left of them (off by default: it stays where the game puts it) and **Hide
+empty buttons**. A spell group (flyout) in one of their slots does nothing, and open bags go over them.
 
 **No error spam**
 Two options in Comfort › Errors, for when a key can't act (Not enough energy, Ability is not ready

@@ -86,6 +86,13 @@ local DEFAULTS = {
         -- The game's red messages at a key press: their text hidden, their
         -- voice silenced, the useful ones kept (QuietErrors.lua)
         hideErrorText = false, muteErrorVoice = false,
+        -- The game's action bars 4 and 5 in its gamepad UI (SideBars.lua):
+        -- how many (0 none, 1 bar 4, 2 bars 4 and 5)
+        sideBars = 0,
+        -- The quest tracker moved left of them
+        sideBarsTracker = false,
+        -- Their empty buttons hidden (shown while an action is carried)
+        sideBarsHideEmpty = false,
     },
     -- Vibrations: one switch and intensity, then each event { on, pattern }
     -- (Vibration.lua fills the events)

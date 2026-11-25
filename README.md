@@ -436,6 +436,27 @@ Home › Gamepad › Red when out of range: the whole spell turns red on the gam
 extra buttons when the target is out of range (too far, or too close for a hunter's shots), instead of
 the game's small red dot only.
 
+### Action bars 4 and 5
+
+The game hides its action bars 2 to 8 in its gamepad UI. Home › Gamepad › **Side bars** brings two of
+them back (1.26.0): none, bar 4, or bars 4 and 5, on the right edge where the game puts them with
+keyboard and mouse, scaled to fit under the minimap. They are the addon's, made of the game's own
+pieces: its slots for bars 4 and 5 (kept on its servers, the same as with keyboard and mouse), its
+buttons, its key bindings (Key Bindings › Action Bar 4 / 5, for a keyboard next to the controller) and
+a mouse click. Drag and drop works out of combat, with the game's lock (Options › Action Bars) and its
+modifier to pick one up anyway; tooltips, cooldowns, range and charges show as on its bars.
+
+- **Move the quest tracker** (off by default): the tracker, and what the game stacks with it on the
+  right, goes left of the bars, as the game does for its own. Unticked, it stays where the game puts
+  it and the addon never touches it. In a fight: once it ends.
+- **Hide empty buttons**: only the slots with an action, all of them while you carry a spell or an
+  item to drop (as the game's Always Show Buttons turned off). A slot filled in a fight shows once it
+  ends.
+
+The game's boxes in Options › Action Bars stay its own, for its keyboard and mouse UI. A spell group
+(flyout) in one of these slots does nothing: the game refuses to open it from an addon's button. Open
+bags go over the bars (the game moves them for its own bars only).
+
 ### Error messages
 
 Comfort › Errors, two options apart (off until you turn them on; asked), for each press of a key that
