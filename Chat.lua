@@ -327,6 +327,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         safe(function() CK.AuctionPrices:Init() end)
         safe(function() CK.Reticle:Init() end)
         safe(function() CK.Range:Init() end)
+        safe(function() CK.SideBars:Init() end)
         safe(function() CK.Toggle:Init() end)
         safe(function() CK.Fields:Init() end)
         safe(function() CK:CheckGameGlyphs() end)
@@ -371,27 +372,48 @@ end)
 -- protected actions that read it (B's SpellStopCasting, the interact icon
 -- at each window: ADDON_ACTION_FORBIDDEN, seen 2026-11-24 in taint.log: the
 -- addon's hover scripts on its buttons in the game's windows, see
--- CK.GameWindowButton). The first time it is written so, the call stack
--- that wrote it is kept (ControllerKeyboardDB.taintWatch, the last 5) and
--- said once in the chat. Silent otherwise.
+-- CK.GameWindowButton). Since 1.26.0 also the window with the gamepad's
+-- focus (GamepadMode.FrameControlsManager.focusedFrame: written tainted, the
+-- game refused its own actions when the focus left it, seen 2026-11-25
+-- after opening the map). The first time each is written so, the call
+-- stack that wrote it is kept (ControllerKeyboardDB.taintWatch, the last 5)
+-- and said once in the chat. Silent otherwise.
 ---------------------------------------------------------------------------
-function CK:WatchTaint()
-    local unit = GamepadMainActionBarFrame and GamepadMainActionBarFrame.PageUnit
-    if self.taintWatched or not (unit and unit.SetActiveActionBar and issecurevariable and debugstack) then return end
-    self.taintWatched = true
-    hooksecurefunc(unit, "SetActiveActionBar", function()
-        if CK.taintSeen then return end
-        local secure, by = issecurevariable(unit, "activeBar")
-        if secure then return end
-        CK.taintSeen = true
-        local stack = debugstack(2, 60, 20) or "?"
-        local db = CK.db
-        if db then
-            if type(db.taintWatch) ~= "table" then db.taintWatch = {} end
-            table.insert(db.taintWatch, 1, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", by = tostring(by),
-                combat = InCombatLockdown() and true or false, stack = stack })
-            while #db.taintWatch > 5 do table.remove(db.taintWatch) end
+local function taintCheck(obj, field, label)
+    CK.taintSeen = CK.taintSeen or {}
+    if CK.taintSeen[label] then return end
+    local secure, by = issecurevariable(obj, field)
+    if secure then return end
+    CK.taintSeen[label] = true
+    local stack = debugstack(3, 60, 20) or "?"
+    local db = CK.db
+    if db then
+        if type(db.taintWatch) ~= "table" then db.taintWatch = {} end
+        table.insert(db.taintWatch, 1, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", by = tostring(by),
+            field = label, combat = InCombatLockdown() and true or false, stack = stack })
+        while #db.taintWatch > 5 do table.remove(db.taintWatch) end
+    end
+    CK:Print("|cffff4040taint|r (" .. label .. "): " .. CK.L.TAINT_WATCH, tostring(by))
+end
+
+-- Each method of the game's that writes the field, checked after it
+local function watchField(obj, methods, field, label)
+    for _, method in ipairs(methods) do
+        if type(obj[method]) == "function" then
+            hooksecurefunc(obj, method, function() taintCheck(obj, field, label) end)
         end
-        CK:Print("|cffff4040taint|r: " .. CK.L.TAINT_WATCH, tostring(by))
-    end)
+    end
+end
+
+function CK:WatchTaint()
+    if self.taintWatched or not (issecurevariable and debugstack) then return end
+    local unit = GamepadMainActionBarFrame and GamepadMainActionBarFrame.PageUnit
+    if not (unit and unit.SetActiveActionBar) then return end
+    self.taintWatched = true
+    watchField(unit, { "SetActiveActionBar" }, "activeBar", "activeBar")
+    local manager = GamepadMode and GamepadMode.FrameControlsManager
+    if type(manager) == "table" then
+        watchField(manager, { "FrameShown", "FrameHidden", "FocusFrame", "RefreshFocus", "SetUIFocusState" },
+            "focusedFrame", "focusedFrame")
+    end
 end

@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.26.0
+
+- **Action bars 4 and 5 in the gamepad UI**: Home › Gamepad › Side bars, none, bar 4, or bars 4
+  and 5, on the right edge where the game puts them with keyboard and mouse (scaled to fit under the
+  minimap). The game hides its bars 2 to 8 in its gamepad UI; these two are the addon's, made of the
+  game's own pieces: its slots for those bars (kept on its servers, the same as with keyboard and
+  mouse), its buttons, its key bindings (Key Bindings › Action Bar 4 / 5, for a keyboard next to the
+  controller) and a mouse click. Drag and drop out of combat, with the game's lock, tooltips,
+  cooldowns, range and charges as on its bars. Two options under it:
+  - **Move the quest tracker** (off by default): the tracker goes left of the bars, as the game does
+    for its own; unticked, it stays where the game puts it and the addon never touches it.
+  - **Hide empty buttons**: only the slots with an action, all of them while you carry a spell or an
+    item to drop.
+
+  The game's boxes in Options › Action Bars stay its own, for its keyboard and mouse UI. A spell
+  group (flyout) in one of these slots does nothing (the game would refuse to open it from an
+  addon's button), and open bags go over the bars (the game moves them for its own bars only).
+- **A wider watch for "blocked" errors**: the chat now also says once if the window with the
+  gamepad's focus is ever marked by an addon (seen once after opening the map), the details kept for
+  a bug report.
+
 ## 1.25.2
 
 - **Replaced buttons kept in a fight after a game window** (reported): with bags or loot opened

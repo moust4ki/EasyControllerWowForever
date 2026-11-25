@@ -1132,6 +1132,30 @@ local function displayRows(b)
             f.rangeTint = v
             CK.Range:Apply()
         end })
+    -- The game's action bars 4 and 5: none, bar 4, both
+    local sides = { L.SIDE_BARS_NONE, L.SIDE_BARS_ONE, L.SIDE_BARS_TWO }
+    local SBars = CK.SideBars
+    b.choice({ id = "d_side_bars", label = L.LBL_SIDE_BARS, tip = L.TIP_SIDE_BARS,
+        text = function() return sides[SBars.Chosen() + 1] end,
+        step = function(d)
+            f.sideBars = (SBars.Chosen() + d) % #sides
+            SBars:Apply()
+        end })
+    local noSide = SBars.Chosen() == 0
+    b.check({ id = "d_side_tracker", label = L.LBL_SIDE_BARS_TRACKER, indent = true, disabled = noSide,
+        tip = L.TIP_SIDE_BARS_TRACKER,
+        get = function() return f.sideBarsTracker == true end,
+        set = function(v)
+            f.sideBarsTracker = v
+            SBars:Apply()
+        end })
+    b.check({ id = "d_side_empty", label = L.LBL_SIDE_BARS_EMPTY, indent = true, disabled = noSide,
+        tip = L.TIP_SIDE_BARS_EMPTY,
+        get = function() return f.sideBarsHideEmpty == true end,
+        set = function(v)
+            f.sideBarsHideEmpty = v
+            SBars:Apply()
+        end })
     b.check({ id = "d_toggle", label = L.LBL_TRIGGER_TOGGLE, disabled = not on, tip = L.TIP_TRIGGER_TOGGLE,
         get = function() return f.triggerToggle == true end,
         set = function(v)
