@@ -32,6 +32,8 @@ local CAGED_PET = 82800      -- battle pets: one item for every pet, left out
 local GOLD, GREY = { 1, 0.82, 0 }, { 0.6, 0.6, 0.6 }
 local GREEN, YELLOW = { 0.25, 0.9, 0.25 }, { 1, 0.82, 0 }
 local PURPLE = { 0.75, 0.45, 1 }
+-- (the recipes' profit, CraftProfit.lua, counts the same)
+AP.CUT, AP.POST_FEE, AP.DURATION = CUT, POST_FEE, DURATION
 
 local function settings() return CK.db.settings.auction end
 local function secret(v) return issecretvalue ~= nil and issecretvalue(v) or false end
@@ -757,6 +759,7 @@ function AP:Finish()
     CK:Print(L.AH_DONE, n, scan.auctions)
     self:UpdateButton()
     self:RefreshMarks()
+    if CK.CraftProfit then CK.CraftProfit:Refresh() end
 end
 
 ---------------------------------------------------------------------------
@@ -907,9 +910,10 @@ end
 -- The game's price step: 1 copper where the auction house takes copper,
 -- whole silver otherwise
 local function priceStep()
-    local copper = C_AuctionHouse.SupportsCopperValues
+    local copper = C_AuctionHouse and C_AuctionHouse.SupportsCopperValues
     return copper and copper() == true and 1 or SILVER
 end
+AP.PriceStep = priceStep
 
 -- The search's answer: its price, or the next one when no longer worth it
 function AP:Searched(itemID)
@@ -1035,6 +1039,7 @@ function AP:Apply()
     if not self:On() and self.posting then self.posting = nil end
     if self.button then self:UpdateButton() elseif AuctionHouseFrame then self:Button() end
     self:RefreshMarks()
+    if CK.CraftProfit then CK.CraftProfit:Refresh() end
 end
 
 ---------------------------------------------------------------------------

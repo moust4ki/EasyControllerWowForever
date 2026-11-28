@@ -654,6 +654,16 @@ local function suppliesRows(b, page)
             S:Refresh()
         end })
     if not s.enabled then return end
+    -- A rogue's poisons as one button, their menu (Poisons.lua)
+    local _, class = UnitClass("player")
+    if class == "ROGUE" then
+        b.check({ id = "s_poisons", label = L.LBL_POISON_MENU, indent = true, tip = L.TIP_POISON_MENU,
+            get = function() return s.poisonMenu == true end,
+            set = function(v)
+                s.poisonMenu = v
+                S:Refresh()
+            end })
+    end
     b.header(L.SUP_H_TRACKED)
     for _, r in ipairs(S:Resources()) do
         local cfg = r.cfg
@@ -803,6 +813,13 @@ local function auctionRows(b, page)
             s.disenchant = v
             AP:RefreshMarks()
         end })
+    -- Each recipe's profit in the professions window (CraftProfit.lua)
+    b.check({ id = "ah_crafts", label = L.LBL_AH_CRAFTS, indent = true, tip = L.TIP_AH_CRAFTS,
+        get = function() return s.crafts == true end,
+        set = function(v)
+            s.crafts = v
+            CK.CraftProfit:Apply()
+        end })
     b.info(AP:StatusText())
     -- Items left out (asked: arrows, a fish bowl...): untick to take one back
     b.header(L.AH_H_IGNORED)
@@ -835,6 +852,27 @@ local function auctionRows(b, page)
         end })
 end
 
+-- What was forgotten, said (Reminders.lua)
+local function reminderRows(b)
+    local s = settings().reminders
+    b.header(L.SEC_REMINDERS)
+    b.check({ id = "r_track", label = L.LBL_REMIND_TRACKING, tip = L.TIP_REMIND_TRACKING,
+        get = function() return s.tracking == true end,
+        set = function(v)
+            s.tracking = v
+            CK.Reminders:Check()
+        end })
+    local _, class = UnitClass("player")
+    if class == "ROGUE" then
+        b.check({ id = "r_poisons", label = L.LBL_REMIND_POISONS, tip = L.TIP_REMIND_POISONS,
+            get = function() return s.poisons == true end,
+            set = function(v)
+                s.poisons = v
+                CK.Reminders:Check()
+            end })
+    end
+end
+
 Config.pages.alerts = Config.NewRailPage({
     key = "alerts",
     sections = {
@@ -844,8 +882,58 @@ Config.pages.alerts = Config.NewRailPage({
         { key = "inventory", label = L.SEC_INVENTORY, tip = L.TIP_SEC_INVENTORY, rows = inventoryRows },
         { key = "auction", label = L.SEC_AUCTION, tip = L.TIP_SEC_AUCTION, rows = auctionRows },
         { key = "errors", label = L.SEC_ERRORS, tip = L.TIP_SEC_ERRORS, rows = errorRows },
+        { key = "reminders", label = L.SEC_REMINDERS, tip = L.TIP_SEC_REMINDERS, rows = reminderRows },
     },
 })
+
+-- Hunters: their effects on the target, timed (TargetTimers.lua)
+local function targetRows(b)
+    local s = settings().targetTimers
+    local T = CK.TargetTimers
+    b.header(L.SEC_TARGET_TIMERS)
+    b.check({ id = "tt_on", label = L.LBL_TARGET_TIMERS, tip = L.TIP_TARGET_TIMERS,
+        get = function() return s.enabled == true end,
+        set = function(v)
+            s.enabled = v
+            T:Refresh()
+        end })
+    if not s.enabled then return end
+    -- The hawks as the game's icons (by default) or as bars
+    b.choice({ id = "tt_display", label = L.LBL_TT_DISPLAY, indent = true, tip = L.TIP_TT_DISPLAY,
+        text = function() return s.display == "bars" and L.TT_BARS or L.TT_ICONS end,
+        step = function()
+            s.display = s.display == "bars" and "icons" or "bars"
+            T:Refresh()
+        end })
+    if s.display ~= "bars" then return end
+    b.slider({ id = "tt_thick", label = L.LBL_TT_THICKNESS, indent = true, tip = L.TIP_TT_THICKNESS,
+        min = 0, max = 24, stepSize = 1,
+        -- 0: the plate's cast bar's own
+        fmt = function(v) return v < 1 and L.TT_AUTO or format("%d px", v) end,
+        get = function() return s.thickness or 0 end,
+        set = function(v)
+            s.thickness = math.floor(v + 0.5)
+            T:Refresh()
+        end })
+    -- The gap under the cast bar (room for its spell name)
+    b.slider({ id = "tt_gap", label = L.LBL_TT_SPACING, indent = true, tip = L.TIP_TT_SPACING,
+        min = -30, max = 30, stepSize = 1, fmt = function(v) return format("%d px", v) end,
+        get = function() return s.spacing or 2 end,
+        set = function(v)
+            s.spacing = math.floor(v + 0.5)
+            T:Refresh()
+        end })
+end
+
+-- Hunters only: their section, last (the class known at login)
+function Config.AddTargetSection()
+    local page = Config.pages.alerts
+    local _, class = UnitClass("player")
+    if class ~= "HUNTER" or page.hasTargetTimers then return end
+    page.hasTargetTimers = true
+    table.insert(page.def.sections, { key = "targettimers", label = L.SEC_TARGET_TIMERS,
+        tip = L.TIP_SEC_TARGET_TIMERS, rows = targetRows })
+end
 
 ---------------------------------------------------------------------------
 -- Wheels: the player's own (a grid of cards, MyWheels.lua, each opening its

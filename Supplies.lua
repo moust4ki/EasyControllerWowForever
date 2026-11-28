@@ -222,11 +222,10 @@ end
 -- addon's code is forbidden in gamepad mode). Created out of combat only.
 local BACKPACK = "MainMenuBarBackpackButton"
 
-function S:Button(i)
-    local bar = self.bar
-    local b = bar.buttons[i]
-    if b then return b end
-    b = CK.Paddles:CreateSlot(bar, SIZES[2])
+-- A counter's look: the round slot, its count on a pill (the poison menu's
+-- too, Poisons.lua)
+function S.NewSlot(parent, size)
+    local b = CK.Paddles:CreateSlot(parent, size)
     b.count:ClearAllPoints()
     b.count:SetPoint("BOTTOM", 0, 3)
     -- The count on a pill (reported: orange or red on the brown bag, hard to
@@ -237,6 +236,14 @@ function S:Button(i)
     b.badgeArea:SetPoint("CENTER", b.count, "CENTER", 0, 0)
     b.badge = CK.ConfigKit.Box(b.over, 4, 1, "ARTWORK", 3)
     b.badge:SetPoints(b.badgeArea)
+    return b
+end
+
+function S:Button(i)
+    local bar = self.bar
+    local b = bar.buttons[i]
+    if b then return b end
+    b = S.NewSlot(bar, SIZES[2])
     local click = CK.NewFrame("Button", "ControllerKeyboardSupplyButton" .. i, bar, "SecureActionButtonTemplate")
     click:SetSize(b.size, b.size)
     click:SetFrameLevel(b:GetFrameLevel() + 10)
@@ -453,6 +460,7 @@ local function fill(b, r, severity, level)
     end
     setGlow(b, severity)
 end
+S.Fill = fill
 
 -- Counts, glows and the vibration when a resource gets lower. The buttons'
 -- number, places and sizes only change out of combat (the game locks its
@@ -463,6 +471,11 @@ function S:Refresh()
     s.layout = OLD_LAYOUT[s.layout] or s.layout
     local list = {}
     self.levels = self.levels or {}
+    -- The rogue's poisons as one button opening their menu (Poisons.lua),
+    -- where the first of them would be
+    local PM = CK.Poisons
+    local menu = s.enabled and PM and PM:On()
+    local poisons, at = {}, nil
     for _, r in ipairs(s.enabled and self:Resources() or {}) do
         local severity = S.Severity(r.count, r.cfg)
         local level = severity >= 1 and 2 or (severity > 0 and 1 or 0)
@@ -472,15 +485,24 @@ function S:Refresh()
             CK.Vibration:Fire(r.kind == "bags" and "lowSpace" or "lowStock")
         end
         self.levels[r.key] = level
-        if r.cfg.on then list[#list + 1] = { r = r, severity = severity, level = level } end
+        if menu and PM.IsPoison(r.id) then
+            poisons[#poisons + 1] = { r = r, severity = severity, level = level }
+            at = at or #list + 1
+        elseif r.cfg.on then
+            list[#list + 1] = { r = r, severity = severity, level = level }
+        end
     end
+    local group = menu and PM:Group(poisons)
+    if group then table.insert(list, at, group) end
 
     local size = SIZES[s.size] or SIZES[2]
     -- Shown with the game's gamepad bar, the gamepad UI on (reported: the bag
     -- counter stayed with the gamepad UI off); always while it is moved
     local gb = GamepadMainActionBarFrame
     local withBar = CK.GamepadUI() and not (gb and gb.IsShown and not gb:IsShown())
-    local layout = table.concat({ tostring(s.enabled), #list, size, s.layout, tostring(withBar) }, ":")
+    -- (the poisons carried and the weapons held: the menu's)
+    local layout = table.concat({ tostring(s.enabled), #list, size, s.layout, tostring(withBar),
+        group and PM.signature or "" }, ":")
     if InCombatLockdown() then
         if self.bar then
             for i, item in ipairs(list) do
@@ -488,12 +510,14 @@ function S:Refresh()
                 if b and b:IsShown() then fill(b, item.r, item.severity, item.level) end
             end
         end
+        if group then PM:Update() end
         self.pendingLayout = layout ~= self.layout or nil
         return
     end
     self.pendingLayout = nil
     if not s.enabled then
         if self.bar then self.bar:Hide() end
+        if PM then PM:Attach(nil) end
         self.layout = layout
         return
     end
@@ -509,6 +533,7 @@ function S:Refresh()
         local x, y = self:CurrentPlace()
         s.barPos = { x = math.floor(x + 0.5), y = math.floor(y + 0.5) }
     end
+    local menuSlot, menuAt
     for i, item in ipairs(list) do
         local b = self:Button(i)
         resize(b, size)
@@ -518,6 +543,11 @@ function S:Refresh()
             frame:SetPoint(d.anchor, bar, d.anchor, d.x * offset, d.y * offset)
             frame:Show()
         end
+        -- The poisons' button: their menu's button takes its clicks
+        if item.r.kind == "poisons" then
+            b.click:Hide()
+            menuSlot, menuAt = b, i
+        end
         fill(b, item.r, item.severity, item.level)
     end
     for i = #list + 1, #bar.buttons do
@@ -526,6 +556,7 @@ function S:Refresh()
     end
     if d.x ~= 0 then bar:SetSize(length, size) else bar:SetSize(size, length) end
     self:Place()
+    if PM then PM:Attach(menuSlot, d, size, menuAt) end
     bar:SetShown((#list > 0 and withBar) or self.moving or false)
     self.layout = layout
 end

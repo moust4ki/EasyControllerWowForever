@@ -38,10 +38,12 @@ Every feature you don't need can be turned off to save even more resources.
 
 **[▶ Watch "Healer Mode Demo" on YouTube](https://www.youtube.com/watch?v=JXDERP1FTDg)**
 
-## What's new in 1.26.0
-- **Action bars 4 and 5 in the gamepad UI**: Home › Gamepad › Side bars, none, bar 4, or both, on the right edge as with keyboard and mouse. The game's own slots and key bindings (Action Bar 4 / 5), a mouse click, drag and drop out of combat.
-- **Move the quest tracker** left of them if you want (off by default), and **hide their empty buttons**.
-- **A wider watch for "blocked" errors**: if the window with the gamepad's focus is ever marked by an addon, the chat says it once and the details are kept for a bug report.
+## What's new in 1.27.0
+- **Hawk timers (hunters)**: your hawks' time left on the nameplate over your target, as the game's own hawk icons at the right of its level, or as bars like its cast bar.
+- **Poison menu (rogues)**: one button on the bag counters lists your poisons, a click on one then on a weapon applies it, in combat too.
+- **Reminders**: an alert when you forget your ore or herb tracking, or your poisons.
+- **Profit in the professions window**: next to each recipe, what crafting it to sell brings, at the auction house's and the merchants' prices.
+- **Other addons' keys left to them**: Forever Fishing's X (and other addons' keys) no longer taken back by Easy Controller.
 
 ## Features
 - **First launch guide**: six screens, with the gamepad, to set everything up (again from Home › Guide or `/ec welcome`)
@@ -69,10 +71,12 @@ Every feature you don't need can be turned off to save even more resources.
 - **Quest items** marked in your bags, quest links in the chat
 - **Quest mobs**: a skull and what is left (3/10) beside the health bar of the mobs your quests need, items they drop included
 - **Vibrations** on the events you pick
-- **Bag counters** (arrows, soul shards, reagents, bag space…) that glow when you run low
+- **Bag counters** (arrows, soul shards, reagents, bag space…) that glow when you run low, and a **poison menu** for rogues: a poison, a weapon, applied
+- **Reminders**: ore and herb tracking or poisons forgotten, said at the top of the screen
+- **Hawk timers** for hunters: your hawks' countdown on your target's nameplate, as the game's icons or as bars
 - **Better items**: highlights upgrade items in your bags
 - **At merchants**: auto-sell junk and auto-repair
-- **Auction house prices**: scan the whole auction house in one press, then every item tooltip tells its lowest price, its usual price over 14 days, the merchant's, what disenchanting it gives and is worth, and whether to sell it there, to the merchant or disenchant it; a mark on each item of your bags telling where it sells best, the auction house ones posted one press each
+- **Auction house prices**: scan the whole auction house in one press, then every item tooltip tells its lowest price, its usual price over 14 days, the merchant's, what disenchanting it gives and is worth, and whether to sell it there, to the merchant or disenchant it; a mark on each item of your bags telling where it sells best, the auction house ones posted one press each; each recipe's profit in the professions window
 - **OLED burn-in prevention** for the centre dot
 - **Xbox / PlayStation (DualSense) / Nintendo Switch** button icons, in the addon and in the game's own interface (or Auto: your controller's)
 - **Configuration panel** driven entirely with the gamepad (RB + D-pad down)
@@ -222,6 +226,21 @@ powders, candles, symbols, seeds, poisons…) and any item you add from your bag
 threshold it glows, stronger and redder down to the critical one; thresholds are yours to set.
 Place the bar anywhere (mouse or D-pad), lock it; it keeps its place from the game's gamepad bar and takes its size, the same on every screen; a click opens your bags. The count sits on a pill:
 dark above the low threshold, orange at low, red at critical.
+For rogues, the **poison menu** (option): the poison counters become one button. A click lists your
+poisons, a click on one shows your two weapons, a click on a weapon applies it; a right click opens
+the bags. It works in combat.
+
+**Hawk timers (hunters)**
+Your hawks (one or two at once) on the nameplate over your target, with their time left: the game's
+own hawk icon with its countdown, at the right of the target's level (the icons under your pet's
+frame stay), or a bar like the nameplate's cast bar for each hawk, under it, its thickness and gap
+yours to set. Enemy nameplates must be shown.
+
+**Reminders**
+An alert when you forget something: your ore or herb tracking (with Mining or Herbalism, no tracking
+on), or your poisons (rogues: poisons in your bags, a weapon without). A gold message at the top of
+the screen, a sound and a vibration, again every 2 minutes; never in combat, dead, on a flight or
+resting: it comes as you leave the city.
 
 **Vibrations**
 The controller vibrates on the game events you choose: combat (death, interrupted, loss of control,

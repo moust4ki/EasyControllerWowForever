@@ -261,6 +261,9 @@ local function slash(msg)
         CK.Export:Dump()
     elseif cmd == "binds" then
         CK.Mapping:Diagnose()
+    elseif cmd == "timers" then
+        -- The target timers: what the game gives (TargetTimers.lua)
+        CK.TargetTimers:Diagnose()
     elseif cmd == "debug" then
         s.debug = not s.debug
         CK.seenSticks = nil
@@ -325,6 +328,9 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2)
         safe(function() CK.Upgrades:Init() end)
         safe(function() CK.Automation:Init() end)
         safe(function() CK.AuctionPrices:Init() end)
+        safe(function() CK.CraftProfit:Init() end)
+        safe(function() CK.Reminders:Init() end)
+        safe(function() CK.TargetTimers:Init() end)
         safe(function() CK.Reticle:Init() end)
         safe(function() CK.Range:Init() end)
         safe(function() CK.SideBars:Init() end)

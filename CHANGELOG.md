@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.27.0
+
+- **Hawk timers (hunters)**: Comfort › Target timers. Your hawks (one or two at once) on the
+  nameplate over your target, with their time left:
+  - **Hawk icons** (the default): the game's own hawk icon, the same as under your pet's frame, with
+    its countdown under it, at the right of the target's level; as big on the screen as the game's.
+    The game keeps the turning shade of its icon to itself, so only the countdown counts down.
+  - **Bars**: a bar like the nameplate's cast bar for each hawk, under the cast bar, with the hawk's
+    name and countdown; its thickness (by default the cast bar's own) and its gap under the cast bar
+    are yours to set.
+
+  The icons under your pet's frame stay as they are. Enemy nameplates must be shown.
+- **Poison menu (rogues)**: Comfort › Bag counters › Poison menu (off by default). Your poison
+  counters become one button: a click lists every poison you carry, a click on one shows your two
+  weapons, a click on a weapon applies it. A right click opens the bags. It works in combat; the list
+  of poisons changes once out of combat.
+- **Reminders**: Comfort › Reminders, two options (off by default):
+  - **Ore and herb tracking**: with Mining or Herbalism, an alert when no tracking is on (another one
+    on, Find Treasure..., is your choice: nothing said);
+  - **Poisons on the weapons** (rogues): an alert when you carry poisons and a weapon has none.
+
+  The alert is a gold message at the top of the screen, a sound and the new **Reminder** vibration,
+  in the chat the first time, then every 2 minutes while it lasts. Never while dead, in combat, on a
+  flight or resting (a city, an inn): it comes as you leave.
+- **Profit in the professions window**: Comfort › Auction house (off by default). Next to each
+  recipe you know, what crafting it to sell brings with every reagent counted as bought (at the
+  merchant's price when one sells it, else the auction house's lowest), the item sold 1 copper under
+  the lowest, less the cut and the deposit. Red for a loss, "?" when a price is missing; the crafted
+  item's tooltip gives the details. The merchants' prices are noted at their window.
+- **Other addons' keys left to them** (reported, Forever Fishing): a key another addon takes for
+  itself (Forever Fishing's X while its fishing bar is open, the D-pad in another addon's window) is
+  left to it until it gives it back. Easy Controller took it back at once, even with only Nothing
+  set on LT + X. The other layers of that button stay yours; `/ec binds` lists the keys held by
+  another addon.
+
 ## 1.26.0
 
 - **Action bars 4 and 5 in the gamepad UI**: Home › Gamepad › Side bars, none, bar 4, or bars 4

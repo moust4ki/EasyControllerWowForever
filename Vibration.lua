@@ -53,6 +53,7 @@ V.EVENTS = {
     { key = "durability", group = "progress", on = false, pattern = "tick" },
     { key = "lowStock", group = "addon", on = true, pattern = "pulse", needs = "Supplies" },
     { key = "lowSpace", group = "addon", on = true, pattern = "pulse", needs = "Supplies" },
+    { key = "reminder", group = "addon", on = true, pattern = "double", needs = "Reminders" },
     { key = "wheelTick", group = "addon", on = true, pattern = "micro", needs = "ConsumableWheel" },
     { key = "keyPress", group = "addon", on = false, pattern = "micro" },
 }
