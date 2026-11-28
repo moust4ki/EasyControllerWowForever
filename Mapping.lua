@@ -1,4 +1,4 @@
-local _, CK = ...
+local ADDON, CK = ...
 local L = CK.L
 
 -- Module "gamepad mapping": WoW Forever's gamepad UI is never changed. This
@@ -1596,11 +1596,125 @@ function M:ApplyPad(input, targets, replaced)
     end
 end
 
+---------------------------------------------------------------------------
+-- Other addons' keys (reported: Forever Fishing's X while its fishing bar
+-- is open, LT + X set to Nothing here; an addon's own window moved in with
+-- the D-pad, issue #28). The repair below took any key of ours back 0.15 s
+-- after another binding replaced it, as it must for the game's windows
+-- (they rebind the pad when they close): another addon's key came back to
+-- us at once. Now a key another addon binds is left to it until it lets it
+-- go: ours taken off that key (theirs runs, whatever the priorities), all
+-- set again once it is free. The key's other layers stay ours (LT + X
+-- still does nothing). Another addon: the code binding is in a folder of
+-- Interface/AddOns neither ours nor Blizzard's (the call stack's lines:
+-- "[Interface/AddOns/ForeverFishing/....lua]:12: in ..."). The game's own
+-- (on UIParent, or from its files) as before.
+---------------------------------------------------------------------------
+M.foreign = {}      -- key -> { owner = its frame, addon = its folder }
+M.yielded = {}      -- key -> the addon ours are left to (taken off)
+local SELF = ADDON or "EasyController"
+local MODS = { "ALT", "CTRL", "SHIFT" }
+
+-- "shift-alt-pad3" -> "ALT-SHIFT-PAD3" (the game's order, ours)
+function M.NormalKey(key)
+    local rest, mods = key:upper(), {}
+    while true do
+        local mod, after = rest:match("^(%u+)%-(.+)$")
+        if not (mod == "ALT" or mod == "CTRL" or mod == "SHIFT") then break end
+        mods[mod], rest = true, after
+    end
+    local prefix = ""
+    for _, mod in ipairs(MODS) do
+        if mods[mod] then prefix = prefix .. mod .. "-" end
+    end
+    return prefix .. rest
+end
+
+-- The addon whose code is binding: its folder, when it is another's
+function M.BindingAddon()
+    if not debugstack then return nil end
+    local ok, stack = pcall(debugstack, 2, 30, 0)
+    if not ok or type(stack) ~= "string" then return nil end
+    for line in stack:gmatch("[^\r\n]+") do
+        -- (the game's C functions, tail calls, ours: the line under)
+        if not (line:find("[C]", 1, true) or line:find("[tail call]", 1, true) or line:find("^%.%.%.")) then
+            local folder = line:match("[Aa][Dd][Dd][Oo][Nn][Ss][/\\]([^/\\%]]+)[/\\]")
+            if folder ~= SELF then
+                if folder and not folder:find("^Blizzard_") then return folder end
+                return nil
+            end
+        end
+    end
+    return nil
+end
+
+local function debugSay(...)
+    if CK.db and CK.db.settings.debug then CK:Print(...) end
+end
+
+-- A key let go by the addon that held it: ours set again (the repair after)
+local function freed(key)
+    local f = M.foreign[key]
+    M.foreign[key] = nil
+    if M.yielded[key] then
+        M.yielded[key] = nil
+        M.pending = true
+        debugSay("%s free again (%s): ours set again", key, f and f.addon or "?")
+    end
+end
+
+-- Each binding call of the game's (its arguments): another addon's noted.
+-- (Addons can't bind in combat: their calls then are refused.)
+function M:NoteBinding(fn, o, _, key, value)
+    if o == nil or o == owner or o == takeOwner or o == UIParent or InCombatLockdown() then return end
+    if fn == "ClearOverrideBindings" then
+        for k, f in pairs(self.foreign) do
+            if f.owner == o then freed(k) end
+        end
+        return
+    end
+    if type(key) ~= "string" or key == "" then return end
+    key = M.NormalKey(key)
+    if value == nil or value == "" then
+        local f = self.foreign[key]
+        if f and f.owner == o then freed(key) end
+        return
+    end
+    local addon = M.BindingAddon()
+    if addon then self.foreign[key] = { owner = o, addon = addon } end
+end
+
+-- Ours taken off the keys another addon holds (out of combat)
+function M:Yield()
+    if InCombatLockdown() or not owner or not next(self.foreign) then return end
+    local was = self.applying
+    self.applying = true
+    for key, f in pairs(self.foreign) do
+        local ours = false
+        if self.bound[key] then
+            SetOverrideBinding(owner, false, key, nil)
+            self.bound[key] = nil
+            ours = true
+        end
+        if takeOwner and self.taken[key] then
+            SetOverrideBinding(takeOwner, true, key, nil)
+            self.taken[key] = nil
+            ours = true
+        end
+        if ours and not self.yielded[key] then
+            self.yielded[key] = f.addon
+            debugSay("%s left to %s", key, f.addon)
+        end
+    end
+    self.applying = was
+end
+
 -- Ours were replaced (a gamepad window of the game rebinds the pad when it
 -- closes): set them again. Only then, so the game's own refreshes don't
--- make us rebind for nothing.
+-- make us rebind for nothing. Never a key another addon holds.
 function M:Repair()
     if self.pending then return self:Apply() end
+    self:Yield()
     for combo, want in pairs(self.bound) do
         if GetBindingAction(combo, true) ~= want and not (CK.Toggle and CK.Toggle:Holds(combo)) then
             return self:Apply()
@@ -1688,6 +1802,8 @@ function M:Apply()
     self:UpdateMarks()
     -- The stick's direction keys, while a party spell is on a button
     if CK.ConsumableWheel and CK.ConsumableWheel.SyncStickKeys then CK.ConsumableWheel:SyncStickKeys() end
+    -- The keys another addon holds: left to it
+    self:Yield()
     self.applying = false
 end
 
@@ -1961,6 +2077,14 @@ function M:Diagnose()
     if self.lastRelease then
         DEFAULT_CHAT_FRAME:AddMessage("  released " .. self.lastRelease)
     end
+    -- The keys another addon holds: left to it
+    local held = {}
+    for key in pairs(self.foreign) do held[#held + 1] = key end
+    table.sort(held)
+    for _, key in ipairs(held) do
+        DEFAULT_CHAT_FRAME:AddMessage(format("  %s held by %s%s", key, self.foreign[key].addon,
+            self.yielded[key] and ": ours taken off until it lets go" or ""))
+    end
     -- The chat keyboard's keys taken by something else while it was open
     local taken = CK.lastTaken
     if taken then
@@ -2088,7 +2212,13 @@ function M:Init()
     end
     for _, name in ipairs({ "SetOverrideBinding", "SetOverrideBindingClick", "SetOverrideBindingSpell",
         "SetOverrideBindingItem", "SetOverrideBindingMacro", "ClearOverrideBindings" }) do
-        if _G[name] then hooksecurefunc(name, changed) end
+        if _G[name] then
+            hooksecurefunc(name, function(...)
+                -- (never an error into the caller's code)
+                pcall(M.NoteBinding, M, name, ...)
+                changed()
+            end)
+        end
     end
     -- The game's gamepad windows rebind the pad when they close (ours stay
     -- under theirs while one is open)

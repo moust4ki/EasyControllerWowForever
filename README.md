@@ -286,6 +286,15 @@ from button to button, up to the layers, down to the actions under the controlle
   game's slots, on the free buttons, on the paddles and in your wheels stays.
 - `/ec binds` lists the replaced keys and what each one runs right now.
 
+### Other addons' keys
+
+A key another addon binds for itself (reported: Forever Fishing's X while its fishing bar is open;
+the D-pad in another addon's settings window) is left to it until it unbinds it, then yours again.
+Easy Controller set its keys back as soon as anything replaced them, as it must after the game's own
+gamepad windows: the other addon's key came back to it at once (with only Nothing on LT + X, X
+became the addon's). The other layers of that button stay yours (LT + X still does nothing). Another
+addon is told from the game's by the code that binds; `/ec binds` lists the keys held that way.
+
 ### Stealth, forms and stances
 
 In stealth, a druid form or a warrior stance, the game's **stance bar** takes the place of one of the
@@ -471,6 +480,19 @@ whole, text and voice: bags full, quest log full, pet dead, not enough money, th
 mail, a trade, loot, pick pocketing. The yellow messages (quest progress) don't change. 1.24's single
 option turns on both.
 
+### Reminders
+
+Comfort › Reminders, two options (off by default; asked):
+
+- **Ore and herb tracking**: you know Find Minerals or Find Herbs and no tracking is on. Another
+  tracking spell on (Find Treasure, Track Beasts...) is your choice: nothing is said.
+- **Poisons on the weapons** (rogues): you carry poisons and a weapon has none; the alert names the
+  hand.
+
+The alert: a gold message at the top of the screen, a sound and the **Reminder** vibration
+(Comfort › Vibrations), in the chat the first time; again every 2 minutes while it is forgotten.
+Never while dead, in combat, on a flight or resting (a city, an inn): it comes as you leave.
+
 ## Vibrations
 
 The controller vibrates on the game events you choose (Comfort › Vibrations): one switch and one
@@ -509,6 +531,33 @@ before):
 - shown **with the game's gamepad UI** only (1.22, reported: it stayed on screen with the gamepad UI
   turned off), and with its bar (hidden in its Edit Mode); the extra buttons too;
 - low supplies and little room left can vibrate (Comfort › Vibrations).
+- **Poison menu** (rogues; Comfort › Bag counters › Poison menu, off by default): the poison
+  counters become one button, with the look of the poison closest to running out. A left click opens
+  the list of every poison carried, a click on a poison shows your two weapons (right hand, left
+  hand; the left one only when it holds a weapon), with the time left on their poison, and a click on
+  a weapon applies it (the game's own item use, then the weapon slot, in one click; it asks before
+  replacing a poison). A right click opens the bags. It works in combat; the list changes once out
+  of combat.
+
+## Hawk timers
+
+Comfort › Target timers (hunters only, off by default; asked): your hawks summoned (one or two at
+once, the game's totem slots) on the nameplate over your target, with their time left. The game's
+own round icons under your pet's frame stay as they are. Enemy nameplates must be shown. Two
+displays:
+
+- **Hawk icons** (the default): the game's hawk icon copied (its round icon, its ring, the countdown
+  under it in its font, written by the game itself), at the right of the target's level box, side by
+  side; as big on the screen as the game's, whatever the nameplate's scale. The turning shade of the
+  game's icon can't be copied: the game keeps that function to itself.
+- **Bars**: a copy of the nameplate's cast bar for each hawk, under the cast bar: its background, a
+  blue fill emptying from right to left, its spark, its frame; the hawk's icon and name and the
+  countdown in or under the bar as your nameplates show a cast's name. **Bar thickness** (by default
+  the cast bar's own) and the **gap under the cast bar** (negative: up toward the health bar) in
+  pixels.
+
+In combat the game hides the hawks' values from addons: their timers and icons go straight to the
+game's own widgets, and an empty slot never shows. `/ec timers` tells what the game gives.
 
 ## Consumables wheel
 
@@ -734,6 +783,13 @@ Comfort › Auction house (off until you turn it on; asked):
   tells where it is (*Post 3/12: 2s each*), its tooltip which item.
 - The game gives no answer in a minute (asked too soon): said in the chat. The window closed during
   the scan or the posting: stopped, nothing kept from the scan.
+- **Profit in the professions window** (asked; off by default): next to each recipe you know, what
+  crafting it to sell brings with everything bought: the item sold 1 copper under its lowest price
+  (Post all's rule), less the cut and the deposit, less every reagent at the merchant's price when one
+  sells it (noted at his window, for every character of the account), else at the auction house's
+  lowest. The reagents in your bags are counted as bought too: farmed ones are pure gain. Green, red
+  for a loss, "?" when a price is missing. The crafted item's tooltip (the recipe's big icon) gives
+  the details. Not for enchantments nor items bound when picked up.
 
 ## Prediction
 
@@ -804,7 +860,8 @@ In the configuration panel (RB + D-pad down, `/ec config`):
 | `/ec wheel` | what the consumables wheel holds, and why an item is not in it; the party wheel's last presses |
 | `/ec phrases` | the quick phrases window |
 | `/ec profile [name]` | this character's settings and the others'; with a name, put that profile in use |
-| `/ec binds` | the game's buttons replaced, and what each key runs now |
+| `/ec binds` | the game's buttons replaced, what each key runs now, and the keys another addon holds |
+| `/ec timers` | the hawk timers: the nameplate's cast bar style, the totem slots as the game gives them |
 | `/ec ranks` | your spells at the highest rank you know (also a button at the bottom of the spellbook) |
 | `/ec glyphs` | list the game's gamepad button icons |
 | `/ec debug` | print received buttons and sticks |

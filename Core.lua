@@ -98,8 +98,9 @@ local DEFAULTS = {
     -- (Vibration.lua fills the events)
     vibration = { enabled = true, intensity = 0.6, events = {} },
     -- Supplies: the buttons' bar (pos = { point, x, y }, size 1-3), each
-    -- resource { on, low, critical } and the items added
-    supplies = { enabled = true, locked = true, layout = "right", size = 2, list = {}, custom = {} },
+    -- resource { on, low, critical } and the items added. poisonMenu: a
+    -- rogue's poisons as one button, their menu (Poisons.lua)
+    supplies = { enabled = true, locked = true, layout = "right", size = 2, list = {}, custom = {}, poisonMenu = false },
     -- Consumables wheel: its kinds, and the variants beside the best of each
     wheel = {
         enabled = true, variants = true, locked = true,
@@ -156,8 +157,13 @@ local DEFAULTS = {
     reticle = { mode = "game", color = 1 },
     -- Auction house prices (AuctionPrices.lua): off unless turned on; the
     -- gold coin in the bags on the items better sold there. The prices
-    -- themselves: ControllerKeyboardPrices, for every character
-    auction = { enabled = false, marks = true, ignored = {}, disenchant = true },
+    -- themselves: ControllerKeyboardPrices, for every character. crafts:
+    -- each recipe's profit in the professions window (CraftProfit.lua)
+    auction = { enabled = false, marks = true, ignored = {}, disenchant = true, crafts = false },
+    -- Reminders (Reminders.lua): the gathering tracking, a rogue's poisons
+    reminders = { tracking = false, poisons = false },
+    -- Hunters: their effects on the target, timed (TargetTimers.lua)
+    targetTimers = { enabled = false, display = "icons", thickness = 0, spacing = 2 },
     gameGlyphs = true,
     debug = false,
 }
